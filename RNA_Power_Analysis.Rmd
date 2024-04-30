@@ -1,0 +1,12 @@
+---
+title: "RNA Power Analysis"
+author: "Zoe Dellaert"
+date: "2024-04-30"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
