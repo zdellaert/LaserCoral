@@ -1,0 +1,48 @@
+---
+title: "RNA Power Analysis"
+author: "Zoe Dellaert"
+date: "2024-04-30"
+output: html_document
+---
+
+## RNA power analysis for laser capture microdissection (LCM) of tissue-specific RNA of multiple coral species
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+sessionInfo() #provides list of loaded packages and version of R.
+```
+
+### Install and load packages 
+
+First, install and load the necessary packages.
+
+```{r load_libraries, message=FALSE}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("RNASeqPower")
+```
+
+### Background info and package information
+
+See vignettes for RNASeqPower package here: https://bioconductor.org/packages/release/bioc/vignettes/RNASeqPower/inst/doc/samplesize.pdf
+
+and manual here: https://bioconductor.org/packages/release/bioc/manuals/RNASeqPower/man/RNASeqPower.pdf
+
+I am also basing some of this code off of Jill Ashey's [Notebook Post](https://jillashey.github.io/JillAshey_Putnam_Lab_Notebook/RNASeq-PowerAnalysis/) and [Power analysis code](https://github.com/JillAshey/SedimentStress/blob/master/RAnalysis/RNASeqPower.Rmd).
+
+### Framing the problem
+
+Hypothesis for this aim: "Gene expression and one of its regulatory mechanisms (e.g., DNA methylation) are spatially stratified, tissue-specific, and correlated with the microenvironment. The higher spatial heterogeneity of pH, O2, and light throughout thick-tissued corals compared to thin-tissued corals will be correlated with higher spatial heterogeneity of their gene expression and DNA methylation."
+
+### Usage
+
+```{r}
+library(RNASeqPower)
+rnapower(depth=20, cv=.4, effect=c(1.25, 1.5, 1.75, 2),
+alpha= .05, power=c(.8, .9))
+```
+
