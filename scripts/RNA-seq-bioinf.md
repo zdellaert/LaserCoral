@@ -93,6 +93,8 @@ sbatch scripts/raw_qc.sh
 
 ### Interpretation of QC data
 
+[View results here](https://github.com/zdellaert/LaserCoral/tree/main/raw_qc)
+
 Okay! So there is definitely data! Yay!
 
 And a lot of it!
