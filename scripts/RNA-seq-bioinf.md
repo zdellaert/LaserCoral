@@ -121,3 +121,35 @@ In the [library preparation](https://zdellaert.github.io/ZD_Putnam_Lab_Notebook/
 2. Adaptor Trimming Sequences: The NEBNext libraries for Illumina resemble TruSeq libraries and can be trimmed similar to TrueSeq:
    1. AdaptorRead1: AGATCGGAAGAGCACACGTCTGAACTCCAGTCA
    2. AdaptorRead2: AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
+
+These were the index primers, cDNA input, and PCR cycles used for each sample:
+
+| Sample Type  | cDNA concentration | amount cDNA input (conc * 26 uL) | PCR cycles  for final step | Index_ID  | index  |
+|--------------|--------------------|----------------------------------|------------|-----------|--------|
+| #4 (Frag A)  | 0.0869             | 2.2594                           | 11         | E7500S-21 | GTTTCG |
+| #5 (Frag A)  | 0.211              | 5.486                            | 9          | E7500S-14 | AGTTCC |
+| #8 (Frag B)  | 0.0744             | 1.9344                           | 11         | E7500S-23 | GAGTGG |
+| #9 (Frag B)  | 0.0232             | 0.6032                           | 11         | E7500S-18 | GTCCGC |
+| #15 (Frag C) | 0.199              | 5.174                            | 9          | E7500S-25 | ACTGAT |
+| #16 (Frag C) | 0.172              | 4.472                            | 9          | E7500S-20 | GTGGCC |
+| #20 (Frag D) | 0.24               | 6.24                             | 9          | E7500S-13 | AGTCAA |
+| #21 (Frag D) | 0.112              | 2.912                            | 9          | E7500S-15 | ATGTCA |
+| #26 (Frag E) | 0.223              | 5.798                            | 9          | E7500S-22 | CGTACG |
+| #27 (Frag E) | 0.188              | 4.888                            | 9          | E7500S-19 | GTGAAA |
+
+Index primer full sequences from [oligo kit E7500S](https://www.neb.com/en-us/-/media/nebus/files/manuals/manuale7335_e7500_-e7710_e7730.pdf?rev=2e735fd18b544d46b36ee0e88353ef5c&sc_lang=en-us&hash=CC77B45817715F3ED3A8F3B1953450EB):
+
+| INDEX PRIMER | INDEX PRIMER SEQUENCE  | EXPECTED INDEX PRIMER SEQUENCE READ |
+|---------------|------------------------|-----------------------------|
+| NEBNext Index 13 Primer for Illumina (10 µM) | 5´-CAAGCAGAAGACGGCATACGAGATTGTTGACTGTGACTGGAGTTCAGACGTGTGCTCTTCCGATC-s-T-3´ | AGTCAA | 
+| NEBNext Index 14 Primer for Illumina (10 µM) | 5´-CAAGCAGAAGACGGCATACGAGATACGGAACTGTGACTGGAGTTCAGACGTGTGCTCTTCCGATC-s-T-3´ | AGTTCC | 
+| NEBNext Index 15 Primer for Illumina (10 µM) | 5´-CAAGCAGAAGACGGCATACGAGATTCTGACATGTGACTGGAGTTCAGACGTGTGCTCTTCCGATC-s-T-3´ | ATGTCA | 
+| NEBNext Index 16 Primer for Illumina (10 µM) | 5´-CAAGCAGAAGACGGCATACGAGATGCGGACGGGTGACTGGAGTTCAGACGTGTGCTCTTCCGATC-s-T-3´ | CCGTCC | 
+| NEBNext Index 18 Primer for Illumina (10 µM) | 5´-CAAGCAGAAGACGGCATACGAGATGTGCGGACGTGACTGGAGTTCAGACGTGTGCTCTTCCGATC-s-T-3´ | GTCCGC | 
+| NEBNext Index 19 Primer for Illumina (10 µM) | 5´-CAAGCAGAAGACGGCATACGAGATCGTTTCACGTGACTGGAGTTCAGACGTGTGCTCTTCCGATC-s-T-3´ | GTGAAA | 
+| NEBNext Index 20 Primer for Illumina (10 µM) | 5´-CAAGCAGAAGACGGCATACGAGATAAGGCCACGTGACTGGAGTTCAGACGTGTGCTCTTCCGATC-s-T-3´ | GTGGCC | 
+| NEBNext Index 21 Primer for Illumina (10 µM) | 5´-CAAGCAGAAGACGGCATACGAGATTCCGAAACGTGACTGGAGTTCAGACGTGTGCTCTTCCGATC-s-T-3´ | GTTTCG | 
+| NEBNext Index 22 Primer for Illumina (10 µM) | 5´-CAAGCAGAAGACGGCATACGAGATTACGTACGGTGACTGGAGTTCAGACGTGTGCTCTTCCGATC-s-T-3´ | CGTACG | 
+| NEBNext Index 23 Primer for Illumina (10 µM) | 5´-CAAGCAGAAGACGGCATACGAGATATCCACTCGTGACTGGAGTTCAGACGTGTGCTCTTCCGATC-s-T-3´ | GAGTGG | 
+| NEBNext Index 25 Primer for Illumina (10 µM) | 5´-CAAGCAGAAGACGGCATACGAGATATATCAGTGTGACTGGAGTTCAGACGTGTGCTCTTCCGATC--s-T-3´ | ACTGAT | 
+| NEBNext Index 27 Primer for Illumina (10 µM) | 5´-CAAGCAGAAGACGGCATACGAGATAAAGGAATGTGACTGGAGTTCAGACGTGTGCTCTTCCGATC-s-T-3´ | ATTCCT | 
