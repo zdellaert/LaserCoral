@@ -111,6 +111,8 @@ But there is also a lot of duplication, overrepresentation of seqeunces, and ada
 <img width="800" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/raw_qc/multiqc_screenshots/screenshot_fastqc_adapter.png?raw=true">
 <img width="800" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/raw_qc/multiqc_screenshots/screenshot_fastqc_overrep.png?raw=true">
 
+**This adapter content graph is indicative that many of the inserts were much shorter than 150bp**
+
 In the [library preparation](https://zdellaert.github.io/ZD_Putnam_Lab_Notebook/LCM-Low-Input-RNA-Library-Prep/), several [oligos and adapters](https://github.com/zdellaert/ZD_Putnam_Lab_Notebook/blob/master/protocols/manualE6420_NEBNext_Low_Input_RNA_Library_Prep.pdf) are used:
 
 1. Oligo Sequences
