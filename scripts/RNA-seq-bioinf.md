@@ -91,4 +91,33 @@ echo "Initial QC of Seq data complete." $(date)
 sbatch scripts/raw_qc.sh
 ```
 
+### Interpretation of QC data
 
+Okay! So there is definitely data! Yay!
+
+And a lot of it!
+
+And it isn't horrible quality! Yay!
+
+<img width="600" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/master/raw_qc/multiqc_screenshots/screenshot1.png?raw=true">
+<img width="600" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/master/raw_qc/multiqc_screenshots/screenshot2.png?raw=true">
+<img width="600" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/master/raw_qc/multiqc_screenshots/screenshot3.png?raw=true">
+<img width="600" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/master/raw_qc/multiqc_screenshots/screenshot4.png?raw=true">
+<img width="600" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/master/raw_qc/multiqc_screenshots/screenshot5.png?raw=true">
+<img width="600" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/master/raw_qc/multiqc_screenshots/screenshot6.png?raw=true">
+
+But there is also a lot of duplication, overrepresentation of seqeunces, and adapter content. This isn't unexpected given the fact that this was low-input of degraded RNA extracted from fixed, LCM-d tissue. Let's see what we can do to interpret and filter from here.
+
+<img width="600" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/master/raw_qc/multiqc_screenshots/screenshot_fastqc_adapter.png?raw=true">
+<img width="600" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/master/raw_qc/multiqc_screenshots/screenshot_fastqc_overrep.png?raw=true">
+
+In the [library preparation](https://zdellaert.github.io/ZD_Putnam_Lab_Notebook/LCM-Low-Input-RNA-Library-Prep/), several [oligos and adapters](https://github.com/zdellaert/ZD_Putnam_Lab_Notebook/blob/master/protocols/manualE6420_NEBNext_Low_Input_RNA_Library_Prep.pdf) are used:
+
+1. Oligo Sequences
+   1. NEBNext Template Switching Oligo: 5 ́-GCT AAT CAT TGC AAG CAG TGG TAT CAA CGC AGA GTA CAT rGrGrG-3 ́
+   2. NEBNext Single Cell RT Primer Mix: 5 ́-AAG CAG TGG TAT CAA CGC AGA GTA CTT TTT TTT TTT TTT TTT TTT TTT TTT TTT TV-3 ́
+   3. NEBNext Single Cell cDNA PCR Primer: 5 ́-AAG CAG TGG TAT CAA CGC AGA GT-3 ́
+
+2. Adaptor Trimming Sequences: The NEBNext libraries for Illumina resemble TruSeq libraries and can be trimmed similar to TrueSeq:
+   1. AdaptorRead1: AGATCGGAAGAGCACACGTCTGAACTCCAGTCA
+   2. AdaptorRead2: AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
