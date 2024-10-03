@@ -99,17 +99,17 @@ And a lot of it!
 
 And it isn't horrible quality! Yay!
 
-<img width="600" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/master/raw_qc/multiqc_screenshots/screenshot1.png?raw=true">
-<img width="600" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/master/raw_qc/multiqc_screenshots/screenshot2.png?raw=true">
-<img width="600" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/master/raw_qc/multiqc_screenshots/screenshot3.png?raw=true">
-<img width="600" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/master/raw_qc/multiqc_screenshots/screenshot4.png?raw=true">
-<img width="600" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/master/raw_qc/multiqc_screenshots/screenshot5.png?raw=true">
-<img width="600" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/master/raw_qc/multiqc_screenshots/screenshot6.png?raw=true">
+<img width="600" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/raw_qc/multiqc_screenshots/screenshot1.png?raw=true">
+<img width="600" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/raw_qc/multiqc_screenshots/screenshot2.png?raw=true">
+<img width="600" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/raw_qc/multiqc_screenshots/screenshot3.png?raw=true">
+<img width="600" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/raw_qc/multiqc_screenshots/screenshot4.png?raw=true">
+<img width="600" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/raw_qc/multiqc_screenshots/screenshot5.png?raw=true">
+<img width="600" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/raw_qc/multiqc_screenshots/screenshot6.png?raw=true">
 
 But there is also a lot of duplication, overrepresentation of seqeunces, and adapter content. This isn't unexpected given the fact that this was low-input of degraded RNA extracted from fixed, LCM-d tissue. Let's see what we can do to interpret and filter from here.
 
-<img width="600" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/master/raw_qc/multiqc_screenshots/screenshot_fastqc_adapter.png?raw=true">
-<img width="600" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/master/raw_qc/multiqc_screenshots/screenshot_fastqc_overrep.png?raw=true">
+<img width="600" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/raw_qc/multiqc_screenshots/screenshot_fastqc_adapter.png?raw=true">
+<img width="600" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/raw_qc/multiqc_screenshots/screenshot_fastqc_overrep.png?raw=true">
 
 In the [library preparation](https://zdellaert.github.io/ZD_Putnam_Lab_Notebook/LCM-Low-Input-RNA-Library-Prep/), several [oligos and adapters](https://github.com/zdellaert/ZD_Putnam_Lab_Notebook/blob/master/protocols/manualE6420_NEBNext_Low_Input_RNA_Library_Prep.pdf) are used:
 
