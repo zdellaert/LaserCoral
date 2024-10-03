@@ -157,3 +157,42 @@ Index primer full sequences from [oligo kit E7500S](https://www.neb.com/en-us/-/
 | NEBNext Index 23 Primer for Illumina (10 µM) | 5´-CAAGCAGAAGACGGCATACGAGATAT_**CCACTC**_GTGACTGGAGTTCAGACGTGTGCTCTTCCGATC-s-T-3´ | GAGTGG | 
 | NEBNext Index 25 Primer for Illumina (10 µM) | 5´-CAAGCAGAAGACGGCATACGAGATAT_**ATCAGT**_GTGACTGGAGTTCAGACGTGTGCTCTTCCGATC-s-T-3´ | ACTGAT | 
 | NEBNext Index 27 Primer for Illumina (10 µM) | 5´-CAAGCAGAAGACGGCATACGAGATAA_**AGGAAT**_GTGACTGGAGTTCAGACGTGTGCTCTTCCGATC-s-T-3´ | ATTCCT | 
+
+## Trimming adapters and low-quality bases and short reads (< 20bp)
+
+I am going to use [cutadapt](https://cutadapt.readthedocs.io/en/stable/guide.html) for trimming and quality control
+
+cutadapt \
+    -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC \  # NEB AdaptorRead1 
+    -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT \  # NEB AdaptorRead2
+    -o trimmed_R1.fastq.gz -p trimmed_R2.fastq.gz \ #output files
+    input_R1.fastq.gz input_R2.fastq.gz \ #input files
+    -q 20,20 \ #trims low-quality bases (score < 20) from the 3' end (first 20) and 5' (second 20) of the read
+    --minimum-length 20 #after trimming, only keep a sequence if longer than 20 bp
+
+```
+#!/bin/bash
+#SBATCH -t 24:00:00
+#SBATCH --nodes=1 --ntasks-per-node=20
+#SBATCH --mem=100GB
+#SBATCH --export=NONE
+#SBATCH --error=outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /data/putnamlab/zdellaert/LaserCoral/data_RNA
+
+
+#make arrays of R1 and R2 reads
+R1_raw=($(ls *R1*.fastq.gz))
+R2_raw=($(ls *R2*.fastq.gz))
+
+for i in ${!R1_raw[@]}; do
+    cutadapt \
+    -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC \  
+    -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT \  
+    -o trimmed_${R1_raw[$i]} -p trimmed_${R2_raw[$i]} \
+    ${R1_raw[$i]} ${R2_raw[$i]} \
+    -q 20,20 --minimum-length 20
+
+    echo "trimming of ${R1_raw[$i]} and ${R2_raw[$i]} complete"
+done
+```
