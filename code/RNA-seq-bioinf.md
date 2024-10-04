@@ -366,6 +366,34 @@ gunzip Pocillopora_acuta_HIv2.assembly.fasta.gz #unzip genome file
 gunzip Pocillopora_acuta_HIv2.genes.gff3.gz #unzip gff annotation file
 ```
 
+
+## check strandedness, https://github.com/signalbash/how_are_we_stranded_here
+
+```
+mkdir strandedness
+cd strandedness
+
+#install how_are_we_stranded_here
+pip install how_are_we_stranded_here
+
+#download and prep transcript fasta and gtf files
+wget http://cyanophora.rutgers.edu/Pocillopora_acuta/Pocillopora_acuta_HIv2.genes.cds.fna.gz
+gunzip Pocillopora_acuta_HIv2.genes.cds.fna.gz
+# copied in gtf I made for this genome another time: Pocillopora_acuta_HIv2.gtf
+
+module load kallisto/0.48.0-gompi-2022a
+
+awk '/^>/{gsub(/^ +| +$/, "", $0)}1' Pocillopora_acuta_HIv2.genes.cds.fasta > trimmed_Pocillopora_acuta_HIv2.genes.cds2.fasta
+
+
+check_strandedness --gtf Pocillopora_acuta_HIv2.gtf --transcripts Pocillopora_acuta_HIv2.genes.cds.fasta --reads_1 ../data_RNA/trimmed_oligo_trimmed_LCM_15_S40_R1_001.fastq.gz --reads_2 ../data_RNA/trimmed_oligo_trimmed_LCM_15_S40_R2_001.fastq.gz
+
+
+#copied in kallisto index.idk file from unity
+
+check_strandedness --gtf Pocillopora_acuta_HIv2.gtf --kallisto_index index.idx --reads_1 ../data_RNA/trimmed_oligo_trimmed_LCM_15_S40_R1_001.fastq.gz --reads_2 ../data_RNA/trimmed_oligo_trimmed_LCM_15_S40_R2_001.fastq.gz
+```
+
 ## HISAT2 Alignment
 
 I will use [Hisat2](https://daehwankimlab.github.io/hisat2/manual/) to align the RNA-seq reads to the *P. acuta* genome
@@ -438,6 +466,7 @@ for read1 in ${array[@]}; do
     rm histat2/${sample_name}.sam
 done
 ```
+
 
 
 ## Should I run GeneExt?
