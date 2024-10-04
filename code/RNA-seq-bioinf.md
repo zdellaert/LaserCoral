@@ -93,7 +93,7 @@ sbatch scripts/raw_qc.sh
 
 ### Interpretation of QC data
 
-[View results here](https://github.com/zdellaert/LaserCoral/tree/main/raw_qc), [MultiQC report](https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/raw_qc/raw_qc_multiqc_report.html)
+[View results here](https://github.com/zdellaert/LaserCoral/tree/main/output_RNA/raw_qc), [MultiQC report](https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/raw_qc/raw_qc_multiqc_report.html)
 
 Okay! So there is definitely data! Yay!
 
@@ -327,9 +327,9 @@ mv multiqc_data trimmed_oligo_qc/trimmed_oligo_multiqc_data
 echo "QC of trimmed_oligo data complete." $(date)
 ```
 
-### Interpretation of QC data, after final trimming of adapters and oligos done
+### Interpretation of QC data
 
-[View results here](https://github.com/zdellaert/LaserCoral/tree/main/trimmed_oligo_qc), [MultiQC report](https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/trimmed_oligo_qc/trimmed_oligo_qc_multiqc_report.html)
+[View results here](https://github.com/zdellaert/LaserCoral/tree/main/output_RNA/trimmed_oligo_qc), [MultiQC report](https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/trimmed_oligo_qc/trimmed_oligo_qc_multiqc_report.html)
 
 Yay! I feel good about moving forward here to alignment. There is still duplication, but the non-biological overrepresented sequences appear to have been removed!
 
