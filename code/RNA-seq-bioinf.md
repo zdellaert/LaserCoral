@@ -7,6 +7,14 @@ Last Updated: 10/2/2024
 - RNA extractions: https://zdellaert.github.io/ZD_Putnam_Lab_Notebook/LCM-Exp-Extractions/
 - RNA library prep: https://zdellaert.github.io/ZD_Putnam_Lab_Notebook/LCM-Low-Input-RNA-Library-Prep/
 
+## Sequencing information
+
+- Sequenced through Genohub Service Provider: Oklahoma Medical Research Foundation NGS Core
+- Instrument: Illumina NovaSeq X Plus - 25B - PE 150 Cycle
+- Read length: 2 x 150bp (Paired End)
+- Number of samples: 10
+- Guaranteed number of pass filter PE reads/sample: 30M (15M in each direction)
+
 ## Make directory structure on Andromeda
 
 ```
@@ -15,7 +23,7 @@ cd /data/putnamlab/zdellaert/LaserCoral #Enter working directory
 
 mkdir scripts #make folder for scripts
 mkdir data_RNA  #make folder for raw data
-mkdir output #make folder for output
+mkdir output_RNA #make folder for output
 ```
 
 ## Check integrity of data transfer
@@ -46,7 +54,6 @@ ln -s /data/putnamlab/KITT/hputnam/20241002_LaserCoral/*.fastq.gz /data/putnamla
 ## QC raw files
 
 ```
-cd /data/putnamlab/zdellaert/LaserCoral #Enter working directory
 nano scripts/raw_qc.sh #write script for QC, enter text in next code chunk
 ```
 
@@ -175,7 +182,6 @@ cutadapt \
 ```
 
 ```
-cd /data/putnamlab/zdellaert/LaserCoral #Enter working directory
 nano scripts/cutadapt.sh #write script for first trimming pass and QC, enter text in next code chunk
 ```
 
@@ -262,8 +268,7 @@ I am going to try to trim these using the following cutadapt parameters:
 ``` 
 
 ```
-cd /data/putnamlab/zdellaert/LaserCoral #Enter working directory
-nano scripts/cutadapt_oligo.sh #write script for first trimming pass and QC, enter text in next code chunk
+nano scripts/cutadapt_oligo.sh #write script for further trimming pass and QC, enter text in next code chunk
 ```
 
 ```
@@ -361,3 +366,78 @@ gunzip Pocillopora_acuta_HIv2.assembly.fasta.gz #unzip genome file
 gunzip Pocillopora_acuta_HIv2.genes.gff3.gz #unzip gff annotation file
 ```
 
+## HISAT2 Alignment
+
+I will use [Hisat2](https://daehwankimlab.github.io/hisat2/manual/) to align the RNA-seq reads to the *P. acuta* genome
+
+The libraries are paired and and stranded, since they were [prepared](https://zdellaert.github.io/ZD_Putnam_Lab_Notebook/LCM-Low-Input-RNA-Library-Prep/) using a [template switching method](https://www.neb.com/en-us/products/e6420-nebnext-single-cell-low-input-rna-library-prep-kit-for-illumina)
+
+See notes here: [strand-related settings for RNA-seq tools](https://rnabio.org/module-09-appendix/0009/12/01/StrandSettings/)
+
+hisat2 -p 16 \ #use 16 threads
+    --rna-strandness fr \ #-tells HISAT2 that the first read (R1) is on the forward strand, and the second read (R2) is on the reverse strand
+    --time \ Print the wall-clock time required to load the index files and align the reads to stderr
+    --dta \ #for input into Stringtie transcriptome assembly
+    -q \ #fastq input files
+    -x Pacuta_ref \ #index location 
+    -1 ${read1} -2 ${read2} \ #input files, R1 and R2
+    -S histat2/${sample_name}.sam #output sam file
+
+```
+nano scripts/hisat2.sh #write script for alignment, enter text in next code chunk
+```
+
+```
+#!/bin/bash
+#SBATCH -t 120:00:00
+#SBATCH --nodes=1 --ntasks-per-node=20
+#SBATCH --mem=200GB
+#SBATCH --export=NONE
+#SBATCH --error=../scripts/outs_errs/"%x_error.%j" #write out slurm error reports
+#SBATCH --output=../scripts/outs_errs/"%x_output.%j" #write out any program outpus
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH --mail-user=zdellaert@uri.edu #your email to send notifications
+#SBATCH -D /data/putnamlab/zdellaert/LaserCoral/output_RNA #set working directory
+
+# load modules needed
+module load HISAT2/2.2.1-gompi-2022a #Alignment to reference genome: HISAT2
+module load SAMtools/1.16.1-GCC-11.3.0 #Preparation of alignment for assembly: SAMtools
+
+# index the reference genome, will write to a directory called Pacuta_ref
+hisat2-build -f ../references/Pocillopora_acuta_HIv2.assembly.fasta ./Pacuta_ref
+
+echo "Reference genome indexed. Starting alingment" $(date)
+
+# make the output directory if it does not exist (-p checks for this)
+mkdir -p histat2
+
+# call the oligo-trimmed sequences into an array
+array=(../data_RNA/trimmed_oligo*_R1_001.fastq.gz)
+
+# align the files to the indexed genome using hisat2
+for read1 in ${array[@]}; do
+    
+    # extract the sample name of R1 files as LCM_##
+    sample_name=$(basename $read1 | sed 's/.*trimmed_\([A-Za-z0-9]*_[0-9]*\).*/\1/')
+    
+    # Define the corresponding reverse read file (R2)
+    read2=${read1/_R1_/_R2_}
+    
+    # perform alignment
+    hisat2 -p 16 --rna-strandness fr --time --dta -q -x Pacuta_ref -1 ${read1} -2 ${read2} -S histat2/${sample_name}.sam
+    echo "${sample_name} aligned!"
+
+    # sort the sam file into a bam file
+    samtools sort -@ 8 -o histat2/${sample_name}.bam histat2/${sample_name}.sam
+    echo "${sample_name} bam-ified!"
+    
+    # index bam file , creating a .bai file which is nice for viewing in IGB
+    samtools index histat2/${sample_name}.bam histat2/${sample_name}.bai
+    
+    # remove sam file to save disk space
+    rm histat2/${sample_name}.sam
+done
+```
+
+
+## Should I run GeneExt?
