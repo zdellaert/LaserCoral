@@ -243,6 +243,8 @@ echo "QC of trimmed data complete." $(date)
 
 Okay! So this trimming definitely removed the adapter sequences, and the QC data reflect that, but there are still oligo and primer sequences in the reads. 
 
+## Trimming oligo and primer sequences from adapter-trimmed reads
+
 1. Oligo Sequences
    1. NEBNext Template Switching Oligo: 5 ́-GCTAATCATTGCAAGCAGTGGTATCAACGCAGAGTACATrGrGrG-3 ́
    2. NEBNext Single Cell RT Primer Mix: 5 ́-AAGCAGTGGTATCAACGCAGAGTACTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTV-3 ́
