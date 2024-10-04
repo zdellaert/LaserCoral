@@ -162,6 +162,9 @@ Index primer full sequences from [oligo kit E7500S](https://www.neb.com/en-us/-/
 
 I am going to use [cutadapt](https://cutadapt.readthedocs.io/en/stable/guide.html) for trimming and quality control
 
+Example code with comments:
+
+```
 cutadapt \
     -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC \  # NEB AdaptorRead1 
     -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT \  # NEB AdaptorRead2
@@ -169,6 +172,7 @@ cutadapt \
     input_R1.fastq.gz input_R2.fastq.gz \ #input files
     -q 20,20 \ #trims low-quality bases (score < 20) from the 3' end (first 20) and 5' (second 20) of the read
     --minimum-length 20 #after trimming, only keep a sequence if longer than 20 bp
+```
 
 ```
 cd /data/putnamlab/zdellaert/LaserCoral #Enter working directory
@@ -230,4 +234,84 @@ mv multiqc_report.html trimmed_qc/trimmed_qc_multiqc_report.html
 mv multiqc_data trimmed_qc/trimmed_multiqc_data
 
 echo "QC of trimmed data complete." $(date)
+```
+
+Okay! So this trimming definitely removed the adapter sequences, and the QC data reflect that, but there are still oligo and primer sequences in the reads. 
+
+1. Oligo Sequences
+   1. NEBNext Template Switching Oligo: 5 ́-GCTAATCATTGCAAGCAGTGGTATCAACGCAGAGTACATrGrGrG-3 ́
+   2. NEBNext Single Cell RT Primer Mix: 5 ́-AAGCAGTGGTATCAACGCAGAGTACTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTV-3 ́
+   3. NEBNext Single Cell cDNA PCR Primer: 5 ́-AAGCAGTGGTATCAACGCAGAGT-3 ́
+
+I am going to try to trim these using the following cutadapt parameters:
+
+-a GCTAATCATTGCAAGCAGTGGTATCAACGCAGAGTACATGGG \
+-a AAGCAGTGGTATCAACGCAGAGTACTTTTTTTTTTTTTTTTTTTTTTTTT \
+-a AAGCAGTGGTATCAACGCAGAGT \
+
+
+```
+cd /data/putnamlab/zdellaert/LaserCoral #Enter working directory
+nano scripts/cutadapt_oligo.sh #write script for first trimming pass and QC, enter text in next code chunk
+```
+
+```
+#!/bin/bash
+#SBATCH -t 24:00:00
+#SBATCH --nodes=1 --ntasks-per-node=20
+#SBATCH --mem=200GB
+#SBATCH --export=NONE
+#SBATCH --error=../scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=../scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /data/putnamlab/zdellaert/LaserCoral/data_RNA
+
+# load modules needed
+module load cutadapt/4.2-GCCcore-11.3.0
+
+#make arrays of R1 and R2 reads
+R1_raw=($('ls' trimmed_*R1*.fastq.gz))
+R2_raw=($('ls' trimmed_*R2*.fastq.gz))
+
+for i in ${!R1_raw[@]}; do
+    cutadapt \
+    -a GCTAATCATTGCAAGCAGTGGTATCAACGCAGAGTACATGGG \
+    -a AAGCAGTGGTATCAACGCAGAGTACTTTTTTTTTTTTTTTTTTTTTTTTT \
+    -a AAGCAGTGGTATCAACGCAGAGT \
+    -A GCTAATCATTGCAAGCAGTGGTATCAACGCAGAGTACATGGG \
+    -A AAGCAGTGGTATCAACGCAGAGTACTTTTTTTTTTTTTTTTTTTTTTTTT \
+    -A AAGCAGTGGTATCAACGCAGAGT \
+    -o trimmed_oligo_${R1_raw[$i]} -p trimmed_oligo_${R2_raw[$i]} \
+    ${R1_raw[$i]} ${R2_raw[$i]} \
+    -q 20,20 --minimum-length 20 --cores=20
+
+    echo "trimming of ${R1_raw[$i]} and ${R2_raw[$i]} complete"
+done
+
+# unload conflicting modules with modules needed below
+module unload cutadapt/4.2-GCCcore-11.3.0
+module unload GCCcore/11.3.0 Python/3.10.4-GCCcore-11.3.0 libffi/3.4.2-GCCcore-11.3.0
+
+# load modules needed
+module load FastQC/0.11.9-Java-11
+module load MultiQC/1.9-intel-2020a-Python-3.8.2
+
+#make trimmed_oligo_qc output folder
+mkdir trimmed_oligo_qc/
+
+# Make an array of fastq files to trim
+array_trim=($(ls trimmed_oligo*)) 
+
+#run fastqc on trimmed_oligo data
+for i in ${array_trim[@]}; do
+    fastqc --threads 20 ${i} -o trimmed_oligo_qc/
+    echo "fastqc ${i} done"
+done
+
+#Compile MultiQC report from FastQC files
+multiqc trimmed_oligo_qc/  #Compile MultiQC report from FastQC files 
+
+mv multiqc_report.html trimmed_oligo_qc/trimmed_oligo_qc_multiqc_report.html
+mv multiqc_data trimmed_oligo_qc/trimmed_oligo_multiqc_data
+
+echo "QC of trimmed_oligo data complete." $(date)
 ```
