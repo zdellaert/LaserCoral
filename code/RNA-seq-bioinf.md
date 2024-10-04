@@ -93,7 +93,7 @@ sbatch scripts/raw_qc.sh
 
 ### Interpretation of QC data
 
-[View results here](https://github.com/zdellaert/LaserCoral/tree/main/raw_qc), [MultiQC report](https://github.com/zdellaert/LaserCoral/blob/main/raw_qc/raw_qc_multiqc_report.html)
+[View results here](https://github.com/zdellaert/LaserCoral/tree/main/raw_qc), [MultiQC report](https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/raw_qc/raw_qc_multiqc_report.html)
 
 Okay! So there is definitely data! Yay!
 
@@ -101,17 +101,17 @@ And a lot of it!
 
 And it isn't horrible quality! Yay!
 
-<img width="800" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/raw_qc/multiqc_screenshots/screenshot1.png?raw=true">
-<img width="800" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/raw_qc/multiqc_screenshots/screenshot2.png?raw=true">
-<img width="800" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/raw_qc/multiqc_screenshots/screenshot3.png?raw=true">
-<img width="800" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/raw_qc/multiqc_screenshots/screenshot4.png?raw=true">
-<img width="800" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/raw_qc/multiqc_screenshots/screenshot5.png?raw=true">
-<img width="800" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/raw_qc/multiqc_screenshots/screenshot6.png?raw=true">
+<img width="800" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/raw_qc/multiqc_screenshots/screenshot1.png?raw=true">
+<img width="800" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/raw_qc/multiqc_screenshots/screenshot2.png?raw=true">
+<img width="800" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/raw_qc/multiqc_screenshots/screenshot3.png?raw=true">
+<img width="800" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/raw_qc/multiqc_screenshots/screenshot4.png?raw=true">
+<img width="800" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/raw_qc/multiqc_screenshots/screenshot5.png?raw=true">
+<img width="800" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/raw_qc/multiqc_screenshots/screenshot6.png?raw=true">
 
 But there is also a lot of duplication, overrepresentation of seqeunces, and adapter content. This isn't unexpected given the fact that this was low-input of degraded RNA extracted from fixed, LCM-d tissue. Let's see what we can do to interpret and filter from here.
 
-<img width="800" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/raw_qc/multiqc_screenshots/screenshot_fastqc_adapter.png?raw=true">
-<img width="800" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/raw_qc/multiqc_screenshots/screenshot_fastqc_overrep.png?raw=true">
+<img width="800" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/raw_qc/multiqc_screenshots/screenshot_fastqc_adapter.png?raw=true">
+<img width="800" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/raw_qc/multiqc_screenshots/screenshot_fastqc_overrep.png?raw=true">
 
 **This adapter content graph is indicative that many of the inserts were much shorter than 150bp**
 
@@ -237,9 +237,9 @@ echo "QC of trimmed data complete." $(date)
 ```
 ### Interpretation of QC data
 
-[View results here](https://github.com/zdellaert/LaserCoral/tree/main/trimmed_qc), [MultiQC report](https://github.com/zdellaert/LaserCoral/blob/main/trimmed_qc/trimmed_qc_multiqc_report.html)
+[View results here](https://github.com/zdellaert/LaserCoral/tree/main/output_RNA/trimmed_qc), [MultiQC report](https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/trimmed_qc/trimmed_qc_multiqc_report.html)
 
-<img width="800" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/trimmed_qc/multiqc_screenshots/screenshot1.png?raw=true">
+<img width="800" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/trimmed_qc/multiqc_screenshots/screenshot1.png?raw=true">
 
 Okay! So this trimming definitely removed the adapter sequences, and the QC data reflect that, but there are still oligo and primer sequences in the reads. 
 
@@ -250,10 +250,14 @@ Okay! So this trimming definitely removed the adapter sequences, and the QC data
 
 I am going to try to trim these using the following cutadapt parameters:
 
--a GCTAATCATTGCAAGCAGTGGTATCAACGCAGAGTACATGGG \
--a AAGCAGTGGTATCAACGCAGAGTACTTTTTTTTTTTTTTTTTTTTTTTTT \
--a AAGCAGTGGTATCAACGCAGAGT \
-
+```
+-a GCTAATCATTGCAAGCAGTGGTATCAACGCAGAGTACATGGG #trim Template Switching Oligo from R1
+-a AAGCAGTGGTATCAACGCAGAGTACTTTTTTTTTTTTTTTTTTTTTTTTT #trim Single Cell RT Primer from R1
+-a AAGCAGTGGTATCAACGCAGAGT #trim Single Cell cDNA PCR Primer from R1
+-A GCTAATCATTGCAAGCAGTGGTATCAACGCAGAGTACATGGG #trim Template Switching Oligo from R2
+-A AAGCAGTGGTATCAACGCAGAGTACTTTTTTTTTTTTTTTTTTTTTTTTT #trim  Single Cell RT Primer from R2
+-A AAGCAGTGGTATCAACGCAGAGT #trim Single Cell cDNA PCR Primer from R2
+``` 
 
 ```
 cd /data/putnamlab/zdellaert/LaserCoral #Enter working directory
@@ -320,3 +324,22 @@ mv multiqc_data trimmed_oligo_qc/trimmed_oligo_multiqc_data
 
 echo "QC of trimmed_oligo data complete." $(date)
 ```
+
+## Download Genome: [*Pocillopora acuta*](http://cyanophora.rutgers.edu/Pocillopora_acuta/)
+
+Rutgers University Stephens et al. 2022 [Publication](https://academic.oup.com/gigascience/article/doi/10.1093/gigascience/giac098/6815755)
+
+Obtain reference genome assembly and gff annotation file.
+
+```
+mkdir references/
+cd references/ 
+
+wget http://cyanophora.rutgers.edu/Pocillopora_acuta/Pocillopora_acuta_HIv2.assembly.fasta.gz
+
+wget http://cyanophora.rutgers.edu/Pocillopora_acuta/Pocillopora_acuta_HIv2.genes.gff3.gz
+
+gunzip Pocillopora_acuta_HIv2.assembly.fasta.gz #unzip genome file
+gunzip Pocillopora_acuta_HIv2.genes.gff3.gz #unzip gff annotation file
+```
+
