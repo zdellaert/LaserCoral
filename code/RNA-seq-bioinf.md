@@ -327,11 +327,9 @@ echo "QC of trimmed_oligo data complete." $(date)
 
 ### Interpretation of QC data, after final trimming of adapters and oligos done
 
-[View results here](https://github.com/zdellaert/LaserCoral/tree/main/raw_qc), [MultiQC report](https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/raw_qc/raw_qc_multiqc_report.html)
+[View results here](https://github.com/zdellaert/LaserCoral/tree/main/trimmed_oligo_qc), [MultiQC report](https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/trimmed_oligo_qc/trimmed_oligo_qc_multiqc_report.html)
 
 Yay! I feel good about moving forward here to alignment. There is still duplication, but the non-biological overrepresented sequences appear to have been removed!
-
-https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/trimmed_oligo_qc/multiqc_screenshots/screenshot7.png
 
 <img width="800" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/trimmed_oligo_qc/multiqc_screenshots/screenshot1.png?raw=true">
 <img width="800" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/trimmed_oligo_qc/multiqc_screenshots/screenshot2.png?raw=true">
