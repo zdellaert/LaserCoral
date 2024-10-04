@@ -93,7 +93,7 @@ sbatch scripts/raw_qc.sh
 
 ### Interpretation of QC data
 
-[View results here](https://github.com/zdellaert/LaserCoral/tree/main/raw_qc)
+[View results here](https://github.com/zdellaert/LaserCoral/tree/main/raw_qc), [MultiQC report](https://github.com/zdellaert/LaserCoral/blob/main/raw_qc/raw_qc_multiqc_report.html)
 
 Okay! So there is definitely data! Yay!
 
@@ -235,6 +235,11 @@ mv multiqc_data trimmed_qc/trimmed_multiqc_data
 
 echo "QC of trimmed data complete." $(date)
 ```
+### Interpretation of QC data
+
+[View results here](https://github.com/zdellaert/LaserCoral/tree/main/trimmed_qc), [MultiQC report](https://github.com/zdellaert/LaserCoral/blob/main/trimmed_qc/trimmed_qc_multiqc_report.html)
+
+<img width="800" alt="screenshot" src="https://github.com/zdellaert/LaserCoral/blob/main/trimmed_qc/multiqc_screenshots/screenshot1.png?raw=true">
 
 Okay! So this trimming definitely removed the adapter sequences, and the QC data reflect that, but there are still oligo and primer sequences in the reads. 
 
@@ -269,10 +274,10 @@ nano scripts/cutadapt_oligo.sh #write script for first trimming pass and QC, ent
 module load cutadapt/4.2-GCCcore-11.3.0
 
 #make arrays of R1 and R2 reads
-R1_raw=($('ls' trimmed_*R1*.fastq.gz))
-R2_raw=($('ls' trimmed_*R2*.fastq.gz))
+R1_trimmed=($('ls' trimmed_*R1*.fastq.gz))
+R2_trimmed=($('ls' trimmed_*R2*.fastq.gz))
 
-for i in ${!R1_raw[@]}; do
+for i in ${!R1_trimmed[@]}; do
     cutadapt \
     -a GCTAATCATTGCAAGCAGTGGTATCAACGCAGAGTACATGGG \
     -a AAGCAGTGGTATCAACGCAGAGTACTTTTTTTTTTTTTTTTTTTTTTTTT \
@@ -280,11 +285,11 @@ for i in ${!R1_raw[@]}; do
     -A GCTAATCATTGCAAGCAGTGGTATCAACGCAGAGTACATGGG \
     -A AAGCAGTGGTATCAACGCAGAGTACTTTTTTTTTTTTTTTTTTTTTTTTT \
     -A AAGCAGTGGTATCAACGCAGAGT \
-    -o trimmed_oligo_${R1_raw[$i]} -p trimmed_oligo_${R2_raw[$i]} \
-    ${R1_raw[$i]} ${R2_raw[$i]} \
+    -o trimmed_oligo_${R1_trimmed[$i]} -p trimmed_oligo_${R2_trimmed[$i]} \
+    ${R1_trimmed[$i]} ${R2_trimmed[$i]} \
     -q 20,20 --minimum-length 20 --cores=20
 
-    echo "trimming of ${R1_raw[$i]} and ${R2_raw[$i]} complete"
+    echo "trimming of ${R1_trimmed[$i]} and ${R2_trimmed[$i]} complete"
 done
 
 # unload conflicting modules with modules needed below
