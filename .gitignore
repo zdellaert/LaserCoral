@@ -19,3 +19,9 @@
 *.utf8.md
 *.knit.md
 .Rproj.user
+
+# Data directory with raw and trimmed fastq files
+data_RNA/*.gz
+
+# large unzipped reference files
+references
