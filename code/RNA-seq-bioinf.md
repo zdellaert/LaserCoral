@@ -734,6 +734,6 @@ python ../../scripts/prepDE.py3 -g LCM_RNA_gene_count_matrix.csv -i listGTF.txt
 echo "Gene count matrix compiled." $(date)
 ```
 
-Woohoo! [Gene count matrix complete.](/data/putnamlab/zdellaert/LaserCoral/output_RNA/stringtie/LCM_RNA_gene_count_matrix.csv)
+Woohoo! [Gene count matrix complete.](https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/stringtie/LCM_RNA_gene_count_matrix.csv)
 
 ## Should I run GeneExt?
