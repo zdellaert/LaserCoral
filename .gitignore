@@ -27,8 +27,13 @@ data_RNA/*.gz
 references
 random/strandedness
 
-#bams and sams and hisat index files
+#bams and sams and hisat index files and stringtie gtfs
 *bam
 *bai
 *sam
 *ht2
+output_RNA/stringtie/LCM_*.gtf
+output_RNA/stringtie/*tab
+
+#temporary file directories
+tmp*/

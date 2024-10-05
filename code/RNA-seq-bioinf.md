@@ -75,7 +75,7 @@ module load MultiQC/1.9-intel-2020a-Python-3.8.2
 mkdir raw_qc/
 
 # Make an array of fastq files to trim
-array1=($(ls *.fastq.gz)) 
+array1=($('ls' *.fastq.gz)) 
 
 #run fastqc on raw data
 for i in ${array1[@]}; do
@@ -92,10 +92,6 @@ mv multiqc_report.html raw_qc/raw_qc_multiqc_report.html
 mv multiqc_data raw_qc/raw_multiqc_data
 
 echo "Initial QC of Seq data complete." $(date)
-```
-
-```
-sbatch scripts/raw_qc.sh
 ```
 
 ### Interpretation of QC data
@@ -225,7 +221,7 @@ module load MultiQC/1.9-intel-2020a-Python-3.8.2
 mkdir trimmed_qc/
 
 # Make an array of fastq files to trim
-array_trim=($(ls trimmed*)) 
+array_trim=($('ls' trimmed*)) 
 
 #run fastqc on trimmed data
 for i in ${array_trim[@]}; do
@@ -315,7 +311,7 @@ module load MultiQC/1.9-intel-2020a-Python-3.8.2
 mkdir trimmed_oligo_qc/
 
 # Make an array of fastq files to trim
-array_trim=($(ls trimmed_oligo*)) 
+array_trim=($('ls' trimmed_oligo*)) 
 
 #run fastqc on trimmed_oligo data
 for i in ${array_trim[@]}; do
@@ -665,7 +661,7 @@ nano scripts/stringtie.sh #make script for assembly, enter text in next code chu
 #SBATCH --mail-user=zdellaert@uri.edu #your email to send notifications
 #SBATCH -D /data/putnamlab/zdellaert/LaserCoral/output_RNA #set working directory
 
-#load packages
+# move into stringtie directory
 module load StringTie/2.1.4-GCC-9.3.0
 
 # make the output directory if it does not exist (-p checks for this)
@@ -697,9 +693,47 @@ done
 echo "StringTie assembly COMPLETE" $(date)
 ```
 
+## Generate gene count matrix using [prepDE.py script from Stringtie](https://ccb.jhu.edu/software/stringtie/index.shtml?t=manual)
+
+Download script from [stringtie website](https://ccb.jhu.edu/software/stringtie/dl/prepDE.py3) or [github repository](https://github.com/gpertea/stringtie/blob/master/prepDE.py3). I am using the python3 version, but this and the original version (prepDE.py) are very similar and should give the exact same result. I am using [this input file format](https://ccb.jhu.edu/software/stringtie/dl/sample_lst.txt).
+
 ```
-sbatch scripts/stringtie.sh
+cd scripts
+wget https://ccb.jhu.edu/software/stringtie/dl/prepDE.py3
+nano prepDE.sh
 ```
 
+```
+#!/bin/bash
+#SBATCH -t 120:00:00
+#SBATCH --nodes=1 --ntasks-per-node=20
+#SBATCH --mem=200GB
+#SBATCH --export=NONE
+#SBATCH --error=../scripts/outs_errs/"%x_error.%j" #write out slurm error reports
+#SBATCH --output=../scripts/outs_errs/"%x_output.%j" #write out any program outpus
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH --mail-user=zdellaert@uri.edu #your email to send notifications
+#SBATCH -D /data/putnamlab/zdellaert/LaserCoral/output_RNA #set working directory
+
+# load modules needed
+module load StringTie/2.1.4-GCC-9.3.0 #stringtie module, includes Python 3.8.5
+
+# move into stringtie directory
+cd stringtie
+
+# make input file
+for filename in *.gtf; do
+    sample_name=$(echo "$filename" | awk -F'[.]' '{print $1}')
+
+    echo $sample_name $PWD/$filename
+done > listGTF.txt
+
+#Compile the gene count matrix
+python ../../scripts/prepDE.py3 -g LCM_RNA_gene_count_matrix.csv -i listGTF.txt
+
+echo "Gene count matrix compiled." $(date)
+```
+
+Woohoo! [Gene count matrix complete.](/data/putnamlab/zdellaert/LaserCoral/output_RNA/stringtie/LCM_RNA_gene_count_matrix.csv)
 
 ## Should I run GeneExt?
