@@ -19,7 +19,7 @@ hisat2-build -f ../references/Pocillopora_acuta_HIv2.assembly.fasta ./Pacuta_ref
 echo "Reference genome indexed. Starting alingment" $(date)
 
 # make the output directory if it does not exist (-p checks for this)
-mkdir -p hisat2
+mkdir -p stranded_hisat2
 
 # call the oligo-trimmed sequences into an array
 array=(../data_RNA/trimmed_oligo*_R1_001.fastq.gz)
@@ -34,19 +34,25 @@ for read1 in ${array[@]}; do
     read2=${read1/_R1_/_R2_}
     
     # perform alignment
-    hisat2 -p 16 --time --dta -q -x Pacuta_ref -1 ${read1} -2 ${read2} -S hisat2/${sample_name}.sam
+    hisat2 -p 16 --time --dta -q --rna-strandness RF -x Pacuta_ref -1 ${read1} -2 ${read2} -S stranded_hisat2/${sample_name}.sam
     echo "${sample_name} aligned!"
 
     # sort the sam file into a bam file
-    samtools sort -@ 8 -o hisat2/${sample_name}.bam hisat2/${sample_name}.sam
+    samtools sort -@ 8 -o stranded_hisat2/${sample_name}.bam stranded_hisat2/${sample_name}.sam
     echo "${sample_name} bam-ified!"
     
     # index bam file , creating a .bai file which is nice for viewing in IGB
-    samtools index hisat2/${sample_name}.bam hisat2/${sample_name}.bai
+    samtools index stranded_hisat2/${sample_name}.bam stranded_hisat2/${sample_name}.bai
     
     # remove sam file to save disk space
-    rm hisat2/${sample_name}.sam
+    rm stranded_hisat2/${sample_name}.sam
 done
 
-# move the reference index files into the hisat2 directory
-mv Pacuta_ref.* hisat2/
+# move the reference index files into the stranded_hisat2 directory
+mv Pacuta_ref.* stranded_hisat2/
+
+#  Calculate mapping percentages
+for i in stranded_hisat2/*.bam; do
+    echo "${i}" >> mapped_reads_counts_Pacuta
+    samtools flagstat ${i} | grep "mapped (" >> stranded_hisat2/mapped_reads_counts_Pacuta
+done
