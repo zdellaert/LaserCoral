@@ -366,23 +366,9 @@ gunzip Pocillopora_acuta_HIv2.assembly.fasta.gz #unzip genome file
 gunzip Pocillopora_acuta_HIv2.genes.gff3.gz #unzip gff annotation file
 ```
 
-### Convert GFF files to GTF format for Stringtie
+### Convert GFF files to GTF format for Stringtie assembler
 
-In order to do this, I am going to use the program [gffread](https://github.com/gpertea/gffread).
-
-[Sam White](https://github.com/kubu4) from the Roberts lab has a good example of this [here](https://robertslab.github.io/sams-notebook/posts/2022/2022-03-01-Data-Wrangling---P.generosa-Genome-GFF-Conversion-to-GTF-Using-gffread/index.html) and [here for P. acuta!](https://robertslab.github.io/sams-notebook/posts/2023/2023-01-26-Data-Wrangling---P.acuta-Genome-GFF-to-GTF-Conversion-Using-gffread/index.html), but I want to use the command line version of gffread within andromeda.
-
-We already have gffread installed on Andromeda, which I found using "module avail gff". It is located at *gffread/0.12.7-GCCcore-11.2.0*. Information and documentation about this package can be found on [the github examples page](https://github.com/gpertea/gffread/tree/master/examples).
-
-"Filter, convert or cluster GFF/GTF/BED records, extract the sequence of transcripts (exon or CDS) and more. By default (i.e. without -O) only transcripts are processed, discarding any other non-transcript features. Default output is a simplified GFF3 with only the basic attributes."
-
-"In order to obtain the GTF2 version of the same transcript records, the -T option should be added:"
-
-`gffread annotation.gff -T -o annotation.gtf`
-
-I am also going to add a "-E" flag, to remove any "non-transcript features and optional attributes."
-
-`gffread -E annotation.gff -o ann_simple.gff`
+The gff3 file provided with the *Pocillopora acuta* genome is missing some features that are necessary for this pipeline (Stringtie specifically). I can correct the gff3 file and add those fields, but it is easier to convert the gff3 to a gtf file and automatically add those fields in the process. In order to do this, I am going to use the program [gffread](https://github.com/gpertea/gffread). Information and documentation about this package can be found on [the github examples page](https://github.com/gpertea/gffread/tree/master/examples).
 
 ```
 nano scripts/gffread.sh
@@ -401,7 +387,8 @@ nano scripts/gffread.sh
 # load modules needed
 module load gffread/0.12.7-GCCcore-11.2.0
 
-# "Clean GFF" file if necessary, then convert cleaned file into a GTF
+# "Clean" GFF file if necessary, then convert cleaned file into a GTF
+# -E : remove any "non-transcript features and optional attributes"
 
 gffread -E Pocillopora_acuta_HIv2.genes.gff3 -T -o Pocillopora_acuta_HIv2.gtf 
 
@@ -652,8 +639,59 @@ Fraction of reads explained by "1+-,1-+,2++,2--": 0.4897
 
 For both the bam files, the results were the same. The reads are distributed almost equally across both orientations. This indicates that the library prep method I used is **unstranded**, even though it was using a directional selection (3' poly-A primer) method. This is what I thought, but wanted to double check.
 
-## Assembly with Stringtie 2
+## Assembly with Stringtie
 
+I will use [Stringtie](https://ccb.jhu.edu/software/stringtie/index.shtml?t=manual) to perform reference-guided assembly of the RNA-seq data. I am using the simplified stringtie protocol with the "stringtie -eB" option:
+
+<img width="800" alt="stringtie_workflow" src="https://github.com/zdellaert/LaserCoral/blob/main/code/images/stringtie_workflow.png?raw=true">
+
+Note: Use of -e means only estimate abundance of given reference transcripts (only genes from the genome, no novel genes). If you are interested in novel genes or splice variants, see Stringtie documentation.
+
+```
+nano scripts/stringtie.sh #make script for assembly, enter text in next code chunk
+```
+
+```
+#!/bin/bash
+#SBATCH -t 120:00:00
+#SBATCH --nodes=1 --ntasks-per-node=20
+#SBATCH --mem=200GB
+#SBATCH --export=NONE
+#SBATCH --error=../scripts/outs_errs/"%x_error.%j" #write out slurm error reports
+#SBATCH --output=../scripts/outs_errs/"%x_output.%j" #write out any program outpus
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH --mail-user=zdellaert@uri.edu #your email to send notifications
+#SBATCH -D /data/putnamlab/zdellaert/LaserCoral/output_RNA #set working directory
+
+#load packages
+module load StringTie/2.1.4-GCC-9.3.0
+
+# make the output directory if it does not exist (-p checks for this)
+mkdir -p stringtie
+
+# call the hisat2 bam files into an array
+array=(hisat2/*.bam)
+
+for i in ${array[@]}; do 
+    sample_name=`echo $i| awk -F'[/.]' '{print $2}'`
+
+    stringtie -p 16 -e -B \ #use 16 cores (-p), exclude novel genes (-e), create Ballgown input files (-B)
+        -G ../references/Pocillopora_acuta_HIv2.gtf \ #gtf annotation file
+        -A stringtie/${sample_name}.gene_abund.tab \ #output name for gene abundance file
+        -o stringtie/${sample_name}.gtf \ #output name for gtf file
+        ${i} #input bam file
+
+        echo "StringTie assembly for seq file ${i}" $(date)
+done
+
+echo "StringTie assembly COMPLETE" $(date)
+```
+
+```
+sbatch scripts/stringtie.sh
+```
+
+This will make a .gtf file for each sample.
 
 
 
