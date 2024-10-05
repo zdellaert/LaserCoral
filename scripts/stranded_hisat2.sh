@@ -53,6 +53,6 @@ mv Pacuta_ref.* stranded_hisat2/
 
 #  Calculate mapping percentages
 for i in stranded_hisat2/*.bam; do
-    echo "${i}" >> mapped_reads_counts_Pacuta
+    echo "${i}" >> stranded_hisat2/mapped_reads_counts_Pacuta
     samtools flagstat ${i} | grep "mapped (" >> stranded_hisat2/mapped_reads_counts_Pacuta
 done

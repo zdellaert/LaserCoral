@@ -25,13 +25,7 @@ data_RNA/*.gz
 
 # large unzipped reference files
 references
-strandedness/HoloPoc_Star2_GeneExt.gtf
-strandedness/index.idx
-strandedness/Pocillopora_acuta_HIv2.genes.cds.fasta
-strandedness/Pocillopora_acuta_HIv2.gtf
-strandedness/transcriptome.idx
-strandedness/stranded_test_trimmed_oligo_trimmed_LCM_15_S40_R1_001/Pocillopora_acuta_HIv2.bed
-strandedness/stranded_test_trimmed_oligo_trimmed_LCM_15_S40_R1_001_1/Pocillopora_acuta_HIv2.bed
+strandedness
 
 #bams and sams and hisat index files
 *bam
