@@ -366,50 +366,21 @@ gunzip Pocillopora_acuta_HIv2.assembly.fasta.gz #unzip genome file
 gunzip Pocillopora_acuta_HIv2.genes.gff3.gz #unzip gff annotation file
 ```
 
-
-## check strandedness, https://github.com/signalbash/how_are_we_stranded_here
-
-```
-mkdir strandedness
-cd strandedness
-
-#install how_are_we_stranded_here
-pip install how_are_we_stranded_here
-
-#download and prep transcript fasta and gtf files
-wget http://cyanophora.rutgers.edu/Pocillopora_acuta/Pocillopora_acuta_HIv2.genes.cds.fna.gz
-gunzip Pocillopora_acuta_HIv2.genes.cds.fna.gz
-# copied in gtf I made for this genome another time: Pocillopora_acuta_HIv2.gtf
-
-module load kallisto/0.48.0-gompi-2022a
-
-awk '/^>/{gsub(/^ +| +$/, "", $0)}1' Pocillopora_acuta_HIv2.genes.cds.fasta > trimmed_Pocillopora_acuta_HIv2.genes.cds2.fasta
-
-
-check_strandedness --gtf Pocillopora_acuta_HIv2.gtf --transcripts Pocillopora_acuta_HIv2.genes.cds.fasta --reads_1 ../data_RNA/trimmed_oligo_trimmed_LCM_15_S40_R1_001.fastq.gz --reads_2 ../data_RNA/trimmed_oligo_trimmed_LCM_15_S40_R2_001.fastq.gz
-
-
-#copied in kallisto index.idk file from unity
-
-check_strandedness --gtf Pocillopora_acuta_HIv2.gtf --kallisto_index index.idx --reads_1 ../data_RNA/trimmed_oligo_trimmed_LCM_15_S40_R1_001.fastq.gz --reads_2 ../data_RNA/trimmed_oligo_trimmed_LCM_15_S40_R2_001.fastq.gz
-```
-
 ## HISAT2 Alignment
 
 I will use [Hisat2](https://daehwankimlab.github.io/hisat2/manual/) to align the RNA-seq reads to the *P. acuta* genome
 
-The libraries are paired and and stranded, since they were [prepared](https://zdellaert.github.io/ZD_Putnam_Lab_Notebook/LCM-Low-Input-RNA-Library-Prep/) using a [template switching method](https://www.neb.com/en-us/products/e6420-nebnext-single-cell-low-input-rna-library-prep-kit-for-illumina)
+The libraries are paired and and (UN??)stranded, since they were [prepared](https://zdellaert.github.io/ZD_Putnam_Lab_Notebook/LCM-Low-Input-RNA-Library-Prep/) using a [template switching method](https://www.neb.com/en-us/products/e6420-nebnext-single-cell-low-input-rna-library-prep-kit-for-illumina) - not with the directional Ultra II NEB workflow.
 
 See notes here: [strand-related settings for RNA-seq tools](https://rnabio.org/module-09-appendix/0009/12/01/StrandSettings/)
 
 hisat2 -p 16 \ #use 16 threads
-    --rna-strandness fr \ #-tells HISAT2 that the first read (R1) is on the forward strand, and the second read (R2) is on the reverse strand
     --time \ Print the wall-clock time required to load the index files and align the reads to stderr
     --dta \ #for input into Stringtie transcriptome assembly
     -q \ #fastq input files
     -x Pacuta_ref \ #index location 
     -1 ${read1} -2 ${read2} \ #input files, R1 and R2
-    -S histat2/${sample_name}.sam #output sam file
+    -S hisat2/${sample_name}.sam #output sam file
 
 ```
 nano scripts/hisat2.sh #write script for alignment, enter text in next code chunk
@@ -437,7 +408,7 @@ hisat2-build -f ../references/Pocillopora_acuta_HIv2.assembly.fasta ./Pacuta_ref
 echo "Reference genome indexed. Starting alingment" $(date)
 
 # make the output directory if it does not exist (-p checks for this)
-mkdir -p histat2
+mkdir -p hisat2
 
 # call the oligo-trimmed sequences into an array
 array=(../data_RNA/trimmed_oligo*_R1_001.fastq.gz)
@@ -452,21 +423,19 @@ for read1 in ${array[@]}; do
     read2=${read1/_R1_/_R2_}
     
     # perform alignment
-    hisat2 -p 16 --rna-strandness fr --time --dta -q -x Pacuta_ref -1 ${read1} -2 ${read2} -S histat2/${sample_name}.sam
+    hisat2 -p 16 --time --dta -q -x Pacuta_ref -1 ${read1} -2 ${read2} -S hisat2/${sample_name}.sam
     echo "${sample_name} aligned!"
 
     # sort the sam file into a bam file
-    samtools sort -@ 8 -o histat2/${sample_name}.bam histat2/${sample_name}.sam
+    samtools sort -@ 8 -o hisat2/${sample_name}.bam hisat2/${sample_name}.sam
     echo "${sample_name} bam-ified!"
     
     # index bam file , creating a .bai file which is nice for viewing in IGB
-    samtools index histat2/${sample_name}.bam histat2/${sample_name}.bai
+    samtools index hisat2/${sample_name}.bam hisat2/${sample_name}.bai
     
     # remove sam file to save disk space
-    rm histat2/${sample_name}.sam
+    rm hisat2/${sample_name}.sam
 done
 ```
-
-
 
 ## Should I run GeneExt?
