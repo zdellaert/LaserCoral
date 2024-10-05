@@ -366,6 +366,71 @@ gunzip Pocillopora_acuta_HIv2.assembly.fasta.gz #unzip genome file
 gunzip Pocillopora_acuta_HIv2.genes.gff3.gz #unzip gff annotation file
 ```
 
+### Convert GFF files to GTF format for Stringtie
+
+In order to do this, I am going to use the program [gffread](https://github.com/gpertea/gffread).
+
+[Sam White](https://github.com/kubu4) from the Roberts lab has a good example of this [here](https://robertslab.github.io/sams-notebook/posts/2022/2022-03-01-Data-Wrangling---P.generosa-Genome-GFF-Conversion-to-GTF-Using-gffread/index.html) and [here for P. acuta!](https://robertslab.github.io/sams-notebook/posts/2023/2023-01-26-Data-Wrangling---P.acuta-Genome-GFF-to-GTF-Conversion-Using-gffread/index.html), but I want to use the command line version of gffread within andromeda.
+
+We already have gffread installed on Andromeda, which I found using "module avail gff". It is located at *gffread/0.12.7-GCCcore-11.2.0*. Information and documentation about this package can be found on [the github examples page](https://github.com/gpertea/gffread/tree/master/examples).
+
+"Filter, convert or cluster GFF/GTF/BED records, extract the sequence of transcripts (exon or CDS) and more. By default (i.e. without -O) only transcripts are processed, discarding any other non-transcript features. Default output is a simplified GFF3 with only the basic attributes."
+
+"In order to obtain the GTF2 version of the same transcript records, the -T option should be added:"
+
+`gffread annotation.gff -T -o annotation.gtf`
+
+I am also going to add a "-E" flag, to remove any "non-transcript features and optional attributes."
+
+`gffread -E annotation.gff -o ann_simple.gff`
+
+```
+nano scripts/gffread.sh
+```
+
+```
+#!/bin/bash
+#SBATCH -t 120:00:00
+#SBATCH --nodes=1 --ntasks-per-node=1
+#SBATCH --mem=100GB
+#SBATCH --export=NONE
+#SBATCH --error=../scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=../scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /data/putnamlab/zdellaert/LaserCoral/references
+
+# load modules needed
+module load gffread/0.12.7-GCCcore-11.2.0
+
+# "Clean GFF" file if necessary, then convert cleaned file into a GTF
+
+gffread -E Pocillopora_acuta_HIv2.genes.gff3 -T -o Pocillopora_acuta_HIv2.gtf 
+
+echo "Check how many fields are in each row of the file; currently there are rows with two different lenghts: 10 and 12"
+awk '{print NF}' Pocillopora_acuta_HIv2.gtf | sort -u
+
+# Use awk to add "gene_id = TRANSCRIPT_ID" to each of the rows that only have a transcript id listed (the non-transcript lines)
+awk 'BEGIN {FS=OFS="\t"} {if ($9 ~ /transcript_id/ && $9 !~ /gene_id/) {match($9, /transcript_id "([^"]+)";/, a); $9 = $9 " gene_id \"" a[1] "\";"}; print}' Pocillopora_acuta_HIv2.gtf > Pocillopora_acuta_HIv2_modified.gtf
+
+echo "Check how many fields are in each row of the file; Now all the rows should be the same length and only one value should be printed, 12"
+awk '{print NF}' Pocillopora_acuta_HIv2_modified.gtf | sort -u
+
+# remove the non-modified file
+rm Pocillopora_acuta_HIv2.gtf
+
+# rename the modified file
+mv Pocillopora_acuta_HIv2_modified.gtf Pocillopora_acuta_HIv2.gtf
+```
+
+Script outputs:
+
+- loaded 33730 genomic features from Pocillopora_acuta_HIv2.genes.gff3
+
+- Check how many fields are in each row of the file; currently there are rows with two different lenghts: 10 and 12
+    - 10
+    - 12
+- Check how many fields are in each row of the file; Now all the rows should be the same length and only one value should be printed, 12
+    - 12
+
 ## HISAT2 Alignment
 
 I will use [Hisat2](https://daehwankimlab.github.io/hisat2/manual/) to align the RNA-seq reads to the *P. acuta* genome
@@ -586,5 +651,10 @@ Fraction of reads explained by "1+-,1-+,2++,2--": 0.4897
 ```
 
 For both the bam files, the results were the same. The reads are distributed almost equally across both orientations. This indicates that the library prep method I used is **unstranded**, even though it was using a directional selection (3' poly-A primer) method. This is what I thought, but wanted to double check.
+
+## Assembly with Stringtie 2
+
+
+
 
 ## Should I run GeneExt?

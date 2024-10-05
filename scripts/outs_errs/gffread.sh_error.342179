@@ -1,0 +1,3 @@
+Command line was:
+gffread -E Pocillopora_acuta_HIv2.genes.gff3 -T -o Pocillopora_acuta_HIv2.gtf
+   .. loaded 33730 genomic features from Pocillopora_acuta_HIv2.genes.gff3

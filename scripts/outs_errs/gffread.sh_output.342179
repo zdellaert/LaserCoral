@@ -1,0 +1,5 @@
+Check how many fields are in each row of the file; currently there are rows with two different lenghts: 10 and 12
+10
+12
+Check how many fields are in each row of the file; Now all the rows should be the same length and only one value should be printed, 12
+12
