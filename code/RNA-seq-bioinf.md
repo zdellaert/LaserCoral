@@ -645,7 +645,9 @@ I will use [Stringtie](https://ccb.jhu.edu/software/stringtie/index.shtml?t=manu
 
 <img width="800" alt="stringtie_workflow" src="https://github.com/zdellaert/LaserCoral/blob/main/code/images/stringtie_workflow.png?raw=true">
 
-Note: Use of -e means only estimate abundance of given reference transcripts (only genes from the genome, no novel genes). If you are interested in novel genes or splice variants, see Stringtie documentation.
+Note: Use of -e (Expression estimation mode) means stringtie will only estimate the abundance of given reference transcripts (only genes from the genome, no novel genes). If you are interested in novel genes or splice variants, see Stringtie documentation:
+
+> StringTie will not attempt to assemble the input read alignments but instead it will only estimate the expression levels of the "reference" transcripts provided in the -G file. With this option, no "novel" transcript assemblies (isoforms) will be produced, and read alignments not overlapping any of the given reference transcripts will be ignored.
 
 ```
 nano scripts/stringtie.sh #make script for assembly, enter text in next code chunk
@@ -672,16 +674,24 @@ mkdir -p stringtie
 # call the hisat2 bam files into an array
 array=(hisat2/*.bam)
 
-for i in ${array[@]}; do 
-    sample_name=`echo $i| awk -F'[/.]' '{print $2}'`
+for i in "${array[@]}"; do 
+    sample_name=$(echo "$i" | awk -F'[/.]' '{print $2}')
 
-    stringtie -p 16 -e -B \ #use 16 cores (-p), exclude novel genes (-e), create Ballgown input files (-B)
-        -G ../references/Pocillopora_acuta_HIv2.gtf \ #gtf annotation file
-        -A stringtie/${sample_name}.gene_abund.tab \ #output name for gene abundance file
-        -o stringtie/${sample_name}.gtf \ #output name for gtf file
-        ${i} #input bam file
+    # -p 16 : use 16 cores
+    # -e : exclude novel genes
+    # -B : create Ballgown input files for downstream analysis
+    # -v : enable verbose mode
+    # -G : gtf annotation file
+    # -A : output name for gene abundance estimate files
+    # -o : output name for gtf file
 
-        echo "StringTie assembly for seq file ${i}" $(date)
+    stringtie -p 16 -e -B -v \
+        -G ../references/Pocillopora_acuta_HIv2.gtf \
+        -A stringtie/"${sample_name}".gene_abund.tab \
+        -o stringtie/"${sample_name}".gtf \
+        "$i" #input bam file
+
+    echo "StringTie assembly for seq file ${i}" $(date)
 done
 
 echo "StringTie assembly COMPLETE" $(date)
@@ -690,9 +700,6 @@ echo "StringTie assembly COMPLETE" $(date)
 ```
 sbatch scripts/stringtie.sh
 ```
-
-This will make a .gtf file for each sample.
-
 
 
 ## Should I run GeneExt?
