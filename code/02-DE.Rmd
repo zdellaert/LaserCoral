@@ -3,8 +3,8 @@ title: "DE"
 author: "Zoe Dellaert"
 date: "2024-10-05"
 output:
-  github_document: default
   html_document: default
+  github_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -34,6 +34,7 @@ renv::install("vsn")
 renv::install("hexbin")
 renv::install("pheatmap")
 renv::install("RColorBrewer")
+renv::install("bioc::EnhancedVolcano")
 renv::install("tidyverse")
 ```
 
@@ -47,6 +48,7 @@ library(vsn)
 library(hexbin)
 library(pheatmap)
 library(RColorBrewer)
+library(EnhancedVolcano)
 library(tidyverse)
 ```
 
@@ -108,25 +110,40 @@ Create DESeq object and run DESeq2
 ```{r}
 dds <- DESeqDataSetFromMatrix(countData = filtered_counts,
                               colData = meta,
-                              design= ~ Tissue)
+                              design= ~ Fragment + Tissue)
 
 dds <- DESeq(dds)
 ```
+
+Extract results for Aboral vs. OralEpi contrast
+
+```{r}
+res <- results(dds, contrast = c("Tissue","Aboral","OralEpi"))
+resLFC <- lfcShrink(dds, coef="Tissue_Aboral_vs_OralEpi", res=res, type = "apeglm")
+```
+
+```{r}
+EnhancedVolcano(res, 
+    lab = rownames(res),
+    x = 'log2FoldChange',
+    y = 'pvalue')
+
+EnhancedVolcano(resLFC, 
+    lab = rownames(resLFC),
+    x = 'log2FoldChange',
+    y = 'pvalue')
+```
+
 Extract results for adjusted p-value < 0.05
 ```{r}
-resultsNames(dds) # lists the coefficients
-res <- results(dds, alpha=0.05)
-summary(res)
+res <- resLFC
 
-# or to shrink log fold changes association with Tissue:
-resLFC <- lfcShrink(dds, coef="Tissue_Aboral_vs_OralEpi", type="apeglm")
 resOrdered <- res[order(res$pvalue),]
-
 # save differentially expressed genes
 
 DE_05 <- as.data.frame(resOrdered) %>% filter(padj < 0.05)
-DE_05_Up <- DE_05 %>% filter(log2FoldChange > 0)
-DE_05_Down <- DE_05 %>% filter(log2FoldChange < 0)
+DE_05_Up <- DE_05 %>% filter(log2FoldChange > 0) #Higher in Aboral, Lower in OralEpi
+DE_05_Down <- DE_05 %>% filter(log2FoldChange < 0) #Lower in Aboral, Higher in OralEpi
 
 DEGs <- rownames(DE_05)
 
@@ -184,48 +201,34 @@ meanSdPlot(assay(rld))
 meanSdPlot(assay(ntd))
 ```
 
+Will move forward with vst transformation for visualizations
+
 ## Heatmap of count matrix
 
 ```{r}
 df <- as.data.frame(colData(dds)[,c("Tissue","Fragment")])
 
 #view all genes
-pheatmap(assay(ntd), cluster_rows=TRUE, show_rownames=FALSE,
-         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df)
-
 pheatmap(assay(vsd), cluster_rows=TRUE, show_rownames=FALSE,
-         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df)
-
-pheatmap(assay(rld), cluster_rows=TRUE, show_rownames=FALSE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=df)
 
 #view highest count genes
 select <- order(rowMeans(counts(dds,normalized=TRUE)),
                 decreasing=TRUE)[1:20]
 
-pheatmap(assay(ntd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
-         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df)
-
 pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=df)
 
-pheatmap(assay(rld)[select,], cluster_rows=FALSE, show_rownames=TRUE,
-         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df)
 
 #view most significantly differentially expressed genes
 
 select <- order(res$padj)[1:20]
 
-pheatmap(assay(ntd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
-         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df)
-
 pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=df)
 
-pheatmap(assay(rld)[select,], cluster_rows=FALSE, show_rownames=TRUE,
-         cluster_cols=TRUE, cutree_cols = 2, annotation_col=df)
-
 ```
+
 ## Heatmap of the sample-to-sample distances
 ```{r}
 sampleDists <- dist(t(assay(vsd)))
@@ -305,49 +308,39 @@ gene_labels <- eggnog_all %>% select(query,PFAMs) %>%
 
 select <- order(res$padj)[1:50]
 
-pheatmap(assay(ntd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
-         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
-         labels_row =gene_labels[select,"PFAMs"], fontsize_row = 5)
-
 pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
-         labels_row =gene_labels[select,"PFAMs"], fontsize_row = 5)
-
-pheatmap(assay(rld)[select,], cluster_rows=FALSE, show_rownames=TRUE,
-         cluster_cols=TRUE, cutree_cols = 2, annotation_col=df,
          labels_row =gene_labels[select,"PFAMs"], fontsize_row = 5)
 
 #view genes Higher in Aboral, Lower in OralEpi, ordered by log2FoldChange
 select <- order(res$log2FoldChange,decreasing = TRUE)[1:50]
 
-pheatmap(assay(ntd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
-         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
-         labels_row =gene_labels[select,"PFAMs"], fontsize_row = 5)
-
 pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
-         labels_row =gene_labels[select,"PFAMs"], fontsize_row = 5)
-
-pheatmap(assay(rld)[select,], cluster_rows=FALSE, show_rownames=TRUE,
-         cluster_cols=TRUE, cutree_cols = 2, annotation_col=df,
          labels_row =gene_labels[select,"PFAMs"], fontsize_row = 5)
 
 #view genes Lower in Aboral, Higher in OralEpi, ordered by log2FoldChange
 select <- order(res$log2FoldChange)[1:50]
 
-pheatmap(assay(ntd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
-         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
-         labels_row =gene_labels[select,"PFAMs"], fontsize_row = 5)
-
 pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
          labels_row =gene_labels[select,"PFAMs"], fontsize_row = 5)
 
-pheatmap(assay(rld)[select,], cluster_rows=FALSE, show_rownames=TRUE,
-         cluster_cols=TRUE, cutree_cols = 2, annotation_col=df,
-         labels_row =gene_labels[select,"PFAMs"], fontsize_row = 5)
-```
+# Extract the relevant assay data for the selected genes
+selected_data <- assay(vsd)[select, ]
 
+# Normalize via z-score (scale across rows)
+zscore_data <- t(scale(t(selected_data)))
+
+pheatmap(zscore_data, 
+         cluster_rows = FALSE, 
+         show_rownames = TRUE, 
+         cluster_cols = TRUE, 
+         cutree_cols = 2, 
+         annotation_col = df, 
+         labels_row = gene_labels[select, "PFAMs"], 
+         fontsize_row = 5)
+```
 
 ## we probably want to correct for batch effects (LCM date) + genotype (Fragment)
 ## and to decide which tranformation to use
