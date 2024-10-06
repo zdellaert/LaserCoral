@@ -1,0 +1,38 @@
+---
+title: "00-renv"
+author: "Zoe Dellaert"
+date: "2024-10-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Renv
+
+First, I set up Renv using the following lines of code:
+
+```{r, eval=FALSE}
+install.packages("renv") #install the package on the new computer
+renv::activate()
+
+# use the latest-available Bioconductor release
+renv::init(bioconductor = TRUE) #initialize the renv directory, lockfile (renv.lock), and .Rprofile files
+```
+
+As I continue to write code and work on the project, I will follow the guidance below:
+
+"As you continue to work on your project, you will install and upgrade packages, either using install.packages() and update.packages or renv::install() and renv::update(). After you’ve confirmed your code works as expected, use renv::snapshot() to record the packages and their sources in the lockfile."
+
+To install packages: install.packages() or renv::install()
+To update packages: update.packages() or renv::update()
+To record changes in code to the renv environment/lockfile: renv::snapshot()
+And regularly push changes in the code and renv files to github
+
+To run the code in my project on another computer using the renv environment, run the following lines of code
+
+"Now when one of your collaborators opens this project, renv will automatically bootstrap itself, downloading and installing the appropriate version of renv. It will also ask them if they want to download and install all the packages it needs by running renv::restore()."
+
+install.packages("renv") #install the package on the new computer (may not be necessary if renv bootstraps itself as expected)
+renv::restore() #reinstall all the package versions in the renv lockfile

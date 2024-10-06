@@ -1,0 +1,122 @@
+---
+title: "DE"
+author: "Zoe Dellaert"
+date: "2024-10-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Renv
+
+To run this code in my project using the renv environment, run the following lines of code
+
+```{r}
+install.packages("renv") #install the package on the new computer (may not be necessary if renv bootstraps itself as expected)
+renv::restore() #reinstall all the package versions in the renv lockfile
+```
+
+## Install packages
+
+```{r}
+renv::install("bioc::genefilter")
+renv::install("DESeq2")
+renv::install("tidyverse")
+
+library(genefilter)
+library(DESeq2)
+library(tidyverse)
+```
+
+```{r}
+sessionInfo() #provides list of loaded packages and version of R.
+```
+
+## Read and clean count matrix and metadata 
+
+Read in raw count data
+```{r}
+counts_raw <- read.csv("../output_RNA/stringtie/LCM_RNA_gene_count_matrix.csv") #load in data
+rownames(counts_raw) <- counts_raw[,1] #set first column that contains gene names as rownames
+counts_raw <- counts_raw[,-1] #remove the column with gene names
+```
+
+gene_id,LCM_15,LCM_16,LCM_20,LCM_21,LCM_26,LCM_27,LCM_4,LCM_5,LCM_8,LCM_9
+
+Read in metadata 
+```{r}
+meta <- read.csv("../data_RNA/LCM_RNA_metadata.csv")
+meta <- dplyr::arrange(meta, Sample)
+
+# Set variables as factors 
+meta$Tissue <- factor(meta$Tissue, levels = c("OralEpi","Aboral")) #we want OralEpi to be the baseline
+
+meta$Fragment <- factor(meta$Fragment)
+meta$Section_Date <- factor(meta$Section_Date)
+meta$LCM_Date <- factor(meta$LCM_Date)
+```
+
+Data sanity checks!
+```{r}
+all(meta$Sample %in% colnames(counts_raw)) #are all of the sample names in the metadata column names in the gene count matrix? Should be TRUE
+all(meta$Sample == colnames(counts_raw)) #are they the same in the same order? Should be TRUE
+```
+
+## pOverA filtering to reduce dataset
+
+```{r}
+ffun<-filterfun(pOverA(0.25,5))  #set up filtering parameters
+counts_filt_poa <- genefilter((counts_raw), ffun) #apply filter
+sum(counts_filt_poa) #count number of genes left
+
+filtered_counts <- counts_raw[counts_filt_poa,] #keep only rows that passed filter
+```
+
+There are now 15530 genes in the filtered dataset.
+
+Data sanity checks:
+```{r}
+all(meta$Sample %in% colnames(filtered_counts)) #are all of the sample names in the metadata column names in the gene count matrix?
+all(meta$Sample == colnames(filtered_counts))  #are they the same in the same order? Should be TRUE
+```
+
+## Following [DESeq2 Vignette](https://www.bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html)
+
+Alternative filtering:
+
+```{r}
+smallestGroupSize <- 2
+keep <- rowSums(counts_raw >= 10) >= smallestGroupSize
+flitered_counts_2 <- counts_raw[keep,]
+nrow(flitered_counts_2)
+```
+
+There are now 17546 genes in the filtered dataset.
+
+Data sanity checks:
+```{r}
+all(meta$Sample %in% colnames(flitered_counts_2)) #are all of the sample names in the metadata column names in the gene count matrix?
+all(meta$Sample == colnames(flitered_counts_2))  #are they the same in the same order? Should be TRUE
+```
+
+```{r}
+dds <- DESeqDataSetFromMatrix(countData = filtered_counts,
+                              colData = meta,
+                              design= ~ Fragment + Tissue)
+
+dds <- DESeq(dds)
+res <- results(dds)
+res
+dds <- DESeq(dds)
+resultsNames(dds) # lists the coefficients
+res <- results(dds, name="tissue_trt_vs_untrt")
+# or to shrink log fold changes association with condition:
+res <- lfcShrink(dds, coef="condition_trt_vs_untrt", type="apeglm")
+```
+
+
+## Updating Renv environment:
+
+After you’ve confirmed your code works as expected, use renv::snapshot() to record the packages and their sources in the lockfile."
