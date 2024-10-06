@@ -2,31 +2,51 @@
 title: "DE"
 author: "Zoe Dellaert"
 date: "2024-10-05"
-output: html_document
+output:
+  github_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Renv
+## Differential expression analysis of LCM RNA Data
+
+## Managing Packages Using Renv
 
 To run this code in my project using the renv environment, run the following lines of code
 
-```{r}
+```{r, eval=FALSE}
 install.packages("renv") #install the package on the new computer (may not be necessary if renv bootstraps itself as expected)
 renv::restore() #reinstall all the package versions in the renv lockfile
 ```
 
 ## Install packages
 
-```{r}
+```{r, eval=FALSE}
 renv::install("bioc::genefilter")
 renv::install("DESeq2")
+renv::install("bioc::apeglm")
+renv::install("ashr")
+renv::install("ggplot2")
+renv::install("vsn")
+renv::install("hexbin")
+renv::install("pheatmap")
+renv::install("RColorBrewer")
 renv::install("tidyverse")
+```
 
+```{r}
 library(genefilter)
 library(DESeq2)
+library(apeglm)
+library(ashr)
+library(ggplot2)
+library(vsn)
+library(hexbin)
+library(pheatmap)
+library(RColorBrewer)
 library(tidyverse)
 ```
 
@@ -84,38 +104,253 @@ all(meta$Sample == colnames(filtered_counts))  #are they the same in the same or
 
 ## Following [DESeq2 Vignette](https://www.bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html)
 
-Alternative filtering:
-
-```{r}
-smallestGroupSize <- 2
-keep <- rowSums(counts_raw >= 10) >= smallestGroupSize
-flitered_counts_2 <- counts_raw[keep,]
-nrow(flitered_counts_2)
-```
-
-There are now 17546 genes in the filtered dataset.
-
-Data sanity checks:
-```{r}
-all(meta$Sample %in% colnames(flitered_counts_2)) #are all of the sample names in the metadata column names in the gene count matrix?
-all(meta$Sample == colnames(flitered_counts_2))  #are they the same in the same order? Should be TRUE
-```
-
+Create DESeq object and run DESeq2
 ```{r}
 dds <- DESeqDataSetFromMatrix(countData = filtered_counts,
                               colData = meta,
-                              design= ~ Fragment + Tissue)
+                              design= ~ Tissue)
 
 dds <- DESeq(dds)
-res <- results(dds)
-res
-dds <- DESeq(dds)
+```
+Extract results for adjusted p-value < 0.05
+```{r}
 resultsNames(dds) # lists the coefficients
-res <- results(dds, name="tissue_trt_vs_untrt")
-# or to shrink log fold changes association with condition:
-res <- lfcShrink(dds, coef="condition_trt_vs_untrt", type="apeglm")
+res <- results(dds, alpha=0.05)
+summary(res)
+
+# or to shrink log fold changes association with Tissue:
+resLFC <- lfcShrink(dds, coef="Tissue_Aboral_vs_OralEpi", type="apeglm")
+resOrdered <- res[order(res$pvalue),]
+
+# save differentially expressed genes
+
+DE_05 <- as.data.frame(resOrdered) %>% filter(padj < 0.05)
+DE_05_Up <- DE_05 %>% filter(log2FoldChange > 0)
+DE_05_Down <- DE_05 %>% filter(log2FoldChange < 0)
+
+DEGs <- rownames(DE_05)
+
+nrow(DE_05)
+nrow(DE_05_Up) #Higher in Aboral, Lower in OralEpi
+nrow(DE_05_Down) #Lower in Aboral, Higher in OralEpi
 ```
 
+```{r}
+write.csv(as.data.frame(resOrdered), 
+          file="../output_RNA/differential_expression/DESeq_results.csv")
+
+write.csv(DE_05, 
+          file="../output_RNA/differential_expression/DEG_05.csv")
+```
+
+## Plots
+```{r}
+plotMA(res, ylim=c(-20,20))
+plotMA(resLFC, ylim=c(-20,20))
+
+#After calling plotMA, one can use the function identify to interactively detect the row number of individual genes by clicking on the plot. One can then recover the gene identifiers by saving the resulting indices:
+
+#idx <- identify(res$baseMean, res$log2FoldChange)
+#rownames(res)[idx]
+```
+
+```{r}
+# because we are interested in the comparison and not the intercept, we set 'coef=2'
+resNorm <- lfcShrink(dds, coef=2, type="normal")
+resAsh <- lfcShrink(dds, coef=2, type="ashr")
+
+par(mfrow=c(1,3), mar=c(4,4,2,1))
+xlim <- c(1,1e5); ylim <- c(-5,5)
+plotMA(resLFC, xlim=xlim, ylim=ylim, main="apeglm")
+plotMA(resNorm, xlim=xlim, ylim=ylim, main="normal")
+plotMA(resAsh, xlim=xlim, ylim=ylim, main="ashr")
+```
+
+
+```{r}
+plotCounts(dds, gene=which.max(res$log2FoldChange), intgroup="Tissue")
+plotCounts(dds, gene=which.min(res$log2FoldChange), intgroup="Tissue")
+```
+
+Transforming count data for visualization 
+
+```{r}
+vsd <- vst(dds, blind=FALSE)
+rld <- rlog(dds, blind=FALSE)
+ntd <- normTransform(dds) # this gives log2(n + 1)
+
+meanSdPlot(assay(vsd), main = "vsd")
+meanSdPlot(assay(rld))
+meanSdPlot(assay(ntd))
+```
+
+## Heatmap of count matrix
+
+```{r}
+df <- as.data.frame(colData(dds)[,c("Tissue","Fragment")])
+
+#view all genes
+pheatmap(assay(ntd), cluster_rows=TRUE, show_rownames=FALSE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df)
+
+pheatmap(assay(vsd), cluster_rows=TRUE, show_rownames=FALSE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df)
+
+pheatmap(assay(rld), cluster_rows=TRUE, show_rownames=FALSE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df)
+
+#view highest count genes
+select <- order(rowMeans(counts(dds,normalized=TRUE)),
+                decreasing=TRUE)[1:20]
+
+pheatmap(assay(ntd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df)
+
+pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df)
+
+pheatmap(assay(rld)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df)
+
+#view most significantly differentially expressed genes
+
+select <- order(res$padj)[1:20]
+
+pheatmap(assay(ntd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df)
+
+pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df)
+
+pheatmap(assay(rld)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2, annotation_col=df)
+
+```
+## Heatmap of the sample-to-sample distances
+```{r}
+sampleDists <- dist(t(assay(vsd)))
+
+sampleDistMatrix <- as.matrix(sampleDists)
+rownames(sampleDistMatrix) <- paste(vsd$Tissue, vsd$Fragment, sep="-")
+colnames(sampleDistMatrix) <- NULL
+colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
+pheatmap(sampleDistMatrix,
+         clustering_distance_rows=sampleDists,
+         clustering_distance_cols=sampleDists,
+         col=colors)
+```
+
+## Principal component plot of the samples
+
+```{r}
+pcaData <- plotPCA(vsd, intgroup=c("Tissue", "Fragment"), returnData=TRUE)
+
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+ggplot(pcaData, aes(PC1, PC2, color=Tissue, shape=Fragment)) +
+  geom_point(size=3) +
+  xlab(paste0("PC1: ",percentVar[1],"% variance")) +
+  ylab(paste0("PC2: ",percentVar[2],"% variance")) + 
+  coord_fixed() + theme_bw()
+```
+
+Clearly, the majority of the variance in the data is explained by tissue type!
+
+## Annotation data
+
+Download annotation files from genome website
+```{bash, eval=FALSE}
+
+# wget files
+wget http://cyanophora.rutgers.edu/Pocillopora_acuta/Pocillopora_acuta_HIv2.genes.Conserved_Domain_Search_results.txt.gz
+
+wget http://cyanophora.rutgers.edu/Pocillopora_acuta/Pocillopora_acuta_HIv2.genes.EggNog_results.txt.gz
+
+wget http://cyanophora.rutgers.edu/Pocillopora_acuta/Pocillopora_acuta_HIv2.genes.KEGG_results.txt.gz
+
+# move to references direcotry
+mv *gz ../references
+
+# unzip files
+gunzip ../references/*gz
+```
+
+
+```{r}
+EggNog <- read.delim("../references/Pocillopora_acuta_HIv2.genes.EggNog_results.txt") %>% dplyr::rename("query" = X.query)
+
+CDSearch <- read.delim("../references/Pocillopora_acuta_HIv2.genes.Conserved_Domain_Search_results.txt", quote = "") %>% dplyr::rename("query" = X.Query)
+
+KEGG <- read.delim("../references/Pocillopora_acuta_HIv2.genes.KEGG_results.txt", header = FALSE) %>% dplyr::rename("query" = V1, "KeggTerm" = V2)
+```
+
+```{r}
+DE_05$query <- rownames(DE_05)
+DE_05_annot <- DE_05 %>% left_join(CDSearch) %>% select(query,everything())
+DE_05_eggnog <- DE_05 %>% left_join(EggNog) %>% select(query,everything())
+
+annot_all <- as.data.frame(rownames(dds)) %>% dplyr::rename("query" = `rownames(dds)`) %>% left_join(CDSearch)
+eggnog_all <- as.data.frame(rownames(dds)) %>% dplyr::rename("query" = `rownames(dds)`) %>% left_join(EggNog)
+
+write.csv(as.data.frame(DE_05_eggnog), 
+          file="../output_RNA/differential_expression/DE_05_eggnog_annotation.csv")
+```
+
+```{r}
+df <- as.data.frame(colData(dds)[,c("Tissue","Fragment")])
+gene_labels <- eggnog_all %>% select(query,PFAMs) %>%
+  mutate_all(~ ifelse(is.na(.), "", .)) %>% #replace NAs with "" for labelling purposes
+  separate(PFAMs, into = c("PFAMs", "rest of name"), sep = ",(?=.*?,)", extra = "merge")
+  
+#view most significantly differentially expressed genes
+
+select <- order(res$padj)[1:50]
+
+pheatmap(assay(ntd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
+         labels_row =gene_labels[select,"PFAMs"], fontsize_row = 5)
+
+pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
+         labels_row =gene_labels[select,"PFAMs"], fontsize_row = 5)
+
+pheatmap(assay(rld)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2, annotation_col=df,
+         labels_row =gene_labels[select,"PFAMs"], fontsize_row = 5)
+
+#view genes Higher in Aboral, Lower in OralEpi, ordered by log2FoldChange
+select <- order(res$log2FoldChange,decreasing = TRUE)[1:50]
+
+pheatmap(assay(ntd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
+         labels_row =gene_labels[select,"PFAMs"], fontsize_row = 5)
+
+pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
+         labels_row =gene_labels[select,"PFAMs"], fontsize_row = 5)
+
+pheatmap(assay(rld)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2, annotation_col=df,
+         labels_row =gene_labels[select,"PFAMs"], fontsize_row = 5)
+
+#view genes Lower in Aboral, Higher in OralEpi, ordered by log2FoldChange
+select <- order(res$log2FoldChange)[1:50]
+
+pheatmap(assay(ntd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
+         labels_row =gene_labels[select,"PFAMs"], fontsize_row = 5)
+
+pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
+         labels_row =gene_labels[select,"PFAMs"], fontsize_row = 5)
+
+pheatmap(assay(rld)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2, annotation_col=df,
+         labels_row =gene_labels[select,"PFAMs"], fontsize_row = 5)
+```
+
+
+## we probably want to correct for batch effects (LCM date) + genotype (Fragment)
+## and to decide which tranformation to use
 
 ## Updating Renv environment:
 
