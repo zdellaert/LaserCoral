@@ -736,4 +736,104 @@ echo "Gene count matrix compiled." $(date)
 
 Woohoo! [Gene count matrix complete.](https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/stringtie/LCM_RNA_gene_count_matrix.csv)
 
-## Should I run GeneExt?
+## GeneExt to Extend Genes to include putative 3' UTRs
+
+[GeneExt](https://github.com/sebepedroslab/GeneExt/tree/main) is a program from the Sebé-Pedrós Lab which has a great manual that explains this probem with 3' biased sequencing approaches in non-model organism in great detail and with helpful nuance. The program allows the user to create a modified GTF/GFF file based on a BAM file of mapping data. It appends 3' UTRs to the genes in a way that is informed by the mapping of reads, so the length of the 3' UTRs added can change dynamically for each gene based on where reads are acutally mapping.
+
+See manual [here](https://github.com/sebepedroslab/GeneExt/blob/main/Manual.md)
+
+### Installation
+
+I have done this on andromeda, in interactive mode. 
+
+```
+interactive -c 24
+
+cd /data/putnamlab/zdellaert/
+module load Miniconda3/4.9.2
+cd GeneExt
+
+# create environment
+conda env create -n geneext -f environment.yaml
+
+# update environment
+conda env update -n geneext -f environment.yaml
+```
+
+### Combine all bam files
+
+Combine all 10 bam files together
+
+```
+nano scripts/bammerge.sh
+```
+
+```
+#!/bin/bash
+#SBATCH -t 120:00:00
+#SBATCH --nodes=1 --ntasks-per-node=1
+#SBATCH --mem=200GB
+#SBATCH --export=NONE
+#SBATCH --error=../scripts/outs_errs/"%x_error.%j" #write out slurm error reports
+#SBATCH --output=../scripts/outs_errs/"%x_output.%j" #write out any program outpus
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH --mail-user=zdellaert@uri.edu #your email to send notifications
+#SBATCH -D /data/putnamlab/zdellaert/LaserCoral/output_RNA #set working directory
+
+#load packages
+module load SAMtools/1.16.1-GCC-11.3.0 #Preparation of alignment for assembly: SAMtools
+
+#use samtools merge to merge all the files
+samtools merge hisat2/merge.bam hisat2/*.bam
+```
+
+### Running GeneExt
+
+```
+nano scripts/GeneExt.sh
+```
+
+```
+#!/bin/bash
+#SBATCH -t 120:00:00
+#SBATCH --nodes=1 --ntasks-per-node=20
+#SBATCH --mem=200GB
+#SBATCH --export=NONE
+#SBATCH --error=../scripts/outs_errs/"%x_error.%j" #write out slurm error reports
+#SBATCH --output=../scripts/outs_errs/"%x_output.%j" #write out any program outpus
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH --mail-user=zdellaert@uri.edu #your email to send notifications
+#SBATCH -D /data/putnamlab/zdellaert/LaserCoral/references #set working directory
+
+# Use the gtf file run in Stringtie above:
+
+# the gtf has to have the gene and transcript IDs be different, so append -T to each transcript_id and save to a new file
+sed 's/transcript_id "\([^"]*\)"/transcript_id "\1-T"/g' Pocillopora_acuta_HIv2.gtf > Pocillopora_acuta_HIv2_modified.gtf
+
+# activate environment
+source ~/.bashrc
+module load Miniconda3/4.9.2
+conda activate geneext
+
+mkdir -p geneext
+cd geneext
+
+# use --clip_strand both to not allow GeneExt to create overlaps on the same strand
+
+python /data/putnamlab/zdellaert/GeneExt/geneext.py --verbose=3 \
+    -g ../Pocillopora_acuta_HIv2_modified.gtf \
+    -b ../../output_RNA/hisat2/merge.bam \
+    -o Pocillopora_acuta_GeneExt.gtf \
+    -j 18 --clip_strand both
+```
+
+
+## Downstream analysis thoughts
+
+1. What level of filtering do we want pre-DEseq?
+2. Any reason to do WGCNA or glmmseq instead of DEseq?
+   1. glmmseq would allow us to incorporate possible batch effects of LCM date
+3. Want to look into
+   1. Differential expression of biomineralization toolkit
+   2. Differential expression of transcription factors
+   3. Differential expression of single cell marker genes

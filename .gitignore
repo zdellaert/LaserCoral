@@ -24,7 +24,10 @@
 data_RNA/*.gz
 
 # large unzipped reference files
-references
+references/*txt
+references/*fasta
+references/*gff3
+references/*gtf
 random/strandedness
 
 #bams and sams and hisat index files and stringtie gtfs
