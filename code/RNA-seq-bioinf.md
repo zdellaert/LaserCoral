@@ -661,7 +661,7 @@ nano scripts/stringtie.sh #make script for assembly, enter text in next code chu
 #SBATCH --mail-user=zdellaert@uri.edu #your email to send notifications
 #SBATCH -D /data/putnamlab/zdellaert/LaserCoral/output_RNA #set working directory
 
-# move into stringtie directory
+# load required modules
 module load StringTie/2.1.4-GCC-9.3.0
 
 # make the output directory if it does not exist (-p checks for this)
@@ -827,6 +827,80 @@ python /data/putnamlab/zdellaert/GeneExt/geneext.py --verbose=3 \
     -j 18 --clip_strand both
 ```
 
+This only runs successfully on Unity and we do not know why. Ran it, copied the whole output folder to Andromeda.
+
+╭───────────╮
+│ All done! │
+╰───────────╯
+Extended 16637/33730 genes
+Median extension length: 1247.0 bp
+Running:
+        Rscript geneext/plot_extensions.R tmp/extensions.tsv Pocillopora_acuta_GeneExt.gtf.extension_length.pdf
+Running:
+        Rscript geneext/peak_density.R tmp/genic_peaks.bed tmp/allpeaks_noov.bed Pocillopora_acuta_GeneExt.gtf.peak_coverage.pdf 25
+Removing tmp/plus.bam
+Removing tmp/minus.bam
+Removing tmp/_peaks_tmp
+Removing tmp/_genes_tmp
+Removing tmp/_peaks_tmp_sorted
+Removing tmp/_genes_tmp_sorted
+Removing tmp/_genes_peaks_closest
+
+Copy geneext gtf file to references directory
+
+```
+cp references/geneext/Pocillopora_acuta_GeneExt.gtf references/
+```
+
+## Re-Assembly with Stringtie and GeneExt gtf
+
+```
+nano scripts/stringtie-GeneExt.sh #make script for assembly, enter text in next code chunk
+```
+
+```
+#!/bin/bash
+#SBATCH -t 120:00:00
+#SBATCH --nodes=1 --ntasks-per-node=20
+#SBATCH --mem=200GB
+#SBATCH --export=NONE
+#SBATCH --error=../scripts/outs_errs/"%x_error.%j" #write out slurm error reports
+#SBATCH --output=../scripts/outs_errs/"%x_output.%j" #write out any program outpus
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH --mail-user=zdellaert@uri.edu #your email to send notifications
+#SBATCH -D /data/putnamlab/zdellaert/LaserCoral/output_RNA #set working directory
+
+# load required modules
+module load StringTie/2.1.4-GCC-9.3.0
+
+# make the output directory if it does not exist (-p checks for this)
+mkdir -p stringtie-GeneExt
+
+# call the hisat2 bam files into an array
+array=(hisat2/*.bam)
+
+for i in "${array[@]}"; do 
+    sample_name=$(echo "$i" | awk -F'[/.]' '{print $2}')
+
+    # -p 16 : use 16 cores
+    # -e : exclude novel genes
+    # -B : create Ballgown input files for downstream analysis
+    # -v : enable verbose mode
+    # -G : gtf annotation file
+    # -A : output name for gene abundance estimate files
+    # -o : output name for gtf file
+
+    stringtie -p 16 -e -B -v \
+        -G ../references/Pocillopora_acuta_GeneExt.gtf \
+        -A stringtie-GeneExt/"${sample_name}".gene_abund.tab \
+        -o stringtie-GeneExt/"${sample_name}".gtf \
+        "$i" #input bam file
+
+    echo "StringTie assembly for seq file ${i}" $(date)
+done
+
+echo "StringTie assembly COMPLETE" $(date)
+```
 
 ## Downstream analysis thoughts
 
