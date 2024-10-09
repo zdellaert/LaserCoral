@@ -1,0 +1,10 @@
+LCM_15 /glfs/brick01/gv0/putnamlab/zdellaert/LaserCoral/output_RNA/stringtie-GeneExt/LCM_15.gtf
+LCM_16 /glfs/brick01/gv0/putnamlab/zdellaert/LaserCoral/output_RNA/stringtie-GeneExt/LCM_16.gtf
+LCM_20 /glfs/brick01/gv0/putnamlab/zdellaert/LaserCoral/output_RNA/stringtie-GeneExt/LCM_20.gtf
+LCM_21 /glfs/brick01/gv0/putnamlab/zdellaert/LaserCoral/output_RNA/stringtie-GeneExt/LCM_21.gtf
+LCM_26 /glfs/brick01/gv0/putnamlab/zdellaert/LaserCoral/output_RNA/stringtie-GeneExt/LCM_26.gtf
+LCM_27 /glfs/brick01/gv0/putnamlab/zdellaert/LaserCoral/output_RNA/stringtie-GeneExt/LCM_27.gtf
+LCM_4 /glfs/brick01/gv0/putnamlab/zdellaert/LaserCoral/output_RNA/stringtie-GeneExt/LCM_4.gtf
+LCM_5 /glfs/brick01/gv0/putnamlab/zdellaert/LaserCoral/output_RNA/stringtie-GeneExt/LCM_5.gtf
+LCM_8 /glfs/brick01/gv0/putnamlab/zdellaert/LaserCoral/output_RNA/stringtie-GeneExt/LCM_8.gtf
+LCM_9 /glfs/brick01/gv0/putnamlab/zdellaert/LaserCoral/output_RNA/stringtie-GeneExt/LCM_9.gtf

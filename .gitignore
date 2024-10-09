@@ -37,6 +37,9 @@ random/strandedness
 *ht2
 output_RNA/stringtie/LCM_*.gtf
 output_RNA/stringtie/*tab
+output_RNA/stringtie-GeneExt/*tab
+output_RNA/stringtie-GeneExt/LCM_*.gtf
+output_RNA/stringtie-GeneExt/merged
 
 #temporary file directories
 tmp*/
