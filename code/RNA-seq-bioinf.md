@@ -812,7 +812,7 @@ sed 's/transcript_id "\([^"]*\)"/transcript_id "\1-T"/g' Pocillopora_acuta_HIv2.
 
 # activate environment
 source ~/.bashrc
-module load Miniconda3/4.9.2
+module load Miniconda3/22.11.1-1
 conda activate geneext
 
 mkdir -p geneext
@@ -860,9 +860,9 @@ nano scripts/stringtie-GeneExt.sh #make script for assembly, enter text in next 
 
 ```
 #!/bin/bash
-#SBATCH -t 120:00:00
-#SBATCH --nodes=1 --ntasks-per-node=20
-#SBATCH --mem=200GB
+#SBATCH -t 24:00:00
+#SBATCH --nodes=1
+#SBATCH --mem=120GB
 #SBATCH --export=NONE
 #SBATCH --error=../scripts/outs_errs/"%x_error.%j" #write out slurm error reports
 #SBATCH --output=../scripts/outs_errs/"%x_output.%j" #write out any program outpus
@@ -879,7 +879,7 @@ mkdir -p stringtie-GeneExt
 # call the hisat2 bam files into an array
 array=(hisat2/*.bam)
 
-for i in "${array[@]}"; do 
+for i in "${array[@]}"; do
     sample_name=$(echo "$i" | awk -F'[/.]' '{print $2}')
 
     # -p 16 : use 16 cores
@@ -890,7 +890,7 @@ for i in "${array[@]}"; do
     # -A : output name for gene abundance estimate files
     # -o : output name for gtf file
 
-    stringtie -p 16 -e -B -v \
+    stringtie -p $SLURM_CPUS_ON_NODE -e -B -v \
         -G ../references/Pocillopora_acuta_GeneExt.gtf \
         -A stringtie-GeneExt/"${sample_name}".gene_abund.tab \
         -o stringtie-GeneExt/"${sample_name}".gtf \
@@ -901,6 +901,50 @@ done
 
 echo "StringTie assembly COMPLETE" $(date)
 ```
+
+## Post-GeneExt - Generate gene count matrix using [prepDE.py script from Stringtie](https://ccb.jhu.edu/software/stringtie/index.shtml?t=manual)
+
+Download script from [stringtie website](https://ccb.jhu.edu/software/stringtie/dl/prepDE.py3) or [github repository](https://github.com/gpertea/stringtie/blob/master/prepDE.py3). I am using the python3 version, but this and the original version (prepDE.py) are very similar and should give the exact same result. I am using [this input file format](https://ccb.jhu.edu/software/stringtie/dl/sample_lst.txt).
+
+```
+cd scripts
+wget https://ccb.jhu.edu/software/stringtie/dl/prepDE.py3
+nano prepDE-GeneExt.sh
+```
+
+```
+#!/bin/bash
+#SBATCH -t 120:00:00
+#SBATCH --nodes=1
+#SBATCH --mem=120GB
+#SBATCH --export=NONE
+#SBATCH --error=../scripts/outs_errs/"%x_error.%j" #write out slurm error reports
+#SBATCH --output=../scripts/outs_errs/"%x_output.%j" #write out any program outpus
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH --mail-user=zdellaert@uri.edu #your email to send notifications
+#SBATCH -D /data/putnamlab/zdellaert/LaserCoral/output_RNA #set working directory
+
+# load modules needed
+module load StringTie/2.1.4-GCC-9.3.0 #stringtie module, includes Python 3.8.5
+
+# move into stringtie-GeneExt directory
+cd stringtie-GeneExt
+
+# make input file
+for filename in *.gtf; do
+    sample_name=$(echo "$filename" | awk -F'[.]' '{print $1}')
+
+    echo $sample_name $PWD/$filename
+done > listGTF.txt
+
+#Compile the gene count matrix
+python ../../scripts/prepDE.py3 -g LCM_RNA_gene_count_matrix.csv -i listGTF.txt
+
+echo "Gene count matrix compiled." $(date)
+```
+
+Woohoo! [GeneExt-ed Gene count matrix complete.](https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/stringtie-GeneExt/LCM_RNA_gene_count_matrix.csv)
+
 
 ## Downstream analysis thoughts
 
