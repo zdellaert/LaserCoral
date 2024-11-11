@@ -15,17 +15,6 @@ knitr::opts_chunk$set(echo = TRUE)
 sessionInfo() #provides list of loaded packages and version of R.
 ```
 
-### Install and load packages 
-
-First, install and load the necessary packages.
-
-```{r load_libraries, message=FALSE}
-if (!require("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
-
-BiocManager::install("RNASeqPower")
-```
-
 ### Background info and package information
 
 See vignettes for RNASeqPower package here: https://bioconductor.org/packages/release/bioc/vignettes/RNASeqPower/inst/doc/samplesize.pdf
@@ -36,13 +25,111 @@ I am also basing some of this code off of Jill Ashey's [Notebook Post](https://j
 
 ### Framing the problem
 
-Hypothesis for this aim: "Gene expression and one of its regulatory mechanisms (e.g., DNA methylation) are spatially stratified, tissue-specific, and correlated with the microenvironment. The higher spatial heterogeneity of pH, O2, and light throughout thick-tissued corals compared to thin-tissued corals will be correlated with higher spatial heterogeneity of their gene expression and DNA methylation."
+1. What is the scientific question?
+  - What genes differ in expression between aboral and oral tissues?
+2. What was the sequencing coverage?
+  - Estimate:
+    - Total Transcriptome Size: 45735791 bp
+    - Min Million sequences (post trimming) = 20,000,000 (or 2X 20M because paired end? for this sample, the average length post trimming= 125bp)
+    - Coverage = (# reads X length of reads) / total transcriptome length
+    - Coverage = (20000000*125) / 45735791
+    - Coverage = ~55X
+  - An alternative method using Samtools estimated the coverage as much higher:
+    - `samtools depth LCM_9.bam | awk '$3 > 0 {sum += $3; count++} END {print "Average coverage:", sum/count}'`
+      - Average coverage: 294.283
+      - this is only across the regions that actually have coverage, so it may be more accurate?
 
 ### Usage
 
+With a sequencing coverage of 55X, and a within-group cv of 0.4, and sample size of 5, we will be able to detect an effect size of 2.112639 at a power of 0.8.
+
+For a coverage of 290X, we will be able to detect an effect size of 2.046944.
+
 ```{r}
 library(RNASeqPower)
-rnapower(depth=20, cv=.4, effect=c(1.25, 1.5, 1.75, 2),
-alpha= .05, power=c(.8, .9))
+
+rnapower(depth=55, cv=.4, n = 5, alpha= .05, power=c(.8, .9))
+
+rnapower(depth=290, cv=.4, n = 5, alpha= .05, power=c(.8, .9))
 ```
 
+With a sequencing coverage of 55X, to detect an effect size of 2 with a power of 0.8, we need within group-cv to be less than 0.3672200.
+
+With a sequencing coverage of 290X, to detect an effect size of 2 with a power of 0.8, we need within group-cv to be less than 0.3867610
+
+```{r}
+library(RNASeqPower)
+rnapower(depth=55, effect= 2, n = 5, alpha= .05, power=c(.8, .9))
+
+rnapower(depth=290, effect= 2, n = 5, alpha= .05, power=c(.8, .9))
+```
+
+
+After getting the data back, what is our CV?
+
+```{r}
+filtered_counts <- read.csv("../output_RNA/differential_expression/filtered_counts.csv") 
+colnames(filtered_counts)[1] <- "gene_id"
+meta <- read.csv("../data_RNA/LCM_RNA_metadata.csv") 
+```
+
+```{r}
+library(tidyverse)
+library(matrixStats)
+library(wrMisc)
+
+counts_oralepi <- filtered_counts[,c("gene_id",meta$Sample[which(meta$Tissue == "OralEpi")])]
+counts_aboral <- filtered_counts[,c("gene_id",meta$Sample[which(meta$Tissue == "Aboral")])]
+
+# Calculate row mean, std dev, and coefficient of variation
+counts_oralepi$mean <- rowMeans(counts_oralepi[, c(-1)], na.rm = T)
+counts_oralepi$sd <- rowSds(as.matrix(counts_oralepi[, c(-1)], na.rm = T))
+counts_oralepi$cv <- rowCVs(counts_oralepi[, c(-1)])
+mean(counts_oralepi$cv, na.rm = T) # 0.7920265
+median(counts_oralepi$cv, na.rm = T) # 0.7233021
+
+# Calculate row mean, std dev, and coefficient of variation
+counts_aboral$mean <- rowMeans(counts_aboral[, c(-1)], na.rm = T)
+counts_aboral$sd <- rowSds(as.matrix(counts_aboral[, c(-1)], na.rm = T))
+counts_aboral$cv <- rowCVs(counts_aboral[, c(-1)])
+mean(counts_aboral$cv, na.rm = T) # 1.01212
+median(counts_aboral$cv, na.rm = T) # 0.975887
+
+# Average cv for both tissue types
+mean(c(0.7920265, 1.01212)) # 0.9020732 
+```
+
+So, time to redo the power analysis and calculate power/effect size we can detect:
+
+Parameters: 
+- Depth = 5 (?)
+- n = 3 (control)
+- n2 = 10 (T1, T2, T3, T4 - not including outliers)
+- cv = 0.2569478
+- cv2 = 0.3105552
+- effect = 1.25, 1.5, 1.75, 2
+- alpha = 0.05
+- power = 0.8, 0.9
+
+```{r}
+library(RNASeqPower)
+
+rnapower(depth=55, cv=0.9020732 , n = 5, alpha= .05, power=c(.8, .9))
+
+rnapower(depth=290, cv=0.9020732 , n = 5, alpha= .05, power=c(.8, .9))
+```
+
+With a sequencing coverage of 55X, and a within-group cv of 0.9, and sample size of 5, we will be able to detect an effect size of 5.033531 at a power of 0.8.
+
+For a coverage of 290X, we will be able to detect an effect size of 4.961692.
+
+What about calculating power?
+```{r}
+library(RNASeqPower)
+
+rnapower(depth=55, cv=0.9020732 , n = 5, alpha= .05, effect=c(1.25, 1.5, 1.75, 2,5, 6))
+
+rnapower(depth=290, cv=0.9020732 , n = 5, alpha= .05, effect=c(1.25, 1.5, 1.75, 2,5, 6))
+```
+
+With both depths, at this cv and sample size, we can see we will be able to determine an effect size around 5-6 and greater for a power > 0.8
