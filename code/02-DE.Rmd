@@ -22,7 +22,7 @@ install.packages("renv") #install the package on the new computer (may not be ne
 renv::restore() #reinstall all the package versions in the renv lockfile
 ```
 
-## Install packages
+## Load packages
 
 ```{r message=FALSE}
 packages <- c("genefilter", "DESeq2", "apeglm", "ashr", "ggplot2", "vsn", 
@@ -50,7 +50,7 @@ save_ggplot <- function(plot, filename, width = 10, height = 7, units = "in", dp
 
 Read in raw count data
 ```{r}
-counts_raw <- read.csv("../output_RNA/stringtie/LCM_RNA_gene_count_matrix.csv", row.names = 1) #load in data
+counts_raw <- read.csv("../output_RNA/stringtie-GeneExt/LCM_RNA_gene_count_matrix.csv", row.names = 1) #load in data
 ```
 
 gene_id,LCM_15,LCM_16,LCM_20,LCM_21,LCM_26,LCM_27,LCM_4,LCM_5,LCM_8,LCM_9
@@ -73,15 +73,17 @@ all(meta$Sample == colnames(counts_raw)) #are they the same in the same order? S
 ## pOverA filtering to reduce dataset
 
 ```{r}
-ffun<-filterfun(pOverA(0.25,5))  #Keep genes expressed in at least 25% of samples
+ffun<-filterfun(pOverA(0.5,10))  #Keep genes expressed in at least 50% of samples -
 counts_filt_poa <- genefilter((counts_raw), ffun) #apply filter
 
 filtered_counts <- counts_raw[counts_filt_poa,] #keep only rows that passed filter
 
 cat("Number of genes after filtering:", sum(counts_filt_poa))
+
+write.csv(filtered_counts, "../output_RNA/differential_expression/filtered_counts.csv")
 ```
 
-There are now 15530 genes in the filtered dataset.
+There are now 14464 genes in the filtered dataset.
 
 Data sanity checks:
 ```{r}
@@ -226,12 +228,20 @@ pcaData <- plotPCA(vsd, intgroup=c("Tissue", "Fragment"), returnData=TRUE)
 
 percentVar <- round(100 * attr(pcaData, "percentVar"))
 PCA <- ggplot(pcaData, aes(PC1, PC2, color=Tissue, shape=Fragment)) +
-  geom_point(size=3) +
+  geom_point(size=2) +
   xlab(paste0("PC1: ",percentVar[1],"% variance")) +
   ylab(paste0("PC2: ",percentVar[2],"% variance")) + 
   coord_fixed() + theme_bw()
 
 save_ggplot(PCA, "../output_RNA/differential_expression/PCA")
+
+PCA_small <- ggplot(pcaData, aes(PC1, PC2, color=Tissue)) +
+  geom_point(size=2) +
+  xlab(paste0("PC1: ",percentVar[1],"% variance")) +
+  ylab(paste0("PC2: ",percentVar[2],"% variance")) + 
+  coord_fixed() + theme_bw()
+
+ggsave(filename = paste0("../output_RNA/differential_expression/PCA_small", ".png"), plot = PCA_small, width = 4, height = 2.5, units = "in", dpi = 300)
 ```
 
 Clearly, the majority of the variance in the data is explained by tissue type!
@@ -388,7 +398,7 @@ Biomin_volcano <- EnhancedVolcano(biomin_all_res,
     drawConnectors = TRUE,
     widthConnectors = 0.75,
     pointSize = 1,
-    labSize = 2,boxedLabels = TRUE)
+    labSize = 2,boxedLabels = TRUE,max.overlaps = 40)
 
 save_ggplot(Biomin_volcano, "../output_RNA/differential_expression/Biomin_volcano")
 
@@ -400,7 +410,7 @@ Marker_volcano <- EnhancedVolcano(markers_all_res,
     drawConnectors = TRUE,
     widthConnectors = 0.75,
     pointSize = 1,
-    labSize = 2,boxedLabels = TRUE)
+    labSize = 2,boxedLabels = TRUE,max.overlaps = 60)
 
 save_ggplot(Marker_volcano, "../output_RNA/differential_expression/Marker_volcano")
 
@@ -412,7 +422,7 @@ Marker_volcano_names <- EnhancedVolcano(markers_all_res,
     drawConnectors = TRUE,
     widthConnectors = 0.75,
     pointSize = 1,
-    labSize = 2,boxedLabels = TRUE,max.overlaps = 20)
+    labSize = 2,boxedLabels = TRUE,max.overlaps = 60)
 
 save_ggplot(Marker_volcano_names, "../output_RNA/differential_expression/Marker_volcano_names")
 ```
