@@ -7,6 +7,27 @@ output: html_document
 
 ## RNA power analysis for laser capture microdissection (LCM) of tissue-specific RNA of multiple coral species
 
+## Managing Packages Using Renv
+
+To run this code in my project using the renv environment, run the following lines of code
+
+```{r, eval=FALSE}
+install.packages("renv") #install the package on the new computer (may not be necessary if renv bootstraps itself as expected)
+renv::restore() #reinstall all the package versions in the renv lockfile
+```
+
+## Load packages
+
+```{r message=FALSE}
+packages <- c("RNASeqPower", "tidyverse", "matrixStats", "wrMisc")
+
+lapply(packages, library, character.only = TRUE)
+```
+
+```{r}
+sessionInfo() #provides list of loaded packages and version of R.
+```
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -46,8 +67,6 @@ With a sequencing coverage of 55X, and a within-group cv of 0.4, and sample size
 For a coverage of 290X, we will be able to detect an effect size of 2.046944.
 
 ```{r}
-library(RNASeqPower)
-
 rnapower(depth=55, cv=.4, n = 5, alpha= .05, power=c(.8, .9))
 
 rnapower(depth=290, cv=.4, n = 5, alpha= .05, power=c(.8, .9))
@@ -58,7 +77,6 @@ With a sequencing coverage of 55X, to detect an effect size of 2 with a power of
 With a sequencing coverage of 290X, to detect an effect size of 2 with a power of 0.8, we need within group-cv to be less than 0.3867610
 
 ```{r}
-library(RNASeqPower)
 rnapower(depth=55, effect= 2, n = 5, alpha= .05, power=c(.8, .9))
 
 rnapower(depth=290, effect= 2, n = 5, alpha= .05, power=c(.8, .9))
@@ -74,10 +92,6 @@ meta <- read.csv("../data_RNA/LCM_RNA_metadata.csv")
 ```
 
 ```{r}
-library(tidyverse)
-library(matrixStats)
-library(wrMisc)
-
 counts_oralepi <- filtered_counts[,c("gene_id",meta$Sample[which(meta$Tissue == "OralEpi")])]
 counts_aboral <- filtered_counts[,c("gene_id",meta$Sample[which(meta$Tissue == "Aboral")])]
 
@@ -85,18 +99,18 @@ counts_aboral <- filtered_counts[,c("gene_id",meta$Sample[which(meta$Tissue == "
 counts_oralepi$mean <- rowMeans(counts_oralepi[, c(-1)], na.rm = T)
 counts_oralepi$sd <- rowSds(as.matrix(counts_oralepi[, c(-1)], na.rm = T))
 counts_oralepi$cv <- rowCVs(counts_oralepi[, c(-1)])
-mean(counts_oralepi$cv, na.rm = T) # 0.7920265
-median(counts_oralepi$cv, na.rm = T) # 0.7233021
+mean(counts_oralepi$cv, na.rm = T) # 0.7061599
+median(counts_oralepi$cv, na.rm = T) # 0.6469626
 
 # Calculate row mean, std dev, and coefficient of variation
 counts_aboral$mean <- rowMeans(counts_aboral[, c(-1)], na.rm = T)
 counts_aboral$sd <- rowSds(as.matrix(counts_aboral[, c(-1)], na.rm = T))
 counts_aboral$cv <- rowCVs(counts_aboral[, c(-1)])
-mean(counts_aboral$cv, na.rm = T) # 1.01212
-median(counts_aboral$cv, na.rm = T) # 0.975887
+mean(counts_aboral$cv, na.rm = T) # 0.9370125
+median(counts_aboral$cv, na.rm = T) #0.8838708
 
 # Average cv for both tissue types
-mean(c(0.7920265, 1.01212)) # 0.9020732 
+mean(c(0.7061599, 0.9370125)) # 0.8215862
 ```
 
 So, time to redo the power analysis and calculate power/effect size we can detect:
@@ -112,22 +126,18 @@ Parameters:
 - power = 0.8, 0.9
 
 ```{r}
-library(RNASeqPower)
+rnapower(depth=55, cv=0.8215862 , n = 5, alpha= .05, power=c(.8, .9))
 
-rnapower(depth=55, cv=0.9020732 , n = 5, alpha= .05, power=c(.8, .9))
-
-rnapower(depth=290, cv=0.9020732 , n = 5, alpha= .05, power=c(.8, .9))
+rnapower(depth=290, cv=0.8215862 , n = 5, alpha= .05, power=c(.8, .9))
 ```
 
-With a sequencing coverage of 55X, and a within-group cv of 0.9, and sample size of 5, we will be able to detect an effect size of 5.033531 at a power of 0.8.
+With a sequencing coverage of 55X, and a within-group cv of 0.9, and sample size of 5, we will be able to detect an effect size of 4.372025 at a power of 0.8.
 
-For a coverage of 290X, we will be able to detect an effect size of 4.961692.
+For a coverage of 290X, we will be able to detect an effect size of 4.303653.
 
 What about calculating power?
 ```{r}
-library(RNASeqPower)
-
-rnapower(depth=55, cv=0.9020732 , n = 5, alpha= .05, effect=c(1.25, 1.5, 1.75, 2,5, 6))
+rnapower(depth=55, cv=0.8215862 , n = 5, alpha= .05, effect=c(1.25, 1.5, 1.75, 2,5, 6))
 
 rnapower(depth=290, cv=0.9020732 , n = 5, alpha= .05, effect=c(1.25, 1.5, 1.75, 2,5, 6))
 ```
