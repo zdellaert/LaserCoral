@@ -427,6 +427,71 @@ Marker_volcano_names <- EnhancedVolcano(markers_all_res,
 save_ggplot(Marker_volcano_names, "../output_RNA/differential_expression/Marker_volcano_names")
 ```
 
+## Trying to annotate un-annotated DE genes:
+
+```{bash, eval = FALSE}
+# wget protein sequence reference file
+wget http://cyanophora.rutgers.edu/Pocillopora_acuta/Pocillopora_acuta_HIv2.genes.pep.faa.gz
+
+# move to references direcotry
+mv *gz ../references
+
+# unzip files
+gunzip ../references/*gz
+
+#get the names of all the DEGs from the first column of the DEG csv file
+tail -n +2 ../output_RNA/differential_expression/DEG_05.csv | cut -d',' -f1 | tr -d '"' > ../output_RNA/differential_expression/DEG_05_names.csv
+
+#grep this file against the protein fasta file, first with wc -l to make sure the number of lines is correct (should be your number of DEGs)
+grep -f ../output_RNA/differential_expression/DEG_05_names.csv ../references/Pocillopora_acuta_HIv2.genes.pep.faa | wc -l
+
+#grep each header with the protein sequence after ("-A 1") and save to a new file
+grep  -A 1 -f ../output_RNA/differential_expression/DEG_05_names.csv ../references/Pocillopora_acuta_HIv2.genes.pep.faa > ../output_RNA/differential_expression/DEG_05_seqs.txt
+```
+
+On andromeda:
+
+```{bash eval=FALSE}
+cd ../scripts
+nano DEG_05_blast.sh
+```
+
+```{bash eval=FALSE}
+#!/bin/bash
+#SBATCH --job-name="DE_blast"
+#SBATCH -t 240:00:00
+#SBATCH --export=NONE
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH --mail-user=zdellaert@uri.edu #your email to send notifications
+#SBATCH --mem=500GB
+#SBATCH --error=../scripts/outs_errs/"%x_error.%j" #write out slurm error reports
+#SBATCH --output=../scripts/outs_errs/"%x_output.%j" #write out any program outpus
+#SBATCH --account=putnamlab
+#SBATCH --nodes=1 --ntasks-per-node=36
+
+module load BLAST+/2.15.0-gompi-2023a
+
+cd ../output_RNA/differential_expression #set working directory
+mkdir blast
+cd blast
+
+#nr database location andromeda: /data/shared/ncbi-db/.ncbirc 
+# points to current location: cat /data/shared/ncbi-db/.ncbirc
+# [BLAST]
+# BLASTDB=/data/shared/ncbi-db/2024-11-10
+
+blastp -query ../DEG_05_seqs.txt -db nr -out DEG_05_blast_results.txt -outfmt 0 -evalue 1e-4 
+
+blastp -query ../DEG_05_seqs.txt -db nr -out DEG_05_blast_results_tab.txt -outfmt 6 -max_target_seqs 1
+
+echo "Blast complete!" $(date)
+```
+
+```{bash eval=FALSE}
+sbatchDEG_05_blast.sh
+```
+
+
 ## we probably want to correct for batch effects (LCM date) + genotype (Fragment)
 ## and to decide which tranformation to use
 
