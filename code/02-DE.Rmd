@@ -449,7 +449,10 @@ grep -f ../output_RNA/differential_expression/DEG_05_names.csv ../references/Poc
 grep  -A 1 -f ../output_RNA/differential_expression/DEG_05_names.csv ../references/Pocillopora_acuta_HIv2.genes.pep.faa > ../output_RNA/differential_expression/DEG_05_seqs.txt
 ```
 
+
 On andromeda:
+
+Blastp-ing only the DE genes against the entire nr database (will take a while)
 
 ```{bash eval=FALSE}
 cd ../scripts
@@ -467,7 +470,7 @@ nano DEG_05_blast.sh
 #SBATCH --error=../scripts/outs_errs/"%x_error.%j" #write out slurm error reports
 #SBATCH --output=../scripts/outs_errs/"%x_output.%j" #write out any program outpus
 #SBATCH --account=putnamlab
-#SBATCH --nodes=1 --ntasks-per-node=36
+#SBATCH --nodes=2 --ntasks-per-node=24
 
 module load BLAST+/2.15.0-gompi-2023a
 
@@ -480,15 +483,91 @@ cd blast
 # [BLAST]
 # BLASTDB=/data/shared/ncbi-db/2024-11-10
 
-blastp -query ../DEG_05_seqs.txt -db nr -out DEG_05_blast_results.txt -outfmt 0 -evalue 1e-4 
+blastp -query ../DEG_05_seqs.txt -db nr -out DEG_05_blast_results.txt -outfmt 0 -evalue 1E-05 \
+-num_threads 48 \
+-max_target_seqs 10
 
-blastp -query ../DEG_05_seqs.txt -db nr -out DEG_05_blast_results_tab.txt -outfmt 6 -max_target_seqs 1
+blastp -query ../DEG_05_seqs.txt -db nr -out DEG_05_blast_results_tab.txt -outfmt 6 -evalue 1E-05 \
+-num_threads 48 \
+-max_target_seqs 1 \
+-max_hsps 1
 
 echo "Blast complete!" $(date)
 ```
 
+```{bash, eval=FALSE}
+sbatch DEG_05_blast.sh
+```
+
+On unity:
+
+swissprot based on https://github.com/urol-e5/deep-dive/blob/main/D-Apul/code/20-Apul-gene-annotation.Rmd and
+https://github.com/urol-e5/deep-dive/blob/main/F-Pmea/code/20-Pmea-gene-annotation.Rmd
+
+Steven's notebook post here: https://sr320.github.io/tumbling-oysters/posts/sr320-27-go/
+
+```{bash, eval=FALSE}
+mkdir ../references/blast_dbs
+```
+
+```{bash, eval=FALSE}
+cd ../references/blast_dbs
+curl -O https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz
+mv uniprot_sprot.fasta.gz uniprot_sprot_r2024_10_02.fasta.gz
+gunzip -k uniprot_sprot_r2024_10_02.fasta.gz
+rm uniprot_sprot_r2024_10_02.fasta.gz
+
+head uniprot_sprot_r2024_10_02.fasta
+echo "Number of Sequences"
+grep -c ">" uniprot_sprot_r2024_10_02.fasta
+# 572214 sequences
+```
+
+```{bash}
+module load blast-plus/2.14.1
+
+makeblastdb \
+-in ../references/blast_dbs/uniprot_sprot_r2024_10_02.fasta \
+-dbtype prot \
+-out ../references/blast_dbs/uniprot_sprot_r2024_10_02
+```
+
 ```{bash eval=FALSE}
-sbatchDEG_05_blast.sh
+cd ../scripts
+nano blastp_SwissProt.sh
+```
+
+```{bash eval=FALSE}
+#!/bin/bash
+#SBATCH -t 18:00:00
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=48
+#SBATCH --mem=500GB
+#SBATCH --export=NONE
+#SBATCH --error=../scripts/outs_errs/"%x_error.%j" #write out slurm error reports
+#SBATCH --output=../scripts/outs_errs/"%x_output.%j" #write out any program outpus
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral #set working directory
+
+module load blast-plus/2.14.1
+
+cd references/
+mkdir annotation
+
+fasta="Pocillopora_acuta_HIv2.genes.pep.faa"
+
+blastp \
+-query $fasta \
+-db blast_dbs/uniprot_sprot_r2024_10_02 \
+-out annotation/blastp_SwissProt_out.tab \
+-evalue 1E-05 \
+-num_threads 48 \
+-max_target_seqs 1 \
+-max_hsps 1 \
+-outfmt 6
+
+echo "Blast complete!" $(date)
 ```
 
 
