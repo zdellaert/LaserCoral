@@ -10,6 +10,8 @@
 #SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
 #SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/references #set working directory
 
+## Warning for putnam lab users of this script, this is written to run on Unity, not andromeda
+
 # Use the gtf file run in Stringtie above:
 
 # the gtf has to have the gene and transcript IDs be different, so append -T to each transcript_id and save to a new file
