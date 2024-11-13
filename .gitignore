@@ -40,6 +40,7 @@ output_RNA/stringtie/*tab
 output_RNA/stringtie-GeneExt/*tab
 output_RNA/stringtie-GeneExt/LCM_*.gtf
 output_RNA/stringtie-GeneExt/merged
+output_RNA/stringtie-GeneExt/transcript_count_matrix.csv
 
 #temporary file directories
 tmp*/
