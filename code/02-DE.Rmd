@@ -570,6 +570,131 @@ blastp \
 echo "Blast complete!" $(date)
 ```
 
+```{bash, eval=FALSE}
+cd references/annotation/
+
+tr '|' '\t' <  blastp_SwissProt_out.tab >  blastp_SwissProt_out_sep.tab
+```
+
+```{bash, eval=FALSE}
+cd ../references/annotation/
+
+curl -H "Accept: text/plain; format=tsv" "https://rest.uniprot.org/uniprotkb/stream?fields=accession%2Creviewed%2Cid%2Cprotein_name%2Cgene_names%2Corganism_name%2Clength%2Cgo_p%2Cgo%2Cgo_id%2Cgo_c%2Cgo_f&format=tsv&query=%28reviewed%3Atrue%29" -o SwissProt-Annot-GO_111524.tsv
+
+wc -l SwissProt-Annot-GO_111524.tsv
+#572215
+```
+
+All code below based on https://github.com/urol-e5/deep-dive/blob/main/D-Apul/code/20-Apul-gene-annotation.Rmd and
+https://github.com/urol-e5/deep-dive/blob/main/F-Pmea/code/20-Pmea-gene-annotation.Rmd
+
+Steven's notebook post here: https://sr320.github.io/tumbling-oysters/posts/sr320-27-go/
+
+```{r}
+bltabl <- read.csv("../references/annotation/blastp_SwissProt_out_sep.tab", sep = '\t', header = FALSE)
+
+spgo <- read.csv("../references/annotation/SwissProt-Annot-GO_111524.tsv", sep = '\t', header = TRUE)
+```
+
+```{r}
+annot_tab <- left_join(bltabl, spgo, by = c("V3" = "Entry")) %>%
+  select(
+    query = V1,
+    blast_hit = V3,
+    evalue = V13,
+    ProteinNames = Protein.names,
+    BiologicalProcess = Gene.Ontology..biological.process.,
+    GeneOntologyIDs = Gene.Ontology.IDs
+  )
+
+head(annot_tab)
+```
+
+```{r}
+write.table(annot_tab, 
+            file = "../references/annotation/protein-GO.tsv", 
+            sep = "\t", 
+            row.names = FALSE, 
+            quote = FALSE)
+```
+
+```{r}
+df <- as.data.frame(colData(dds)[,c("Tissue","Fragment")])
+
+annot_tab$short_name <- ifelse(nchar(annot_tab$ProteinNames) > 30, 
+                            paste0(substr(annot_tab$ProteinNames, 1, 27), "..."), 
+                            annot_tab$ProteinNames)
+
+gene_labels <- annot_tab %>% select(query,short_name) %>%
+  mutate_all(~ ifelse(is.na(.), "", .)) #replace NAs with "" for labelling purposes
+
+#view most significantly differentially expressed genes
+
+select <- order(res$padj)[1:50]
+
+top50_DE <- pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
+         labels_row =gene_labels[select,"short_name"], fontsize_row = 5)
+top50_DE
+save_ggplot(top50_DE, "../output_RNA/differential_expression/top50_DE_SwissProt")
+
+#view genes Higher in Aboral, Lower in OralEpi, ordered by log2FoldChange
+select <- order(res$log2FoldChange,decreasing = TRUE)[1:50]
+
+up_Aboral <- pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
+         labels_row =gene_labels[select,"short_name"], fontsize_row = 5)
+up_Aboral
+save_ggplot(up_Aboral, "../output_RNA/differential_expression/up_Aboral_SwissProt")
+
+#view genes Lower in Aboral, Higher in OralEpi, ordered by log2FoldChange
+select <- order(res$log2FoldChange)[1:50]
+
+up_OralEpi <- pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
+         labels_row =gene_labels[select,"short_name"], fontsize_row = 5)
+up_OralEpi
+save_ggplot(up_OralEpi, "../output_RNA/differential_expression/up_OralEpi_SwissProt")
+```
+
+```{r}
+df <- as.data.frame(colData(dds)[,c("Tissue","Fragment")])
+
+annot_tab$short_GO <- ifelse(nchar(annot_tab$BiologicalProcess) > 30, 
+                            paste0(substr(annot_tab$BiologicalProcess, 1, 27), "..."), 
+                            annot_tab$BiologicalProcess)
+
+gene_labels <- annot_tab %>% select(query,short_GO) %>%
+  mutate_all(~ ifelse(is.na(.), "", .)) #replace NAs with "" for labelling purposes
+
+#view most significantly differentially expressed genes
+
+select <- order(res$padj)[1:50]
+
+top50_DE <- pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
+         labels_row =gene_labels[select,"short_GO"], fontsize_row = 5)
+top50_DE
+save_ggplot(top50_DE, "../output_RNA/differential_expression/top50_DE_Blast2GO")
+
+#view genes Higher in Aboral, Lower in OralEpi, ordered by log2FoldChange
+select <- order(res$log2FoldChange,decreasing = TRUE)[1:50]
+
+up_Aboral <- pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
+         labels_row =gene_labels[select,"short_GO"], fontsize_row = 5)
+up_Aboral
+save_ggplot(up_Aboral, "../output_RNA/differential_expression/up_Aboral_Blast2GO")
+
+#view genes Lower in Aboral, Higher in OralEpi, ordered by log2FoldChange
+select <- order(res$log2FoldChange)[1:50]
+
+up_OralEpi <- pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
+         labels_row =gene_labels[select,"short_GO"], fontsize_row = 5)
+up_OralEpi
+save_ggplot(up_OralEpi, "../output_RNA/differential_expression/up_OralEpi_Blast2GO")
+```
 
 ## we probably want to correct for batch effects (LCM date) + genotype (Fragment)
 ## and to decide which tranformation to use

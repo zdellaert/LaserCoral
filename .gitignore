@@ -29,6 +29,7 @@ references/*fasta
 references/*gff3
 references/*gtf
 random/strandedness
+references/annotation/SwissProt-Annot-GO_111524.tsv
 
 #bams and sams and hisat index files and stringtie gtfs
 *bam
