@@ -45,3 +45,12 @@ output_RNA/stringtie-GeneExt/transcript_count_matrix.csv
 
 #temporary file directories
 tmp*/
+references/blast_dbs/uniprot_sprot_r2024_10_02.fasta
+references/blast_dbs/uniprot_sprot_r2024_10_02.pdb
+references/blast_dbs/uniprot_sprot_r2024_10_02.phr
+references/blast_dbs/uniprot_sprot_r2024_10_02.pin
+references/blast_dbs/uniprot_sprot_r2024_10_02.pjs
+references/blast_dbs/uniprot_sprot_r2024_10_02.pot
+references/blast_dbs/uniprot_sprot_r2024_10_02.psq
+references/blast_dbs/uniprot_sprot_r2024_10_02.ptf
+references/blast_dbs/uniprot_sprot_r2024_10_02.pto
