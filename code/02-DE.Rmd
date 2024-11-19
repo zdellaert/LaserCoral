@@ -625,16 +625,20 @@ annot_tab$short_name <- ifelse(nchar(annot_tab$ProteinNames) > 30,
                             paste0(substr(annot_tab$ProteinNames, 1, 27), "..."), 
                             annot_tab$ProteinNames)
 
-gene_labels <- annot_tab %>% select(query,short_name) %>%
+DE_05_SwissProt <- DE_05 %>% left_join(annot_tab) %>% select(query,everything()) 
+
+gene_labels <- DE_05_SwissProt %>% 
+  select(query,short_name) %>%
   mutate_all(~ ifelse(is.na(.), "", .)) #replace NAs with "" for labelling purposes
 
 #view most significantly differentially expressed genes
 
 select <- order(res$padj)[1:50]
+rownames(res)[select]
 
 top50_DE <- pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
-         labels_row =gene_labels[select,"short_name"], fontsize_row = 5)
+         labels_row = gene_labels[match(rownames(res)[select],(gene_labels$query)),2], fontsize_row = 6)
 top50_DE
 save_ggplot(top50_DE, "../output_RNA/differential_expression/top50_DE_SwissProt")
 
@@ -643,7 +647,7 @@ select <- order(res$log2FoldChange,decreasing = TRUE)[1:50]
 
 up_Aboral <- pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
-         labels_row =gene_labels[select,"short_name"], fontsize_row = 5)
+         labels_row = gene_labels[match(rownames(res)[select],(gene_labels$query)),2], fontsize_row = 5)
 up_Aboral
 save_ggplot(up_Aboral, "../output_RNA/differential_expression/up_Aboral_SwissProt")
 
@@ -652,7 +656,7 @@ select <- order(res$log2FoldChange)[1:50]
 
 up_OralEpi <- pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
-         labels_row =gene_labels[select,"short_name"], fontsize_row = 5)
+         labels_row =gene_labels[match(rownames(res)[select],(gene_labels$query)),2], fontsize_row = 5)
 up_OralEpi
 save_ggplot(up_OralEpi, "../output_RNA/differential_expression/up_OralEpi_SwissProt")
 ```
@@ -664,7 +668,9 @@ annot_tab$short_GO <- ifelse(nchar(annot_tab$BiologicalProcess) > 30,
                             paste0(substr(annot_tab$BiologicalProcess, 1, 27), "..."), 
                             annot_tab$BiologicalProcess)
 
-gene_labels <- annot_tab %>% select(query,short_GO) %>%
+DE_05_SwissProt <- DE_05 %>% left_join(annot_tab) %>% select(query,everything()) 
+
+gene_labels <- DE_05_SwissProt %>% select(query,short_GO) %>%
   mutate_all(~ ifelse(is.na(.), "", .)) #replace NAs with "" for labelling purposes
 
 #view most significantly differentially expressed genes
@@ -673,7 +679,7 @@ select <- order(res$padj)[1:50]
 
 top50_DE <- pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
-         labels_row =gene_labels[select,"short_GO"], fontsize_row = 5)
+         labels_row =gene_labels[match(rownames(res)[select],(gene_labels$query)),2], fontsize_row = 5)
 top50_DE
 save_ggplot(top50_DE, "../output_RNA/differential_expression/top50_DE_Blast2GO")
 
@@ -682,7 +688,7 @@ select <- order(res$log2FoldChange,decreasing = TRUE)[1:50]
 
 up_Aboral <- pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
-         labels_row =gene_labels[select,"short_GO"], fontsize_row = 5)
+         labels_row =gene_labels[match(rownames(res)[select],(gene_labels$query)),2], fontsize_row = 5)
 up_Aboral
 save_ggplot(up_Aboral, "../output_RNA/differential_expression/up_Aboral_Blast2GO")
 
@@ -691,7 +697,7 @@ select <- order(res$log2FoldChange)[1:50]
 
 up_OralEpi <- pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
-         labels_row =gene_labels[select,"short_GO"], fontsize_row = 5)
+         labels_row =gene_labels[match(rownames(res)[select],(gene_labels$query)),2], fontsize_row = 5)
 up_OralEpi
 save_ggplot(up_OralEpi, "../output_RNA/differential_expression/up_OralEpi_Blast2GO")
 ```
