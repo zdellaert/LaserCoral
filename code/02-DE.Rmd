@@ -616,16 +616,19 @@ write.table(annot_tab,
             sep = "\t", 
             row.names = FALSE, 
             quote = FALSE)
+
+DE_05_SwissProt <- DE_05 %>% left_join(annot_tab) %>% select(query,everything()) 
+
+write.csv(as.data.frame(DE_05_SwissProt), 
+          file="../output_RNA/differential_expression/DE_05_SwissProt_annotation.csv")
 ```
 
 ```{r}
 df <- as.data.frame(colData(dds)[,c("Tissue","Fragment")])
 
-annot_tab$short_name <- ifelse(nchar(annot_tab$ProteinNames) > 30, 
-                            paste0(substr(annot_tab$ProteinNames, 1, 27), "..."), 
-                            annot_tab$ProteinNames)
-
-DE_05_SwissProt <- DE_05 %>% left_join(annot_tab) %>% select(query,everything()) 
+DE_05_SwissProt$short_name <- ifelse(nchar(DE_05_SwissProt$ProteinNames) > 30, 
+                            paste0(substr(DE_05_SwissProt$ProteinNames, 1, 27), "..."), 
+                            DE_05_SwissProt$ProteinNames)
 
 gene_labels <- DE_05_SwissProt %>% 
   select(query,short_name) %>%
@@ -664,11 +667,9 @@ save_ggplot(up_OralEpi, "../output_RNA/differential_expression/up_OralEpi_SwissP
 ```{r}
 df <- as.data.frame(colData(dds)[,c("Tissue","Fragment")])
 
-annot_tab$short_GO <- ifelse(nchar(annot_tab$BiologicalProcess) > 30, 
-                            paste0(substr(annot_tab$BiologicalProcess, 1, 27), "..."), 
-                            annot_tab$BiologicalProcess)
-
-DE_05_SwissProt <- DE_05 %>% left_join(annot_tab) %>% select(query,everything()) 
+DE_05_SwissProt$short_GO <- ifelse(nchar(DE_05_SwissProt$BiologicalProcess) > 30, 
+                            paste0(substr(DE_05_SwissProt$BiologicalProcess, 1, 27), "..."), 
+                            DE_05_SwissProt$BiologicalProcess)
 
 gene_labels <- DE_05_SwissProt %>% select(query,short_GO) %>%
   mutate_all(~ ifelse(is.na(.), "", .)) #replace NAs with "" for labelling purposes
