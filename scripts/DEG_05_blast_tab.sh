@@ -4,7 +4,7 @@
 #SBATCH --export=NONE
 #SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
 #SBATCH --mail-user=zdellaert@uri.edu #your email to send notifications
-#SBATCH --mem=500GB
+#SBATCH --mem=250GB
 #SBATCH --error=../scripts/outs_errs/"%x_error.%j" #write out slurm error reports
 #SBATCH --output=../scripts/outs_errs/"%x_output.%j" #write out any program outpus
 #SBATCH --account=putnamlab
