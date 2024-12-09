@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name="DE_blast"
-#SBATCH -t 240:00:00
+#SBATCH -t 500:00:00
 #SBATCH --export=NONE
 #SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
 #SBATCH --mail-user=zdellaert@uri.edu #your email to send notifications
@@ -21,7 +21,7 @@ cd blast
 # [BLAST]
 # BLASTDB=/data/shared/ncbi-db/2024-11-10
 
-blastp -query ../DEG_05_seqs.txt -db nr -out DEG_05_blast_results.txt -outfmt 0 -evalue 1E-05 \
+blastp -query DEG_05_seqs_restart.txt -db nr -out DEG_05_blast_results_restart.txt -outfmt 0 -evalue 1E-05 \
 -num_threads 48 \
 -max_target_seqs 10
 
