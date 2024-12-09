@@ -296,7 +296,8 @@ gene_labels <- eggnog_all %>% select(query,PFAMs) %>%
 
 select <- order(res$padj)[1:50]
 
-top50_DE <- pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
+top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=FALSE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
          labels_row =gene_labels[select,"PFAMs"], fontsize_row = 5)
 top50_DE
@@ -305,7 +306,8 @@ save_ggplot(top50_DE, "../output_RNA/differential_expression/top50_DE")
 #view genes Higher in Aboral, Lower in OralEpi, ordered by log2FoldChange
 select <- order(res$log2FoldChange,decreasing = TRUE)[1:50]
 
-up_Aboral <- pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
+up_Aboral <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200),cluster_rows=FALSE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
          labels_row =gene_labels[select,"PFAMs"], fontsize_row = 5)
 up_Aboral
@@ -314,7 +316,8 @@ save_ggplot(up_Aboral, "../output_RNA/differential_expression/up_Aboral")
 #view genes Lower in Aboral, Higher in OralEpi, ordered by log2FoldChange
 select <- order(res$log2FoldChange)[1:50]
 
-up_OralEpi <- pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
+up_OralEpi <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200),cluster_rows=FALSE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
          labels_row =gene_labels[select,"PFAMs"], fontsize_row = 5)
 up_OralEpi
@@ -364,7 +367,8 @@ df <- as.data.frame(colData(dds)[,c("Tissue","Fragment")])
 
 #view biomin genes that are differntially expressed
 
-DE_biomin <- pheatmap(assay(vsd)[DE_05_biomin$query,], cluster_rows=TRUE, show_rownames=TRUE,
+z_scores <- t(scale(t(assay(vsd)[DE_05_biomin$query, ]), center = TRUE, scale = TRUE))
+DE_biomin <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
          labels_row = DE_05_biomin$def_short, fontsize_row = 5)
 DE_biomin
@@ -372,14 +376,17 @@ save_ggplot(DE_biomin, "../output_RNA/differential_expression/DE_biomin")
 
 #view marker genes that are differntially expressed
 
-DE_marker <- pheatmap(assay(vsd)[DE_05_marker$query,], cluster_rows=TRUE, show_rownames=TRUE,
+z_scores <- t(scale(t(assay(vsd)[DE_05_marker$query, ]), center = TRUE, scale = TRUE))
+DE_marker <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,cutree_rows = 5,annotation_col=df,
          labels_row = DE_05_marker$List, fontsize_row = 4)
 DE_marker
 save_ggplot(DE_marker, "../output_RNA/differential_expression/DE_marker")
 
 DE_05_marker_grouped <- DE_05_marker %>% arrange(List) %>% mutate(List = as.factor(List))
-DE_05_marker_grouped_plot <- pheatmap(assay(vsd)[DE_05_marker_grouped$query,], cluster_rows=FALSE, show_rownames=TRUE,
+
+z_scores <- t(scale(t(assay(vsd)[DE_05_marker_grouped$quer, ]), center = TRUE, scale = TRUE))
+DE_05_marker_grouped_plot <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=FALSE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
          labels_row = DE_05_marker_grouped$List, fontsize_row = 5)
 
@@ -523,7 +530,7 @@ grep -c ">" uniprot_sprot_r2024_10_02.fasta
 # 572214 sequences
 ```
 
-```{bash}
+```{bash, eval=FALSE}
 module load blast-plus/2.14.1
 
 makeblastdb \
@@ -532,7 +539,7 @@ makeblastdb \
 -out ../references/blast_dbs/uniprot_sprot_r2024_10_02
 ```
 
-```{bash eval=FALSE}
+```{bash, eval=FALSE}
 cd ../scripts
 nano blastp_SwissProt.sh
 ```
@@ -639,7 +646,8 @@ gene_labels <- DE_05_SwissProt %>%
 select <- order(res$padj)[1:50]
 rownames(res)[select]
 
-top50_DE <- pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
+top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=FALSE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
          labels_row = gene_labels[match(rownames(res)[select],(gene_labels$query)),2], fontsize_row = 6)
 top50_DE
@@ -648,7 +656,8 @@ save_ggplot(top50_DE, "../output_RNA/differential_expression/top50_DE_SwissProt"
 #view genes Higher in Aboral, Lower in OralEpi, ordered by log2FoldChange
 select <- order(res$log2FoldChange,decreasing = TRUE)[1:50]
 
-up_Aboral <- pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
+up_Aboral <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=FALSE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
          labels_row = gene_labels[match(rownames(res)[select],(gene_labels$query)),2], fontsize_row = 5)
 up_Aboral
@@ -657,7 +666,8 @@ save_ggplot(up_Aboral, "../output_RNA/differential_expression/up_Aboral_SwissPro
 #view genes Lower in Aboral, Higher in OralEpi, ordered by log2FoldChange
 select <- order(res$log2FoldChange)[1:50]
 
-up_OralEpi <- pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
+up_OralEpi <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=FALSE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
          labels_row =gene_labels[match(rownames(res)[select],(gene_labels$query)),2], fontsize_row = 5)
 up_OralEpi
@@ -678,7 +688,8 @@ gene_labels <- DE_05_SwissProt %>% select(query,short_GO) %>%
 
 select <- order(res$padj)[1:50]
 
-top50_DE <- pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
+top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=FALSE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
          labels_row =gene_labels[match(rownames(res)[select],(gene_labels$query)),2], fontsize_row = 5)
 top50_DE
@@ -687,7 +698,8 @@ save_ggplot(top50_DE, "../output_RNA/differential_expression/top50_DE_Blast2GO")
 #view genes Higher in Aboral, Lower in OralEpi, ordered by log2FoldChange
 select <- order(res$log2FoldChange,decreasing = TRUE)[1:50]
 
-up_Aboral <- pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
+up_Aboral <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=FALSE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
          labels_row =gene_labels[match(rownames(res)[select],(gene_labels$query)),2], fontsize_row = 5)
 up_Aboral
@@ -696,7 +708,8 @@ save_ggplot(up_Aboral, "../output_RNA/differential_expression/up_Aboral_Blast2GO
 #view genes Lower in Aboral, Higher in OralEpi, ordered by log2FoldChange
 select <- order(res$log2FoldChange)[1:50]
 
-up_OralEpi <- pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
+up_OralEpi <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=FALSE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=df,
          labels_row =gene_labels[match(rownames(res)[select],(gene_labels$query)),2], fontsize_row = 5)
 up_OralEpi
