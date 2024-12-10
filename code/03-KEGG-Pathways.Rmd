@@ -37,6 +37,7 @@ sessionInfo() #provides list of loaded packages and version of R.
 
 ```{r}
 DE_05 <- read.csv("../output_RNA/differential_expression/DE_05_SwissProt_annotation.csv", header = TRUE) %>% select(-X)
+DESeq_allgenes <- read.csv("../output_RNA/differential_expression/DESeq_results.csv", header = TRUE) %>% rename("X" = "query")
 
 uniprot_ids <- DE_05$blast_hit[!is.na(DE_05$blast_hit)]
 ```
@@ -208,6 +209,17 @@ gene.data$gene_id <- gsub("LOC", "", gene.data$gene_id) %>% as.numeric()
 gene.data <- setNames(gene.data$log2FoldChange, gene.data$gene_id)
 ```
 
+Join to all genes data:
+
+```{r}
+allgenes_Pdam <- left_join(DESeq_allgenes, Annot_Pdam)
+
+# make gene data matrix
+gene.data_allegenes <- allgenes_Pdam %>% select(gene_id,log2FoldChange) %>% drop_na() 
+gene.data_allegenes$gene_id <- gsub("LOC", "", gene.data_allegenes$gene_id) %>% as.numeric()
+
+gene.data_allegenes <- setNames(gene.data_allegenes$log2FoldChange, gene.data_allegenes$gene_id)
+```
 
 ## Wnt signaling pathway - Pocillopora damicornis (lace coral)
 
@@ -217,6 +229,10 @@ See pathway here: https://www.genome.jp/entry/pathway+pdam04310
 setwd("../output_RNA/differential_expression/KEGG")
 
 pathview(gene.data = gene.data, pathway.id = "pdam04310", species = "pdam", gene.idtype="KEGG", kegg.native = TRUE,
+          low = "mediumpurple1",
+          high = "green")
+
+pathview(gene.data = gene.data_allegenes, pathway.id = "pdam04310", species = "pdam", gene.idtype="KEGG", kegg.native = TRUE,
           low = "mediumpurple1",
           high = "green")
 ```
