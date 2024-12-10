@@ -370,7 +370,6 @@ renv::restore() #reinstall all the package versions in the renv lockfile</code><
 <div id="load-packages" class="section level2">
 <h2>Load packages</h2>
 <pre class="r"><code>packages &lt;- c(&quot;pathview&quot;, &quot;KEGGREST&quot;, &quot;rtracklayer&quot; , &quot;tidyverse&quot;)
-
 lapply(packages, library, character.only = TRUE)</code></pre>
 <pre><code>## Warning: package &#39;GenomeInfoDb&#39; was built under R version 4.3.3</code></pre>
 <pre><code>## [[1]]
@@ -471,8 +470,8 @@ DESeq_allgenes &lt;- read.csv(&quot;../output_RNA/differential_expression/DESeq_
 
 uniprot_ids &lt;- DE_05$blast_hit[!is.na(DE_05$blast_hit)]</code></pre>
 </div>
-<div id="blast-pacuta-genes-to-pdam-genome" class="section level2">
-<h2>BLAST Pacuta genes to Pdam genome</h2>
+<div id="blast-pacuta-genes-to-pdam-genome-in-bash" class="section level2">
+<h2>BLAST Pacuta genes to Pdam genome (in bash)</h2>
 <pre class="bash"><code>cd ../scripts
 nano Pdam_blast.sh</code></pre>
 <pre class="bash"><code>#!/bin/bash
@@ -500,10 +499,18 @@ blastp -query Pocillopora_acuta_HIv2.genes.pep.faa -db blast_dbs/Pdam_prot -out 
 
 echo &quot;Blast complete!&quot; $(date)</code></pre>
 <pre class="bash"><code>sbatch Pdam_blast.sh</code></pre>
+</div>
+<div id="join-our-data-to-pdam-annotations" class="section level2">
+<h2>Join our data to Pdam annotations</h2>
 <pre class="r"><code>Pdam_gtf &lt;- import(&quot;../references/Pdam_RefSeq.gtf&quot;)
-Pdam_gtf_proteins &lt;- as.data.frame(Pdam_gtf) %&gt;% filter(type == &quot;CDS&quot;) %&gt;% select(protein_id, gene_id) %&gt;% distinct()
+Pdam_gtf_proteins &lt;- as.data.frame(Pdam_gtf) %&gt;%
+                        filter(type == &quot;CDS&quot;) %&gt;% 
+                        select(protein_id, gene_id) %&gt;% 
+                        distinct()
 
-Annot_Pdam &lt;- read.csv(&quot;../references/annotation/blastp_Pdam_out.tab&quot;, sep = &#39;\t&#39;, header = FALSE) %&gt;% select(c(1,2)) %&gt;% dplyr::rename(&quot;protein_id&quot; = &quot;V2&quot;, &quot;query&quot; = &quot;V1&quot;)
+Annot_Pdam &lt;- read.csv(&quot;../references/annotation/blastp_Pdam_out.tab&quot;, sep = &#39;\t&#39;, header = FALSE) %&gt;% 
+                        select(c(1,2)) %&gt;%
+                        dplyr::rename(&quot;protein_id&quot; = &quot;V2&quot;, &quot;query&quot; = &quot;V1&quot;)
 
 Annot_Pdam &lt;- left_join(Annot_Pdam, Pdam_gtf_proteins)</code></pre>
 <pre><code>## Joining with `by = join_by(protein_id)`</code></pre>
@@ -546,127 +553,47 @@ gene_data_allgenes$gene_id &lt;- gsub(&quot;LOC&quot;, &quot;&quot;, gene_data_a
 
 gene.data_allgenes &lt;- setNames(gene_data_allgenes$log2FoldChange, gene_data_allgenes$gene_id)</code></pre>
 </div>
-<div id="wnt-signaling-pathway---pocillopora-damicornis-lace-coral" class="section level2">
-<h2>Wnt signaling pathway - Pocillopora damicornis (lace coral)</h2>
-<p>See pathway here: <a href="https://www.genome.jp/entry/pathway+pdam04310" class="uri">https://www.genome.jp/entry/pathway+pdam04310</a></p>
-<pre class="r"><code>setwd(&quot;../output_RNA/differential_expression/KEGG&quot;)
-
-pathview(gene.data = gene.data, pathway.id = &quot;pdam04310&quot;, species = &quot;pdam&quot;, gene.idtype=&quot;KEGG&quot;, kegg.native = TRUE,
-         out.suffix = &quot;DE_05&quot;, 
-         low = &quot;mediumpurple1&quot;,
-         high = &quot;green&quot;)</code></pre>
-<pre><code>## Warning: No annotation package for the species pdam, gene symbols not mapped!</code></pre>
-<pre><code>## Info: Working in directory /Users/zoedellaert/Documents/URI/LaserCoral/output_RNA/differential_expression/KEGG</code></pre>
-<pre><code>## Info: Writing image file pdam04310.DE_05.png</code></pre>
-<pre class="r"><code>pathview(gene.data = gene.data_allgenes, pathway.id = &quot;pdam04310&quot;, species = &quot;pdam&quot;, gene.idtype=&quot;KEGG&quot;, kegg.native = TRUE,
-          out.suffix = &quot;allgenes&quot;, 
-          low = &quot;mediumpurple1&quot;,
-          high = &quot;green&quot;)</code></pre>
-<pre><code>## Warning: No annotation package for the species pdam, gene symbols not mapped!</code></pre>
-<pre><code>## Info: Working in directory /Users/zoedellaert/Documents/URI/LaserCoral/output_RNA/differential_expression/KEGG</code></pre>
-<pre><code>## Info: Writing image file pdam04310.allgenes.png</code></pre>
+<div id="visualize-kegg-pathways-of-interest" class="section level2">
+<h2>Visualize KEGG Pathways of interest</h2>
+<div id="pathways-of-interest" class="section level3">
+<h3>Pathways of interest:</h3>
+<ol style="list-style-type: decimal">
+<li>Wnt signaling pathway - <a href="https://www.genome.jp/entry/pathway+pdam04310" class="uri">https://www.genome.jp/entry/pathway+pdam04310</a></li>
+<li>mTOR signaling pathway - <a href="https://www.genome.jp/entry/pathway+pdam04150" class="uri">https://www.genome.jp/entry/pathway+pdam04150</a></li>
+<li>Neuroactive ligand-receptor interaction -<a href="https://www.genome.jp/entry/pathway+pdam04080" class="uri">https://www.genome.jp/entry/pathway+pdam04080</a></li>
+<li>Motor proteins - <a href="https://www.genome.jp/entry/pathway+pdam04814" class="uri">https://www.genome.jp/entry/pathway+pdam04814</a></li>
+<li>Lysosome - <a href="https://www.genome.jp/entry/pathway+pdam04142" class="uri">https://www.genome.jp/entry/pathway+pdam04142</a></li>
+<li>Cytoskeleton in muscle cells - <a href="https://www.genome.jp/entry/pathway+pdam04820" class="uri">https://www.genome.jp/entry/pathway+pdam04820</a></li>
+</ol>
 </div>
-<div id="mtor-signaling-pathway---pocillopora-damicornis-lace-coral" class="section level2">
-<h2>mTOR signaling pathway - Pocillopora damicornis (lace coral)</h2>
-<p>See pathway here: <a href="https://www.genome.jp/entry/pathway+pdam04150" class="uri">https://www.genome.jp/entry/pathway+pdam04150</a></p>
-<pre class="r"><code>setwd(&quot;../output_RNA/differential_expression/KEGG&quot;)
+<div id="code" class="section level3">
+<h3>Code</h3>
+<pre class="r"><code># Define output directory
+setwd(&quot;../output_RNA/differential_expression/KEGG&quot;)
 
-pathview(gene.data = gene.data, pathway.id = &quot;pdam04150&quot;, species = &quot;pdam&quot;, gene.idtype=&quot;KEGG&quot;, kegg.native = TRUE,
-         out.suffix = &quot;DE_05&quot;, 
-         low = &quot;mediumpurple1&quot;,
-         high = &quot;green&quot;)</code></pre>
-<pre><code>## Warning: No annotation package for the species pdam, gene symbols not mapped!</code></pre>
-<pre><code>## Info: Working in directory /Users/zoedellaert/Documents/URI/LaserCoral/output_RNA/differential_expression/KEGG</code></pre>
-<pre><code>## Info: Writing image file pdam04150.DE_05.png</code></pre>
-<pre class="r"><code>pathview(gene.data = gene.data_allgenes, pathway.id = &quot;pdam04150&quot;, species = &quot;pdam&quot;, gene.idtype=&quot;KEGG&quot;, kegg.native = TRUE,
-          out.suffix = &quot;allgenes&quot;, 
-          low = &quot;mediumpurple1&quot;,
-          high = &quot;green&quot;)</code></pre>
-<pre><code>## Warning: No annotation package for the species pdam, gene symbols not mapped!</code></pre>
-<pre><code>## Info: Working in directory /Users/zoedellaert/Documents/URI/LaserCoral/output_RNA/differential_expression/KEGG</code></pre>
-<pre><code>## Info: Writing image file pdam04150.allgenes.png</code></pre>
+# Function to visualize a pathway
+visualize_pathway &lt;- function(pathway_id, suffix, gene_data) {
+  pathview(
+    gene.data = gene_data,
+    pathway.id = pathway_id,
+    species = &quot;pdam&quot;,
+    gene.idtype = &quot;KEGG&quot;,
+    kegg.native = TRUE,
+    out.suffix = suffix,
+    low = &quot;mediumpurple1&quot;,
+    high = &quot;green&quot;
+  )
+}
+
+# Specify pathways of interest
+pathways &lt;- c(&quot;pdam04310&quot;, &quot;pdam04150&quot;, &quot;pdam04080&quot;, &quot;pdam04814&quot;, &quot;pdam04142&quot;, &quot;pdam04820&quot;)
+
+# Visualize for DE_05 data and all genes
+for (pathway in pathways) {
+  visualize_pathway(pathway, &quot;DE_05&quot;, gene.data)
+  visualize_pathway(pathway, &quot;allgenes&quot;, gene.data_allgenes)
+}</code></pre>
 </div>
-<div id="neuroactive-ligand-receptor-interaction---pocillopora-damicornis-lace-coral" class="section level2">
-<h2>Neuroactive ligand-receptor interaction - Pocillopora damicornis
-(lace coral)</h2>
-<p>See pathway here: <a href="https://www.genome.jp/entry/pathway+pdam04080" class="uri">https://www.genome.jp/entry/pathway+pdam04080</a></p>
-<pre class="r"><code>setwd(&quot;../output_RNA/differential_expression/KEGG&quot;)
-
-pathview(gene.data = gene.data, pathway.id = &quot;pdam04080&quot;, species = &quot;pdam&quot;, gene.idtype=&quot;KEGG&quot;, kegg.native = TRUE,
-         out.suffix = &quot;DE_05&quot;, 
-         low = &quot;mediumpurple1&quot;,
-         high = &quot;green&quot;)</code></pre>
-<pre><code>## Warning: No annotation package for the species pdam, gene symbols not mapped!</code></pre>
-<pre><code>## Info: Working in directory /Users/zoedellaert/Documents/URI/LaserCoral/output_RNA/differential_expression/KEGG</code></pre>
-<pre><code>## Info: Writing image file pdam04080.DE_05.png</code></pre>
-<pre class="r"><code>pathview(gene.data = gene.data_allgenes, pathway.id = &quot;pdam04080&quot;, species = &quot;pdam&quot;, gene.idtype=&quot;KEGG&quot;, kegg.native = TRUE,
-          out.suffix = &quot;allgenes&quot;, 
-          low = &quot;mediumpurple1&quot;,
-          high = &quot;green&quot;)</code></pre>
-<pre><code>## Warning: No annotation package for the species pdam, gene symbols not mapped!</code></pre>
-<pre><code>## Info: Working in directory /Users/zoedellaert/Documents/URI/LaserCoral/output_RNA/differential_expression/KEGG</code></pre>
-<pre><code>## Info: Writing image file pdam04080.allgenes.png</code></pre>
-</div>
-<div id="motor-proteins---pocillopora-damicornis-lace-coral" class="section level2">
-<h2>Motor proteins - Pocillopora damicornis (lace coral)</h2>
-<p>See pathway here: <a href="https://www.genome.jp/entry/pathway+pdam04814" class="uri">https://www.genome.jp/entry/pathway+pdam04814</a></p>
-<pre class="r"><code>setwd(&quot;../output_RNA/differential_expression/KEGG&quot;)
-
-pathview(gene.data = gene.data, pathway.id = &quot;pdam04814&quot;, species = &quot;pdam&quot;, gene.idtype=&quot;KEGG&quot;, kegg.native = TRUE,
-         out.suffix = &quot;DE_05&quot;, 
-         low = &quot;mediumpurple1&quot;,
-         high = &quot;green&quot;)</code></pre>
-<pre><code>## Warning: No annotation package for the species pdam, gene symbols not mapped!</code></pre>
-<pre><code>## Info: Working in directory /Users/zoedellaert/Documents/URI/LaserCoral/output_RNA/differential_expression/KEGG</code></pre>
-<pre><code>## Info: Writing image file pdam04814.DE_05.png</code></pre>
-<pre class="r"><code>pathview(gene.data = gene.data_allgenes, pathway.id = &quot;pdam04814&quot;, species = &quot;pdam&quot;, gene.idtype=&quot;KEGG&quot;, kegg.native = TRUE,
-          out.suffix = &quot;allgenes&quot;, 
-          low = &quot;mediumpurple1&quot;,
-          high = &quot;green&quot;)</code></pre>
-<pre><code>## Warning: No annotation package for the species pdam, gene symbols not mapped!</code></pre>
-<pre><code>## Info: Working in directory /Users/zoedellaert/Documents/URI/LaserCoral/output_RNA/differential_expression/KEGG</code></pre>
-<pre><code>## Info: Writing image file pdam04814.allgenes.png</code></pre>
-</div>
-<div id="lysosome---pocillopora-damicornis-lace-coral" class="section level2">
-<h2>Lysosome - Pocillopora damicornis (lace coral)</h2>
-<p>See pathway here: <a href="https://www.genome.jp/entry/pathway+pdam04142" class="uri">https://www.genome.jp/entry/pathway+pdam04142</a></p>
-<pre class="r"><code>setwd(&quot;../output_RNA/differential_expression/KEGG&quot;)
-
-pathview(gene.data = gene.data, pathway.id = &quot;pdam04142&quot;, species = &quot;pdam&quot;, gene.idtype=&quot;KEGG&quot;, kegg.native = TRUE,
-         out.suffix = &quot;DE_05&quot;, 
-         low = &quot;mediumpurple1&quot;,
-         high = &quot;green&quot;)</code></pre>
-<pre><code>## Warning: No annotation package for the species pdam, gene symbols not mapped!</code></pre>
-<pre><code>## Info: Working in directory /Users/zoedellaert/Documents/URI/LaserCoral/output_RNA/differential_expression/KEGG</code></pre>
-<pre><code>## Info: Writing image file pdam04142.DE_05.png</code></pre>
-<pre class="r"><code>pathview(gene.data = gene.data_allgenes, pathway.id = &quot;pdam04142&quot;, species = &quot;pdam&quot;, gene.idtype=&quot;KEGG&quot;, kegg.native = TRUE,
-          out.suffix = &quot;allgenes&quot;, 
-          low = &quot;mediumpurple1&quot;,
-          high = &quot;green&quot;)</code></pre>
-<pre><code>## Warning: No annotation package for the species pdam, gene symbols not mapped!</code></pre>
-<pre><code>## Info: Working in directory /Users/zoedellaert/Documents/URI/LaserCoral/output_RNA/differential_expression/KEGG</code></pre>
-<pre><code>## Info: Writing image file pdam04142.allgenes.png</code></pre>
-</div>
-<div id="cytoskeleton-in-muscle-cells---pocillopora-damicornis-lace-coral" class="section level2">
-<h2>Cytoskeleton in muscle cells - Pocillopora damicornis (lace
-coral)</h2>
-<p>See pathway here: <a href="https://www.genome.jp/entry/pathway+pdam04820" class="uri">https://www.genome.jp/entry/pathway+pdam04820</a></p>
-<pre class="r"><code>setwd(&quot;../output_RNA/differential_expression/KEGG&quot;)
-
-pathview(gene.data = gene.data, pathway.id = &quot;pdam04820&quot;, species = &quot;pdam&quot;, gene.idtype=&quot;KEGG&quot;, kegg.native = TRUE,
-         out.suffix = &quot;DE_05&quot;, 
-         low = &quot;mediumpurple1&quot;,
-         high = &quot;green&quot;)</code></pre>
-<pre><code>## Warning: No annotation package for the species pdam, gene symbols not mapped!</code></pre>
-<pre><code>## Info: Working in directory /Users/zoedellaert/Documents/URI/LaserCoral/output_RNA/differential_expression/KEGG</code></pre>
-<pre><code>## Info: Writing image file pdam04820.DE_05.png</code></pre>
-<pre class="r"><code>pathview(gene.data = gene.data_allgenes, pathway.id = &quot;pdam04820&quot;, species = &quot;pdam&quot;, gene.idtype=&quot;KEGG&quot;, kegg.native = TRUE,
-          out.suffix = &quot;allgenes&quot;, 
-          low = &quot;mediumpurple1&quot;,
-          high = &quot;green&quot;)</code></pre>
-<pre><code>## Warning: No annotation package for the species pdam, gene symbols not mapped!</code></pre>
-<pre><code>## Info: Working in directory /Users/zoedellaert/Documents/URI/LaserCoral/output_RNA/differential_expression/KEGG</code></pre>
-<pre><code>## Info: Writing image file pdam04820.allgenes.png</code></pre>
 </div>
 <div id="updating-renv-environment" class="section level2">
 <h2>Updating Renv environment:</h2>

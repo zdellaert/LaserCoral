@@ -25,11 +25,8 @@ renv::restore() #reinstall all the package versions in the renv lockfile
 
 ```{r message=FALSE}
 packages <- c("pathview", "KEGGREST", "rtracklayer" , "tidyverse")
-
 lapply(packages, library, character.only = TRUE)
-```
 
-```{r}
 sessionInfo() #provides list of loaded packages and version of R.
 ```
 
@@ -42,7 +39,7 @@ DESeq_allgenes <- read.csv("../output_RNA/differential_expression/DESeq_results.
 uniprot_ids <- DE_05$blast_hit[!is.na(DE_05$blast_hit)]
 ```
 
-## BLAST Pacuta genes to Pdam genome
+## BLAST Pacuta genes to Pdam genome (in bash)
 
 ```{bash eval=FALSE}
 cd ../scripts
@@ -80,11 +77,18 @@ echo "Blast complete!" $(date)
 sbatch Pdam_blast.sh
 ```
 
+## Join our data to Pdam annotations
+
 ```{r}
 Pdam_gtf <- import("../references/Pdam_RefSeq.gtf")
-Pdam_gtf_proteins <- as.data.frame(Pdam_gtf) %>% filter(type == "CDS") %>% select(protein_id, gene_id) %>% distinct()
+Pdam_gtf_proteins <- as.data.frame(Pdam_gtf) %>%
+                        filter(type == "CDS") %>% 
+                        select(protein_id, gene_id) %>% 
+                        distinct()
 
-Annot_Pdam <- read.csv("../references/annotation/blastp_Pdam_out.tab", sep = '\t', header = FALSE) %>% select(c(1,2)) %>% dplyr::rename("protein_id" = "V2", "query" = "V1")
+Annot_Pdam <- read.csv("../references/annotation/blastp_Pdam_out.tab", sep = '\t', header = FALSE) %>% 
+                        select(c(1,2)) %>%
+                        dplyr::rename("protein_id" = "V2", "query" = "V1")
 
 Annot_Pdam <- left_join(Annot_Pdam, Pdam_gtf_proteins)
 ```
@@ -124,110 +128,45 @@ gene_data_allgenes$gene_id <- gsub("LOC", "", gene_data_allgenes$gene_id) %>% as
 gene.data_allgenes <- setNames(gene_data_allgenes$log2FoldChange, gene_data_allgenes$gene_id)
 ```
 
-## Wnt signaling pathway - Pocillopora damicornis (lace coral)
+## Visualize KEGG Pathways of interest
 
-See pathway here: https://www.genome.jp/entry/pathway+pdam04310
+### Pathways of interest:
 
-```{r}
+1. Wnt signaling pathway - https://www.genome.jp/entry/pathway+pdam04310
+2. mTOR signaling pathway - https://www.genome.jp/entry/pathway+pdam04150
+3. Neuroactive ligand-receptor interaction -https://www.genome.jp/entry/pathway+pdam04080
+4. Motor proteins - https://www.genome.jp/entry/pathway+pdam04814
+5. Lysosome - https://www.genome.jp/entry/pathway+pdam04142
+6. Cytoskeleton in muscle cells - https://www.genome.jp/entry/pathway+pdam04820
+
+### Code
+
+```{r message=FALSE}
+# Define output directory
 setwd("../output_RNA/differential_expression/KEGG")
 
-pathview(gene.data = gene.data, pathway.id = "pdam04310", species = "pdam", gene.idtype="KEGG", kegg.native = TRUE,
-         out.suffix = "DE_05", 
-         low = "mediumpurple1",
-         high = "green")
+# Function to visualize a pathway
+visualize_pathway <- function(pathway_id, suffix, gene_data) {
+  pathview(
+    gene.data = gene_data,
+    pathway.id = pathway_id,
+    species = "pdam",
+    gene.idtype = "KEGG",
+    kegg.native = TRUE,
+    out.suffix = suffix,
+    low = "mediumpurple1",
+    high = "green"
+  )
+}
 
-pathview(gene.data = gene.data_allgenes, pathway.id = "pdam04310", species = "pdam", gene.idtype="KEGG", kegg.native = TRUE,
-          out.suffix = "allgenes", 
-          low = "mediumpurple1",
-          high = "green")
-```
+# Specify pathways of interest
+pathways <- c("pdam04310", "pdam04150", "pdam04080", "pdam04814", "pdam04142", "pdam04820")
 
-## mTOR signaling pathway - Pocillopora damicornis (lace coral)
-
-See pathway here: https://www.genome.jp/entry/pathway+pdam04150
-
-```{r}
-setwd("../output_RNA/differential_expression/KEGG")
-
-pathview(gene.data = gene.data, pathway.id = "pdam04150", species = "pdam", gene.idtype="KEGG", kegg.native = TRUE,
-         out.suffix = "DE_05", 
-         low = "mediumpurple1",
-         high = "green")
-
-pathview(gene.data = gene.data_allgenes, pathway.id = "pdam04150", species = "pdam", gene.idtype="KEGG", kegg.native = TRUE,
-          out.suffix = "allgenes", 
-          low = "mediumpurple1",
-          high = "green")
-```
-
-## Neuroactive ligand-receptor interaction - Pocillopora damicornis (lace coral)
-
-See pathway here: https://www.genome.jp/entry/pathway+pdam04080
-
-```{r}
-setwd("../output_RNA/differential_expression/KEGG")
-
-pathview(gene.data = gene.data, pathway.id = "pdam04080", species = "pdam", gene.idtype="KEGG", kegg.native = TRUE,
-         out.suffix = "DE_05", 
-         low = "mediumpurple1",
-         high = "green")
-
-pathview(gene.data = gene.data_allgenes, pathway.id = "pdam04080", species = "pdam", gene.idtype="KEGG", kegg.native = TRUE,
-          out.suffix = "allgenes", 
-          low = "mediumpurple1",
-          high = "green")
-```
-## Motor proteins - Pocillopora damicornis (lace coral)
-
-See pathway here: https://www.genome.jp/entry/pathway+pdam04814
-
-```{r}
-setwd("../output_RNA/differential_expression/KEGG")
-
-pathview(gene.data = gene.data, pathway.id = "pdam04814", species = "pdam", gene.idtype="KEGG", kegg.native = TRUE,
-         out.suffix = "DE_05", 
-         low = "mediumpurple1",
-         high = "green")
-
-pathview(gene.data = gene.data_allgenes, pathway.id = "pdam04814", species = "pdam", gene.idtype="KEGG", kegg.native = TRUE,
-          out.suffix = "allgenes", 
-          low = "mediumpurple1",
-          high = "green")
-```
-## Lysosome - Pocillopora damicornis (lace coral)
-
-See pathway here: https://www.genome.jp/entry/pathway+pdam04142
-
-```{r}
-setwd("../output_RNA/differential_expression/KEGG")
-
-pathview(gene.data = gene.data, pathway.id = "pdam04142", species = "pdam", gene.idtype="KEGG", kegg.native = TRUE,
-         out.suffix = "DE_05", 
-         low = "mediumpurple1",
-         high = "green")
-
-pathview(gene.data = gene.data_allgenes, pathway.id = "pdam04142", species = "pdam", gene.idtype="KEGG", kegg.native = TRUE,
-          out.suffix = "allgenes", 
-          low = "mediumpurple1",
-          high = "green")
-```
-
-## Cytoskeleton in muscle cells - Pocillopora damicornis (lace coral)
-
-See pathway here: https://www.genome.jp/entry/pathway+pdam04820
-
-```{r}
-setwd("../output_RNA/differential_expression/KEGG")
-
-pathview(gene.data = gene.data, pathway.id = "pdam04820", species = "pdam", gene.idtype="KEGG", kegg.native = TRUE,
-         out.suffix = "DE_05", 
-         low = "mediumpurple1",
-         high = "green")
-
-pathview(gene.data = gene.data_allgenes, pathway.id = "pdam04820", species = "pdam", gene.idtype="KEGG", kegg.native = TRUE,
-          out.suffix = "allgenes", 
-          low = "mediumpurple1",
-          high = "green")
+# Visualize for DE_05 data and all genes
+for (pathway in pathways) {
+  visualize_pathway(pathway, "DE_05", gene.data)
+  visualize_pathway(pathway, "allgenes", gene.data_allgenes)
+}
 ```
 
 ## Updating Renv environment:
