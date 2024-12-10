@@ -24,7 +24,7 @@ renv::restore() #reinstall all the package versions in the renv lockfile
 ## Load packages
 
 ```{r message=FALSE}
-packages <- c("pathview", "biomaRt", "KEGGREST", "rtracklayer", "tidyverse")
+packages <- c("pathview", "KEGGREST", "rtracklayer" , "tidyverse")
 
 lapply(packages, library, character.only = TRUE)
 ```
@@ -37,118 +37,10 @@ sessionInfo() #provides list of loaded packages and version of R.
 
 ```{r}
 DE_05 <- read.csv("../output_RNA/differential_expression/DE_05_SwissProt_annotation.csv", header = TRUE) %>% select(-X)
-DESeq_allgenes <- read.csv("../output_RNA/differential_expression/DESeq_results.csv", header = TRUE) %>% rename("X" = "query")
+DESeq_allgenes <- read.csv("../output_RNA/differential_expression/DESeq_results.csv", header = TRUE) %>% dplyr::rename("query" ="X")
 
 uniprot_ids <- DE_05$blast_hit[!is.na(DE_05$blast_hit)]
 ```
-
-## Get ensembl ids for all of the BLAST hits
-
-```{r}
-# Connect to Ensembl BioMart
-ensembl <- useMart("ensembl")
-
-# Get all datasets
-datasets <- listDatasets(ensembl)[104:214,]
-
-# Store results
-#results <- list()
-
-# Iterate through all datasets
-for (dataset in datasets$dataset) {
-  cat("Querying dataset:", dataset, "\n")
-  
-  # Connect to each dataset
-  mart <- useMart("ensembl", dataset = dataset)
-  
-  # Try mapping UniProt to Entrez IDs
-  try({
-    mapping <- getBM(
-      attributes = c("uniprotswissprot", "entrezgene_id"),
-      filters = "uniprotswissprot",
-      values = uniprot_ids,
-      mart = mart
-    )
-    
-    # If results are found, store them
-    if (nrow(mapping) > 0) {
-      mapping$dataset <- dataset  # Add dataset info for context
-      results[[dataset]] <- mapping
-    }
-  }, silent = TRUE)
-}
-
-# Combine results into one data frame
-final_results <- do.call(rbind, results)
-print(final_results)
-
-DE_05_ENTREZ <- left_join(DE_05, final_results, join_by(blast_hit == uniprotswissprot))
-
-# make gene data matrix
-gene.data <- DE_05_ENTREZ %>% select(entrezgene_id,log2FoldChange) %>% drop_na() %>%
-  mutate(entrezgene_id = as.numeric(entrezgene_id))
-```
-
-
-## BLAST DE genes to Pdam genome
-
-On andromeda:
-
-Download Pdam genome
-```{bash eval=FALSE}
-cd ../references
-
-wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/003/704/095/GCF_003704095.1_ASM370409v1/GCF_003704095.1_ASM370409v1_protein.faa.gz
-
-gunzip GCF_003704095.1_ASM370409v1_protein.faa.gz
-mv GCF_003704095.1_ASM370409v1_protein.faa Pdam_RefSeq_protein.faa
-
-wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/003/704/095/GCF_003704095.1_ASM370409v1/GCF_003704095.1_ASM370409v1_genomic.gtf.gz
-gunzip GCF_003704095.1_ASM370409v1_genomic.gtf.gz
-mv GCF_003704095.1_ASM370409v1_genomic.gtf Pdam_RefSeq.gtf
-```
-
-```{bash eval=FALSE}
-cd ../scripts
-nano Pdam_blast.sh
-```
-
-```{bash eval=FALSE}
-#!/bin/bash
-#SBATCH --job-name="Pdam_blast"
-#SBATCH -t 240:00:00
-#SBATCH --export=NONE
-#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
-#SBATCH --mail-user=zdellaert@uri.edu #your email to send notifications
-#SBATCH --mem=100GB
-#SBATCH --error=../scripts/outs_errs/"%x_error.%j" #write out slurm error reports
-#SBATCH --output=../scripts/outs_errs/"%x_output.%j" #write out any program outpus
-#SBATCH --account=putnamlab
-#SBATCH --nodes=2 --ntasks-per-node=24
-
-module load BLAST+/2.15.0-gompi-2023a
-
-makeblastdb -in ../references/Pdam_RefSeq_protein.faa -out ../references/blast_dbs/Pdam_prot -dbtype prot
-
-cd ../output_RNA/differential_expression/blast
-
-blastp -query ../DEG_05_seqs.txt -db ../../../references/blast_dbs/Pdam_prot -out DEG_05_blast_results_tab_Pdam.txt -outfmt 6 -evalue 1E-05 \
--num_threads 48 \
--max_target_seqs 1 \
--max_hsps 1
-
-echo "Blast complete!" $(date)
-```
-
-```{bash, eval=FALSE}
-sbatch Pdam_blast.sh
-```
-
-```{r}
-DE_05_Pdam <- read.csv("../output_RNA/differential_expression/blast/DEG_05_blast_results_tab_Pdam.txt", sep = '\t', header = FALSE)
-```
-
-
 
 ## BLAST Pacuta genes to Pdam genome
 
@@ -192,13 +84,12 @@ sbatch Pdam_blast.sh
 Pdam_gtf <- import("../references/Pdam_RefSeq.gtf")
 Pdam_gtf_proteins <- as.data.frame(Pdam_gtf) %>% filter(type == "CDS") %>% select(protein_id, gene_id) %>% distinct()
 
-Annot_Pdam <- read.csv("../references/annotation/blastp_Pdam_out.tab", sep = '\t', header = FALSE) %>% select(c(1,2)) %>% rename("V2" = "protein_id", "V1" = "query")
+Annot_Pdam <- read.csv("../references/annotation/blastp_Pdam_out.tab", sep = '\t', header = FALSE) %>% select(c(1,2)) %>% dplyr::rename("protein_id" = "V2", "query" = "V1")
 
 Annot_Pdam <- left_join(Annot_Pdam, Pdam_gtf_proteins)
 ```
 
 Join to DE data:
-
 ```{r}
 DE_05_Pdam <- left_join(DE_05, Annot_Pdam)
 
@@ -213,7 +104,7 @@ What pathways are common in our DE genes?
 ```{r}
 pdam_pathways <- keggLink("pathway", "pdam")
 pdam_pathways <- data.frame(pdam_pathways, names(pdam_pathways)) 
-pdam_pathways <- pdam_pathways %>% rename("names.pdam_pathways." = "gene_id")
+pdam_pathways <- pdam_pathways %>% dplyr::rename("gene_id" = "names.pdam_pathways.")
 pdam_pathways$gene_id <- gsub("pdam:", "", pdam_pathways$gene_id) %>% as.numeric()
 
 DE_05_Pdam_pathways <- left_join(gene_data, pdam_pathways) %>%  drop_na() %>% count(pdam_pathways) %>% arrange(-n)
@@ -223,7 +114,6 @@ head(DE_05_Pdam_pathways)
 
 
 Join to all genes data:
-
 ```{r}
 allgenes_Pdam <- left_join(DESeq_allgenes, Annot_Pdam)
 
