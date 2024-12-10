@@ -456,6 +456,7 @@ grep -f ../output_RNA/differential_expression/DEG_05_names.csv ../references/Poc
 grep  -A 1 -f ../output_RNA/differential_expression/DEG_05_names.csv ../references/Pocillopora_acuta_HIv2.genes.pep.faa > ../output_RNA/differential_expression/DEG_05_seqs.txt
 ```
 
+### nr database BLAST of DE_05 genes only
 
 On andromeda:
 
@@ -505,6 +506,31 @@ echo "Blast complete!" $(date)
 ```{bash, eval=FALSE}
 sbatch DEG_05_blast.sh
 ```
+
+```{bash, eval=FALSE}
+cd ../output_RNA/differential_expression/blast
+
+wc -l DEG_05_blast_results_tab.txt #3537 of the 3606 genes were annotated
+
+#get just the NCBI database accession numbers for the blast results
+cut -f2 DEG_05_blast_results_tab.txt > DEG_05_blast_accessions.txt
+
+#remove any duplicates
+sort -u  DEG_05_blast_accessions.txt > unique_DEG_05_blast_accessions.txt
+
+wc -l unique_DEG_05_blast_accessions.txt #3404 of the 3537 annotations were unique
+
+while read acc; do
+  curl -s "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=$acc&rettype=gp&retmode=text" \
+  | grep "DEFINITION" | sed 's/DEFINITION  //g' | awk -v id="$acc" '{print id "\t" $0}'
+done < unique_DEG_05_blast_accessions.txt > DEG_05_blast_names.txt
+
+wc -l DEG_05_blast_names.txt #3396 ; unsure why 8 are missing.
+
+join -1 2 -2 1 -t $'\t' <(sort -k2 DEG_05_blast_results_tab.txt) <(sort DEG_05_blast_names.txt) > annotated_DEG_05_blast_results_tab.txt
+```
+
+### SwissProt of ALL genes
 
 On unity:
 
@@ -715,10 +741,6 @@ up_OralEpi <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, 
 up_OralEpi
 save_ggplot(up_OralEpi, "../output_RNA/differential_expression/up_OralEpi_Blast2GO")
 ```
-
-## we probably want to correct for batch effects (LCM date) + genotype (Fragment)
-## and to decide which tranformation to use
-
 ## Updating Renv environment:
 
 After you’ve confirmed your code works as expected, use renv::snapshot() to record the packages and their sources in the lockfile."
