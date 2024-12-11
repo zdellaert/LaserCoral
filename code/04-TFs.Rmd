@@ -109,16 +109,51 @@ summary(start(promoters_500_UP))
 
 #trim any promoters that exit the boundaries of the chromosomes, none of mine did but just in case
 promoters_500_UP <- GenomicRanges::trim(promoters_500_UP)
+
+summary(start(promoters_500_UP))
+
+# also remove any rows where the promoter sequence had a width of 0
+data.frame(promoters_500_UP[promoters_500_UP@ranges@width == 0])$ID
+
+promoters_500_UP <- promoters_500_UP[promoters_500_UP@ranges@width != 0]
 ```
+
+This removed these three genes:
+- "Pocillopora_acuta_HIv2___RNAseq.g8520.t1"
+- "Pocillopora_acuta_HIv2___RNAseq.g23688.t1"
+- "Pocillopora_acuta_HIv2___RNAseq.g3131.t1" 
 
 Then, use the package BioStrings (manual here: https://bioconductor.org/packages/release/bioc/manuals/Biostrings/man/Biostrings.pdf) to extract these sequences:
 
 ```{r}
+# to avoid any confusion, remove any chromosomes frome the genome that are not represented in our 3606 DE genes
 genome_filtered <- genome[genome@ranges@NAMES %in% seqlevels(promoters_500_UP)]
 
 names(genome_filtered) == seqlevels(promoters_500_UP)
 
-promoters_500_UP_seqs <- getSeq(genome_filtered, promoters_500_UP)
+# extract the positive strand transcripts, where start < end
+#pos_promoters <- promoters_500_UP_df %>% filter(strand == "+")
+
+# extract the negative strand transcripts, where start > end
+#neg_promoters <- promoters_500_UP_df %>% filter(strand == "-")
+
+promoters_all <- list()
+
+for (chromosome in unique(seqnames(promoters_500_UP))) {
+  genome_filtered <- genome[genome@ranges@NAMES %in% chromosome]
+  promoters_500_UP_filtered <- data.frame(promoters_500_UP) %>% filter(seqnames == chromosome)
+  
+  promoters_chromosome <- list()
+  
+  for (i in 1:nrow(promoters_500_UP_filtered)) {
+    promoter <- subseq(genome_filtered, start= promoters_500_UP_filtered$start[i], end= promoters_500_UP_filtered$end[i])
+    names(promoter) <- promoters_500_UP_filtered$ID[i]
+    
+    promoters_chromosome[[i]] <-  promoter
+  }
+  
+  promoters_all[[chromosome]] <- promoters_chromosome
+}
 
 ```
 ## Updating Renv environment:
