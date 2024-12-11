@@ -123,38 +123,42 @@ This removed these three genes:
 - "Pocillopora_acuta_HIv2___RNAseq.g23688.t1"
 - "Pocillopora_acuta_HIv2___RNAseq.g3131.t1" 
 
-Then, use the package BioStrings (manual here: https://bioconductor.org/packages/release/bioc/manuals/Biostrings/man/Biostrings.pdf) to extract these sequences:
+Then, extract these sequences, by chromosome, using the function "DNAStringSet":
 
 ```{r}
-# to avoid any confusion, remove any chromosomes frome the genome that are not represented in our 3606 DE genes
-genome_filtered <- genome[genome@ranges@NAMES %in% seqlevels(promoters_500_UP)]
-
-names(genome_filtered) == seqlevels(promoters_500_UP)
-
-# extract the positive strand transcripts, where start < end
-#pos_promoters <- promoters_500_UP_df %>% filter(strand == "+")
-
-# extract the negative strand transcripts, where start > end
-#neg_promoters <- promoters_500_UP_df %>% filter(strand == "-")
-
-promoters_all <- list()
+#create a DNAStringSet object to house all the sequences
+promoters_all <- DNAStringSet()
 
 for (chromosome in unique(seqnames(promoters_500_UP))) {
+  # one chromosome at a time, filter the gff dataframe
   genome_filtered <- genome[genome@ranges@NAMES %in% chromosome]
   promoters_500_UP_filtered <- data.frame(promoters_500_UP) %>% filter(seqnames == chromosome)
   
   promoters_chromosome <- list()
   
+  # then iterate over every row (transcript) for that chromosome
   for (i in 1:nrow(promoters_500_UP_filtered)) {
-    promoter <- subseq(genome_filtered, start= promoters_500_UP_filtered$start[i], end= promoters_500_UP_filtered$end[i])
+    
+    #use the DNAStringSet function to subset the chromosome into the promoter regions of interest
+    promoter <- DNAStringSet(genome_filtered,
+                             start= promoters_500_UP_filtered$start[i],
+                             end= promoters_500_UP_filtered$end[i])
+    
+    #carry over the transcript name (what we really care about!)
     names(promoter) <- promoters_500_UP_filtered$ID[i]
     
-    promoters_chromosome[[i]] <-  promoter
+    #append this extracted sequence to the promoter list for this chromosome
+    promoters_chromosome[[promoters_500_UP_filtered$ID[i]]] <-  promoter
   }
   
-  promoters_all[[chromosome]] <- promoters_chromosome
+  #collapse this big list into a "DNAStringSetList" object, which takes less memory
+  collapsed <- DNAStringSetList(unlist(promoters_chromosome))
+  
+  #append this chromosome list to the DNAStringSetList for all chromosomes
+  promoters_all <- c(promoters_all, unlist(collapsed))
 }
 
+writeXStringSet(promoters_all, filepath = "../output_RNA/differential_expression/TFs/promoters_500_upstream.fasta")
 ```
 ## Updating Renv environment:
 
