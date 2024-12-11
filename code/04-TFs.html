@@ -615,12 +615,56 @@ summary(start(promoters_500_UP))</code></pre>
 
 #trim any promoters that exit the boundaries of the chromosomes, none of mine did but just in case
 promoters_500_UP &lt;- GenomicRanges::trim(promoters_500_UP)
+
 summary(start(promoters_500_UP))</code></pre>
 <pre><code>##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
 ##        1   911572  2376274  3263669  4651098 15660880</code></pre>
-<p>Then, use the package BioStrings (manual here: <a href="https://bioconductor.org/packages/release/bioc/manuals/Biostrings/man/Biostrings.pdf" class="uri">https://bioconductor.org/packages/release/bioc/manuals/Biostrings/man/Biostrings.pdf</a>)
-to extract these sequences:</p>
-<pre class="r"><code>#promoters_500_UP_seqs &lt;- getSeq(genome, promoters_500_UP)</code></pre>
+<pre class="r"><code># also remove any rows where the promoter sequence had a width of 0
+data.frame(promoters_500_UP[promoters_500_UP@ranges@width == 0])$ID</code></pre>
+<pre><code>## [1] &quot;Pocillopora_acuta_HIv2___RNAseq.g8520.t1&quot; 
+## [2] &quot;Pocillopora_acuta_HIv2___RNAseq.g23688.t1&quot;
+## [3] &quot;Pocillopora_acuta_HIv2___RNAseq.g3131.t1&quot;</code></pre>
+<pre class="r"><code>promoters_500_UP &lt;- promoters_500_UP[promoters_500_UP@ranges@width != 0]</code></pre>
+<p>This removed these three genes: -
+“Pocillopora_acuta_HIv2_<strong>RNAseq.g8520.t1” -
+”Pocillopora_acuta_HIv2</strong>_RNAseq.g23688.t1” -
+“Pocillopora_acuta_HIv2___RNAseq.g3131.t1”</p>
+<p>Then, extract these sequences, by chromosome, using the function
+“DNAStringSet”:</p>
+<pre class="r"><code>#create a DNAStringSet object to house all the sequences
+promoters_all &lt;- DNAStringSet()
+
+for (chromosome in unique(seqnames(promoters_500_UP))) {
+  
+  # filter the genome, one chromosome at a time
+  genome_filtered &lt;- genome[genome@ranges@NAMES %in% chromosome]
+  
+  # one chromosome at a time, filter the gff dataframe
+  promoters_500_UP_filtered &lt;- data.frame(promoters_500_UP) %&gt;% filter(seqnames == chromosome)
+  
+  # set up a list for this chromosome
+  promoters_chromosome &lt;- DNAStringSetList()
+  
+  # then iterate over every row (transcript) for that chromosome
+  for (i in 1:nrow(promoters_500_UP_filtered)) {
+    
+    #use the DNAStringSet function to subset the chromosome into the promoter regions of interest
+    promoter &lt;- DNAStringSet(genome_filtered,
+                             start= promoters_500_UP_filtered$start[i],
+                             end= promoters_500_UP_filtered$end[i])
+    
+    #carry over the transcript name (what we really care about!)
+    names(promoter) &lt;- promoters_500_UP_filtered$ID[i]
+    
+    #append this extracted sequence to the promoter list for this chromosome
+    promoters_chromosome &lt;-  c(promoters_chromosome, promoter)
+  }
+  
+  #append this chromosome list to the DNAStringSetList for all chromosomes
+  promoters_all &lt;- c(promoters_all, unlist(promoters_chromosome))
+}
+
+writeXStringSet(promoters_all, filepath = &quot;../output_RNA/differential_expression/TFs/promoters_500_upstream.fasta&quot;)</code></pre>
 </div>
 <div id="updating-renv-environment" class="section level2">
 <h2>Updating Renv environment:</h2>
