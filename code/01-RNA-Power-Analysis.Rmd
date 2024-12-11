@@ -7,6 +7,10 @@ output: html_document
 
 ## RNA power analysis for laser capture microdissection (LCM) of tissue-specific RNA of multiple coral species
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
 ## Managing Packages Using Renv
 
 To run this code in my project using the renv environment, run the following lines of code
@@ -18,21 +22,12 @@ renv::restore() #reinstall all the package versions in the renv lockfile
 
 ## Load packages
 
-```{r message=FALSE}
-packages <- c("RNASeqPower", "tidyverse", "matrixStats", "wrMisc")
+```{r packages}
+require("RNASeqPower")
+require("tidyverse")
+require("matrixStats")
+require("wrMisc")
 
-lapply(packages, library, character.only = TRUE)
-```
-
-```{r}
-sessionInfo() #provides list of loaded packages and version of R.
-```
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-```{r}
 sessionInfo() #provides list of loaded packages and version of R.
 ```
 
@@ -143,3 +138,12 @@ rnapower(depth=290, cv=0.9020732 , n = 5, alpha= .05, effect=c(1.25, 1.5, 1.75, 
 ```
 
 With both depths, at this cv and sample size, we can see we will be able to determine an effect size around 5-6 and greater for a power > 0.8
+
+## Updating Renv environment:
+
+After you’ve confirmed your code works as expected, use renv::snapshot() to record the packages and their sources in the lockfile.
+
+```{r, eval=FALSE}
+renv::snapshot()
+```
+

@@ -369,31 +369,77 @@ renv::restore() #reinstall all the package versions in the renv lockfile</code><
 </div>
 <div id="load-packages" class="section level2">
 <h2>Load packages</h2>
-<pre class="r"><code>packages &lt;- c(&quot;pathview&quot;, &quot;KEGGREST&quot;, &quot;rtracklayer&quot; , &quot;tidyverse&quot;)
-lapply(packages, library, character.only = TRUE)</code></pre>
-<pre><code>## Warning: package &#39;GenomeInfoDb&#39; was built under R version 4.3.3</code></pre>
-<pre><code>## [[1]]
-## [1] &quot;pathview&quot;  &quot;stats&quot;     &quot;graphics&quot;  &quot;grDevices&quot; &quot;datasets&quot;  &quot;utils&quot;    
-## [7] &quot;methods&quot;   &quot;base&quot;     
+<pre class="r"><code>require(&quot;pathview&quot;)</code></pre>
+<pre><code>## Loading required package: pathview</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## ##############################################################################
+## Pathview is an open source software package distributed under GNU General
+## Public License version 3 (GPLv3). Details of GPLv3 is available at
+## http://www.gnu.org/licenses/gpl-3.0.html. Particullary, users are required to
+## formally cite the original Pathview paper (not just mention it) in publications
+## or products. For details, do citation(&quot;pathview&quot;) within R.
 ## 
-## [[2]]
-## [1] &quot;KEGGREST&quot;  &quot;pathview&quot;  &quot;stats&quot;     &quot;graphics&quot;  &quot;grDevices&quot; &quot;datasets&quot; 
-## [7] &quot;utils&quot;     &quot;methods&quot;   &quot;base&quot;     
+## The pathview downloads and uses KEGG data. Non-academic uses may require a KEGG
+## license agreement (details at http://www.kegg.jp/kegg/legal.html).
+## ##############################################################################</code></pre>
+<pre class="r"><code>require(&quot;KEGGREST&quot;)</code></pre>
+<pre><code>## Loading required package: KEGGREST</code></pre>
+<pre class="r"><code>require(&quot;rtracklayer&quot;)</code></pre>
+<pre><code>## Loading required package: rtracklayer</code></pre>
+<pre><code>## Loading required package: GenomicRanges</code></pre>
+<pre><code>## Loading required package: stats4</code></pre>
+<pre><code>## Loading required package: BiocGenerics</code></pre>
+<pre><code>## 
+## Attaching package: &#39;BiocGenerics&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
 ## 
-## [[3]]
-##  [1] &quot;rtracklayer&quot;   &quot;GenomicRanges&quot; &quot;GenomeInfoDb&quot;  &quot;IRanges&quot;      
-##  [5] &quot;S4Vectors&quot;     &quot;BiocGenerics&quot;  &quot;stats4&quot;        &quot;KEGGREST&quot;     
-##  [9] &quot;pathview&quot;      &quot;stats&quot;         &quot;graphics&quot;      &quot;grDevices&quot;    
-## [13] &quot;datasets&quot;      &quot;utils&quot;         &quot;methods&quot;       &quot;base&quot;         
+##     IQR, mad, sd, var, xtabs</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
 ## 
-## [[4]]
-##  [1] &quot;lubridate&quot;     &quot;forcats&quot;       &quot;stringr&quot;       &quot;dplyr&quot;        
-##  [5] &quot;purrr&quot;         &quot;readr&quot;         &quot;tidyr&quot;         &quot;tibble&quot;       
-##  [9] &quot;ggplot2&quot;       &quot;tidyverse&quot;     &quot;rtracklayer&quot;   &quot;GenomicRanges&quot;
-## [13] &quot;GenomeInfoDb&quot;  &quot;IRanges&quot;       &quot;S4Vectors&quot;     &quot;BiocGenerics&quot; 
-## [17] &quot;stats4&quot;        &quot;KEGGREST&quot;      &quot;pathview&quot;      &quot;stats&quot;        
-## [21] &quot;graphics&quot;      &quot;grDevices&quot;     &quot;datasets&quot;      &quot;utils&quot;        
-## [25] &quot;methods&quot;       &quot;base&quot;</code></pre>
+##     anyDuplicated, aperm, append, as.data.frame, basename, cbind,
+##     colnames, dirname, do.call, duplicated, eval, evalq, Filter, Find,
+##     get, grep, grepl, intersect, is.unsorted, lapply, Map, mapply,
+##     match, mget, order, paste, pmax, pmax.int, pmin, pmin.int,
+##     Position, rank, rbind, Reduce, rownames, sapply, setdiff, sort,
+##     table, tapply, union, unique, unsplit, which.max, which.min</code></pre>
+<pre><code>## Loading required package: S4Vectors</code></pre>
+<pre><code>## 
+## Attaching package: &#39;S4Vectors&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:utils&#39;:
+## 
+##     findMatches</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     expand.grid, I, unname</code></pre>
+<pre><code>## Loading required package: IRanges</code></pre>
+<pre><code>## Loading required package: GenomeInfoDb</code></pre>
+<pre><code>## Registered S3 method overwritten by &#39;SparseArray&#39;:
+##   method           from        
+##   rowsum.dgCMatrix DelayedArray</code></pre>
+<pre class="r"><code>require(&quot;tidyverse&quot;)</code></pre>
+<pre><code>## Loading required package: tidyverse</code></pre>
+<pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+## ✔ dplyr     1.1.4     ✔ readr     2.1.5
+## ✔ forcats   1.0.0     ✔ stringr   1.5.1
+## ✔ ggplot2   3.5.1     ✔ tibble    3.2.1
+## ✔ lubridate 1.9.3     ✔ tidyr     1.3.1
+## ✔ purrr     1.0.2     
+## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ lubridate::%within%() masks IRanges::%within%()
+## ✖ dplyr::collapse()     masks IRanges::collapse()
+## ✖ dplyr::combine()      masks BiocGenerics::combine()
+## ✖ dplyr::desc()         masks IRanges::desc()
+## ✖ tidyr::expand()       masks S4Vectors::expand()
+## ✖ dplyr::filter()       masks stats::filter()
+## ✖ dplyr::first()        masks S4Vectors::first()
+## ✖ dplyr::lag()          masks stats::lag()
+## ✖ ggplot2::Position()   masks BiocGenerics::Position(), base::Position()
+## ✖ purrr::reduce()       masks GenomicRanges::reduce(), IRanges::reduce()
+## ✖ dplyr::rename()       masks S4Vectors::rename()
+## ✖ lubridate::second()   masks S4Vectors::second()
+## ✖ lubridate::second&lt;-() masks S4Vectors::second&lt;-()
+## ✖ dplyr::slice()        masks IRanges::slice()
+## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
 <pre class="r"><code>sessionInfo() #provides list of loaded packages and version of R.</code></pre>
 <pre><code>## R version 4.3.2 (2023-10-31)
 ## Platform: aarch64-apple-darwin20 (64-bit)
@@ -417,35 +463,35 @@ lapply(packages, library, character.only = TRUE)</code></pre>
 ##  [1] lubridate_1.9.3      forcats_1.0.0        stringr_1.5.1       
 ##  [4] dplyr_1.1.4          purrr_1.0.2          readr_2.1.5         
 ##  [7] tidyr_1.3.1          tibble_3.2.1         ggplot2_3.5.1       
-## [10] tidyverse_2.0.0      rtracklayer_1.62.0   GenomicRanges_1.54.1
-## [13] GenomeInfoDb_1.38.8  IRanges_2.36.0       S4Vectors_0.40.2    
-## [16] BiocGenerics_0.48.1  KEGGREST_1.42.0      pathview_1.42.0     
+## [10] tidyverse_2.0.0      rtracklayer_1.62.0   GenomicRanges_1.52.1
+## [13] GenomeInfoDb_1.36.4  IRanges_2.34.1       S4Vectors_0.38.2    
+## [16] BiocGenerics_0.46.0  KEGGREST_1.40.1      pathview_1.42.0     
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] tidyselect_1.2.1            blob_1.2.4                 
-##  [3] Biostrings_2.70.3           bitops_1.0-9               
+##  [3] Biostrings_2.68.1           bitops_1.0-9               
 ##  [5] fastmap_1.2.0               RCurl_1.98-1.16            
 ##  [7] GenomicAlignments_1.38.2    XML_3.99-0.17              
 ##  [9] digest_0.6.37               timechange_0.3.0           
 ## [11] lifecycle_1.0.4             KEGGgraph_1.62.0           
-## [13] RSQLite_2.3.7               magrittr_2.0.3             
+## [13] RSQLite_2.3.9               magrittr_2.0.3             
 ## [15] compiler_4.3.2              rlang_1.1.4                
 ## [17] sass_0.4.9                  tools_4.3.2                
 ## [19] utf8_1.2.4                  yaml_2.3.10                
-## [21] knitr_1.48                  S4Arrays_1.2.1             
-## [23] bit_4.5.0                   DelayedArray_0.28.0        
-## [25] abind_1.4-8                 BiocParallel_1.36.0        
+## [21] knitr_1.48                  S4Arrays_1.0.6             
+## [23] bit_4.5.0                   DelayedArray_0.26.7        
+## [25] abind_1.4-8                 BiocParallel_1.34.2        
 ## [27] withr_3.0.1                 grid_4.3.2                 
 ## [29] fansi_1.0.6                 colorspace_2.1-1           
-## [31] scales_1.3.0                SummarizedExperiment_1.32.0
+## [31] scales_1.3.0                SummarizedExperiment_1.30.2
 ## [33] cli_3.6.3                   rmarkdown_2.28             
 ## [35] crayon_1.5.3                generics_0.1.3             
 ## [37] rstudioapi_0.17.0           tzdb_0.4.0                 
 ## [39] httr_1.4.7                  rjson_0.2.23               
 ## [41] DBI_1.2.3                   cachem_1.1.0               
-## [43] zlibbioc_1.48.2             parallel_4.3.2             
-## [45] AnnotationDbi_1.64.1        BiocManager_1.30.25        
-## [47] XVector_0.42.0              restfulr_0.0.15            
+## [43] zlibbioc_1.46.0             parallel_4.3.2             
+## [45] AnnotationDbi_1.62.2        BiocManager_1.30.25        
+## [47] XVector_0.40.0              restfulr_0.0.15            
 ## [49] matrixStats_1.4.1           vctrs_0.6.5                
 ## [51] Matrix_1.6-5                jsonlite_1.8.9             
 ## [53] hms_1.1.3                   bit64_4.5.2                
@@ -454,14 +500,14 @@ lapply(packages, library, character.only = TRUE)</code></pre>
 ## [59] stringi_1.8.4               gtable_0.3.5               
 ## [61] BiocIO_1.12.0               munsell_0.5.1              
 ## [63] pillar_1.9.0                htmltools_0.5.8.1          
-## [65] graph_1.80.0                GenomeInfoDbData_1.2.11    
+## [65] graph_1.80.0                GenomeInfoDbData_1.2.10    
 ## [67] R6_2.5.1                    evaluate_1.0.1             
-## [69] lattice_0.22-6              Biobase_2.62.0             
+## [69] lattice_0.22-6              Biobase_2.60.0             
 ## [71] png_0.1-8                   Rsamtools_2.18.0           
 ## [73] memoise_2.0.1               renv_1.0.11                
 ## [75] bslib_0.8.0                 SparseArray_1.2.4          
 ## [77] org.Hs.eg.db_3.18.0         xfun_0.48                  
-## [79] MatrixGenerics_1.14.0       pkgconfig_2.0.3</code></pre>
+## [79] MatrixGenerics_1.12.3       pkgconfig_2.0.3</code></pre>
 </div>
 <div id="load-in-differential-expression-data" class="section level2">
 <h2>Load in differential expression data</h2>
@@ -529,13 +575,8 @@ pdam_pathways &lt;- pdam_pathways %&gt;% dplyr::rename(&quot;gene_id&quot; = &qu
 pdam_pathways$gene_id &lt;- gsub(&quot;pdam:&quot;, &quot;&quot;, pdam_pathways$gene_id) %&gt;% as.numeric()</code></pre>
 <pre><code>## Warning in gsub(&quot;pdam:&quot;, &quot;&quot;, pdam_pathways$gene_id) %&gt;% as.numeric(): NAs
 ## introduced by coercion</code></pre>
-<pre class="r"><code>DE_05_Pdam_pathways &lt;- left_join(gene_data, pdam_pathways) %&gt;%  drop_na() %&gt;% count(pdam_pathways) %&gt;% arrange(-n)</code></pre>
+<pre class="r"><code>DE_05_Pdam_pathways &lt;- left_join(gene_data, pdam_pathways, relationship = &quot;many-to-many&quot;) %&gt;% drop_na() %&gt;% dplyr::count(pdam_pathways) %&gt;% arrange(-n)</code></pre>
 <pre><code>## Joining with `by = join_by(gene_id)`</code></pre>
-<pre><code>## Warning in left_join(gene_data, pdam_pathways): Detected an unexpected many-to-many relationship between `x` and `y`.
-## ℹ Row 2 of `x` matches multiple rows in `y`.
-## ℹ Row 356 of `y` matches multiple rows in `x`.
-## ℹ If a many-to-many relationship is expected, set `relationship =
-##   &quot;many-to-many&quot;` to silence this warning.</code></pre>
 <pre class="r"><code>head(DE_05_Pdam_pathways)</code></pre>
 <pre><code>##    pdam_pathways   n
 ## 1 path:pdam01100 229
@@ -568,11 +609,9 @@ gene.data_allgenes &lt;- setNames(gene_data_allgenes$log2FoldChange, gene_data_a
 </div>
 <div id="code" class="section level3">
 <h3>Code</h3>
-<pre class="r"><code># Define output directory
-setwd(&quot;../output_RNA/differential_expression/KEGG&quot;)
+<pre class="r"><code>setwd(&quot;../output_RNA/differential_expression/KEGG&quot;)
 
-# Function to visualize a pathway
-visualize_pathway &lt;- function(pathway_id, suffix, gene_data) {
+pathview_plot &lt;- function(pathway_id, suffix, gene_data) {
   pathview(
     gene.data = gene_data,
     pathway.id = pathway_id,
@@ -590,16 +629,53 @@ pathways &lt;- c(&quot;pdam04310&quot;, &quot;pdam04150&quot;, &quot;pdam04080&q
 
 # Visualize for DE_05 data and all genes
 for (pathway in pathways) {
-  visualize_pathway(pathway, &quot;DE_05&quot;, gene.data)
-  visualize_pathway(pathway, &quot;allgenes&quot;, gene.data_allgenes)
+  pathview_plot(pathway, &quot;DE_05&quot;, gene.data)
+  pathview_plot(pathway, &quot;allgenes&quot;, gene.data_allgenes)
 }</code></pre>
+<pre><code>## Warning: No annotation package for the species pdam, gene symbols not mapped!</code></pre>
+<pre><code>## Info: Working in directory /Users/zoedellaert/Documents/URI/LaserCoral/output_RNA/differential_expression/KEGG</code></pre>
+<pre><code>## Info: Writing image file pdam04310.DE_05.png</code></pre>
+<pre><code>## Warning: No annotation package for the species pdam, gene symbols not mapped!</code></pre>
+<pre><code>## Info: Working in directory /Users/zoedellaert/Documents/URI/LaserCoral/output_RNA/differential_expression/KEGG</code></pre>
+<pre><code>## Info: Writing image file pdam04310.allgenes.png</code></pre>
+<pre><code>## Warning: No annotation package for the species pdam, gene symbols not mapped!</code></pre>
+<pre><code>## Info: Working in directory /Users/zoedellaert/Documents/URI/LaserCoral/output_RNA/differential_expression/KEGG</code></pre>
+<pre><code>## Info: Writing image file pdam04150.DE_05.png</code></pre>
+<pre><code>## Warning: No annotation package for the species pdam, gene symbols not mapped!</code></pre>
+<pre><code>## Info: Working in directory /Users/zoedellaert/Documents/URI/LaserCoral/output_RNA/differential_expression/KEGG</code></pre>
+<pre><code>## Info: Writing image file pdam04150.allgenes.png</code></pre>
+<pre><code>## Warning: No annotation package for the species pdam, gene symbols not mapped!</code></pre>
+<pre><code>## Info: Working in directory /Users/zoedellaert/Documents/URI/LaserCoral/output_RNA/differential_expression/KEGG</code></pre>
+<pre><code>## Info: Writing image file pdam04080.DE_05.png</code></pre>
+<pre><code>## Warning: No annotation package for the species pdam, gene symbols not mapped!</code></pre>
+<pre><code>## Info: Working in directory /Users/zoedellaert/Documents/URI/LaserCoral/output_RNA/differential_expression/KEGG</code></pre>
+<pre><code>## Info: Writing image file pdam04080.allgenes.png</code></pre>
+<pre><code>## Warning: No annotation package for the species pdam, gene symbols not mapped!</code></pre>
+<pre><code>## Info: Working in directory /Users/zoedellaert/Documents/URI/LaserCoral/output_RNA/differential_expression/KEGG</code></pre>
+<pre><code>## Info: Writing image file pdam04814.DE_05.png</code></pre>
+<pre><code>## Warning: No annotation package for the species pdam, gene symbols not mapped!</code></pre>
+<pre><code>## Info: Working in directory /Users/zoedellaert/Documents/URI/LaserCoral/output_RNA/differential_expression/KEGG</code></pre>
+<pre><code>## Info: Writing image file pdam04814.allgenes.png</code></pre>
+<pre><code>## Warning: No annotation package for the species pdam, gene symbols not mapped!</code></pre>
+<pre><code>## Info: Working in directory /Users/zoedellaert/Documents/URI/LaserCoral/output_RNA/differential_expression/KEGG</code></pre>
+<pre><code>## Info: Writing image file pdam04142.DE_05.png</code></pre>
+<pre><code>## Warning: No annotation package for the species pdam, gene symbols not mapped!</code></pre>
+<pre><code>## Info: Working in directory /Users/zoedellaert/Documents/URI/LaserCoral/output_RNA/differential_expression/KEGG</code></pre>
+<pre><code>## Info: Writing image file pdam04142.allgenes.png</code></pre>
+<pre><code>## Warning: No annotation package for the species pdam, gene symbols not mapped!</code></pre>
+<pre><code>## Info: Working in directory /Users/zoedellaert/Documents/URI/LaserCoral/output_RNA/differential_expression/KEGG</code></pre>
+<pre><code>## Info: Writing image file pdam04820.DE_05.png</code></pre>
+<pre><code>## Warning: No annotation package for the species pdam, gene symbols not mapped!</code></pre>
+<pre><code>## Info: Working in directory /Users/zoedellaert/Documents/URI/LaserCoral/output_RNA/differential_expression/KEGG</code></pre>
+<pre><code>## Info: Writing image file pdam04820.allgenes.png</code></pre>
 </div>
 </div>
 <div id="updating-renv-environment" class="section level2">
 <h2>Updating Renv environment:</h2>
 <p>After you’ve confirmed your code works as expected, use
 renv::snapshot() to record the packages and their sources in the
-lockfile.”</p>
+lockfile.</p>
+<pre class="r"><code>renv::snapshot()</code></pre>
 </div>
 
 

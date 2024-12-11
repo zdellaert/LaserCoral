@@ -5,12 +5,11 @@ date: "2024-12-09"
 output: html_document
 ---
 
+## KEGG Pathway analysis of LCM RNA Data
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
-## KEGG Pathway analysis of LCM RNA Data
 
 ## Managing Packages Using Renv
 
@@ -23,16 +22,18 @@ renv::restore() #reinstall all the package versions in the renv lockfile
 
 ## Load packages
 
-```{r message=FALSE}
-packages <- c("pathview", "KEGGREST", "rtracklayer" , "tidyverse")
-lapply(packages, library, character.only = TRUE)
+```{r packages}
+require("pathview")
+require("KEGGREST")
+require("rtracklayer")
+require("tidyverse")
 
 sessionInfo() #provides list of loaded packages and version of R.
 ```
 
 ## Load in differential expression data
 
-```{r}
+```{r load_data}
 DE_05 <- read.csv("../output_RNA/differential_expression/DE_05_SwissProt_annotation.csv", header = TRUE) %>% select(-X)
 DESeq_allgenes <- read.csv("../output_RNA/differential_expression/DESeq_results.csv", header = TRUE) %>% dplyr::rename("query" ="X")
 
@@ -79,7 +80,7 @@ sbatch Pdam_blast.sh
 
 ## Join our data to Pdam annotations
 
-```{r}
+```{r load_annotation}
 Pdam_gtf <- import("../references/Pdam_RefSeq.gtf")
 Pdam_gtf_proteins <- as.data.frame(Pdam_gtf) %>%
                         filter(type == "CDS") %>% 
@@ -94,7 +95,7 @@ Annot_Pdam <- left_join(Annot_Pdam, Pdam_gtf_proteins)
 ```
 
 Join to DE data:
-```{r}
+```{r join_de}
 DE_05_Pdam <- left_join(DE_05, Annot_Pdam)
 
 # make gene data matrix
@@ -105,20 +106,20 @@ gene.data <- setNames(gene_data$log2FoldChange, gene_data$gene_id)
 ```
 
 What pathways are common in our DE genes?
-```{r}
+```{r de_pathways}
 pdam_pathways <- keggLink("pathway", "pdam")
 pdam_pathways <- data.frame(pdam_pathways, names(pdam_pathways)) 
 pdam_pathways <- pdam_pathways %>% dplyr::rename("gene_id" = "names.pdam_pathways.")
 pdam_pathways$gene_id <- gsub("pdam:", "", pdam_pathways$gene_id) %>% as.numeric()
 
-DE_05_Pdam_pathways <- left_join(gene_data, pdam_pathways) %>%  drop_na() %>% count(pdam_pathways) %>% arrange(-n)
+DE_05_Pdam_pathways <- left_join(gene_data, pdam_pathways, relationship = "many-to-many") %>% drop_na() %>% dplyr::count(pdam_pathways) %>% arrange(-n)
 
 head(DE_05_Pdam_pathways)
 ```
 
 
 Join to all genes data:
-```{r}
+```{r join_all}
 allgenes_Pdam <- left_join(DESeq_allgenes, Annot_Pdam)
 
 # make gene data matrix
@@ -141,12 +142,10 @@ gene.data_allgenes <- setNames(gene_data_allgenes$log2FoldChange, gene_data_allg
 
 ### Code
 
-```{r message=FALSE}
-# Define output directory
+```{r pathview}
 setwd("../output_RNA/differential_expression/KEGG")
 
-# Function to visualize a pathway
-visualize_pathway <- function(pathway_id, suffix, gene_data) {
+pathview_plot <- function(pathway_id, suffix, gene_data) {
   pathview(
     gene.data = gene_data,
     pathway.id = pathway_id,
@@ -164,11 +163,15 @@ pathways <- c("pdam04310", "pdam04150", "pdam04080", "pdam04814", "pdam04142", "
 
 # Visualize for DE_05 data and all genes
 for (pathway in pathways) {
-  visualize_pathway(pathway, "DE_05", gene.data)
-  visualize_pathway(pathway, "allgenes", gene.data_allgenes)
+  pathview_plot(pathway, "DE_05", gene.data)
+  pathview_plot(pathway, "allgenes", gene.data_allgenes)
 }
 ```
 
 ## Updating Renv environment:
 
-After you’ve confirmed your code works as expected, use renv::snapshot() to record the packages and their sources in the lockfile."
+After you’ve confirmed your code works as expected, use renv::snapshot() to record the packages and their sources in the lockfile.
+
+```{r, eval=FALSE}
+renv::snapshot()
+```

@@ -7,11 +7,11 @@ output:
   github_document: default
 ---
 
+## Differential expression analysis of LCM RNA Data
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
-## Differential expression analysis of LCM RNA Data
 
 ## Managing Packages Using Renv
 
@@ -24,14 +24,19 @@ renv::restore() #reinstall all the package versions in the renv lockfile
 
 ## Load packages
 
-```{r message=FALSE}
-packages <- c("genefilter", "DESeq2", "apeglm", "ashr", "ggplot2", "vsn", 
-              "hexbin", "pheatmap", "RColorBrewer", "EnhancedVolcano", "tidyverse")
+```{r packages}
+require("genefilter")
+require("DESeq2")
+require("apeglm")
+require("ashr")
+require("ggplot2")
+require("vsn")
+require("hexbin")
+require("pheatmap")
+require("RColorBrewer")
+require("EnhancedVolcano")
+require("tidyverse")
 
-lapply(packages, library, character.only = TRUE)
-```
-
-```{r}
 sessionInfo() #provides list of loaded packages and version of R.
 ```
 
@@ -743,4 +748,8 @@ save_ggplot(up_OralEpi, "../output_RNA/differential_expression/up_OralEpi_Blast2
 ```
 ## Updating Renv environment:
 
-After you’ve confirmed your code works as expected, use renv::snapshot() to record the packages and their sources in the lockfile."
+After you’ve confirmed your code works as expected, use renv::snapshot() to record the packages and their sources in the lockfile.
+
+```{r, eval=FALSE}
+renv::snapshot()
+```
