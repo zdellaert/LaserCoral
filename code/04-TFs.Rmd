@@ -1,0 +1,130 @@
+---
+title: "Transcription-Factors"
+author: "Zoe Dellaert"
+date: "2024-12-09"
+output: html_document
+---
+
+## Transcription Factor analysis of LCM RNA Data
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Managing Packages Using Renv
+
+To run this code in my project using the renv environment, run the following lines of code
+
+```{r, eval=FALSE}
+install.packages("renv") #install the package on the new computer (may not be necessary if renv bootstraps itself as expected)
+renv::restore() #reinstall all the package versions in the renv lockfile
+```
+
+## Load packages
+
+```{r packages}
+require("rtracklayer")
+require("Biostrings")
+require("GenomicRanges")
+require("tidyverse")
+
+sessionInfo() #provides list of loaded packages and version of R.
+```
+
+## Load in reference files and differential expression data
+
+In the next chunk I am loadinf in my DESeq data. These results are ordered by adjusted p-value. As a reminder, negative LFC = higher in Aboral tissue, and positive LFC = higher in Oral tissue.
+
+```{r load_data}
+DESeq <- read.csv("../output_RNA/differential_expression/DESeq_results.csv", header = TRUE) %>% dplyr::rename("query" ="X")
+DE_05 <- DE_05 <- DESeq %>% filter(padj < 0.05)
+```
+
+I want to identify promoter sequences of the differentially expressed genes to identify transcription factor binding sites. Below I load in the *Pocillopora acuta* genome and gff annotation files, which are in the references folder of this repo and were downloaded as described here: https://github.com/zdellaert/LaserCoral/blob/main/code/RNA-seq-bioinf.md.
+
+```{r references}
+# Import the P. acuta genome
+genome_fasta <- "../references/Pocillopora_acuta_HIv2.assembly.fasta"
+genome <- readDNAStringSet(genome_fasta, format = "fasta")
+
+# Import the P actua genome gff3 file
+gff_file <- "../references/Pocillopora_acuta_HIv2.genes.gff3"
+gff <- import(gff_file, format = "gff")
+
+#What types of entries are in the gff
+unique(gff$type)
+
+#keep only transcript entries, to have one entry per gene
+gff <- gff[gff$type=="transcript"]
+
+#the gff is missing chromosome lengths, so I am adding them here:
+chromosome_lengths <- seqlengths(genome)
+head(chromosome_lengths)
+
+head(seqlengths(gff))
+
+seqlengths(gff) <- chromosome_lengths[names(chromosome_lengths) %in% seqlevels(gff)]
+
+head(seqlengths(gff))
+```
+
+Filter the gff for differentially expressed genes
+
+```{r}
+gff_05 <- gff[gff$ID %in% DE_05$query]
+```
+
+## Define promoter regions
+
+I am basing this idea off of the following paper:
+
+"extract the putative promoter sequence, defined as the 500 bp immediately upstream of the predicted transcription start site in the gene model."
+
+Cleves PA, Krediet CJ, Lehnert EM, Onishi M, Pringle JR. Insights into coral bleaching under heat stress from analysis of gene expression in a sea anemone model system. Proceedings of the National Academy of Sciences. 2020 Nov 17;117(46):28906–17. (https://www.pnas.org/doi/10.1073/pnas.2015737117)
+
+I am going to try using the promoters function of the GenomicRanges Package (manual here: https://bioconductor.org/packages/devel/bioc/manuals/GenomicRanges/man/GenomicRanges.pdf):
+
+The function is described as such:
+
+promoters: assumes that the ranges in x represent transcript regions and returns the ranges of the corresponding promoter regions. The result is another GenomicRanges derivative parallel to the input, that is, of the same length as x and with the i-th element in the output corresponding to the i-th element in the input.
+
+The promoter regions extend around the transcription start sites (TSS) which are located at start(x) for ranges on the + or * strand, and at end(x) for ranges on the - strand. The upstream and downstream arguments define the number of nucleotides in the 5’ and 3’ direction, respectively. More precisely, the output range is defined as
+
+> (start(x) - upstream) to (start(x) + downstream - 1)
+
+for ranges on the + or * strand, and as
+
+> (end(x) - downstream + 1) to (end(x) + upstream)
+
+for ranges on the - strand. Be aware that the returned object might contain **out-of-bound ranges** i.e. ranges that start before the first nucleotide position and/or end after the last nucleotide position of the underlying sequence.
+
+```{r}
+promoters_500_UP <- promoters(gff_05, upstream = 500, downstream = 0)
+
+# are any of these regions out of bounds?
+
+summary(start(promoters_500_UP))
+
+#yes! I have some regions starting at -499, which is not good.
+
+#trim any promoters that exit the boundaries of the chromosomes, none of mine did but just in case
+promoters_500_UP <- GenomicRanges::trim(promoters_500_UP)
+```
+
+Then, use the package BioStrings (manual here: https://bioconductor.org/packages/release/bioc/manuals/Biostrings/man/Biostrings.pdf) to extract these sequences:
+
+```{r}
+genome_filtered <- genome[genome@ranges@NAMES %in% seqlevels(promoters_500_UP)]
+
+names(genome_filtered) == seqlevels(promoters_500_UP)
+
+promoters_500_UP_seqs <- getSeq(genome_filtered, promoters_500_UP)
+
+```
+## Updating Renv environment:
+
+After you’ve confirmed your code works as expected, use renv::snapshot() to record the packages and their sources in the lockfile.
+
+```{r, eval=FALSE}
+renv::snapshot()
+```
