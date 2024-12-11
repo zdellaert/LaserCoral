@@ -160,6 +160,43 @@ for (chromosome in unique(seqnames(promoters_500_UP))) {
 writeXStringSet(promoters_all, filepath = "../output_RNA/differential_expression/TFs/promoters_500_upstream.fasta")
 ```
 
+## Run MEME in Linux environment using the [Docker image of MEMESuite](https://hub.docker.com/r/memesuite/memesuite) via Singularity
+
+alternatively submit jobs via their webserver: https://meme-suite.org/meme/
+
+### In unity:
+
+```{bash, eval=FALSE}
+cd ../scripts
+nano MEME.sh
+```
+
+
+```{bash, eval=FALSE}
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=48
+#SBATCH --signal=2
+#SBATCH --no-requeue
+#SBATCH --mem=500GB
+#SBATCH --error=../scripts/outs_errs/"%x_error.%j"
+#SBATCH --output=../scripts/outs_errs/"%x_output.%j"
+#SBATCH -t 24:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+
+SINGULARITY_IMAGE="docker://memesuite/memesuite:latest"
+
+cd ../output_RNA/differential_expression/TFs
+
+module load apptainer/latest
+
+singularity exec --cleanenv $SINGULARITY_IMAGE meme promoters_500_upstream.fasta -maxw 25 -mod anr -nmotifs 2 -oc meme_output
+
+#singularity exec $SINGULARITY_IMAGE tomtom -oc tomtom_output meme_output/meme.txt known_motifs.meme
+
+#singularity exec $SINGULARITY_IMAGE fimo --oc fimo_output meme_output/motifs.meme all_promoters.fasta
+```
+
 
 
 ## Updating Renv environment:

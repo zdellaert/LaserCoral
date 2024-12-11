@@ -57,7 +57,6 @@ nano Pdam_blast.sh
 #SBATCH --mem=100GB
 #SBATCH --error=../scripts/outs_errs/"%x_error.%j" #write out slurm error reports
 #SBATCH --output=../scripts/outs_errs/"%x_output.%j" #write out any program outpus
-#SBATCH --account=putnamlab
 #SBATCH --nodes=2 --ntasks-per-node=24
 
 module load BLAST+/2.15.0-gompi-2023a
