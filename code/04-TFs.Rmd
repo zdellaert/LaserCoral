@@ -165,7 +165,6 @@ promoters_upOralEpi <- promoters_all[promoters_all@ranges@NAMES %in% DE_05[which
 
 writeXStringSet(promoters_upAboral, filepath = "../output_RNA/differential_expression/TFs/promoters_500_upstream_upAboral.fasta")
 writeXStringSet(promoters_upOralEpi, filepath = "../output_RNA/differential_expression/TFs/promoters_500_upstream_upOralEpi.fasta")
-
 ```
 
 
@@ -184,10 +183,10 @@ nano MEME.sh
 ```{bash, eval=FALSE}
 #!/usr/bin/env bash
 #SBATCH --export=NONE
-#SBATCH --nodes=1 --ntasks-per-node=48
+#SBATCH --nodes=1 --ntasks-per-node=24
 #SBATCH --signal=2
 #SBATCH --no-requeue
-#SBATCH --mem=500GB
+#SBATCH --mem=200GB
 #SBATCH --error=../scripts/outs_errs/"%x_error.%j"
 #SBATCH --output=../scripts/outs_errs/"%x_output.%j"
 #SBATCH -t 24:00:00
@@ -199,11 +198,19 @@ cd ../output_RNA/differential_expression/TFs
 
 module load apptainer/latest
 
-singularity exec --cleanenv $SINGULARITY_IMAGE meme promoters_500_upstream.fasta -maxw 25 -mod anr -nmotifs 2 -oc meme_output
+#singularity exec --cleanenv $SINGULARITY_IMAGE meme promoters_500_upstream_upAboral.fasta -dna -maxw 25 -mod anr -nmotifs 10 -p 6 -oc meme_output_upAboral -revcomp
 
-#singularity exec $SINGULARITY_IMAGE tomtom -oc tomtom_output meme_output/meme.txt known_motifs.meme
+#singularity exec --cleanenv $SINGULARITY_IMAGE meme promoters_500_upstream_upOralEpi.fasta -dna -maxw 25 -mod anr -nmotifs 10 -p 6 -oc meme_output_upOralEpi -revcomp
 
-#singularity exec $SINGULARITY_IMAGE fimo --oc fimo_output meme_output/motifs.meme all_promoters.fasta
+singularity exec --cleanenv $SINGULARITY_IMAGE tomtom -oc tomtom_output_upAboral meme_output_upAboral/meme.txt known_motifs.meme
+
+singularity exec --cleanenv $SINGULARITY_IMAGE tomtom -oc tomtom_output_upOralEpi meme_output_upOralEpi/meme.txt known_motifs.meme
+
+
+## timo should be run against whole genome, so i need to make a new file with promoters for all genes
+#singularity exec --cleanenv $SINGULARITY_IMAGE fimo --oc fimo_output_upAboral meme_output_upAboral/motifs.meme all_promoters.fasta
+
+#singularity exec --cleanenv $SINGULARITY_IMAGE fimo --oc fimo_output_upOralEpi meme_output_upOralEpi/motifs.meme all_promoters.fasta
 ```
 
 
