@@ -1,0 +1,125 @@
+Loading apptainer version latest
+INFO:    Using cached SIF image
+Writing results to output directory 'tomtom_output_upAboral'.
+Processing query 1 out of 10 
+# Computing q-values.
+#   Estimating pi_0 from all 3912 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.988412
+#   Estimated pi_0=0.988412
+Processing query 2 out of 10 
+# Computing q-values.
+#   Estimating pi_0 from all 3912 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00323
+#   Estimated pi_0=1
+Processing query 3 out of 10 
+# Computing q-values.
+#   Estimating pi_0 from all 3912 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.990412
+#   Estimated pi_0=0.992694
+Processing query 4 out of 10 
+# Computing q-values.
+#   Estimating pi_0 from all 3912 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00143
+#   Estimated pi_0=1
+Processing query 5 out of 10 
+# Computing q-values.
+#   Estimating pi_0 from all 3912 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00014
+#   Estimated pi_0=1
+Processing query 6 out of 10 
+# Computing q-values.
+#   Estimating pi_0 from all 3912 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.98428
+#   Estimated pi_0=0.986014
+Processing query 7 out of 10 
+# Computing q-values.
+#   Estimating pi_0 from all 3912 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.004
+#   Estimated pi_0=1
+Processing query 8 out of 10 
+# Computing q-values.
+#   Estimating pi_0 from all 3912 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.004
+#   Estimated pi_0=1
+Processing query 9 out of 10 
+# Computing q-values.
+#   Estimating pi_0 from all 3912 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00374
+#   Estimated pi_0=1
+Processing query 10 out of 10 
+# Computing q-values.
+#   Estimating pi_0 from all 3912 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00246
+#   Estimated pi_0=1
+INFO:    Using cached SIF image
+Writing results to output directory 'tomtom_output_upOralEpi'.
+Processing query 1 out of 10 
+# Computing q-values.
+#   Estimating pi_0 from all 3912 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00451
+#   Estimated pi_0=1
+Processing query 2 out of 10 
+# Computing q-values.
+#   Estimating pi_0 from all 3912 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.987021
+#   Estimated pi_0=0.987812
+Processing query 3 out of 10 
+# Computing q-values.
+#   Estimating pi_0 from all 3912 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.98884
+#   Estimated pi_0=0.98884
+Processing query 4 out of 10 
+# Computing q-values.
+#   Estimating pi_0 from all 3912 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.999887
+#   Estimated pi_0=0.999887
+Processing query 5 out of 10 
+# Computing q-values.
+#   Estimating pi_0 from all 3912 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00425
+#   Estimated pi_0=1
+Processing query 6 out of 10 
+# Computing q-values.
+#   Estimating pi_0 from all 3912 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.0004
+#   Estimated pi_0=1
+Processing query 7 out of 10 
+# Computing q-values.
+#   Estimating pi_0 from all 3912 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00425
+#   Estimated pi_0=1
+Processing query 8 out of 10 
+# Computing q-values.
+#   Estimating pi_0 from all 3912 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00323
+#   Estimated pi_0=1
+Processing query 9 out of 10 
+# Computing q-values.
+#   Estimating pi_0 from all 3912 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.979456
+#   Estimated pi_0=0.979456
+Processing query 10 out of 10 
+# Computing q-values.
+#   Estimating pi_0 from all 3912 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00271
+#   Estimated pi_0=1
