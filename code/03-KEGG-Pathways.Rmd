@@ -144,16 +144,16 @@ gene.data_allgenes <- setNames(gene_data_allgenes$log2FoldChange, gene_data_allg
 ```{r pathview}
 setwd("../output_RNA/differential_expression/KEGG")
 
-pathview_plot <- function(pathway_id, suffix, gene_data) {
+pathview_plot <- function(pathway_id, suffix, gene.data) {
   pathview(
-    gene.data = gene_data,
+    gene.data = gene.data,
     pathway.id = pathway_id,
     species = "pdam",
     gene.idtype = "KEGG",
     kegg.native = TRUE,
     out.suffix = suffix,
-    low = "mediumpurple1",
-    high = "green"
+    low = "green",
+    high = "mediumpurple1"
   )
 }
 

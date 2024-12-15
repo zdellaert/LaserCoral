@@ -463,13 +463,13 @@ renv::restore() #reinstall all the package versions in the renv lockfile</code><
 ##  [1] lubridate_1.9.3      forcats_1.0.0        stringr_1.5.1       
 ##  [4] dplyr_1.1.4          purrr_1.0.2          readr_2.1.5         
 ##  [7] tidyr_1.3.1          tibble_3.2.1         ggplot2_3.5.1       
-## [10] tidyverse_2.0.0      rtracklayer_1.62.0   GenomicRanges_1.52.1
+## [10] tidyverse_2.0.0      rtracklayer_1.62.0   GenomicRanges_1.54.1
 ## [13] GenomeInfoDb_1.36.4  IRanges_2.34.1       S4Vectors_0.38.2    
 ## [16] BiocGenerics_0.46.0  KEGGREST_1.40.1      pathview_1.42.0     
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] tidyselect_1.2.1            blob_1.2.4                 
-##  [3] Biostrings_2.68.1           bitops_1.0-9               
+##  [3] Biostrings_2.70.3           bitops_1.0-9               
 ##  [5] fastmap_1.2.0               RCurl_1.98-1.16            
 ##  [7] GenomicAlignments_1.38.2    XML_3.99-0.17              
 ##  [9] digest_0.6.37               timechange_0.3.0           
@@ -529,7 +529,6 @@ nano Pdam_blast.sh</code></pre>
 #SBATCH --mem=100GB
 #SBATCH --error=../scripts/outs_errs/&quot;%x_error.%j&quot; #write out slurm error reports
 #SBATCH --output=../scripts/outs_errs/&quot;%x_output.%j&quot; #write out any program outpus
-#SBATCH --account=putnamlab
 #SBATCH --nodes=2 --ntasks-per-node=24
 
 module load BLAST+/2.15.0-gompi-2023a
@@ -619,8 +618,8 @@ pathview_plot &lt;- function(pathway_id, suffix, gene_data) {
     gene.idtype = &quot;KEGG&quot;,
     kegg.native = TRUE,
     out.suffix = suffix,
-    low = &quot;mediumpurple1&quot;,
-    high = &quot;green&quot;
+    low = &quot;green&quot;,
+    high = &quot;mediumpurple1&quot;
   )
 }
 
