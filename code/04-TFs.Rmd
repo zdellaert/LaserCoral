@@ -68,10 +68,11 @@ seqlengths(gff) <- chromosome_lengths[names(chromosome_lengths) %in% seqlevels(g
 head(seqlengths(gff))
 ```
 
-Filter the gff for differentially expressed genes
+Filter the gff for differentially expressed genes and all expressed genes in the dataset (filtered, this is not all genes in the genome)
 
 ```{r}
 gff_05 <- gff[gff$ID %in% DE_05$query]
+gff_expressed <- gff[gff$ID %in% DESeq$query] 
 ```
 
 ## Define promoter regions
@@ -218,7 +219,72 @@ singularity exec --cleanenv $SINGULARITY_IMAGE tomtom -no-ssc -oc tomtom_output_
 #singularity exec --cleanenv $SINGULARITY_IMAGE fimo --oc fimo_output_upOralEpi meme_output_upOralEpi/motifs.meme all_promoters.fasta
 ```
 
+## Extract promoters for ALL sequences:
 
+```{r}
+promoters_500_UP <- promoters(gff_expressed, upstream = 500, downstream = 0)
+
+# are any of these regions out of bounds?
+
+summary(start(promoters_500_UP))
+
+#yes! I have some regions starting at -499, which is not good.
+
+#trim any promoters that exit the boundaries of the chromosomes, none of mine did but just in case
+promoters_500_UP <- GenomicRanges::trim(promoters_500_UP)
+
+summary(start(promoters_500_UP))
+
+# also remove any rows where the promoter sequence had a width of 0
+data.frame(promoters_500_UP[promoters_500_UP@ranges@width == 0])$ID
+
+promoters_500_UP <- promoters_500_UP[promoters_500_UP@ranges@width != 0]
+```
+
+This removed these four genes:
+"Pocillopora_acuta_HIv2___RNAseq.g8520.t1", "Pocillopora_acuta_HIv2___RNAseq.g23688.t1",  "Pocillopora_acuta_HIv2___RNAseq.g3131.t1" , and "Pocillopora_acuta_HIv2___RNAseq.g28711.t1" 
+
+Then, extract these sequences, by chromosome, using the function "DNAStringSet":
+
+```{r}
+#create a DNAStringSet object to house all the sequences
+promoters_all <- DNAStringSet()
+
+for (chromosome in unique(seqnames(promoters_500_UP))) {
+  
+  # filter the genome, one chromosome at a time
+  genome_filtered <- genome[genome@ranges@NAMES %in% chromosome]
+  
+  # one chromosome at a time, filter the gff dataframe
+  promoters_500_UP_filtered <- data.frame(promoters_500_UP) %>% filter(seqnames == chromosome)
+  
+  # set up a list for this chromosome
+  promoters_chromosome <- DNAStringSetList()
+  
+  # then iterate over every row (transcript) for that chromosome
+  for (i in 1:nrow(promoters_500_UP_filtered)) {
+    
+    #use the DNAStringSet function to subset the chromosome into the promoter regions of interest
+    promoter <- DNAStringSet(genome_filtered,
+                             start= promoters_500_UP_filtered$start[i],
+                             end= promoters_500_UP_filtered$end[i])
+    
+    #carry over the transcript name (what we really care about!)
+    names(promoter) <- promoters_500_UP_filtered$ID[i]
+    
+    #append this extracted sequence to the promoter list for this chromosome
+    promoters_chromosome <-  c(promoters_chromosome, promoter)
+  }
+  
+  #append this chromosome list to the DNAStringSetList for all chromosomes
+  promoters_all <- c(promoters_all, unlist(promoters_chromosome))
+}
+
+writeXStringSet(promoters_all, filepath = "../output_RNA/differential_expression/TFs/promoters_500_upstream_allgenes.fasta")
+
+
+# I could define differentially expressed as having a log fold change cutoff as well
+```
 
 ## Updating Renv environment:
 
