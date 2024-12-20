@@ -440,9 +440,9 @@ COMMAND LINE SUMMARY
 This information can also be useful in the event you wish to report a
 problem with the MEME software.
 
-command: meme promoters_500_upstream_upAboral.fasta -dna -maxw 25 -mod anr -nmotifs 10 -p 6 -oc meme_output_upAboral -revcomp 
+command: meme promoters_500_upstream_upAboral.fasta -dna -maxw 25 -mod anr -evt 0.05 -p 6 -oc meme_output_upAboral -revcomp 
 
-model:  mod=           anr    nmotifs=        10    evt=           inf
+model:  mod=           anr    nmotifs=      1000    evt=          0.05
 objective function:           em=       E-value of product of p-values
                               starts=   E-value of product of p-values
 strands: + -
@@ -1439,7 +1439,7 @@ TTT[TC][TC]T[TC]T[TC]T[TC]
 
 
 
-Time 90.29 secs.
+Time 105.25 secs.
 
 ********************************************************************************
 
@@ -1604,7 +1604,7 @@ T[TA]T[TC]G[ATC][TG]A[AC]AA[CGT]CAC[GT]CG[GAT]T[CT][AC]G
 
 
 
-Time 167.95 secs.
+Time 191.75 secs.
 
 ********************************************************************************
 
@@ -1814,7 +1814,7 @@ letter-probability matrix: alength= 4 w= 25 nsites= 29 E= 2.7e-004
 
 
 
-Time 246.35 secs.
+Time 278.14 secs.
 
 ********************************************************************************
 
@@ -1959,913 +1959,7 @@ GCCGTGTC[CA]TGGCAGG[GA]TC[GT]CCAC[TC]
 
 
 
-Time 323.85 secs.
-
-********************************************************************************
-
-
-********************************************************************************
-MOTIF GGTMACWSWACTCGCTTYCGK MEME-5	width =  21  sites =   8  llr = 177  E-value = 5.6e-001
-********************************************************************************
---------------------------------------------------------------------------------
-	Motif GGTMACWSWACTCGCTTYCGK MEME-5 Description
---------------------------------------------------------------------------------
-Simplified        A  :::5a:6:69:1::::3::::
-pos.-specific     C  :1:5:a:4:19181a::6a::
-probability       G  a8:::::5::1:39:::::a5
-matrix            T  :1a:::414::8:::a84::5
-
-         bits    2.4 *    *        *   ** 
-                 2.1 *    *        *   ** 
-                 1.9 *    *    *  **   ** 
-                 1.7 * * **    * ****  ** 
-Relative         1.4 * * **    * ****  ** 
-Entropy          1.2 *** **   ** **** *** 
-(31.9 bits)      0.9 ****** * ** *********
-                 0.7 *********************
-                 0.5 *********************
-                 0.2 *********************
-                 0.0 ---------------------
-
-Multilevel           GGTAACAGAACTCGCTTCCGG
-consensus               C  TCT   G   AT  T
-sequence                                  
-                                          
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif GGTMACWSWACTCGCTTYCGK MEME-5 sites sorted by position p-value
---------------------------------------------------------------------------------
-Sequence name            Strand  Start   P-value                    Site       
--------------            ------  ----- ---------            ---------------------
-Pocillopora_acuta_HIv2__     +    275  3.03e-13 TAACATAAAA GGTAACAGAACTCGCTTCCGG TCACGACATG
-Pocillopora_acuta_HIv2__     +    301  5.22e-13 TAACATAAAA GGTAACACAACTCGCTTCCGG TCACGACACC
-Pocillopora_acuta_HIv2__     +    271  5.22e-13 TAACATAAAA GGTAACACAACTCGCTTCCGG TCACGACACT
-Pocillopora_acuta_HIv2__     -    161  5.22e-13 AACATAAAAA GGTAACACAACTCGCTTCCGG TCACGACACC
-Pocillopora_acuta_HIv2__     -     66  1.27e-10 ATCTTTTCTT GGTCACTGTACTGGCTATCGT AAGATTGGAC
-Pocillopora_acuta_HIv2__     -     66  1.27e-10 ATCTTTTCTT GGTCACTGTACTGGCTATCGT ACGATTGCAC
-Pocillopora_acuta_HIv2__     +    414  9.72e-10 TTCCATTTCC GTTCACAGAAGCCCCTTCCGT TGCGACGAAA
-Pocillopora_acuta_HIv2__     +    244  1.63e-09 TGTTTTCCGA GCTCACTTTCCACGCTTTCGT GTTTGCATGT
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif GGTMACWSWACTCGCTTYCGK MEME-5 block diagrams
---------------------------------------------------------------------------------
-SEQUENCE NAME            POSITION P-VALUE  MOTIF DIAGRAM
--------------            ----------------  -------------
-Pocillopora_acuta_HIv2__            3e-13  274_[+5]_205
-Pocillopora_acuta_HIv2__          5.2e-13  300_[+5]_179
-Pocillopora_acuta_HIv2__          5.2e-13  270_[+5]_209
-Pocillopora_acuta_HIv2__          5.2e-13  160_[-5]_319
-Pocillopora_acuta_HIv2__          1.3e-10  65_[-5]_414
-Pocillopora_acuta_HIv2__          1.3e-10  65_[-5]_414
-Pocillopora_acuta_HIv2__          9.7e-10  413_[+5]_66
-Pocillopora_acuta_HIv2__          1.6e-09  243_[+5]_236
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif GGTMACWSWACTCGCTTYCGK MEME-5 in BLOCKS format
---------------------------------------------------------------------------------
-BL   MOTIF GGTMACWSWACTCGCTTYCGK width=21 seqs=8
-Pocillopora_acuta_HIv2__ (  275) GGTAACAGAACTCGCTTCCGG  1 
-Pocillopora_acuta_HIv2__ (  301) GGTAACACAACTCGCTTCCGG  1 
-Pocillopora_acuta_HIv2__ (  271) GGTAACACAACTCGCTTCCGG  1 
-Pocillopora_acuta_HIv2__ (  161) GGTAACACAACTCGCTTCCGG  1 
-Pocillopora_acuta_HIv2__ (   66) GGTCACTGTACTGGCTATCGT  1 
-Pocillopora_acuta_HIv2__ (   66) GGTCACTGTACTGGCTATCGT  1 
-Pocillopora_acuta_HIv2__ (  414) GTTCACAGAAGCCCCTTCCGT  1 
-Pocillopora_acuta_HIv2__ (  244) GCTCACTTTCCACGCTTTCGT  1 
-//
-
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif GGTMACWSWACTCGCTTYCGK MEME-5 position-specific scoring matrix
---------------------------------------------------------------------------------
-log-odds matrix: alength= 4 w= 21 n= 385223 bayes= 15.5553 E= 5.6e-001 
-  -965   -965    236   -965 
-  -965    -63    195   -129 
-  -965   -965   -965    171 
-    71    137   -965   -965 
-   171   -965   -965   -965 
-  -965    236   -965   -965 
-   103   -965   -965     29 
-  -965     95    137   -129 
-   103   -965   -965     29 
-   151    -63   -965   -965 
-  -965    217    -63   -965 
-  -129    -63   -965    129 
-  -965    195     37   -965 
-  -965    -63    217   -965 
-  -965    236   -965   -965 
-  -965   -965   -965    171 
-   -29   -965   -965    129 
-  -965    169   -965     29 
-  -965    236   -965   -965 
-  -965   -965    236   -965 
-  -965   -965    137     71 
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif GGTMACWSWACTCGCTTYCGK MEME-5 position-specific probability matrix
---------------------------------------------------------------------------------
-letter-probability matrix: alength= 4 w= 21 nsites= 8 E= 5.6e-001 
- 0.000000  0.000000  1.000000  0.000000 
- 0.000000  0.125000  0.750000  0.125000 
- 0.000000  0.000000  0.000000  1.000000 
- 0.500000  0.500000  0.000000  0.000000 
- 1.000000  0.000000  0.000000  0.000000 
- 0.000000  1.000000  0.000000  0.000000 
- 0.625000  0.000000  0.000000  0.375000 
- 0.000000  0.375000  0.500000  0.125000 
- 0.625000  0.000000  0.000000  0.375000 
- 0.875000  0.125000  0.000000  0.000000 
- 0.000000  0.875000  0.125000  0.000000 
- 0.125000  0.125000  0.000000  0.750000 
- 0.000000  0.750000  0.250000  0.000000 
- 0.000000  0.125000  0.875000  0.000000 
- 0.000000  1.000000  0.000000  0.000000 
- 0.000000  0.000000  0.000000  1.000000 
- 0.250000  0.000000  0.000000  0.750000 
- 0.000000  0.625000  0.000000  0.375000 
- 0.000000  1.000000  0.000000  0.000000 
- 0.000000  0.000000  1.000000  0.000000 
- 0.000000  0.000000  0.500000  0.500000 
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif GGTMACWSWACTCGCTTYCGK MEME-5 regular expression
---------------------------------------------------------------------------------
-GGT[AC]AC[AT][GC][AT]ACT[CG]GCT[TA][CT]CG[GT]
---------------------------------------------------------------------------------
-
-
-
-
-Time 401.26 secs.
-
-********************************************************************************
-
-
-********************************************************************************
-MOTIF SYNSRGGGGGGGGGGGGKGGGAGD MEME-6	width =  24  sites =  27  llr = 492  E-value = 1.0e+000
-********************************************************************************
---------------------------------------------------------------------------------
-	Motif SYNSRGGGGGGGGGGGGKGGGAGD MEME-6 Description
---------------------------------------------------------------------------------
-Simplified        A  122131:322222::112:236:3
-pos.-specific     C  43342::::::::::1::1:1:::
-probability       G  3:35499787887aa695966284
-matrix            T  153:1:1::1::1::2:3:2:122
-
-         bits    2.4                         
-                 2.1              **         
-                 1.9      **      **   *     
-                 1.7      ** *    ** * *     
-Relative         1.4      ** * ** ** * *   * 
-Entropy          1.2      ** * ** ** * *   * 
-(26.3 bits)      0.9    * ********** * * * * 
-                 0.7    * ************ *** * 
-                 0.5 ** * *******************
-                 0.2 ** *********************
-                 0.0 ------------------------
-
-Multilevel           CTCGGGGGGGGGGGGGGGGGGAGG
-consensus            GCGCA  A  A A  T T AAG A
-sequence               T                T   T
-                       A                     
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif SYNSRGGGGGGGGGGGGKGGGAGD MEME-6 sites sorted by position p-value
---------------------------------------------------------------------------------
-Sequence name            Strand  Start   P-value                      Site        
--------------            ------  ----- ---------            ------------------------
-Pocillopora_acuta_HIv2__     -    469  9.86e-15   GTTGCTTC CCAGGGGGGGGGGGGGGGGGGAGT GGCAGGGTCG
-Pocillopora_acuta_HIv2__     +    111  1.35e-13 GTAACAAAGG GTGGCGGGGGGGGGGGGGGAGGGG CGGGGGAAAC
-Pocillopora_acuta_HIv2__     +    239  1.07e-11 CATACAAAGG GTGGGGGAGGGGGGGGGGGGGGAG GGGGCAACAG
-Pocillopora_acuta_HIv2__     +    369  1.40e-11 GTTTTTCCTG GTGCAGTGGGGGAGGGGGGGGGGG CGGCTGTTCA
-Pocillopora_acuta_HIv2__     +    323  2.08e-11 AAACTCCCTC CCCCAGGGGGGAGGGGGGCGAAGG GTCTTTAGAA
-Pocillopora_acuta_HIv2__     -    335  2.68e-11 AAATACCAGG TTTGGGGGGGGGGGGAGGGTGAGG AACTTTGTTT
-Pocillopora_acuta_HIv2__     -    476  5.64e-11          G TTCCAGGGGGGAGGGGGAGGGAGA ACTTCTTCTA
-Pocillopora_acuta_HIv2__     -    226  1.80e-10 TGTAGGGGAG GAGGCGGGGTGGGGGTGGGGAAGA GTATGTGTCG
-Pocillopora_acuta_HIv2__     -    440  3.85e-10 ATTTTTAAAT CTAAGGGAAGGGGGGGGAGGGAGA GGGGATTTGG
-Pocillopora_acuta_HIv2__     -    184  4.28e-10 TTTATAGCCT GTCGGGGGGAAGGGGGAGGGGGTG GAGTAGTTTG
-Pocillopora_acuta_HIv2__     -    156  4.28e-10 AGAGGGAAAA TATCGGGGAGGGGGGGATGGGAGG TGATTGCGTT
-Pocillopora_acuta_HIv2__     -     67  5.84e-10 TTGTGTTGGA CACCGGGGGGAGGGGGGAGAAATG TGATCAAGAA
-Pocillopora_acuta_HIv2__     -    221  6.47e-10 AAGCTGTCAA CTTGGGGGGGGGGGGGGTCACGGT GTTTGTTCAA
-Pocillopora_acuta_HIv2__     +    350  7.17e-10 GAGGGGTGGG GAGGGGTGGGGAGGGGAGGGGAGT TGATGATTGC
-Pocillopora_acuta_HIv2__     +     64  7.92e-10 TATCGAAACA AAGGGGGGAGGGGGGGGGCTAAGG GAATCAACAG
-Pocillopora_acuta_HIv2__     -    434  5.62e-09 TTCATGACAT ACCCTGGGGAAGGGGTGGGGATGG AGGGGGGGTT
-Pocillopora_acuta_HIv2__     -    355  6.13e-09 TATGCTGTAC CTAGCGGAGGGGGGAGGGGAATGA AAGAAGTCAA
-Pocillopora_acuta_HIv2__     -    307  7.28e-09 TCTGGTTTAA GTTGAGGAGGAGAGGCGTGTGAGA GGATTTCTAA
-Pocillopora_acuta_HIv2__     -    377  7.28e-09 ACAGTCAAAT GCACAGGAAAGGTGGGGAGGGGGG TATGTTTAAG
-Pocillopora_acuta_HIv2__     +    171  7.28e-09 TCTGGTTTAA GTTGAGGAGGAGAGGCGTGTGAGA GGATTTCTAA
-Pocillopora_acuta_HIv2__     -    386  1.41e-08 ATCTGCTTTG CCCCCAGGGGGAGGGTGAGAAAGA GTTTAAACGT
-Pocillopora_acuta_HIv2__     +    161  1.41e-08 CACGTTTTTC CTACTGTAGAGGGGGTGGGGGATA TCAGACTTCA
-Pocillopora_acuta_HIv2__     +    171  5.52e-08 ACCTAATATT CTGCTGGAGTGGGTGGGTGGCTGG AAGATTCGCG
-Pocillopora_acuta_HIv2__     -    348  1.10e-07 ACGTTAACTA ACTAGGGGAGGGAGGTGTGTGATT TTCGTTGTAA
-Pocillopora_acuta_HIv2__     +    271  1.18e-07 TGACATACGC CCTGAAGTGGGGAGGAAGGGGAGA GCGGAGCATC
-Pocillopora_acuta_HIv2__     +    428  2.24e-07 CAATCTTACA ACCCCGGGGTGCTGGGGTGAGATT TCTTGAGGTT
-Pocillopora_acuta_HIv2__     +     69  2.87e-07 CATATTTGTT CCACAGGGGAAAAGGTGTGTATGT ATTGAAAAAG
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif SYNSRGGGGGGGGGGGGKGGGAGD MEME-6 block diagrams
---------------------------------------------------------------------------------
-SEQUENCE NAME            POSITION P-VALUE  MOTIF DIAGRAM
--------------            ----------------  -------------
-Pocillopora_acuta_HIv2__          9.9e-15  468_[-6]_8
-Pocillopora_acuta_HIv2__          1.4e-13  110_[+6]_366
-Pocillopora_acuta_HIv2__          1.1e-11  238_[+6]_238
-Pocillopora_acuta_HIv2__          1.4e-11  368_[+6]_108
-Pocillopora_acuta_HIv2__          2.1e-11  322_[+6]_154
-Pocillopora_acuta_HIv2__          2.7e-11  334_[-6]_142
-Pocillopora_acuta_HIv2__          1.2e-07  270_[+6]_181_[-6]_1
-Pocillopora_acuta_HIv2__          1.8e-10  225_[-6]_251
-Pocillopora_acuta_HIv2__          3.9e-10  439_[-6]_37
-Pocillopora_acuta_HIv2__          4.3e-10  183_[-6]_293
-Pocillopora_acuta_HIv2__          4.3e-10  155_[-6]_321
-Pocillopora_acuta_HIv2__          5.8e-10  66_[-6]_410
-Pocillopora_acuta_HIv2__          6.5e-10  220_[-6]_256
-Pocillopora_acuta_HIv2__          7.2e-10  349_[+6]_127
-Pocillopora_acuta_HIv2__          7.9e-10  63_[+6]_413
-Pocillopora_acuta_HIv2__          5.6e-09  433_[-6]_43
-Pocillopora_acuta_HIv2__          6.1e-09  354_[-6]_122
-Pocillopora_acuta_HIv2__          7.3e-09  306_[-6]_170
-Pocillopora_acuta_HIv2__          7.3e-09  376_[-6]_100
-Pocillopora_acuta_HIv2__          7.3e-09  170_[+6]_306
-Pocillopora_acuta_HIv2__          1.4e-08  385_[-6]_91
-Pocillopora_acuta_HIv2__          1.4e-08  160_[+6]_316
-Pocillopora_acuta_HIv2__          5.5e-08  170_[+6]_306
-Pocillopora_acuta_HIv2__          1.1e-07  347_[-6]_129
-Pocillopora_acuta_HIv2__          2.2e-07  427_[+6]_49
-Pocillopora_acuta_HIv2__          2.9e-07  68_[+6]_408
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif SYNSRGGGGGGGGGGGGKGGGAGD MEME-6 in BLOCKS format
---------------------------------------------------------------------------------
-BL   MOTIF SYNSRGGGGGGGGGGGGKGGGAGD width=24 seqs=27
-Pocillopora_acuta_HIv2__ (  469) CCAGGGGGGGGGGGGGGGGGGAGT  1 
-Pocillopora_acuta_HIv2__ (  111) GTGGCGGGGGGGGGGGGGGAGGGG  1 
-Pocillopora_acuta_HIv2__ (  239) GTGGGGGAGGGGGGGGGGGGGGAG  1 
-Pocillopora_acuta_HIv2__ (  369) GTGCAGTGGGGGAGGGGGGGGGGG  1 
-Pocillopora_acuta_HIv2__ (  323) CCCCAGGGGGGAGGGGGGCGAAGG  1 
-Pocillopora_acuta_HIv2__ (  335) TTTGGGGGGGGGGGGAGGGTGAGG  1 
-Pocillopora_acuta_HIv2__ (  476) TTCCAGGGGGGAGGGGGAGGGAGA  1 
-Pocillopora_acuta_HIv2__ (  226) GAGGCGGGGTGGGGGTGGGGAAGA  1 
-Pocillopora_acuta_HIv2__ (  440) CTAAGGGAAGGGGGGGGAGGGAGA  1 
-Pocillopora_acuta_HIv2__ (  184) GTCGGGGGGAAGGGGGAGGGGGTG  1 
-Pocillopora_acuta_HIv2__ (  156) TATCGGGGAGGGGGGGATGGGAGG  1 
-Pocillopora_acuta_HIv2__ (   67) CACCGGGGGGAGGGGGGAGAAATG  1 
-Pocillopora_acuta_HIv2__ (  221) CTTGGGGGGGGGGGGGGTCACGGT  1 
-Pocillopora_acuta_HIv2__ (  350) GAGGGGTGGGGAGGGGAGGGGAGT  1 
-Pocillopora_acuta_HIv2__ (   64) AAGGGGGGAGGGGGGGGGCTAAGG  1 
-Pocillopora_acuta_HIv2__ (  434) ACCCTGGGGAAGGGGTGGGGATGG  1 
-Pocillopora_acuta_HIv2__ (  355) CTAGCGGAGGGGGGAGGGGAATGA  1 
-Pocillopora_acuta_HIv2__ (  307) GTTGAGGAGGAGAGGCGTGTGAGA  1 
-Pocillopora_acuta_HIv2__ (  377) GCACAGGAAAGGTGGGGAGGGGGG  1 
-Pocillopora_acuta_HIv2__ (  171) GTTGAGGAGGAGAGGCGTGTGAGA  1 
-Pocillopora_acuta_HIv2__ (  386) CCCCCAGGGGGAGGGTGAGAAAGA  1 
-Pocillopora_acuta_HIv2__ (  161) CTACTGTAGAGGGGGTGGGGGATA  1 
-Pocillopora_acuta_HIv2__ (  171) CTGCTGGAGTGGGTGGGTGGCTGG  1 
-Pocillopora_acuta_HIv2__ (  348) ACTAGGGGAGGGAGGTGTGTGATT  1 
-Pocillopora_acuta_HIv2__ (  271) CCTGAAGTGGGGAGGAAGGGGAGA  1 
-Pocillopora_acuta_HIv2__ (  428) ACCCCGGGGTGCTGGGGTGAGATT  1 
-Pocillopora_acuta_HIv2__ (   69) CCACAGGGGAAAAGGTGTGTATGT  1 
-//
-
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif SYNSRGGGGGGGGGGGGKGGGAGD MEME-6 position-specific scoring matrix
---------------------------------------------------------------------------------
-log-odds matrix: alength= 4 w= 24 n= 382811 bayes= 14.9855 E= 1.0e+000 
-  -105    107     78   -146 
-   -72     78  -1140     65 
-   -46     42     42    -24 
-  -204    120    131  -1140 
-    -5     -7    107   -146 
-  -204  -1140    225  -1140 
- -1140  -1140    220   -146 
-    -5  -1140    178   -304 
-   -72  -1140    207  -1140 
-   -72  -1140    186   -146 
-   -46  -1140    200  -1140 
-   -72   -239    200  -1140 
-   -46  -1140    186   -204 
- -1140  -1140    231   -304 
-  -304  -1140    231  -1140 
-  -204   -139    170    -46 
-  -105  -1140    213  -1140 
-   -72  -1140    142     -5 
- -1140    -80    220  -1140 
-   -46  -1140    152    -46 
-    -5   -139    170  -1140 
-   104  -1140     20   -105 
-  -304  -1140    200    -72 
-    12  -1140    120    -46 
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif SYNSRGGGGGGGGGGGGKGGGAGD MEME-6 position-specific probability matrix
---------------------------------------------------------------------------------
-letter-probability matrix: alength= 4 w= 24 nsites= 27 E= 1.0e+000 
- 0.148148  0.407407  0.333333  0.111111 
- 0.185185  0.333333  0.000000  0.481481 
- 0.222222  0.259259  0.259259  0.259259 
- 0.074074  0.444444  0.481481  0.000000 
- 0.296296  0.185185  0.407407  0.111111 
- 0.074074  0.000000  0.925926  0.000000 
- 0.000000  0.000000  0.888889  0.111111 
- 0.296296  0.000000  0.666667  0.037037 
- 0.185185  0.000000  0.814815  0.000000 
- 0.185185  0.000000  0.703704  0.111111 
- 0.222222  0.000000  0.777778  0.000000 
- 0.185185  0.037037  0.777778  0.000000 
- 0.222222  0.000000  0.703704  0.074074 
- 0.000000  0.000000  0.962963  0.037037 
- 0.037037  0.000000  0.962963  0.000000 
- 0.074074  0.074074  0.629630  0.222222 
- 0.148148  0.000000  0.851852  0.000000 
- 0.185185  0.000000  0.518519  0.296296 
- 0.000000  0.111111  0.888889  0.000000 
- 0.222222  0.000000  0.555556  0.222222 
- 0.296296  0.074074  0.629630  0.000000 
- 0.629630  0.000000  0.222222  0.148148 
- 0.037037  0.000000  0.777778  0.185185 
- 0.333333  0.000000  0.444444  0.222222 
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif SYNSRGGGGGGGGGGGGKGGGAGD MEME-6 regular expression
---------------------------------------------------------------------------------
-[CG][TC][CGTA][GC][GA]GG[GA]GG[GA]G[GA]GG[GT]G[GT]G[GAT][GA][AG]G[GAT]
---------------------------------------------------------------------------------
-
-
-
-
-Time 478.63 secs.
-
-********************************************************************************
-
-
-********************************************************************************
-MOTIF CGGTACACGTCGTGGTATTCTCYCC MEME-7	width =  25  sites =   3  llr = 107  E-value = 2.7e+000
-********************************************************************************
---------------------------------------------------------------------------------
-	Motif CGGTACACGTCGTGGTATTCTCYCC MEME-7 Description
---------------------------------------------------------------------------------
-Simplified        A  ::::a:a:::::::::a::::::::
-pos.-specific     C  a::::a:a::a::::::::a:a3aa
-probability       G  :aa:::::a::a:aa::::::::::
-matrix            T  :::a:::::a::a::a:aa:a:7::
-
-         bits    2.4 ***  * ** ** **    * * **
-                 2.1 ***  * ** ** **    * * **
-                 1.9 ***  * ** ** **    * * **
-                 1.7 ********************** **
-Relative         1.4 ********************** **
-Entropy          1.2 ********************** **
-(51.2 bits)      0.9 *************************
-                 0.7 *************************
-                 0.5 *************************
-                 0.2 *************************
-                 0.0 -------------------------
-
-Multilevel           CGGTACACGTCGTGGTATTCTCTCC
-consensus                                  C  
-sequence                                      
-                                              
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif CGGTACACGTCGTGGTATTCTCYCC MEME-7 sites sorted by position p-value
---------------------------------------------------------------------------------
-Sequence name            Strand  Start   P-value                      Site         
--------------            ------  ----- ---------            -------------------------
-Pocillopora_acuta_HIv2__     +    172  2.36e-16 TTCACTTTGT CGGTACACGTCGTGGTATTCTCTCC TTTTTTTCCT
-Pocillopora_acuta_HIv2__     +    172  2.36e-16 TTCACTTTGT CGGTACACGTCGTGGTATTCTCTCC TGAATCAATC
-Pocillopora_acuta_HIv2__     +    172  3.85e-16 CTCACTTTGT CGGTACACGTCGTGGTATTCTCCCC TAAATCGATC
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif CGGTACACGTCGTGGTATTCTCYCC MEME-7 block diagrams
---------------------------------------------------------------------------------
-SEQUENCE NAME            POSITION P-VALUE  MOTIF DIAGRAM
--------------            ----------------  -------------
-Pocillopora_acuta_HIv2__          2.4e-16  171_[+7]_304
-Pocillopora_acuta_HIv2__          2.4e-16  171_[+7]_304
-Pocillopora_acuta_HIv2__          3.8e-16  171_[+7]_304
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif CGGTACACGTCGTGGTATTCTCYCC MEME-7 in BLOCKS format
---------------------------------------------------------------------------------
-BL   MOTIF CGGTACACGTCGTGGTATTCTCYCC width=25 seqs=3
-Pocillopora_acuta_HIv2__ (  172) CGGTACACGTCGTGGTATTCTCTCC  1 
-Pocillopora_acuta_HIv2__ (  172) CGGTACACGTCGTGGTATTCTCTCC  1 
-Pocillopora_acuta_HIv2__ (  172) CGGTACACGTCGTGGTATTCTCCCC  1 
-//
-
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif CGGTACACGTCGTGGTATTCTCYCC MEME-7 position-specific scoring matrix
---------------------------------------------------------------------------------
-log-odds matrix: alength= 4 w= 25 n= 382007 bayes= 16.6172 E= 2.7e+000 
-  -823    236   -823   -823 
-  -823   -823    236   -823 
-  -823   -823    236   -823 
-  -823   -823   -823    170 
-   170   -823   -823   -823 
-  -823    236   -823   -823 
-   170   -823   -823   -823 
-  -823    236   -823   -823 
-  -823   -823    236   -823 
-  -823   -823   -823    170 
-  -823    236   -823   -823 
-  -823   -823    236   -823 
-  -823   -823   -823    170 
-  -823   -823    236   -823 
-  -823   -823    236   -823 
-  -823   -823   -823    170 
-   170   -823   -823   -823 
-  -823   -823   -823    170 
-  -823   -823   -823    170 
-  -823    236   -823   -823 
-  -823   -823   -823    170 
-  -823    236   -823   -823 
-  -823     78   -823    112 
-  -823    236   -823   -823 
-  -823    236   -823   -823 
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif CGGTACACGTCGTGGTATTCTCYCC MEME-7 position-specific probability matrix
---------------------------------------------------------------------------------
-letter-probability matrix: alength= 4 w= 25 nsites= 3 E= 2.7e+000 
- 0.000000  1.000000  0.000000  0.000000 
- 0.000000  0.000000  1.000000  0.000000 
- 0.000000  0.000000  1.000000  0.000000 
- 0.000000  0.000000  0.000000  1.000000 
- 1.000000  0.000000  0.000000  0.000000 
- 0.000000  1.000000  0.000000  0.000000 
- 1.000000  0.000000  0.000000  0.000000 
- 0.000000  1.000000  0.000000  0.000000 
- 0.000000  0.000000  1.000000  0.000000 
- 0.000000  0.000000  0.000000  1.000000 
- 0.000000  1.000000  0.000000  0.000000 
- 0.000000  0.000000  1.000000  0.000000 
- 0.000000  0.000000  0.000000  1.000000 
- 0.000000  0.000000  1.000000  0.000000 
- 0.000000  0.000000  1.000000  0.000000 
- 0.000000  0.000000  0.000000  1.000000 
- 1.000000  0.000000  0.000000  0.000000 
- 0.000000  0.000000  0.000000  1.000000 
- 0.000000  0.000000  0.000000  1.000000 
- 0.000000  1.000000  0.000000  0.000000 
- 0.000000  0.000000  0.000000  1.000000 
- 0.000000  1.000000  0.000000  0.000000 
- 0.000000  0.333333  0.000000  0.666667 
- 0.000000  1.000000  0.000000  0.000000 
- 0.000000  1.000000  0.000000  0.000000 
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif CGGTACACGTCGTGGTATTCTCYCC MEME-7 regular expression
---------------------------------------------------------------------------------
-CGGTACACGTCGTGGTATTCTC[TC]CC
---------------------------------------------------------------------------------
-
-
-
-
-Time 556.36 secs.
-
-********************************************************************************
-
-
-********************************************************************************
-MOTIF TGTCGGGAAATGGTGCTCGCC MEME-8	width =  21  sites =   5  llr = 135  E-value = 1.2e+002
-********************************************************************************
---------------------------------------------------------------------------------
-	Motif TGTCGGGAAATGGTGCTCGCC MEME-8 Description
---------------------------------------------------------------------------------
-Simplified        A  :2:::2:aaa:::::2:::::
-pos.-specific     C  :2:a2::::::::::8:8:aa
-probability       G  :6::88a::::aa:8::2a::
-matrix            T  a:a:::::::a::a2:a::::
-
-         bits    2.4    *  *    **     ***
-                 2.1    *  *    **     ***
-                 1.9    *  *    **     ***
-                 1.7 * *** ********  *****
-Relative         1.4 * *******************
-Entropy          1.2 * *******************
-(38.9 bits)      0.9 *********************
-                 0.7 *********************
-                 0.5 *********************
-                 0.2 *********************
-                 0.0 ---------------------
-
-Multilevel           TGTCGGGAAATGGTGCTCGCC
-consensus             A  CA        TA G   
-sequence              C                   
-                                          
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif TGTCGGGAAATGGTGCTCGCC MEME-8 sites sorted by position p-value
---------------------------------------------------------------------------------
-Sequence name            Strand  Start   P-value                    Site       
--------------            ------  ----- ---------            ---------------------
-Pocillopora_acuta_HIv2__     +     93  4.24e-14 TCGCCACTTT TGTCGGGAAATGGTGCTCGCC GACAAAGGAA
-Pocillopora_acuta_HIv2__     +     93  4.24e-14 TCGCCACTTT TGTCGGGAAATGGTGCTCGCC GACAAAGGAA
-Pocillopora_acuta_HIv2__     -    388  4.24e-14 TCGCCACTTT TGTCGGGAAATGGTGCTCGCC AACAAAGGAA
-Pocillopora_acuta_HIv2__     +     93  8.48e-14 TCGCCACTTT TCTCGGGAAATGGTGCTCGCC GACAAAGGAA
-Pocillopora_acuta_HIv2__     +    262  3.69e-11 TCGAAACCGA TATCCAGAAATGGTTATGGCC CGAACTGTGT
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif TGTCGGGAAATGGTGCTCGCC MEME-8 block diagrams
---------------------------------------------------------------------------------
-SEQUENCE NAME            POSITION P-VALUE  MOTIF DIAGRAM
--------------            ----------------  -------------
-Pocillopora_acuta_HIv2__          4.2e-14  92_[+8]_387
-Pocillopora_acuta_HIv2__          4.2e-14  92_[+8]_387
-Pocillopora_acuta_HIv2__          4.2e-14  387_[-8]_92
-Pocillopora_acuta_HIv2__          8.5e-14  92_[+8]_387
-Pocillopora_acuta_HIv2__          3.7e-11  261_[+8]_218
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif TGTCGGGAAATGGTGCTCGCC MEME-8 in BLOCKS format
---------------------------------------------------------------------------------
-BL   MOTIF TGTCGGGAAATGGTGCTCGCC width=21 seqs=5
-Pocillopora_acuta_HIv2__ (   93) TGTCGGGAAATGGTGCTCGCC  1 
-Pocillopora_acuta_HIv2__ (   93) TGTCGGGAAATGGTGCTCGCC  1 
-Pocillopora_acuta_HIv2__ (  388) TGTCGGGAAATGGTGCTCGCC  1 
-Pocillopora_acuta_HIv2__ (   93) TCTCGGGAAATGGTGCTCGCC  1 
-Pocillopora_acuta_HIv2__ (  262) TATCCAGAAATGGTTATGGCC  1 
-//
-
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif TGTCGGGAAATGGTGCTCGCC MEME-8 position-specific scoring matrix
---------------------------------------------------------------------------------
-log-odds matrix: alength= 4 w= 21 n= 385223 bayes= 16.4849 E= 1.2e+002 
-  -897   -897   -897    171 
-   -61      4    163   -897 
-  -897   -897   -897    171 
-  -897    236   -897   -897 
-  -897      4    204   -897 
-   -61   -897    204   -897 
-  -897   -897    236   -897 
-   171   -897   -897   -897 
-   171   -897   -897   -897 
-   171   -897   -897   -897 
-  -897   -897   -897    171 
-  -897   -897    236   -897 
-  -897   -897    236   -897 
-  -897   -897   -897    171 
-  -897   -897    204    -61 
-   -61    204   -897   -897 
-  -897   -897   -897    171 
-  -897    204      4   -897 
-  -897   -897    236   -897 
-  -897    236   -897   -897 
-  -897    236   -897   -897 
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif TGTCGGGAAATGGTGCTCGCC MEME-8 position-specific probability matrix
---------------------------------------------------------------------------------
-letter-probability matrix: alength= 4 w= 21 nsites= 5 E= 1.2e+002 
- 0.000000  0.000000  0.000000  1.000000 
- 0.200000  0.200000  0.600000  0.000000 
- 0.000000  0.000000  0.000000  1.000000 
- 0.000000  1.000000  0.000000  0.000000 
- 0.000000  0.200000  0.800000  0.000000 
- 0.200000  0.000000  0.800000  0.000000 
- 0.000000  0.000000  1.000000  0.000000 
- 1.000000  0.000000  0.000000  0.000000 
- 1.000000  0.000000  0.000000  0.000000 
- 1.000000  0.000000  0.000000  0.000000 
- 0.000000  0.000000  0.000000  1.000000 
- 0.000000  0.000000  1.000000  0.000000 
- 0.000000  0.000000  1.000000  0.000000 
- 0.000000  0.000000  0.000000  1.000000 
- 0.000000  0.000000  0.800000  0.200000 
- 0.200000  0.800000  0.000000  0.000000 
- 0.000000  0.000000  0.000000  1.000000 
- 0.000000  0.800000  0.200000  0.000000 
- 0.000000  0.000000  1.000000  0.000000 
- 0.000000  1.000000  0.000000  0.000000 
- 0.000000  1.000000  0.000000  0.000000 
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif TGTCGGGAAATGGTGCTCGCC MEME-8 regular expression
---------------------------------------------------------------------------------
-T[GAC]TC[GC][GA]GAAATGGT[GT][CA]T[CG]GCC
---------------------------------------------------------------------------------
-
-
-
-
-Time 633.77 secs.
-
-********************************************************************************
-
-
-********************************************************************************
-MOTIF TGAATAATTTGAGAATACGACTGAT MEME-9	width =  25  sites =   5  llr = 147  E-value = 3.1e+002
-********************************************************************************
---------------------------------------------------------------------------------
-	Motif TGAATAATTTGAGAATACGACTGAT MEME-9 Description
---------------------------------------------------------------------------------
-Simplified        A  ::aa:aa::::a:8a:8::a22:8:
-pos.-specific     C  ::::::::::2:::::2a2:8::::
-probability       G  :a::::::::8:a2::::8:::a2:
-matrix            T  a:::a::aaa:::::a:::::8::a
-
-         bits    2.4  *          *    *    *  
-                 2.1  *          *    *    *  
-                 1.9  *          *    *    *  
-                 1.7 ************* ** ***  * *
-Relative         1.4 ************* ** **** * *
-Entropy          1.2 ********************* ***
-(42.5 bits)      0.9 *************************
-                 0.7 *************************
-                 0.5 *************************
-                 0.2 *************************
-                 0.0 -------------------------
-
-Multilevel           TGAATAATTTGAGAATACGACTGAT
-consensus                      C  G  C C AA G 
-sequence                                      
-                                              
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif TGAATAATTTGAGAATACGACTGAT MEME-9 sites sorted by position p-value
---------------------------------------------------------------------------------
-Sequence name            Strand  Start   P-value                      Site         
--------------            ------  ----- ---------            -------------------------
-Pocillopora_acuta_HIv2__     +    466  5.72e-15 AAATGAGGTT TGAATAATTTGAGAATACGACTGAT ATATGGAAAA
-Pocillopora_acuta_HIv2__     +    223  5.72e-15 AAATGAGGTT TGAATAATTTGAGAATACGACTGAT ATACGGAAAA
-Pocillopora_acuta_HIv2__     +    223  5.72e-15 AAATGAGGTT TGAATAATTTGAGAATACGACTGAT ATACGGAAAA
-Pocillopora_acuta_HIv2__     +    466  4.97e-14 AAATCAGGTT TGAATAATTTGAGAATACGAATGAT ATATGGAAAA
-Pocillopora_acuta_HIv2__     +    113  4.78e-13 TCTAAGTCAC TGAATAATTTCAGGATCCCACAGGT GGATTGGCAG
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif TGAATAATTTGAGAATACGACTGAT MEME-9 block diagrams
---------------------------------------------------------------------------------
-SEQUENCE NAME            POSITION P-VALUE  MOTIF DIAGRAM
--------------            ----------------  -------------
-Pocillopora_acuta_HIv2__          5.7e-15  465_[+9]_10
-Pocillopora_acuta_HIv2__          5.7e-15  222_[+9]_253
-Pocillopora_acuta_HIv2__          5.7e-15  222_[+9]_253
-Pocillopora_acuta_HIv2__            5e-14  465_[+9]_10
-Pocillopora_acuta_HIv2__          4.8e-13  112_[+9]_363
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif TGAATAATTTGAGAATACGACTGAT MEME-9 in BLOCKS format
---------------------------------------------------------------------------------
-BL   MOTIF TGAATAATTTGAGAATACGACTGAT width=25 seqs=5
-Pocillopora_acuta_HIv2__ (  466) TGAATAATTTGAGAATACGACTGAT  1 
-Pocillopora_acuta_HIv2__ (  223) TGAATAATTTGAGAATACGACTGAT  1 
-Pocillopora_acuta_HIv2__ (  223) TGAATAATTTGAGAATACGACTGAT  1 
-Pocillopora_acuta_HIv2__ (  466) TGAATAATTTGAGAATACGAATGAT  1 
-Pocillopora_acuta_HIv2__ (  113) TGAATAATTTCAGGATCCCACAGGT  1 
-//
-
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif TGAATAATTTGAGAATACGACTGAT MEME-9 position-specific scoring matrix
---------------------------------------------------------------------------------
-log-odds matrix: alength= 4 w= 25 n= 382007 bayes= 16.4728 E= 3.1e+002 
-  -897   -897   -897    171 
-  -897   -897    236   -897 
-   171   -897   -897   -897 
-   171   -897   -897   -897 
-  -897   -897   -897    171 
-   171   -897   -897   -897 
-   171   -897   -897   -897 
-  -897   -897   -897    171 
-  -897   -897   -897    171 
-  -897   -897   -897    171 
-  -897      4    204   -897 
-   171   -897   -897   -897 
-  -897   -897    236   -897 
-   138   -897      4   -897 
-   171   -897   -897   -897 
-  -897   -897   -897    171 
-   138      4   -897   -897 
-  -897    236   -897   -897 
-  -897      4    204   -897 
-   171   -897   -897   -897 
-   -61    204   -897   -897 
-   -61   -897   -897    138 
-  -897   -897    236   -897 
-   138   -897      4   -897 
-  -897   -897   -897    171 
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif TGAATAATTTGAGAATACGACTGAT MEME-9 position-specific probability matrix
---------------------------------------------------------------------------------
-letter-probability matrix: alength= 4 w= 25 nsites= 5 E= 3.1e+002 
- 0.000000  0.000000  0.000000  1.000000 
- 0.000000  0.000000  1.000000  0.000000 
- 1.000000  0.000000  0.000000  0.000000 
- 1.000000  0.000000  0.000000  0.000000 
- 0.000000  0.000000  0.000000  1.000000 
- 1.000000  0.000000  0.000000  0.000000 
- 1.000000  0.000000  0.000000  0.000000 
- 0.000000  0.000000  0.000000  1.000000 
- 0.000000  0.000000  0.000000  1.000000 
- 0.000000  0.000000  0.000000  1.000000 
- 0.000000  0.200000  0.800000  0.000000 
- 1.000000  0.000000  0.000000  0.000000 
- 0.000000  0.000000  1.000000  0.000000 
- 0.800000  0.000000  0.200000  0.000000 
- 1.000000  0.000000  0.000000  0.000000 
- 0.000000  0.000000  0.000000  1.000000 
- 0.800000  0.200000  0.000000  0.000000 
- 0.000000  1.000000  0.000000  0.000000 
- 0.000000  0.200000  0.800000  0.000000 
- 1.000000  0.000000  0.000000  0.000000 
- 0.200000  0.800000  0.000000  0.000000 
- 0.200000  0.000000  0.000000  0.800000 
- 0.000000  0.000000  1.000000  0.000000 
- 0.800000  0.000000  0.200000  0.000000 
- 0.000000  0.000000  0.000000  1.000000 
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif TGAATAATTTGAGAATACGACTGAT MEME-9 regular expression
---------------------------------------------------------------------------------
-TGAATAATTT[GC]AG[AG]AT[AC]C[GC]A[CA][TA]G[AG]T
---------------------------------------------------------------------------------
-
-
-
-
-Time 711.20 secs.
-
-********************************************************************************
-
-
-********************************************************************************
-MOTIF CTCHCGCGTCYGAAGWTTTTC MEME-10	width =  21  sites =   9  llr = 173  E-value = 2.5e+004
-********************************************************************************
---------------------------------------------------------------------------------
-	Motif CTCHCGCGTCYGAAGWTTTTC MEME-10 Description
---------------------------------------------------------------------------------
-Simplified        A  :::3:2::12:288:7::::1
-pos.-specific     C  a1a49:a2183:1:2:11::9
-probability       G  :2:::8:8:::8:16::12::
-matrix            T  :7:21:::8:7:1123988a:
-
-         bits    2.4 * *   *              
-                 2.1 * *   *              
-                 1.9 * * * *             *
-                 1.7 * * * **           **
-Relative         1.4 * * **** * *       **
-Entropy          1.2 * * **** * *    * ***
-(27.7 bits)      0.9 * * **** ***    *****
-                 0.7 *** *****************
-                 0.5 *********************
-                 0.2 *********************
-                 0.0 ---------------------
-
-Multilevel           CTCCCGCGTCTGAAGATTTTC
-consensus             G A A C ACA  CT  G  
-sequence                T          T      
-                                          
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif CTCHCGCGTCYGAAGWTTTTC MEME-10 sites sorted by position p-value
---------------------------------------------------------------------------------
-Sequence name            Strand  Start   P-value                    Site       
--------------            ------  ----- ---------            ---------------------
-Pocillopora_acuta_HIv2__     +    125  5.11e-13 ACAAAGGAAA CTCACGCGTCTGAAGATTTTC ACCAGATTTA
-Pocillopora_acuta_HIv2__     +    125  5.11e-13 ACAAAGGAAA CTCACGCGTCTGAAGATTTTC ACCAGATTTA
-Pocillopora_acuta_HIv2__     +    125  2.34e-11 ACAAAGGAAA CTCTCACGTCTGAAGATTTTC ACCAGATTTA
-Pocillopora_acuta_HIv2__     -    356  2.36e-10 ACAAAGGAAA CTCTCACGTATGAAGATTTTC ACCAGATTTA
-Pocillopora_acuta_HIv2__     -    305  4.41e-09 GAAGTTTGTC CGCCCGCGACCAAATTTTGTC CTTTGGTGAA
-Pocillopora_acuta_HIv2__     -    109  5.07e-09 GTTAGCCGCT CGCCCGCCCATGCACATTTTC AGCCTTAGCG
-Pocillopora_acuta_HIv2__     +    172  6.13e-09 CCCTCAGACT CTCACGCGTCCGAGTATCTTA TTATTTATAC
-Pocillopora_acuta_HIv2__     -    426  9.96e-09 CGCAGCGCTT CTCCTGCGTCCAAACTCTGTC AAAGAAAATA
-Pocillopora_acuta_HIv2__     -    186  1.12e-08 GCTCCTCCAT CCCCCGCCTCTGTTGTTGTTC TTTGAGCTGT
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif CTCHCGCGTCYGAAGWTTTTC MEME-10 block diagrams
---------------------------------------------------------------------------------
-SEQUENCE NAME            POSITION P-VALUE  MOTIF DIAGRAM
--------------            ----------------  -------------
-Pocillopora_acuta_HIv2__          5.1e-13  124_[+10]_355
-Pocillopora_acuta_HIv2__          5.1e-13  124_[+10]_355
-Pocillopora_acuta_HIv2__          2.3e-11  124_[+10]_355
-Pocillopora_acuta_HIv2__          2.4e-10  355_[-10]_124
-Pocillopora_acuta_HIv2__          4.4e-09  304_[-10]_175
-Pocillopora_acuta_HIv2__          5.1e-09  108_[-10]_371
-Pocillopora_acuta_HIv2__          6.1e-09  171_[+10]_308
-Pocillopora_acuta_HIv2__            1e-08  425_[-10]_54
-Pocillopora_acuta_HIv2__          1.1e-08  185_[-10]_294
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif CTCHCGCGTCYGAAGWTTTTC MEME-10 in BLOCKS format
---------------------------------------------------------------------------------
-BL   MOTIF CTCHCGCGTCYGAAGWTTTTC width=21 seqs=9
-Pocillopora_acuta_HIv2__ (  125) CTCACGCGTCTGAAGATTTTC  1 
-Pocillopora_acuta_HIv2__ (  125) CTCACGCGTCTGAAGATTTTC  1 
-Pocillopora_acuta_HIv2__ (  125) CTCTCACGTCTGAAGATTTTC  1 
-Pocillopora_acuta_HIv2__ (  356) CTCTCACGTATGAAGATTTTC  1 
-Pocillopora_acuta_HIv2__ (  305) CGCCCGCGACCAAATTTTGTC  1 
-Pocillopora_acuta_HIv2__ (  109) CGCCCGCCCATGCACATTTTC  1 
-Pocillopora_acuta_HIv2__ (  172) CTCACGCGTCCGAGTATCTTA  1 
-Pocillopora_acuta_HIv2__ (  426) CTCCTGCGTCCAAACTCTGTC  1 
-Pocillopora_acuta_HIv2__ (  186) CCCCCGCCTCTGTTGTTGTTC  1 
-//
-
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif CTCHCGCGTCYGAAGWTTTTC MEME-10 position-specific scoring matrix
---------------------------------------------------------------------------------
-log-odds matrix: alength= 4 w= 21 n= 385223 bayes= 16.2334 E= 2.5e+004 
-  -982    236   -982   -982 
-  -982    -80     20    112 
-  -982    236   -982   -982 
-    12    120   -982    -46 
-  -982    219   -982   -146 
-   -46   -982    200   -982 
-  -982    236   -982   -982 
-  -982     20    200   -982 
-  -146    -80   -982    134 
-   -46    200   -982   -982 
-  -982     78   -982    112 
-   -46   -982    200   -982 
-   134    -80   -982   -146 
-   134   -982    -80   -146 
-  -982     20    152    -46 
-   112   -982   -982     12 
-  -982    -80   -982    154 
-  -982    -80    -80    134 
-  -982   -982     20    134 
-  -982   -982   -982    171 
-  -146    219   -982   -982 
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif CTCHCGCGTCYGAAGWTTTTC MEME-10 position-specific probability matrix
---------------------------------------------------------------------------------
-letter-probability matrix: alength= 4 w= 21 nsites= 9 E= 2.5e+004 
- 0.000000  1.000000  0.000000  0.000000 
- 0.000000  0.111111  0.222222  0.666667 
- 0.000000  1.000000  0.000000  0.000000 
- 0.333333  0.444444  0.000000  0.222222 
- 0.000000  0.888889  0.000000  0.111111 
- 0.222222  0.000000  0.777778  0.000000 
- 0.000000  1.000000  0.000000  0.000000 
- 0.000000  0.222222  0.777778  0.000000 
- 0.111111  0.111111  0.000000  0.777778 
- 0.222222  0.777778  0.000000  0.000000 
- 0.000000  0.333333  0.000000  0.666667 
- 0.222222  0.000000  0.777778  0.000000 
- 0.777778  0.111111  0.000000  0.111111 
- 0.777778  0.000000  0.111111  0.111111 
- 0.000000  0.222222  0.555556  0.222222 
- 0.666667  0.000000  0.000000  0.333333 
- 0.000000  0.111111  0.000000  0.888889 
- 0.000000  0.111111  0.111111  0.777778 
- 0.000000  0.000000  0.222222  0.777778 
- 0.000000  0.000000  0.000000  1.000000 
- 0.111111  0.888889  0.000000  0.000000 
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
-	Motif CTCHCGCGTCYGAAGWTTTTC MEME-10 regular expression
---------------------------------------------------------------------------------
-C[TG]C[CAT]C[GA]C[GC]T[CA][TC][GA]AA[GCT][AT]TT[TG]TC
---------------------------------------------------------------------------------
-
-
-
-
-Time 789.38 secs.
+Time 364.28 secs.
 
 ********************************************************************************
 
@@ -2879,1215 +1973,1009 @@ SUMMARY OF MOTIFS
 --------------------------------------------------------------------------------
 SEQUENCE NAME            COMBINED P-VALUE  MOTIF DIAGRAM
 -------------            ----------------  -------------
-Pocillopora_acuta_HIv2__         7.78e-01  500
-Pocillopora_acuta_HIv2__         1.70e-01  424_[+1(2.84e-06)]_65
-Pocillopora_acuta_HIv2__         3.44e-01  74_[-3(1.69e-05)]_132_\
-    [-7(9.52e-05)]_244
-Pocillopora_acuta_HIv2__         1.97e-02  211_[-2(1.66e-05)]_64_\
-    [+2(6.62e-05)]_31_[-1(4.28e-05)]_18_[+5(8.01e-05)]_98
-Pocillopora_acuta_HIv2__         1.17e-01  63_[+3(3.37e-06)]_412
-Pocillopora_acuta_HIv2__         1.07e-05  94_[+4(4.05e-12)]_83_[+1(3.60e-05)]_\
+Pocillopora_acuta_HIv2__         6.57e-01  500
+Pocillopora_acuta_HIv2__         2.17e-02  424_[+1(2.84e-06)]_65
+Pocillopora_acuta_HIv2__         1.17e-01  74_[-3(1.69e-05)]_401
+Pocillopora_acuta_HIv2__         1.70e-02  211_[-2(1.66e-05)]_64_\
+    [+2(6.62e-05)]_31_[-1(4.28e-05)]_137
+Pocillopora_acuta_HIv2__         1.61e-02  63_[+3(3.37e-06)]_412
+Pocillopora_acuta_HIv2__         5.34e-08  94_[+4(4.05e-12)]_83_[+1(3.60e-05)]_\
     287
-Pocillopora_acuta_HIv2__         4.36e-01  268_[-1(5.08e-05)]_221
-Pocillopora_acuta_HIv2__         1.32e-01  346_[+8(1.24e-06)]_133
-Pocillopora_acuta_HIv2__         1.46e-02  78_[+5(7.62e-05)]_194_\
-    [+4(4.96e-07)]_182
-Pocillopora_acuta_HIv2__         6.86e-01  500
-Pocillopora_acuta_HIv2__         7.24e-01  500
-Pocillopora_acuta_HIv2__         2.11e-01  246_[-9(3.17e-05)]_229
-Pocillopora_acuta_HIv2__         3.73e-02  136_[-10(5.81e-05)]_24_\
-    [-8(9.59e-06)]_298
-Pocillopora_acuta_HIv2__         2.10e-01  106_[+3(8.77e-06)]_24_\
-    [+3(2.39e-05)]_21_[+1(7.11e-05)]_288
-Pocillopora_acuta_HIv2__         7.83e-01  500
-Pocillopora_acuta_HIv2__         5.45e-03  155_[+6(6.73e-05)]_125_\
-    [-10(4.41e-09)]_175
-Pocillopora_acuta_HIv2__         7.63e-01  88_[-7(9.52e-05)]_387
-Pocillopora_acuta_HIv2__         4.98e-01  160_[+4(4.16e-05)]_315
-Pocillopora_acuta_HIv2__         1.76e-01  20_[+1(9.48e-05)]_26_[-1(5.08e-05)]_\
-    194_[-5(7.23e-05)]_217
-Pocillopora_acuta_HIv2__         7.84e-02  68_[-3(2.09e-05)]_4_[-1(9.34e-06)]_\
-    392
-Pocillopora_acuta_HIv2__         3.25e-01  280_[-2(3.25e-05)]_4_[+2(3.74e-05)]_\
-    170
-Pocillopora_acuta_HIv2__         1.23e-02  7_[+4(1.87e-05)]_395_[-8(1.47e-05)]_\
-    12_[-7(6.29e-05)]_15
-Pocillopora_acuta_HIv2__         2.19e-01  48_[+1(5.08e-05)]_11_[-1(4.28e-05)]_\
-    13_[+1(7.11e-05)]_67_[-4(2.70e-05)]_303
-Pocillopora_acuta_HIv2__         7.47e-01  10_[-3(4.80e-05)]_465
-Pocillopora_acuta_HIv2__         4.45e-01  500
-Pocillopora_acuta_HIv2__         2.73e-01  199_[+1(2.84e-06)]_253_\
-    [-1(5.08e-05)]_26
-Pocillopora_acuta_HIv2__         4.44e-01  92_[+2(6.28e-05)]_43_[-5(6.15e-05)]_\
-    321
-Pocillopora_acuta_HIv2__         3.84e-04  4_[-3(1.98e-08)]_304_[-1(5.12e-06)]_\
-    156
-Pocillopora_acuta_HIv2__         7.59e-01  500
-Pocillopora_acuta_HIv2__         1.60e-49  160_[-5(5.22e-13)]_28_\
-    [-2(3.17e-10)]_56_[-7(5.78e-10)]_17_[-3(7.12e-09)]_[-10(2.36e-10)]_\
-    [+1(5.08e-05)]_[-8(4.24e-14)]_2_[-4(1.19e-15)]_4_[-3(1.47e-09)]_6_\
-    [-2(1.56e-14)]_7
-Pocillopora_acuta_HIv2__         7.14e-01  500
-Pocillopora_acuta_HIv2__         6.60e-03  77_[+10(5.06e-06)]_157_\
-    [-3(1.03e-06)]_116_[-3(2.09e-05)]_79
-Pocillopora_acuta_HIv2__         3.38e-01  500
-Pocillopora_acuta_HIv2__         2.12e-01  171_[-7(6.29e-05)]_115_\
-    [-10(3.45e-05)]_168
-Pocillopora_acuta_HIv2__         2.04e-01  155_[-3(2.93e-05)]_265_\
-    [-9(5.04e-05)]_30
-Pocillopora_acuta_HIv2__         1.06e-01  84_[-7(9.52e-05)]_55_[-7(6.85e-05)]_\
-    123_[+1(8.01e-05)]_152_[-2(5.34e-05)]_2
-Pocillopora_acuta_HIv2__         6.69e-01  500
-Pocillopora_acuta_HIv2__         6.82e-07  268_[-3(3.24e-05)]_29_\
-    [+6(2.08e-11)]_32_[-1(1.32e-05)]_38_[+3(7.98e-07)]_48
-Pocillopora_acuta_HIv2__         2.09e-02  60_[-3(4.62e-07)]_415
-Pocillopora_acuta_HIv2__         9.43e-01  117_[+7(9.52e-05)]_358
-Pocillopora_acuta_HIv2__         6.47e-01  64_[-3(7.53e-05)]_411
-Pocillopora_acuta_HIv2__         3.98e-01  212_[-8(6.40e-05)]_267
-Pocillopora_acuta_HIv2__         3.16e-01  158_[-10(3.54e-05)]_321
-Pocillopora_acuta_HIv2__         1.66e-01  192_[-3(5.29e-05)]_122_\
-    [-1(1.72e-05)]_150
-Pocillopora_acuta_HIv2__         1.77e-01  446_[+1(5.08e-05)]_43
-Pocillopora_acuta_HIv2__         1.80e-05  169_[+1(9.34e-06)]_90_\
-    [+6(1.18e-07)]_181_[-6(5.64e-11)]_1
-Pocillopora_acuta_HIv2__         8.86e-01  500
-Pocillopora_acuta_HIv2__         2.34e-01  500
-Pocillopora_acuta_HIv2__         5.71e-02  61_[-3(7.53e-05)]_12_[+1(2.36e-05)]_\
-    26_[+1(2.36e-05)]_91_[+4(4.77e-05)]_238
-Pocillopora_acuta_HIv2__         7.54e-01  500
-Pocillopora_acuta_HIv2__         6.88e-01  500
-Pocillopora_acuta_HIv2__         9.02e-01  500
-Pocillopora_acuta_HIv2__         2.68e-01  157_[+6(2.13e-06)]_319
-Pocillopora_acuta_HIv2__         4.19e-03  40_[+6(1.59e-06)]_31_[+1(6.05e-05)]_\
-    14_[+1(4.28e-05)]_2_[-3(4.96e-05)]_91_[+10(9.68e-05)]_230
-Pocillopora_acuta_HIv2__         5.59e-03  29_[+6(6.83e-07)]_243_\
-    [-1(2.84e-06)]_193
-Pocillopora_acuta_HIv2__         5.18e-01  11_[-7(9.52e-05)]_464
-Pocillopora_acuta_HIv2__         1.89e-01  65_[+1(2.91e-05)]_98_[+4(9.36e-05)]_\
-    225_[+3(6.63e-05)]_51
-Pocillopora_acuta_HIv2__         6.90e-01  300_[+5(3.72e-05)]_179
-Pocillopora_acuta_HIv2__         5.82e-01  500
-Pocillopora_acuta_HIv2__         7.14e-02  27_[-1(6.05e-05)]_2_[-1(6.05e-05)]_\
-    326_[+6(6.73e-05)]_43_[-5(3.92e-05)]_35
-Pocillopora_acuta_HIv2__         7.65e-01  500
-Pocillopora_acuta_HIv2__         8.33e-01  96_[+6(9.89e-05)]_380
-Pocillopora_acuta_HIv2__         1.71e-02  202_[+3(7.41e-06)]_9_[-1(8.85e-07)]_\
-    123_[+1(1.32e-05)]_119
-Pocillopora_acuta_HIv2__         5.24e-01  500
-Pocillopora_acuta_HIv2__         6.27e-03  186_[+1(6.05e-05)]_253_\
-    [-6(5.14e-08)]_5_[-1(8.58e-05)]_10
-Pocillopora_acuta_HIv2__         8.64e-01  500
-Pocillopora_acuta_HIv2__         2.37e-01  242_[+3(1.35e-05)]_233
-Pocillopora_acuta_HIv2__         6.03e-04  127_[+9(3.77e-05)]_76_\
-    [-6(1.03e-05)]_9_[-6(8.44e-05)]_116_[-4(1.65e-05)]_74
-Pocillopora_acuta_HIv2__         6.39e-01  500
-Pocillopora_acuta_HIv2__         3.99e-01  500
-Pocillopora_acuta_HIv2__         9.31e-01  500
-Pocillopora_acuta_HIv2__         1.73e-02  136_[+5(1.81e-05)]_106_\
-    [-1(5.12e-06)]_226
-Pocillopora_acuta_HIv2__         1.62e-01  15_[+1(5.08e-05)]_280_\
-    [-4(7.98e-05)]_169
-Pocillopora_acuta_HIv2__         3.73e-01  53_[-6(3.80e-05)]_423
-Pocillopora_acuta_HIv2__         1.73e-01  266_[+1(7.76e-05)]_223
-Pocillopora_acuta_HIv2__         2.08e-01  247_[+1(4.28e-05)]_242
-Pocillopora_acuta_HIv2__         1.11e-01  105_[+1(2.36e-05)]_23_\
-    [+6(7.67e-05)]_337
-Pocillopora_acuta_HIv2__         1.40e-01  337_[+6(1.53e-05)]_10_\
-    [-5(2.31e-05)]_108
-Pocillopora_acuta_HIv2__         1.35e-02  10_[-1(5.12e-06)]_3_[-3(8.07e-06)]_\
-    45_[-1(7.76e-05)]_50_[-1(9.93e-05)]_271_[+5(9.04e-05)]_42
-Pocillopora_acuta_HIv2__         2.18e-01  134_[-3(7.73e-06)]_56_\
-    [-1(6.05e-05)]_52_[-1(9.93e-05)]_211
-Pocillopora_acuta_HIv2__         3.82e-02  14_[-3(8.07e-06)]_56_[-1(6.05e-05)]_\
-    331_[+5(9.04e-05)]_42
-Pocillopora_acuta_HIv2__         4.20e-01  220_[+1(9.34e-06)]_197_\
-    [-1(1.32e-05)]_61
-Pocillopora_acuta_HIv2__         6.30e-03  127_[-1(8.85e-07)]_24_\
-    [-3(9.69e-05)]_133_[+6(2.48e-05)]_7_[-3(8.28e-05)]_124
-Pocillopora_acuta_HIv2__         1.05e-01  12_[-1(9.34e-06)]_477
-Pocillopora_acuta_HIv2__         2.65e-01  50_[+9(3.17e-05)]_205_\
-    [-6(8.72e-05)]_196
-Pocillopora_acuta_HIv2__         4.71e-01  346_[+1(3.60e-05)]_143
-Pocillopora_acuta_HIv2__         3.52e-01  98_[+9(6.71e-05)]_334_\
-    [+1(9.93e-05)]_32
-Pocillopora_acuta_HIv2__         8.06e-01  82_[-1(9.48e-05)]_407
-Pocillopora_acuta_HIv2__         3.40e-01  131_[-4(8.42e-05)]_344
-Pocillopora_acuta_HIv2__         5.52e-03  4_[-1(6.84e-05)]_6_[-7(4.57e-05)]_\
-    129_[-6(1.53e-05)]_37_[-6(2.70e-06)]_240
-Pocillopora_acuta_HIv2__         3.61e-01  500
-Pocillopora_acuta_HIv2__         6.93e-01  276_[-1(6.05e-05)]_181_\
-    [-1(8.58e-05)]_21
-Pocillopora_acuta_HIv2__         9.15e-03  334_[-2(2.90e-08)]_143
-Pocillopora_acuta_HIv2__         4.60e-01  109_[-9(3.77e-05)]_366
-Pocillopora_acuta_HIv2__         2.36e-01  85_[-1(8.58e-05)]_124_\
-    [-6(3.67e-05)]_48_[-5(8.42e-05)]_187
-Pocillopora_acuta_HIv2__         1.96e-01  400_[+2(1.07e-05)]_77
-Pocillopora_acuta_HIv2__         2.60e-01  15_[-3(6.42e-05)]_123_\
-    [-1(9.48e-05)]_50_[-1(7.11e-05)]_265
-Pocillopora_acuta_HIv2__         7.89e-02  16_[-4(1.15e-05)]_145_\
-    [+3(2.93e-05)]_289
-Pocillopora_acuta_HIv2__         2.37e-01  243_[-2(8.17e-05)]_234
-Pocillopora_acuta_HIv2__         3.93e-01  122_[-6(4.66e-05)]_354
-Pocillopora_acuta_HIv2__         2.57e-01  139_[-6(5.09e-06)]_113_\
-    [-6(7.63e-07)]_200
-Pocillopora_acuta_HIv2__         4.97e-01  69_[-1(6.84e-05)]_95_[-3(1.57e-05)]_\
-    300
-Pocillopora_acuta_HIv2__         6.27e-01  69_[+7(3.21e-05)]_221_\
-    [-10(9.24e-05)]_164
-Pocillopora_acuta_HIv2__         9.97e-01  500
-Pocillopora_acuta_HIv2__         1.40e-01  240_[+1(6.84e-05)]_189_\
-    [-9(4.07e-05)]_35
-Pocillopora_acuta_HIv2__         4.15e-01  387_[+3(7.77e-05)]_88
-Pocillopora_acuta_HIv2__         4.64e-02  111_[-1(9.34e-06)]_58_\
-    [-6(5.16e-05)]_141_[+4(4.94e-05)]_72_[+1(2.91e-05)]_47
-Pocillopora_acuta_HIv2__         2.57e-01  257_[-10(7.69e-05)]_59_\
-    [+6(5.71e-05)]_139
-Pocillopora_acuta_HIv2__         1.87e-01  126_[-1(6.05e-05)]_213_\
-    [+6(4.66e-05)]_126
-Pocillopora_acuta_HIv2__         6.28e-01  246_[+1(8.01e-05)]_243
-Pocillopora_acuta_HIv2__         5.91e-01  23_[-5(7.60e-06)]_456
-Pocillopora_acuta_HIv2__         9.46e-01  500
-Pocillopora_acuta_HIv2__         1.26e-05  65_[-5(1.27e-10)]_126_\
-    [-2(1.17e-05)]_265
-Pocillopora_acuta_HIv2__         1.11e-05  65_[-5(1.27e-10)]_126_\
-    [-2(7.22e-06)]_265
-Pocillopora_acuta_HIv2__         1.72e-02  15_[-9(4.07e-05)]_147_\
-    [-10(5.83e-06)]_138_[+2(2.83e-05)]_131
-Pocillopora_acuta_HIv2__         1.90e-01  67_[-3(3.95e-05)]_408
-Pocillopora_acuta_HIv2__         8.03e-01  500
-Pocillopora_acuta_HIv2__         3.84e-05  238_[+6(1.07e-11)]_49_\
-    [+10(5.68e-05)]_168
-Pocillopora_acuta_HIv2__         4.95e-02  207_[+10(9.45e-05)]_1_\
-    [+3(4.65e-05)]_85_[-8(2.08e-05)]_140
-Pocillopora_acuta_HIv2__         5.16e-03  40_[-1(1.32e-05)]_210_\
-    [-8(1.38e-05)]_165_[-5(1.57e-05)]_32
-Pocillopora_acuta_HIv2__         1.88e-01  71_[+10(9.45e-05)]_408
-Pocillopora_acuta_HIv2__         4.99e-01  236_[-3(6.02e-05)]_152_\
-    [-6(8.18e-05)]_63
-Pocillopora_acuta_HIv2__         9.86e-02  351_[-3(7.41e-06)]_124
-Pocillopora_acuta_HIv2__         1.97e-01  357_[+7(3.50e-05)]_118
-Pocillopora_acuta_HIv2__         9.73e-02  213_[-6(9.89e-05)]_138_\
-    [-8(4.43e-05)]_104
-Pocillopora_acuta_HIv2__         3.27e-01  275_[-10(4.46e-05)]_204
-Pocillopora_acuta_HIv2__         3.40e-01  475_[-10(7.51e-05)]_4
-Pocillopora_acuta_HIv2__         5.20e-02  130_[+6(7.46e-06)]_13_\
-    [-6(3.90e-06)]_309
+Pocillopora_acuta_HIv2__         1.58e-01  268_[-1(5.08e-05)]_221
+Pocillopora_acuta_HIv2__         9.45e-01  500
+Pocillopora_acuta_HIv2__         7.49e-03  293_[+4(4.96e-07)]_182
+Pocillopora_acuta_HIv2__         7.13e-01  500
+Pocillopora_acuta_HIv2__         1.84e-01  500
 Pocillopora_acuta_HIv2__         5.90e-01  500
-Pocillopora_acuta_HIv2__         2.81e-01  206_[-5(6.86e-05)]_273
-Pocillopora_acuta_HIv2__         3.17e-01  255_[+2(5.95e-05)]_65_\
-    [-3(4.08e-05)]_132
-Pocillopora_acuta_HIv2__         1.69e-02  10_[-5(7.83e-06)]_5_[-7(6.29e-05)]_\
-    254_[+2(5.95e-05)]_65_[-3(4.08e-05)]_72
-Pocillopora_acuta_HIv2__         8.54e-01  395_[-3(7.06e-05)]_80
-Pocillopora_acuta_HIv2__         9.22e-02  186_[+1(2.84e-06)]_182_\
-    [-1(2.36e-05)]_110
-Pocillopora_acuta_HIv2__         1.08e-03  188_[+1(8.85e-07)]_69_\
-    [+1(4.28e-05)]_24_[+2(1.40e-05)]_41_[-10(9.89e-05)]_112
-Pocillopora_acuta_HIv2__         2.79e-01  2_[-1(5.12e-06)]_168_\
-    [-10(1.66e-05)]_91_[-1(6.84e-05)]_196
-Pocillopora_acuta_HIv2__         9.14e-04  170_[+6(7.28e-09)]_63_\
-    [+3(3.14e-05)]_16_[-1(5.08e-05)]_191
-Pocillopora_acuta_HIv2__         8.15e-01  56_[+3(9.10e-05)]_369_\
-    [+2(9.78e-05)]_27
-Pocillopora_acuta_HIv2__         3.77e-02  173_[+10(3.27e-05)]_57_\
-    [+3(3.82e-05)]_19_[+3(1.49e-06)]_180
-Pocillopora_acuta_HIv2__         4.09e-02  403_[-1(2.84e-06)]_34_\
-    [+1(6.84e-05)]_41
-Pocillopora_acuta_HIv2__         1.20e-01  434_[-1(2.84e-06)]_15_\
-    [-2(6.98e-05)]_17
-Pocillopora_acuta_HIv2__         8.48e-01  500
-Pocillopora_acuta_HIv2__         3.08e-01  26_[-10(8.63e-05)]_85_\
-    [+1(6.19e-05)]_357
-Pocillopora_acuta_HIv2__         5.41e-01  463_[+5(3.11e-05)]_16
-Pocillopora_acuta_HIv2__         5.21e-02  231_[-5(6.67e-05)]_87_\
-    [-1(9.34e-06)]_79_[-7(3.72e-05)]_46
-Pocillopora_acuta_HIv2__         3.78e-01  136_[+1(6.84e-05)]_353
-Pocillopora_acuta_HIv2__         9.41e-03  176_[+6(4.46e-06)]_204_\
-    [-1(9.34e-06)]_85
-Pocillopora_acuta_HIv2__         3.16e-01  172_[+4(2.64e-05)]_303
-Pocillopora_acuta_HIv2__         2.74e-01  394_[-3(4.10e-06)]_81
-Pocillopora_acuta_HIv2__         7.96e-02  321_[-10(1.70e-05)]_59_\
-    [-4(2.08e-05)]_74
-Pocillopora_acuta_HIv2__         5.90e-01  450_[+6(3.07e-05)]_26
-Pocillopora_acuta_HIv2__         3.09e-02  71_[+6(2.76e-05)]_187_\
-    [-9(3.17e-05)]_46_[-3(3.46e-05)]_122
-Pocillopora_acuta_HIv2__         1.21e-01  424_[-9(2.09e-05)]_51
-Pocillopora_acuta_HIv2__         1.52e-02  86_[+10(3.73e-05)]_300_\
-    [-7(6.65e-06)]_68
-Pocillopora_acuta_HIv2__         4.95e-01  145_[-1(9.93e-05)]_344
-Pocillopora_acuta_HIv2__         4.80e-02  136_[-6(3.07e-05)]_98_\
-    [-7(2.98e-06)]_217
-Pocillopora_acuta_HIv2__         6.08e-02  168_[+9(2.88e-05)]_307
-Pocillopora_acuta_HIv2__         8.44e-02  222_[+9(2.05e-06)]_210_\
-    [-3(6.63e-05)]_18
-Pocillopora_acuta_HIv2__         9.46e-01  500
-Pocillopora_acuta_HIv2__         6.02e-01  435_[+1(2.91e-05)]_54
-Pocillopora_acuta_HIv2__         8.74e-02  26_[+1(9.93e-05)]_31_[+2(5.79e-05)]_\
-    45_[+4(6.59e-05)]_296_[-1(3.60e-05)]_32
-Pocillopora_acuta_HIv2__         1.95e-03  224_[-1(1.72e-05)]_45_\
-    [-6(5.78e-07)]_101_[-6(1.78e-05)]_71
-Pocillopora_acuta_HIv2__         7.18e-01  500
-Pocillopora_acuta_HIv2__         6.24e-01  272_[-1(2.91e-05)]_217
-Pocillopora_acuta_HIv2__         1.69e-03  42_[+8(1.51e-06)]_69_[+9(2.88e-05)]_\
-    21_[+3(4.50e-05)]_38_[+4(8.12e-05)]_234
-Pocillopora_acuta_HIv2__         9.90e-04  195_[-8(3.59e-05)]_138_\
-    [-6(6.13e-09)]_122
-Pocillopora_acuta_HIv2__         9.84e-02  323_[+2(1.71e-05)]_122_\
-    [+3(2.56e-05)]_7
-Pocillopora_acuta_HIv2__         8.09e-02  20_[+2(4.92e-05)]_40_[-7(2.98e-06)]_\
+Pocillopora_acuta_HIv2__         3.43e-01  500
+Pocillopora_acuta_HIv2__         3.76e-02  106_[+3(8.77e-06)]_24_\
+    [+3(2.39e-05)]_21_[+1(7.11e-05)]_288
+Pocillopora_acuta_HIv2__         7.46e-01  500
+Pocillopora_acuta_HIv2__         8.45e-01  500
+Pocillopora_acuta_HIv2__         7.83e-01  500
+Pocillopora_acuta_HIv2__         8.36e-02  160_[+4(4.16e-05)]_315
+Pocillopora_acuta_HIv2__         2.46e-01  20_[+1(9.48e-05)]_26_[-1(5.08e-05)]_\
+    432
+Pocillopora_acuta_HIv2__         1.09e-02  68_[-3(2.09e-05)]_4_[-1(9.34e-06)]_\
     392
-Pocillopora_acuta_HIv2__         8.03e-01  500
-Pocillopora_acuta_HIv2__         7.78e-03  41_[+7(9.52e-05)]_73_[+1(5.08e-05)]_\
-    186_[+6(1.23e-06)]_140
-Pocillopora_acuta_HIv2__         4.57e-01  25_[-1(2.91e-05)]_464
-Pocillopora_acuta_HIv2__         3.49e-01  71_[+9(4.99e-05)]_404
-Pocillopora_acuta_HIv2__         2.21e-01  103_[+2(1.21e-05)]_374
-Pocillopora_acuta_HIv2__         8.71e-01  500
-Pocillopora_acuta_HIv2__         7.69e-01  500
-Pocillopora_acuta_HIv2__         1.82e-01  405_[+1(1.32e-05)]_84
-Pocillopora_acuta_HIv2__         9.34e-01  500
-Pocillopora_acuta_HIv2__         3.23e-01  317_[+1(5.21e-05)]_172
-Pocillopora_acuta_HIv2__         7.69e-01  68_[+1(6.05e-05)]_421
-Pocillopora_acuta_HIv2__         3.54e-01  66_[+7(1.65e-05)]_338_\
-    [-1(3.60e-05)]_60
-Pocillopora_acuta_HIv2__         4.67e-02  127_[-2(1.14e-08)]_350
-Pocillopora_acuta_HIv2__         4.66e-01  83_[+4(4.67e-05)]_392
-Pocillopora_acuta_HIv2__         4.44e-01  500
-Pocillopora_acuta_HIv2__         8.52e-03  30_[+6(8.11e-06)]_98_[+6(8.72e-05)]_\
-    61_[+1(9.34e-06)]_252
-Pocillopora_acuta_HIv2__         4.39e-02  84_[-6(1.92e-05)]_208_\
-    [+8(1.85e-05)]_163
-Pocillopora_acuta_HIv2__         6.91e-02  183_[+1(1.32e-05)]_75_\
-    [-9(6.19e-05)]_75_[+3(2.93e-05)]_106
-Pocillopora_acuta_HIv2__         6.40e-01  500
-Pocillopora_acuta_HIv2__         8.09e-01  227_[-1(8.58e-05)]_97_\
-    [+1(6.19e-05)]_154
-Pocillopora_acuta_HIv2__         2.07e-01  179_[-10(8.05e-05)]_167_\
-    [-8(9.59e-06)]_112
-Pocillopora_acuta_HIv2__         1.95e-01  118_[-8(9.59e-06)]_215_\
-    [+9(7.62e-05)]_121
-Pocillopora_acuta_HIv2__         5.30e-01  500
-Pocillopora_acuta_HIv2__         5.05e-01  355_[-2(6.80e-05)]_122
-Pocillopora_acuta_HIv2__         1.49e-02  179_[-1(6.05e-05)]_112_\
-    [+6(2.46e-06)]_96_[-7(6.29e-05)]_53
-Pocillopora_acuta_HIv2__         4.60e-01  296_[-1(4.28e-05)]_193
-Pocillopora_acuta_HIv2__         2.50e-03  81_[-1(2.91e-05)]_144_\
-    [+10(1.86e-05)]_3_[+1(2.84e-06)]_229
-Pocillopora_acuta_HIv2__         8.69e-01  500
-Pocillopora_acuta_HIv2__         1.78e-02  172_[+3(8.02e-05)]_82_\
-    [-2(2.33e-05)]_26_[-3(5.44e-06)]_147
-Pocillopora_acuta_HIv2__         3.59e-02  337_[-3(2.60e-06)]_138
-Pocillopora_acuta_HIv2__         6.05e-01  413_[-9(8.41e-05)]_62
-Pocillopora_acuta_HIv2__         7.21e-01  500
-Pocillopora_acuta_HIv2__         2.06e-04  139_[-1(1.32e-05)]_93_\
-    [+6(3.54e-05)]_57_[-6(1.03e-07)]_1_[+10(5.66e-06)]_130
-Pocillopora_acuta_HIv2__         1.09e-03  58_[-3(1.88e-05)]_22_[-1(7.76e-05)]_\
-    42_[+6(6.95e-05)]_101_[-8(9.82e-05)]_124_[+1(3.60e-05)]_1_[+3(2.56e-05)]_\
-    35
-Pocillopora_acuta_HIv2__         2.75e-02  16_[+1(6.05e-05)]_108_\
-    [-3(1.88e-05)]_340
-Pocillopora_acuta_HIv2__         1.92e-01  113_[-8(9.15e-05)]_366
-Pocillopora_acuta_HIv2__         2.15e-01  148_[-6(3.19e-05)]_150_\
-    [+1(6.84e-05)]_167
-Pocillopora_acuta_HIv2__         9.11e-01  500
-Pocillopora_acuta_HIv2__         2.46e-01  186_[+6(8.45e-06)]_290
-Pocillopora_acuta_HIv2__         2.79e-01  500
-Pocillopora_acuta_HIv2__         2.46e-01  186_[+6(8.45e-06)]_290
-Pocillopora_acuta_HIv2__         3.45e-02  189_[+1(2.84e-06)]_300
-Pocillopora_acuta_HIv2__         5.39e-01  500
-Pocillopora_acuta_HIv2__         6.78e-01  259_[+5(3.72e-05)]_220
-Pocillopora_acuta_HIv2__         2.96e-01  500
-Pocillopora_acuta_HIv2__         1.13e-01  119_[-8(7.74e-05)]_360
-Pocillopora_acuta_HIv2__         8.74e-01  500
-Pocillopora_acuta_HIv2__         3.50e-01  211_[-2(6.28e-05)]_266
-Pocillopora_acuta_HIv2__         4.63e-01  345_[-9(4.97e-05)]_130
-Pocillopora_acuta_HIv2__         1.31e-01  1_[-10(7.69e-05)]_80_[-5(4.77e-05)]_\
-    175_[-6(1.36e-05)]_178
-Pocillopora_acuta_HIv2__         2.18e-01  372_[-7(3.70e-05)]_15_\
-    [-6(9.89e-05)]_64
-Pocillopora_acuta_HIv2__         1.38e-01  294_[-9(3.17e-05)]_181
-Pocillopora_acuta_HIv2__         6.01e-01  294_[+5(7.14e-06)]_185
-Pocillopora_acuta_HIv2__         8.88e-02  128_[-9(7.26e-05)]_347
-Pocillopora_acuta_HIv2__         2.32e-01  186_[+3(3.82e-05)]_13_\
-    [+2(4.92e-05)]_253
-Pocillopora_acuta_HIv2__         5.27e-06  171_[+10(6.13e-09)]_144_\
-    [+3(4.08e-05)]_1_[-5(7.23e-05)]_117
-Pocillopora_acuta_HIv2__         4.31e-01  117_[+1(5.08e-05)]_372
-Pocillopora_acuta_HIv2__         2.38e-02  205_[+5(3.59e-06)]_16_\
-    [-6(1.36e-05)]_234
-Pocillopora_acuta_HIv2__         1.94e-01  500
-Pocillopora_acuta_HIv2__         2.42e-01  208_[-10(3.02e-06)]_223_\
-    [+10(3.36e-05)]_27
-Pocillopora_acuta_HIv2__         4.50e-01  500
-Pocillopora_acuta_HIv2__         4.44e-01  402_[+4(7.19e-05)]_73
-Pocillopora_acuta_HIv2__         2.42e-01  432_[-7(6.29e-05)]_43
-Pocillopora_acuta_HIv2__         3.96e-02  146_[-2(2.83e-05)]_227_\
-    [-5(3.52e-05)]_83
-Pocillopora_acuta_HIv2__         7.12e-01  56_[-1(9.48e-05)]_433
-Pocillopora_acuta_HIv2__         8.24e-02  43_[-9(2.98e-06)]_432
-Pocillopora_acuta_HIv2__         5.39e-02  43_[-9(2.98e-06)]_151_\
-    [+9(6.23e-05)]_256
-Pocillopora_acuta_HIv2__         1.34e-01  42_[-9(2.98e-06)]_433
-Pocillopora_acuta_HIv2__         5.01e-03  262_[-1(6.84e-05)]_36_\
-    [+6(1.74e-07)]_167
-Pocillopora_acuta_HIv2__         9.40e-01  500
-Pocillopora_acuta_HIv2__         1.02e-01  84_[-4(3.13e-05)]_391
-Pocillopora_acuta_HIv2__         4.88e-04  35_[+1(9.48e-05)]_20_[-6(5.84e-10)]_\
-    32_[+5(1.60e-05)]_357
-Pocillopora_acuta_HIv2__         1.73e-01  352_[+2(1.10e-05)]_125
-Pocillopora_acuta_HIv2__         1.98e-01  420_[-1(2.84e-06)]_69
-Pocillopora_acuta_HIv2__         4.40e-02  57_[-1(6.05e-05)]_48_[-3(2.09e-05)]_\
-    204_[+7(6.85e-05)]_130
-Pocillopora_acuta_HIv2__         8.60e-02  230_[+1(9.34e-06)]_259
-Pocillopora_acuta_HIv2__         3.09e-01  440_[-6(1.99e-05)]_36
-Pocillopora_acuta_HIv2__         1.11e-01  224_[+5(1.60e-05)]_183_\
-    [-7(2.22e-05)]_47
-Pocillopora_acuta_HIv2__         2.59e-01  385_[-10(8.95e-06)]_94
-Pocillopora_acuta_HIv2__         2.96e-01  26_[-3(7.77e-05)]_127_\
-    [-1(9.34e-06)]_311
-Pocillopora_acuta_HIv2__         2.59e-01  385_[-10(8.95e-06)]_94
-Pocillopora_acuta_HIv2__         1.15e-01  243_[+6(5.90e-05)]_154_\
-    [-10(9.68e-05)]_58
-Pocillopora_acuta_HIv2__         2.00e-01  53_[-10(9.68e-05)]_337_\
-    [+3(6.22e-05)]_64
-Pocillopora_acuta_HIv2__         1.15e-02  9_[-8(4.92e-05)]_146_\
-    [+10(4.80e-05)]_18_[-9(1.39e-05)]_80_[+7(9.52e-05)]_155
-Pocillopora_acuta_HIv2__         2.19e-01  169_[-1(8.85e-07)]_320
-Pocillopora_acuta_HIv2__         4.94e-02  159_[+8(6.40e-05)]_166_\
-    [-5(7.04e-05)]_31_[-2(3.74e-05)]_79
-Pocillopora_acuta_HIv2__         1.01e-01  5_[-10(2.43e-06)]_129_\
-    [+10(3.45e-05)]_324
-Pocillopora_acuta_HIv2__         1.90e-01  61_[+3(6.22e-05)]_170_\
-    [+1(6.05e-05)]_233
-Pocillopora_acuta_HIv2__         9.56e-02  63_[+1(5.08e-05)]_336_\
-    [+1(2.36e-05)]_16_[+9(5.95e-05)]_38
-Pocillopora_acuta_HIv2__         6.02e-01  207_[+3(2.93e-05)]_15_\
-    [-3(8.55e-05)]_69_[+3(8.55e-05)]_134
-Pocillopora_acuta_HIv2__         2.92e-01  126_[+1(3.60e-05)]_335_\
-    [-2(6.98e-05)]_5
-Pocillopora_acuta_HIv2__         4.85e-08  54_[-3(9.51e-06)]_70_[-1(8.58e-05)]_\
-    62_[+9(5.72e-15)]_253
-Pocillopora_acuta_HIv2__         5.24e-07  149_[-1(8.58e-05)]_62_\
-    [+9(5.72e-15)]_253
-Pocillopora_acuta_HIv2__         5.52e-05  465_[+9(4.97e-14)]_10
-Pocillopora_acuta_HIv2__         1.90e-01  76_[-1(6.05e-05)]_152_\
-    [-9(6.50e-06)]_236
-Pocillopora_acuta_HIv2__         2.42e-08  67_[-5(9.04e-05)]_41_[+2(6.62e-05)]_\
-    145_[-1(4.28e-05)]_78_[-5(4.38e-05)]_58_[+9(5.72e-15)]_10
-Pocillopora_acuta_HIv2__         7.19e-02  209_[+9(2.88e-05)]_177_\
-    [+2(2.46e-05)]_66
-Pocillopora_acuta_HIv2__         4.76e-01  269_[+2(6.98e-05)]_208
-Pocillopora_acuta_HIv2__         1.63e-01  13_[+7(2.02e-06)]_462
-Pocillopora_acuta_HIv2__         3.89e-03  11_[+1(6.19e-05)]_70_[+2(2.84e-06)]_\
-    141_[-3(1.57e-05)]_219
-Pocillopora_acuta_HIv2__         3.61e-01  335_[+1(8.85e-05)]_154
-Pocillopora_acuta_HIv2__         1.26e-02  118_[-7(4.57e-05)]_133_\
-    [-1(3.60e-05)]_78_[+6(4.66e-05)]_23_[-5(5.34e-05)]_67
-Pocillopora_acuta_HIv2__         1.50e-01  435_[+10(2.78e-05)]_44
-Pocillopora_acuta_HIv2__         4.36e-06  118_[-7(4.57e-05)]_77_\
-    [-6(6.47e-10)]_38_[-1(3.60e-05)]_79_[+6(4.66e-05)]_47_[-5(5.65e-05)]_36
-Pocillopora_acuta_HIv2__         1.50e-01  416_[+10(2.78e-05)]_63
-Pocillopora_acuta_HIv2__         6.01e-01  241_[-4(9.52e-05)]_234
-Pocillopora_acuta_HIv2__         7.73e-03  135_[+7(4.45e-05)]_13_\
-    [+4(9.19e-05)]_64_[+1(2.84e-06)]_31_[-9(1.84e-05)]_10_[-1(4.28e-05)]_150
-Pocillopora_acuta_HIv2__         5.68e-01  108_[+1(5.08e-05)]_367_\
-    [+1(5.08e-05)]_3
-Pocillopora_acuta_HIv2__         4.14e-01  279_[+1(3.60e-05)]_69_\
-    [+9(1.11e-05)]_116
-Pocillopora_acuta_HIv2__         1.42e-01  248_[-1(1.72e-05)]_23_\
-    [-2(7.56e-05)]_141_[+6(6.10e-05)]_30
-Pocillopora_acuta_HIv2__         3.49e-02  88_[-5(5.65e-05)]_112_\
-    [+8(9.88e-05)]_22_[+1(7.76e-05)]_225
-Pocillopora_acuta_HIv2__         5.64e-03  119_[-9(4.97e-05)]_8_[+1(2.91e-05)]_\
-    98_[+1(9.34e-06)]_69_[+1(2.84e-06)]_91_[+3(1.57e-07)]_32
-Pocillopora_acuta_HIv2__         1.12e-01  150_[+6(1.42e-05)]_282_\
-    [-1(6.84e-05)]_33
-Pocillopora_acuta_HIv2__         1.54e-01  61_[-3(1.81e-05)]_124_\
-    [+2(6.11e-05)]_267
-Pocillopora_acuta_HIv2__         1.94e-02  107_[+3(5.47e-05)]_116_\
-    [+1(2.84e-06)]_241
-Pocillopora_acuta_HIv2__         2.33e-01  273_[-2(8.83e-05)]_61_\
-    [-5(6.86e-05)]_61_[+6(4.51e-05)]_37
-Pocillopora_acuta_HIv2__         3.88e-01  48_[-3(4.36e-05)]_427
-Pocillopora_acuta_HIv2__         6.46e-01  195_[-3(8.82e-05)]_280
-Pocillopora_acuta_HIv2__         1.96e-01  326_[-2(8.83e-05)]_151
-Pocillopora_acuta_HIv2__         2.78e-01  173_[+1(1.32e-05)]_316
-Pocillopora_acuta_HIv2__         5.04e-01  136_[-6(1.78e-05)]_340
-Pocillopora_acuta_HIv2__         1.68e-01  55_[+4(5.42e-05)]_420
-Pocillopora_acuta_HIv2__         6.16e-01  500
-Pocillopora_acuta_HIv2__         6.05e-01  396_[+2(5.34e-05)]_81
-Pocillopora_acuta_HIv2__         8.30e-01  19_[+7(4.45e-05)]_456
-Pocillopora_acuta_HIv2__         1.59e-01  318_[+1(9.34e-06)]_171
-Pocillopora_acuta_HIv2__         7.40e-01  500
-Pocillopora_acuta_HIv2__         9.96e-03  159_[-3(2.01e-07)]_178_\
-    [-1(6.05e-05)]_29_[+9(6.58e-05)]_73
-Pocillopora_acuta_HIv2__         5.10e-01  500
-Pocillopora_acuta_HIv2__         2.90e-01  155_[-5(6.49e-05)]_121_\
-    [-9(8.00e-05)]_158_[-1(3.60e-05)]_9
-Pocillopora_acuta_HIv2__         2.34e-01  465_[-10(7.01e-05)]_14
-Pocillopora_acuta_HIv2__         8.21e-02  129_[-3(2.48e-05)]_346
-Pocillopora_acuta_HIv2__         3.19e-03  160_[-6(4.46e-06)]_22_\
-    [+1(2.36e-05)]_44_[-10(3.36e-05)]_218
-Pocillopora_acuta_HIv2__         1.18e-02  3_[+2(8.83e-05)]_321_\
-    [+10(6.69e-05)]_79_[-3(9.68e-07)]_28
-Pocillopora_acuta_HIv2__         6.19e-03  188_[-10(6.94e-07)]_68_\
-    [-1(4.28e-05)]_152_[-1(6.05e-05)]_49
-Pocillopora_acuta_HIv2__         4.24e-07  125_[-7(3.21e-05)]_35_\
-    [-10(1.12e-08)]_68_[-1(4.28e-05)]_148_[-6(5.62e-09)]_43
-Pocillopora_acuta_HIv2__         3.62e-02  284_[-1(6.84e-05)]_5_[-1(7.76e-05)]_\
-    111_[+6(9.89e-05)]_54
-Pocillopora_acuta_HIv2__         4.45e-01  500
-Pocillopora_acuta_HIv2__         1.47e-01  369_[-1(5.12e-06)]_120
-Pocillopora_acuta_HIv2__         9.68e-02  191_[+6(4.07e-05)]_142_\
-    [+6(4.36e-05)]_29_[+6(2.39e-05)]_66
-Pocillopora_acuta_HIv2__         9.38e-02  193_[-10(4.46e-05)]_226_\
-    [+1(2.84e-06)]_49
-Pocillopora_acuta_HIv2__         2.09e-01  252_[+3(5.47e-05)]_223
-Pocillopora_acuta_HIv2__         9.99e-01  500
-Pocillopora_acuta_HIv2__         1.23e-01  125_[+9(4.97e-05)]_148_\
-    [+1(3.60e-05)]_191
-Pocillopora_acuta_HIv2__         4.70e-02  82_[+4(5.83e-05)]_163_\
-    [-6(4.82e-05)]_24_[+1(2.36e-05)]_171
-Pocillopora_acuta_HIv2__         6.56e-01  124_[-1(2.91e-05)]_365
-Pocillopora_acuta_HIv2__         2.12e-01  72_[-5(1.23e-05)]_407
-Pocillopora_acuta_HIv2__         3.21e-01  15_[+5(6.49e-05)]_133_\
-    [-3(2.84e-05)]_306
-Pocillopora_acuta_HIv2__         1.33e-05  86_[+5(8.62e-05)]_14_[-3(3.20e-07)]_\
-    97_[+5(1.63e-09)]_236
-Pocillopora_acuta_HIv2__         3.50e-01  500
-Pocillopora_acuta_HIv2__         2.21e-01  15_[-8(2.97e-05)]_344_\
-    [-10(5.68e-05)]_99
-Pocillopora_acuta_HIv2__         9.41e-02  120_[-10(1.76e-05)]_275_\
-    [-7(3.50e-05)]_59
-Pocillopora_acuta_HIv2__         2.61e-01  80_[+7(4.36e-06)]_395
-Pocillopora_acuta_HIv2__         5.76e-01  393_[+3(4.08e-05)]_82
-Pocillopora_acuta_HIv2__         4.73e-01  166_[+1(6.19e-05)]_323
-Pocillopora_acuta_HIv2__         3.57e-02  312_[-6(9.93e-06)]_76_\
-    [+1(8.01e-05)]_77
-Pocillopora_acuta_HIv2__         3.28e-03  137_[+7(6.29e-05)]_109_\
-    [-6(1.67e-06)]_61_[+5(5.81e-05)]_123
-Pocillopora_acuta_HIv2__         2.56e-03  137_[+7(6.29e-05)]_109_\
-    [-6(1.67e-06)]_61_[+5(5.81e-05)]_123
-Pocillopora_acuta_HIv2__         6.81e-04  199_[+10(5.29e-05)]_45_\
-    [+6(1.23e-06)]_14_[-6(6.82e-08)]_85_[+1(8.85e-05)]_77
-Pocillopora_acuta_HIv2__         8.58e-01  500
-Pocillopora_acuta_HIv2__         1.13e-01  67_[+1(8.01e-05)]_15_[+1(3.60e-05)]_\
-    270_[+6(5.79e-06)]_102
-Pocillopora_acuta_HIv2__         1.85e-02  73_[+2(3.35e-05)]_380_\
-    [-1(9.34e-06)]_13
-Pocillopora_acuta_HIv2__         2.97e-02  294_[-9(3.25e-05)]_117_\
-    [+6(7.19e-05)]_40
-Pocillopora_acuta_HIv2__         9.38e-01  500
-Pocillopora_acuta_HIv2__         8.48e-01  500
-Pocillopora_acuta_HIv2__         6.22e-02  404_[-2(4.01e-07)]_73
-Pocillopora_acuta_HIv2__         4.56e-01  105_[+10(9.24e-05)]_374
-Pocillopora_acuta_HIv2__         5.58e-02  77_[+10(7.34e-05)]_75_\
-    [-2(1.79e-06)]_304
-Pocillopora_acuta_HIv2__         3.68e-01  50_[-10(4.57e-05)]_429
-Pocillopora_acuta_HIv2__         2.51e-04  50_[+1(1.72e-05)]_316_\
-    [-2(3.89e-09)]_100
-Pocillopora_acuta_HIv2__         3.03e-02  31_[-7(2.22e-05)]_17_[+8(9.15e-05)]_\
-    103_[-2(4.66e-05)]_280
-Pocillopora_acuta_HIv2__         7.56e-02  446_[+4(3.54e-05)]_29
-Pocillopora_acuta_HIv2__         2.55e-01  279_[-7(9.52e-05)]_196
-Pocillopora_acuta_HIv2__         8.77e-01  377_[-1(9.48e-05)]_112
-Pocillopora_acuta_HIv2__         2.40e-01  500
-Pocillopora_acuta_HIv2__         4.76e-02  12_[+10(4.92e-05)]_120_\
-    [-3(2.39e-05)]_210_[+1(3.60e-05)]_101
-Pocillopora_acuta_HIv2__         7.26e-01  [+3(8.82e-05)]_475
-Pocillopora_acuta_HIv2__         1.00e-01  149_[-3(1.07e-05)]_98_\
-    [-1(2.91e-05)]_217
-Pocillopora_acuta_HIv2__         4.86e-02  54_[+6(2.83e-06)]_118_\
-    [+1(6.05e-05)]_119_[+1(5.08e-05)]_163
-Pocillopora_acuta_HIv2__         5.00e-01  104_[-1(6.05e-05)]_385
-Pocillopora_acuta_HIv2__         8.21e-01  500
-Pocillopora_acuta_HIv2__         6.61e-01  500
-Pocillopora_acuta_HIv2__         1.39e-06  36_[-4(9.71e-12)]_364_\
-    [+2(4.92e-05)]_23_[-6(6.10e-05)]_5
-Pocillopora_acuta_HIv2__         6.61e-01  4_[+1(3.60e-05)]_291_[-1(2.36e-05)]_\
-    183
-Pocillopora_acuta_HIv2__         1.13e-01  192_[-1(2.84e-06)]_109_\
-    [+1(2.91e-05)]_177
-Pocillopora_acuta_HIv2__         3.32e-01  302_[+2(5.20e-05)]_175
-Pocillopora_acuta_HIv2__         4.88e-02  234_[-1(1.72e-05)]_2_[-1(2.36e-05)]_\
-    9_[-1(3.60e-05)]_98_[+8(7.13e-05)]_103
-Pocillopora_acuta_HIv2__         5.27e-02  12_[-10(6.24e-05)]_369_\
-    [+3(1.51e-05)]_73
-Pocillopora_acuta_HIv2__         6.31e-01  168_[+2(9.54e-05)]_309
-Pocillopora_acuta_HIv2__         6.69e-01  500
-Pocillopora_acuta_HIv2__         2.59e-01  156_[-6(9.59e-05)]_91_\
-    [+1(9.34e-06)]_79_[-1(7.76e-05)]_128
-Pocillopora_acuta_HIv2__         3.22e-01  138_[-1(3.60e-05)]_351
-Pocillopora_acuta_HIv2__         7.48e-02  15_[+7(6.29e-05)]_12_[+8(1.47e-05)]_\
-    427
-Pocillopora_acuta_HIv2__         8.04e-01  500
-Pocillopora_acuta_HIv2__         8.83e-01  500
-Pocillopora_acuta_HIv2__         1.27e-02  192_[-3(4.22e-05)]_25_\
-    [-6(9.29e-05)]_110_[-2(2.02e-05)]_101
-Pocillopora_acuta_HIv2__         8.86e-01  500
-Pocillopora_acuta_HIv2__         1.99e-01  137_[-1(1.72e-05)]_352
-Pocillopora_acuta_HIv2__         4.14e-01  500
-Pocillopora_acuta_HIv2__         1.14e-01  283_[-10(7.69e-05)]_2_\
-    [-5(9.04e-05)]_173
-Pocillopora_acuta_HIv2__         9.56e-02  333_[+9(1.69e-05)]_142
-Pocillopora_acuta_HIv2__         4.22e-01  259_[+1(8.01e-05)]_230
-Pocillopora_acuta_HIv2__         7.55e-01  500
-Pocillopora_acuta_HIv2__         8.05e-01  500
-Pocillopora_acuta_HIv2__         2.43e-01  500
-Pocillopora_acuta_HIv2__         5.89e-02  80_[+7(3.35e-05)]_69_[+9(3.77e-05)]_\
-    79_[+6(2.31e-05)]_198
-Pocillopora_acuta_HIv2__         2.41e-02  164_[+8(2.01e-05)]_162_\
-    [+1(1.32e-05)]_142
-Pocillopora_acuta_HIv2__         1.89e-06  368_[+6(1.40e-11)]_39_\
-    [+1(8.85e-07)]_58
-Pocillopora_acuta_HIv2__         6.11e-01  500
-Pocillopora_acuta_HIv2__         6.95e-01  500
-Pocillopora_acuta_HIv2__         5.84e-01  500
-Pocillopora_acuta_HIv2__         1.18e-01  95_[-7(9.52e-05)]_275_\
-    [+2(7.96e-05)]_15_[+7(4.45e-05)]_42
-Pocillopora_acuta_HIv2__         7.91e-01  500
-Pocillopora_acuta_HIv2__         2.38e-01  58_[-1(7.11e-05)]_134_\
-    [-3(1.75e-05)]_272
-Pocillopora_acuta_HIv2__         7.39e-01  500
-Pocillopora_acuta_HIv2__         4.89e-02  126_[+1(9.34e-06)]_331_\
-    [+9(6.44e-05)]_7
-Pocillopora_acuta_HIv2__         5.42e-01  258_[+4(5.23e-05)]_217
-Pocillopora_acuta_HIv2__         3.08e-01  469_[+2(6.80e-05)]_8
-Pocillopora_acuta_HIv2__         1.84e-01  26_[-8(5.96e-05)]_49_[+3(6.42e-05)]_\
-    109_[+1(9.93e-05)]_259
-Pocillopora_acuta_HIv2__         7.77e-01  500
-Pocillopora_acuta_HIv2__         3.92e-04  60_[+3(2.74e-05)]_143_\
-    [-5(5.16e-06)]_213_[+3(1.71e-07)]_13
-Pocillopora_acuta_HIv2__         1.11e-06  44_[+2(2.16e-08)]_41_\
-    [-10(5.07e-09)]_125_[+1(6.84e-05)]_235
-Pocillopora_acuta_HIv2__         1.66e-01  50_[+1(1.72e-05)]_7_[+10(8.82e-05)]_\
-    411
-Pocillopora_acuta_HIv2__         6.85e-01  91_[-3(6.84e-05)]_384
-Pocillopora_acuta_HIv2__         8.14e-01  500
-Pocillopora_acuta_HIv2__         3.22e-01  467_[-1(5.08e-05)]_22
-Pocillopora_acuta_HIv2__         8.43e-01  500
-Pocillopora_acuta_HIv2__         6.07e-01  251_[+7(6.29e-05)]_224
-Pocillopora_acuta_HIv2__         2.81e-01  477_[-2(2.46e-05)]
-Pocillopora_acuta_HIv2__         1.37e-02  62_[-6(1.65e-05)]_209_\
-    [+2(1.36e-05)]_11_[+3(9.69e-05)]_146
-Pocillopora_acuta_HIv2__         6.53e-01  500
-Pocillopora_acuta_HIv2__         4.28e-01  274_[+6(9.29e-05)]_202
-Pocillopora_acuta_HIv2__         2.11e-01  66_[-1(2.84e-06)]_423
-Pocillopora_acuta_HIv2__         1.69e-02  21_[-5(6.86e-05)]_29_[+7(2.96e-05)]_\
-    39_[+3(2.74e-05)]_130_[-6(7.19e-05)]_52_[+10(9.24e-05)]_113
-Pocillopora_acuta_HIv2__         8.44e-01  500
-Pocillopora_acuta_HIv2__         2.73e-02  84_[-3(8.82e-05)]_52_[+2(2.02e-05)]_\
-    179_[-9(3.77e-05)]_112
-Pocillopora_acuta_HIv2__         2.43e-01  276_[+2(1.86e-05)]_201
-Pocillopora_acuta_HIv2__         6.76e-01  500
-Pocillopora_acuta_HIv2__         6.03e-01  500
-Pocillopora_acuta_HIv2__         3.93e-03  51_[-1(7.76e-05)]_122_\
-    [-1(5.12e-06)]_123_[+1(9.48e-05)]_65_[+5(9.57e-07)]_85
-Pocillopora_acuta_HIv2__         2.15e-02  185_[-1(1.32e-05)]_186_\
-    [+3(1.10e-06)]_29_[+10(5.41e-05)]_43
-Pocillopora_acuta_HIv2__         1.25e-01  68_[+7(9.16e-06)]_129_\
-    [+1(8.58e-05)]_205_[+5(5.65e-05)]_41
-Pocillopora_acuta_HIv2__         7.31e-02  315_[+4(3.47e-05)]_160
-Pocillopora_acuta_HIv2__         4.96e-01  237_[+5(7.04e-05)]_242
-Pocillopora_acuta_HIv2__         7.90e-04  439_[-6(3.85e-10)]_37
-Pocillopora_acuta_HIv2__         2.98e-02  214_[+1(9.34e-06)]_204_\
-    [-1(7.76e-05)]_60
-Pocillopora_acuta_HIv2__         2.24e-01  255_[+4(8.87e-05)]_220
-Pocillopora_acuta_HIv2__         7.76e-01  500
-Pocillopora_acuta_HIv2__         4.60e-01  281_[+5(2.65e-05)]_181_\
-    [+1(8.85e-05)]_6
-Pocillopora_acuta_HIv2__         3.73e-01  8_[-1(6.19e-05)]_46_[-1(2.36e-05)]_\
-    66_[-1(9.93e-05)]_150_[-1(5.08e-05)]_186
-Pocillopora_acuta_HIv2__         9.06e-01  500
-Pocillopora_acuta_HIv2__         1.28e-02  8_[-1(9.34e-06)]_172_[-5(2.96e-05)]_\
-    158_[+1(2.91e-05)]_119
-Pocillopora_acuta_HIv2__         8.01e-03  81_[+3(3.06e-10)]_394
-Pocillopora_acuta_HIv2__         7.88e-02  394_[-4(2.53e-05)]_81
-Pocillopora_acuta_HIv2__         9.71e-02  164_[+3(2.01e-05)]_57_\
-    [+2(4.53e-05)]_75_[+1(4.34e-05)]_145
-Pocillopora_acuta_HIv2__         2.76e-01  161_[+7(9.52e-05)]_161_\
-    [+4(4.94e-05)]_128
-Pocillopora_acuta_HIv2__         7.68e-01  251_[-9(2.88e-05)]_224
-Pocillopora_acuta_HIv2__         3.46e-02  60_[-2(6.62e-05)]_113_\
-    [-1(9.34e-06)]_205_[+1(9.34e-06)]_77
-Pocillopora_acuta_HIv2__         7.85e-04  91_[-1(1.32e-05)]_16_[-1(6.05e-05)]_\
-    61_[-2(9.54e-05)]_17_[-2(9.54e-05)]_172_[-10(9.96e-09)]_54
-Pocillopora_acuta_HIv2__         1.15e-01  400_[-6(3.93e-05)]_33_\
-    [-8(8.40e-05)]_22
-Pocillopora_acuta_HIv2__         3.46e-02  54_[+6(1.92e-05)]_130_\
-    [-1(2.36e-05)]_281
-Pocillopora_acuta_HIv2__         2.34e-01  186_[-1(9.34e-06)]_303
-Pocillopora_acuta_HIv2__         2.16e-01  457_[-8(7.74e-05)]_22
-Pocillopora_acuta_HIv2__         5.11e-02  113_[-1(2.84e-06)]_376
-Pocillopora_acuta_HIv2__         2.75e-03  199_[-3(1.88e-05)]_52_\
-    [+9(5.98e-06)]_96_[-4(3.20e-05)]_78
-Pocillopora_acuta_HIv2__         9.48e-05  153_[-3(1.98e-08)]_56_\
-    [+5(2.77e-05)]_78_[+6(3.41e-06)]_143
-Pocillopora_acuta_HIv2__         7.83e-02  13_[+3(9.69e-05)]_252_\
-    [+1(9.34e-06)]_125_[+6(1.99e-05)]_50
-Pocillopora_acuta_HIv2__         4.89e-01  160_[-9(5.79e-05)]_315
-Pocillopora_acuta_HIv2__         1.88e-01  271_[-6(5.16e-05)]_56_\
-    [+1(5.21e-05)]_138
-Pocillopora_acuta_HIv2__         3.58e-01  129_[+6(1.85e-05)]_347
-Pocillopora_acuta_HIv2__         3.97e-01  334_[-6(4.82e-05)]_142
-Pocillopora_acuta_HIv2__         8.58e-01  500
-Pocillopora_acuta_HIv2__         7.97e-01  500
-Pocillopora_acuta_HIv2__         2.38e-01  257_[-3(6.42e-05)]_218
-Pocillopora_acuta_HIv2__         3.13e-01  284_[+1(7.76e-05)]_177_\
-    [-8(6.81e-05)]_7
-Pocillopora_acuta_HIv2__         3.41e-01  31_[-8(6.81e-05)]_448
-Pocillopora_acuta_HIv2__         8.82e-06  18_[+1(5.08e-05)]_86_[-6(2.22e-05)]_\
-    240_[-3(6.22e-05)]_9_[+5(9.72e-10)]_66
-Pocillopora_acuta_HIv2__         1.50e-01  479_[+1(2.84e-06)]_10
-Pocillopora_acuta_HIv2__         6.08e-01  500
-Pocillopora_acuta_HIv2__         5.38e-02  295_[-1(3.60e-05)]_41_\
-    [-1(3.60e-05)]_4_[-3(5.44e-06)]_113
-Pocillopora_acuta_HIv2__         5.29e-02  420_[+9(5.71e-06)]_55
-Pocillopora_acuta_HIv2__         2.30e-01  220_[-3(2.48e-05)]_118_\
-    [+2(2.83e-05)]_114
-Pocillopora_acuta_HIv2__         1.45e-01  141_[-4(5.77e-07)]_184_\
-    [+2(8.83e-05)]_127
-Pocillopora_acuta_HIv2__         8.51e-01  395_[+5(9.89e-05)]_84
-Pocillopora_acuta_HIv2__         4.36e-02  157_[-5(8.31e-06)]_125_\
-    [+1(5.08e-05)]_186
-Pocillopora_acuta_HIv2__         5.31e-01  500
-Pocillopora_acuta_HIv2__         2.66e-01  500
-Pocillopora_acuta_HIv2__         8.46e-02  38_[+6(3.42e-05)]_68_[-1(4.28e-05)]_\
-    359
-Pocillopora_acuta_HIv2__         5.89e-01  500
-Pocillopora_acuta_HIv2__         2.62e-02  308_[+8(1.16e-05)]_171
-Pocillopora_acuta_HIv2__         2.89e-02  112_[-10(1.66e-05)]_116_\
-    [-7(9.52e-05)]_75_[-9(7.27e-05)]_126
-Pocillopora_acuta_HIv2__         1.48e-01  367_[+6(2.39e-05)]_1_[-6(6.30e-05)]_\
-    84
-Pocillopora_acuta_HIv2__         1.08e-01  83_[+7(3.47e-05)]_163_\
-    [+8(2.20e-05)]_208
-Pocillopora_acuta_HIv2__         1.39e-01  45_[-1(6.05e-05)]_162_\
-    [-1(1.32e-05)]_11_[-7(9.52e-05)]_235
-Pocillopora_acuta_HIv2__         5.66e-01  175_[-6(4.99e-05)]_301
-Pocillopora_acuta_HIv2__         9.85e-01  500
-Pocillopora_acuta_HIv2__         7.20e-01  317_[+4(1.91e-05)]_158
-Pocillopora_acuta_HIv2__         2.45e-05  112_[+9(4.78e-13)]_363
-Pocillopora_acuta_HIv2__         9.06e-02  57_[-1(6.05e-05)]_5_[-1(3.60e-05)]_\
-    289_[-8(2.27e-05)]_106
-Pocillopora_acuta_HIv2__         2.05e-03  281_[+6(1.98e-07)]_136_\
-    [+3(8.82e-05)]_34
-Pocillopora_acuta_HIv2__         1.26e-07  468_[-6(9.86e-15)]_8
-Pocillopora_acuta_HIv2__         1.47e-06  334_[-6(2.68e-11)]_116_\
-    [-9(2.19e-05)]_1
-Pocillopora_acuta_HIv2__         3.03e-01  64_[-1(4.28e-05)]_425
-Pocillopora_acuta_HIv2__         7.72e-02  326_[-3(2.24e-05)]_106_\
-    [-2(1.24e-06)]_20
-Pocillopora_acuta_HIv2__         2.11e-01  500
-Pocillopora_acuta_HIv2__         4.22e-02  184_[-1(1.72e-05)]_65_\
-    [+8(1.38e-05)]_219
-Pocillopora_acuta_HIv2__         8.93e-01  500
-Pocillopora_acuta_HIv2__         5.02e-01  500
-Pocillopora_acuta_HIv2__         2.71e-01  321_[-10(4.03e-05)]_158
-Pocillopora_acuta_HIv2__         4.81e-04  276_[-8(3.58e-06)]_38_\
-    [+5(6.67e-05)]_144
-Pocillopora_acuta_HIv2__         8.00e-01  500
-Pocillopora_acuta_HIv2__         1.57e-03  132_[+6(9.98e-07)]_16_\
-    [-4(3.05e-06)]_277_[-3(5.47e-05)]_1
-Pocillopora_acuta_HIv2__         2.97e-01  381_[-8(8.79e-06)]_98
-Pocillopora_acuta_HIv2__         1.36e-01  186_[+9(7.85e-05)]_55_\
-    [-1(4.28e-05)]_139_[+5(7.62e-05)]_63
-Pocillopora_acuta_HIv2__         4.57e-01  30_[-9(3.58e-05)]_92_[-3(3.82e-05)]_\
-    328
-Pocillopora_acuta_HIv2__         7.13e-02  194_[+6(1.08e-05)]_254_\
-    [-5(2.44e-05)]_7
-Pocillopora_acuta_HIv2__         4.04e-01  146_[-2(8.83e-05)]_331
-Pocillopora_acuta_HIv2__         5.29e-03  212_[+1(2.91e-05)]_252_\
-    [+2(1.48e-08)]_2
-Pocillopora_acuta_HIv2__         3.37e-01  446_[+10(1.97e-05)]_33
-Pocillopora_acuta_HIv2__         2.63e-01  364_[-10(5.29e-05)]_115
-Pocillopora_acuta_HIv2__         2.94e-01  290_[+10(2.03e-05)]_152_\
-    [+5(7.04e-05)]_16
-Pocillopora_acuta_HIv2__         4.65e-01  192_[+1(5.12e-06)]_297
-Pocillopora_acuta_HIv2__         5.80e-01  323_[-5(9.25e-05)]_156
-Pocillopora_acuta_HIv2__         7.53e-01  500
-Pocillopora_acuta_HIv2__         8.13e-02  4_[+1(9.34e-06)]_207_[+1(1.72e-05)]_\
-    45_[+8(3.19e-05)]_201
-Pocillopora_acuta_HIv2__         8.02e-02  430_[+4(3.13e-05)]_45
-Pocillopora_acuta_HIv2__         1.91e-03  55_[+8(5.45e-05)]_94_[+6(5.52e-08)]_\
-    275_[+1(9.34e-06)]_20
-Pocillopora_acuta_HIv2__         9.05e-01  500
-Pocillopora_acuta_HIv2__         3.40e-02  80_[+10(2.85e-05)]_240_\
-    [-6(3.41e-06)]_135
-Pocillopora_acuta_HIv2__         2.79e-01  4_[-4(7.44e-05)]_321_[-1(3.60e-05)]_\
-    139
-Pocillopora_acuta_HIv2__         1.00e-01  18_[-1(2.91e-05)]_152_\
-    [+8(4.43e-05)]_298
-Pocillopora_acuta_HIv2__         9.68e-02  58_[-6(1.53e-05)]_126_\
-    [+6(1.71e-05)]_68_[-3(6.22e-05)]_175
-Pocillopora_acuta_HIv2__         1.23e-01  134_[+1(1.32e-05)]_315_\
-    [-5(7.23e-05)]_19
-Pocillopora_acuta_HIv2__         2.57e-01  161_[-5(2.96e-05)]_318
-Pocillopora_acuta_HIv2__         1.94e-01  261_[-1(7.76e-05)]_75_\
-    [-9(5.36e-05)]_128
-Pocillopora_acuta_HIv2__         5.07e-01  88_[-1(4.28e-05)]_401
-Pocillopora_acuta_HIv2__         3.01e-01  500
-Pocillopora_acuta_HIv2__         6.73e-01  500
-Pocillopora_acuta_HIv2__         1.64e-01  500
-Pocillopora_acuta_HIv2__         8.74e-02  427_[+6(2.24e-07)]_49
-Pocillopora_acuta_HIv2__         2.37e-01  55_[-5(1.49e-05)]_94_[-5(8.62e-05)]_\
-    309
-Pocillopora_acuta_HIv2__         5.50e-02  251_[+3(4.36e-05)]_34_\
-    [+8(3.72e-05)]_121_[+6(6.30e-05)]_24
-Pocillopora_acuta_HIv2__         5.09e-01  156
-Pocillopora_acuta_HIv2__         1.97e-01  76_[+1(9.48e-05)]_14_[+1(6.84e-05)]_\
-    174_[+1(1.72e-05)]_203
-Pocillopora_acuta_HIv2__         4.49e-01  85_[+3(7.29e-05)]_390
-Pocillopora_acuta_HIv2__         1.05e-01  124_[-4(6.56e-06)]_320_\
-    [+5(3.17e-06)]_10
-Pocillopora_acuta_HIv2__         1.87e-01  230_[-4(7.98e-05)]_62_\
-    [+10(7.69e-05)]_102_[-4(9.02e-05)]_35
-Pocillopora_acuta_HIv2__         4.16e-03  222_[+1(5.12e-06)]_98_\
-    [+7(3.70e-05)]_8_[+3(4.22e-05)]_111
-Pocillopora_acuta_HIv2__         9.10e-01  500
-Pocillopora_acuta_HIv2__         3.70e-01  275_[+1(2.36e-05)]_214
-Pocillopora_acuta_HIv2__         8.45e-01  453_[+7(6.29e-05)]_22
-Pocillopora_acuta_HIv2__         8.78e-01  500
-Pocillopora_acuta_HIv2__         8.76e-01  500
-Pocillopora_acuta_HIv2__         2.52e-02  83_[-4(3.54e-05)]_16_[-7(6.29e-05)]_\
-    122_[+8(1.16e-05)]_208
-Pocillopora_acuta_HIv2__         4.42e-01  413_[+7(1.45e-05)]_62
-Pocillopora_acuta_HIv2__         3.20e-02  87_[-4(1.87e-05)]_300_\
-    [-3(3.37e-06)]_63
-Pocillopora_acuta_HIv2__         5.17e-02  55_[+7(1.65e-05)]_25_[-1(6.05e-05)]_\
-    34_[-1(2.36e-05)]_339
-Pocillopora_acuta_HIv2__         1.04e-01  391_[-7(1.45e-05)]_15_\
-    [-4(9.19e-05)]_44
-Pocillopora_acuta_HIv2__         3.80e-01  251_[-1(2.36e-05)]_238
-Pocillopora_acuta_HIv2__         2.21e-01  115_[-1(2.91e-05)]_374
-Pocillopora_acuta_HIv2__         2.53e-01  86_[-3(3.03e-05)]_389
-Pocillopora_acuta_HIv2__         2.11e-02  14_[-2(1.07e-05)]_291_\
-    [-1(6.84e-05)]_161
-Pocillopora_acuta_HIv2__         5.02e-01  171_[-8(8.40e-05)]_249_\
-    [-3(8.55e-05)]_34
-Pocillopora_acuta_HIv2__         6.90e-03  226_[+6(1.43e-06)]_195_\
-    [+1(9.34e-06)]_44
-Pocillopora_acuta_HIv2__         2.33e-02  78_[+2(6.28e-05)]_262_\
-    [+1(1.72e-05)]_65_[+3(1.24e-06)]_36
-Pocillopora_acuta_HIv2__         1.47e-01  40_[-10(9.45e-05)]_98_\
-    [+9(8.94e-05)]_211_[-1(9.93e-05)]_94
-Pocillopora_acuta_HIv2__         2.09e-01  66_[-9(9.58e-05)]_409
-Pocillopora_acuta_HIv2__         8.73e-01  500
-Pocillopora_acuta_HIv2__         6.64e-01  351_[+2(2.53e-05)]_126
-Pocillopora_acuta_HIv2__         1.06e-02  276_[+4(4.25e-05)]_52_\
-    [-6(8.50e-07)]_123
-Pocillopora_acuta_HIv2__         2.74e-01  26_[+8(7.74e-05)]_453
-Pocillopora_acuta_HIv2__         1.42e-01  342_[+1(6.05e-05)]_16_\
-    [-6(3.67e-05)]_107
-Pocillopora_acuta_HIv2__         2.99e-01  90_[+1(5.12e-06)]_399
-Pocillopora_acuta_HIv2__         2.29e-01  107_[-10(1.43e-05)]_6_\
-    [-1(6.19e-05)]_111_[-6(9.59e-05)]_220
-Pocillopora_acuta_HIv2__         2.86e-01  23_[-3(7.53e-05)]_139_\
-    [+8(8.41e-05)]_292
-Pocillopora_acuta_HIv2__         7.43e-01  500
-Pocillopora_acuta_HIv2__         3.98e-01  24_[+9(7.03e-05)]_451
-Pocillopora_acuta_HIv2__         4.99e-01  500
-Pocillopora_acuta_HIv2__         1.04e-01  37_[-1(6.05e-05)]_20_[+6(2.87e-07)]_\
-    408
-Pocillopora_acuta_HIv2__         8.67e-02  84_[-4(2.27e-05)]_256_\
-    [+4(1.83e-05)]_110
-Pocillopora_acuta_HIv2__         5.35e-03  67_[+3(1.40e-06)]_20_[+5(4.38e-05)]_\
-    367
-Pocillopora_acuta_HIv2__         4.27e-01  500
-Pocillopora_acuta_HIv2__         3.33e-03  193_[+1(9.34e-06)]_64_\
-    [-1(1.72e-05)]_97_[-6(7.28e-09)]_100
-Pocillopora_acuta_HIv2__         4.22e-07  30_[-3(1.12e-07)]_105_\
-    [+6(1.41e-08)]_15_[+1(5.12e-06)]_15_[+3(7.77e-05)]_17_[+1(2.36e-05)]_222
-Pocillopora_acuta_HIv2__         2.60e-02  100_[+10(8.82e-05)]_6_\
-    [+8(1.58e-05)]_352
-Pocillopora_acuta_HIv2__         2.01e-01  162_[+2(9.23e-06)]_315
-Pocillopora_acuta_HIv2__         1.72e-01  70_[-9(1.12e-05)]_68_[-1(6.84e-05)]_\
-    326
-Pocillopora_acuta_HIv2__         2.74e-01  246_[-4(7.84e-05)]_229
-Pocillopora_acuta_HIv2__         5.75e-01  500
-Pocillopora_acuta_HIv2__         8.89e-01  249_[-8(2.97e-05)]_230
-Pocillopora_acuta_HIv2__         3.27e-01  61_[+10(2.56e-05)]_418
-Pocillopora_acuta_HIv2__         1.42e-02  3_[+6(5.34e-05)]_53_[+1(5.08e-05)]_\
-    322_[+1(1.72e-05)]_76
-Pocillopora_acuta_HIv2__         7.50e-02  231_[+4(3.62e-05)]_60_\
-    [-1(9.34e-06)]_173
-Pocillopora_acuta_HIv2__         9.62e-02  309_[-1(9.34e-06)]_180
-Pocillopora_acuta_HIv2__         2.36e-01  166_[-10(5.29e-05)]_167_\
-    [-3(3.95e-05)]_121
-Pocillopora_acuta_HIv2__         7.19e-02  223_[-6(1.36e-06)]_253
-Pocillopora_acuta_HIv2__         2.75e-04  9_[+5(4.91e-05)]_9_[+4(3.85e-05)]_\
-    41_[-6(2.31e-05)]_37_[+1(5.08e-05)]_212_[+2(5.42e-06)]_88
-Pocillopora_acuta_HIv2__         7.98e-01  500
-Pocillopora_acuta_HIv2__         5.13e-04  225_[-6(1.80e-10)]_251
-Pocillopora_acuta_HIv2__         9.11e-02  271_[-5(2.49e-05)]_112_\
-    [+10(2.22e-05)]_75
-Pocillopora_acuta_HIv2__         1.94e-02  34_[+8(3.39e-05)]_75_[+1(3.60e-05)]_\
-    93_[-5(3.92e-05)]_105_[+3(8.82e-05)]_115
-Pocillopora_acuta_HIv2__         2.36e-01  32_[-7(6.29e-05)]_370_\
-    [-5(4.38e-05)]_52
-Pocillopora_acuta_HIv2__         1.31e-01  440_[-1(3.60e-05)]_11_\
-    [+10(9.21e-06)]_17
-Pocillopora_acuta_HIv2__         6.13e-01  472_[-1(7.11e-05)]_17
-Pocillopora_acuta_HIv2__         8.98e-01  500
-Pocillopora_acuta_HIv2__         3.30e-02  282_[+1(9.48e-05)]_136_\
-    [-6(2.58e-06)]_47
-Pocillopora_acuta_HIv2__         5.36e-01  500
-Pocillopora_acuta_HIv2__         4.12e-03  173_[-2(5.95e-05)]_69_\
-    [+3(7.18e-08)]_13_[-1(6.05e-05)]_186
-Pocillopora_acuta_HIv2__         1.29e-01  2_[-7(9.52e-05)]_115_[+1(1.32e-05)]_\
-    347
-Pocillopora_acuta_HIv2__         1.26e-02  94_[-2(2.75e-05)]_167_\
-    [-7(9.52e-05)]_115_[+1(1.32e-05)]_65
-Pocillopora_acuta_HIv2__         1.31e-01  133_[-5(8.01e-05)]_13_\
-    [+8(1.05e-05)]_312
-Pocillopora_acuta_HIv2__         4.44e-02  2_[-7(9.52e-05)]_20_[-5(9.67e-05)]_\
-    72_[+1(1.32e-05)]_56_[+8(3.46e-05)]_272
-Pocillopora_acuta_HIv2__         1.73e-01  197_[+8(1.05e-05)]_282
-Pocillopora_acuta_HIv2__         4.08e-02  2_[-7(9.52e-05)]_65_[+1(9.34e-06)]_\
-    38_[+1(1.32e-05)]_56_[+8(3.46e-05)]_271
-Pocillopora_acuta_HIv2__         8.30e-03  22_[-4(1.96e-05)]_199_\
-    [-1(5.12e-06)]_243
-Pocillopora_acuta_HIv2__         1.67e-01  197_[+8(1.05e-05)]_282
-Pocillopora_acuta_HIv2__         4.25e-01  86_[-1(8.58e-05)]_403
-Pocillopora_acuta_HIv2__         2.10e-01  286_[-7(2.22e-05)]_189
-Pocillopora_acuta_HIv2__         1.36e-01  15_[-8(6.40e-05)]_193_\
-    [-6(3.80e-05)]_247
-Pocillopora_acuta_HIv2__         2.52e-02  26_[+1(9.34e-06)]_[+1(8.01e-05)]_\
-    112_[-7(9.52e-05)]_85_[+1(6.05e-05)]_143_[+1(8.85e-05)]_65
-Pocillopora_acuta_HIv2__         2.53e-03  230_[-6(5.90e-05)]_12_\
-    [-1(3.60e-05)]_35_[-9(2.33e-05)]_27_[+3(5.47e-05)]_58_[-6(1.99e-05)]_29
-Pocillopora_acuta_HIv2__         1.10e-01  168_[-2(7.17e-05)]_111_\
-    [+1(1.72e-05)]_187
-Pocillopora_acuta_HIv2__         4.95e-02  312_[-1(7.76e-05)]_52_\
-    [-7(3.70e-05)]_100
-Pocillopora_acuta_HIv2__         4.63e-02  236_[-1(2.84e-06)]_106_\
-    [+8(8.40e-05)]_126
-Pocillopora_acuta_HIv2__         2.60e-01  270_[+7(2.96e-05)]_205
-Pocillopora_acuta_HIv2__         7.46e-61  7_[+2(1.56e-14)]_6_[+3(1.47e-09)]_4_\
-    [+4(3.81e-17)]_2_[+8(4.24e-14)]_[-1(3.60e-05)]_[+10(5.11e-13)]_\
-    [+3(2.57e-09)]_1_[+7(2.36e-16)]_28_[+1(9.34e-06)]_39_[+5(3.03e-13)]_10_\
-    [-7(6.29e-05)]_12_[+8(8.40e-05)]_137
-Pocillopora_acuta_HIv2__         7.71e-02  74_[-10(5.36e-06)]_137_\
-    [+8(3.19e-05)]_247
-Pocillopora_acuta_HIv2__         7.56e-01  309_[-9(4.97e-05)]_166
-Pocillopora_acuta_HIv2__         6.21e-01  500
-Pocillopora_acuta_HIv2__         2.84e-02  102_[-6(7.19e-05)]_202_\
-    [-10(4.46e-05)]_5_[-2(1.36e-05)]_123
-Pocillopora_acuta_HIv2__         9.21e-04  4_[-10(7.51e-05)]_94_[+5(4.14e-05)]_\
-    27_[+10(2.28e-05)]_41_[-8(2.12e-05)]_145_[+6(7.46e-06)]_81
-Pocillopora_acuta_HIv2__         6.20e-01  106_[+9(3.17e-05)]_369
-Pocillopora_acuta_HIv2__         4.86e-03  214_[+2(3.08e-05)]_128_\
-    [-3(1.67e-06)]_110
-Pocillopora_acuta_HIv2__         4.21e-01  457_[-5(4.38e-05)]_22
-Pocillopora_acuta_HIv2__         1.14e-02  84_[-9(7.63e-06)]_7_[-1(6.05e-05)]_\
-    99_[-1(2.84e-06)]_263
-Pocillopora_acuta_HIv2__         8.30e-02  57_[+1(4.28e-05)]_61_[+1(9.34e-06)]_\
-    360
-Pocillopora_acuta_HIv2__         2.19e-01  99_[-6(5.71e-05)]_377
-Pocillopora_acuta_HIv2__         8.74e-01  388_[-7(2.55e-05)]_87
-Pocillopora_acuta_HIv2__         6.67e-01  500
-Pocillopora_acuta_HIv2__         6.12e-01  29_[+1(6.84e-05)]_460
-Pocillopora_acuta_HIv2__         1.36e-01  132_[-2(2.68e-05)]_118_\
-    [+3(2.65e-05)]_202
+Pocillopora_acuta_HIv2__         2.62e-01  280_[-2(3.25e-05)]_4_[+2(3.74e-05)]_\
+    170
+Pocillopora_acuta_HIv2__         1.20e-01  7_[+4(1.87e-05)]_468
+Pocillopora_acuta_HIv2__         3.51e-02  48_[+1(5.08e-05)]_11_[-1(4.28e-05)]_\
+    13_[+1(7.11e-05)]_67_[-4(2.70e-05)]_303
+Pocillopora_acuta_HIv2__         2.09e-01  10_[-3(4.80e-05)]_465
+Pocillopora_acuta_HIv2__         3.24e-01  500
+Pocillopora_acuta_HIv2__         1.89e-02  199_[+1(2.84e-06)]_253_\
+    [-1(5.08e-05)]_26
+Pocillopora_acuta_HIv2__         4.71e-01  92_[+2(6.28e-05)]_385
+Pocillopora_acuta_HIv2__         3.76e-05  4_[-3(1.98e-08)]_304_[-1(5.12e-06)]_\
+    156
+Pocillopora_acuta_HIv2__         7.16e-01  500
+Pocillopora_acuta_HIv2__         6.51e-26  209_[-2(3.17e-10)]_98_\
+    [-3(7.12e-09)]_21_[+1(5.08e-05)]_23_[-4(1.19e-15)]_4_[-3(1.47e-09)]_6_\
+    [-2(1.56e-14)]_7
+Pocillopora_acuta_HIv2__         2.46e-01  500
+Pocillopora_acuta_HIv2__         7.40e-03  255_[-3(1.03e-06)]_116_\
+    [-3(2.09e-05)]_79
+Pocillopora_acuta_HIv2__         4.55e-01  500
+Pocillopora_acuta_HIv2__         9.36e-01  500
+Pocillopora_acuta_HIv2__         1.48e-01  155_[-3(2.93e-05)]_320
+Pocillopora_acuta_HIv2__         4.20e-02  312_[+1(8.01e-05)]_152_\
+    [-2(5.34e-05)]_2
+Pocillopora_acuta_HIv2__         2.93e-01  500
+Pocillopora_acuta_HIv2__         1.87e-03  268_[-3(3.24e-05)]_85_\
+    [-1(1.32e-05)]_38_[+3(7.98e-07)]_48
+Pocillopora_acuta_HIv2__         8.08e-04  60_[-3(4.62e-07)]_415
+Pocillopora_acuta_HIv2__         9.30e-01  500
+Pocillopora_acuta_HIv2__         5.29e-01  64_[-3(7.53e-05)]_411
+Pocillopora_acuta_HIv2__         4.33e-01  500
+Pocillopora_acuta_HIv2__         1.86e-01  500
+Pocillopora_acuta_HIv2__         7.11e-02  192_[-3(5.29e-05)]_122_\
+    [-1(1.72e-05)]_150
+Pocillopora_acuta_HIv2__         2.44e-01  446_[+1(5.08e-05)]_43
+Pocillopora_acuta_HIv2__         3.72e-02  169_[+1(9.34e-06)]_320
+Pocillopora_acuta_HIv2__         7.36e-01  500
+Pocillopora_acuta_HIv2__         9.53e-02  500
+Pocillopora_acuta_HIv2__         7.11e-03  61_[-3(7.53e-05)]_12_[+1(2.36e-05)]_\
+    26_[+1(2.36e-05)]_91_[+4(4.77e-05)]_238
+Pocillopora_acuta_HIv2__         4.80e-01  500
+Pocillopora_acuta_HIv2__         4.51e-01  500
 Pocillopora_acuta_HIv2__         6.46e-01  500
-Pocillopora_acuta_HIv2__         3.40e-01  44_[+2(5.95e-05)]_433
-Pocillopora_acuta_HIv2__         9.65e-01  500
-Pocillopora_acuta_HIv2__         4.38e-01  63_[-3(8.41e-06)]_216_\
-    [-3(5.83e-05)]_171
-Pocillopora_acuta_HIv2__         1.24e-02  261_[-7(1.45e-05)]_73_\
-    [+1(8.85e-05)]_130
-Pocillopora_acuta_HIv2__         9.14e-04  191_[+1(5.08e-05)]_16_\
-    [-3(3.14e-05)]_63_[-6(7.28e-09)]_170
-Pocillopora_acuta_HIv2__         4.12e-02  14_[+4(6.36e-05)]_117_\
-    [-1(6.05e-05)]_104_[-4(2.64e-06)]_166_[+2(7.17e-05)]_15
-Pocillopora_acuta_HIv2__         3.76e-01  57_[-3(6.63e-05)]_418
-Pocillopora_acuta_HIv2__         7.91e-03  167_[+6(4.78e-08)]_63_\
-    [+3(3.14e-05)]_16_[-1(5.08e-05)]_194
-Pocillopora_acuta_HIv2__         9.08e-01  500
-Pocillopora_acuta_HIv2__         4.12e-01  230_[-1(5.08e-05)]_259
-Pocillopora_acuta_HIv2__         9.53e-01  209_[-4(7.98e-05)]_266
-Pocillopora_acuta_HIv2__         5.34e-01  118_[-7(3.70e-05)]_357
-Pocillopora_acuta_HIv2__         4.10e-01  204_[+9(1.69e-05)]_271
-Pocillopora_acuta_HIv2__         5.94e-01  500
-Pocillopora_acuta_HIv2__         6.69e-01  272_[+1(9.48e-05)]_217
-Pocillopora_acuta_HIv2__         5.90e-01  272_[+1(9.48e-05)]_217
-Pocillopora_acuta_HIv2__         2.64e-02  34_[+3(2.45e-08)]_441
-Pocillopora_acuta_HIv2__         1.31e-01  74_[-7(6.85e-05)]_158_\
-    [+1(2.36e-05)]_106_[+1(2.91e-05)]_45_[-1(7.11e-05)]_59
-Pocillopora_acuta_HIv2__         8.43e-04  24_[-6(4.13e-08)]_107_\
-    [-6(4.28e-10)]_321
-Pocillopora_acuta_HIv2__         4.78e-01  500
-Pocillopora_acuta_HIv2__         8.09e-01  192_[-6(8.44e-05)]_284
-Pocillopora_acuta_HIv2__         8.33e-01  500
-Pocillopora_acuta_HIv2__         3.27e-02  5_[-3(3.70e-05)]_69_[-7(2.22e-05)]_\
-    158_[-1(6.05e-05)]_207
-Pocillopora_acuta_HIv2__         7.09e-04  273_[-7(9.52e-05)]_49_\
-    [-6(1.10e-07)]_66_[+7(3.35e-05)]_38
-Pocillopora_acuta_HIv2__         6.73e-01  500
-Pocillopora_acuta_HIv2__         8.22e-01  500
-Pocillopora_acuta_HIv2__         6.55e-01  500
-Pocillopora_acuta_HIv2__         2.10e-01  345_[-5(6.49e-05)]_84_\
-    [-6(2.14e-05)]_26
-Pocillopora_acuta_HIv2__         6.32e-01  262_[-6(3.67e-05)]_118_\
-    [-6(4.82e-05)]_72
-Pocillopora_acuta_HIv2__         2.93e-01  300_[+7(6.85e-05)]_132_\
-    [+4(2.58e-05)]_18
-Pocillopora_acuta_HIv2__         5.33e-01  120_[+6(7.19e-05)]_356
-Pocillopora_acuta_HIv2__         2.53e-04  158_[+1(9.93e-05)]_180_\
-    [+6(7.17e-10)]_127
-Pocillopora_acuta_HIv2__         1.76e-01  154_[-3(3.70e-05)]_251_\
-    [+3(3.82e-05)]_45
-Pocillopora_acuta_HIv2__         6.71e-02  435_[+8(3.72e-05)]_44
-Pocillopora_acuta_HIv2__         4.31e-02  92_[-6(1.65e-05)]_88_[+3(7.41e-06)]_\
-    104_[+7(9.52e-05)]_142
-Pocillopora_acuta_HIv2__         1.69e-01  217_[-1(2.36e-05)]_272
-Pocillopora_acuta_HIv2__         7.67e-01  293_[-1(2.36e-05)]_196
-Pocillopora_acuta_HIv2__         8.83e-01  500
-Pocillopora_acuta_HIv2__         1.07e-01  212_[+1(1.72e-05)]_116_\
-    [+4(3.07e-05)]_30_[-3(4.36e-05)]_81
-Pocillopora_acuta_HIv2__         1.50e-01  10_[+1(1.32e-05)]_112_\
-    [-9(7.85e-05)]_151_[+4(8.55e-05)]_166
-Pocillopora_acuta_HIv2__         4.19e-01  500
-Pocillopora_acuta_HIv2__         9.17e-01  500
-Pocillopora_acuta_HIv2__         1.64e-02  117_[-5(6.15e-05)]_168_\
-    [+1(5.12e-06)]_41_[+6(2.14e-05)]_118
-Pocillopora_acuta_HIv2__         3.48e-01  500
-Pocillopora_acuta_HIv2__         4.73e-03  230_[+3(6.02e-05)]_29_\
-    [-9(3.47e-05)]_103_[-10(2.93e-06)]_67
-Pocillopora_acuta_HIv2__         1.75e-01  406_[+4(6.15e-05)]_69
-Pocillopora_acuta_HIv2__         1.75e-01  66_[+3(6.42e-05)]_409
-Pocillopora_acuta_HIv2__         1.72e-02  50_[-7(1.11e-06)]_317_\
-    [+1(2.36e-05)]_97
-Pocillopora_acuta_HIv2__         2.64e-01  191_[-3(1.21e-05)]_284
-Pocillopora_acuta_HIv2__         5.73e-01  417_[+1(9.93e-05)]_72
-Pocillopora_acuta_HIv2__         5.75e-01  500
-Pocillopora_acuta_HIv2__         4.48e-01  500
-Pocillopora_acuta_HIv2__         5.74e-01  177_[+9(6.83e-05)]_298
-Pocillopora_acuta_HIv2__         1.01e-01  70_[-2(9.06e-05)]_109_\
-    [-9(8.94e-05)]_235_[+4(2.92e-06)]_13
-Pocillopora_acuta_HIv2__         8.80e-02  96_[-1(2.36e-05)]_393
-Pocillopora_acuta_HIv2__         8.62e-03  175_[-7(4.57e-05)]_16_\
-    [-5(3.92e-05)]_36_[-10(9.03e-05)]_40_[+3(2.74e-05)]_86_[-1(2.36e-05)]_44
-Pocillopora_acuta_HIv2__         1.68e-01  228_[-9(1.69e-05)]_247
-Pocillopora_acuta_HIv2__         3.62e-04  9_[+1(8.58e-05)]_19_[-6(7.84e-08)]_\
-    27_[-6(1.31e-05)]_386
-Pocillopora_acuta_HIv2__         6.38e-04  38_[-6(1.03e-07)]_28_[-6(2.39e-05)]_\
-    46_[+7(3.50e-05)]_103_[-2(1.21e-05)]_98_[-7(6.29e-05)]_66
-Pocillopora_acuta_HIv2__         5.56e-02  84_[-1(2.84e-06)]_26_[-1(5.08e-05)]_\
-    18_[-7(1.45e-05)]_325
-Pocillopora_acuta_HIv2__         1.79e-01  217_[+2(3.51e-06)]_260
-Pocillopora_acuta_HIv2__         1.18e-01  192_[+1(6.84e-05)]_68_\
-    [+5(5.81e-05)]_52_[+1(9.48e-05)]_145
-Pocillopora_acuta_HIv2__         4.11e-02  116_[+1(2.84e-06)]_107_\
-    [+1(9.93e-05)]_255
-Pocillopora_acuta_HIv2__         3.51e-02  15_[-1(1.32e-05)]_29_[-7(9.52e-05)]_\
-    119_[-3(1.03e-05)]_224_[-1(8.85e-05)]_41
-Pocillopora_acuta_HIv2__         5.90e-02  106_[+9(2.40e-05)]_48_\
-    [-8(9.18e-05)]_132_[-3(5.29e-05)]_143
-Pocillopora_acuta_HIv2__         6.24e-01  343_[+5(8.42e-05)]_136
-Pocillopora_acuta_HIv2__         1.54e-01  453_[-6(8.72e-05)]_23
-Pocillopora_acuta_HIv2__         7.11e-01  500
-Pocillopora_acuta_HIv2__         2.62e-02  82_[-6(3.26e-06)]_350_\
-    [-2(1.71e-05)]_21
-Pocillopora_acuta_HIv2__         9.04e-02  87_[-1(8.85e-05)]_109_\
-    [+9(9.58e-05)]_167_[-10(7.18e-05)]_80
-Pocillopora_acuta_HIv2__         8.79e-02  338_[+1(5.08e-05)]_5_[-5(2.40e-05)]_\
-    125
-Pocillopora_acuta_HIv2__         7.11e-01  445_[+4(6.59e-05)]_30
-Pocillopora_acuta_HIv2__         8.72e-01  500
-Pocillopora_acuta_HIv2__         2.14e-02  6_[-1(2.36e-05)]_332_[-1(9.34e-06)]_\
-    39_[+3(3.70e-05)]_76
-Pocillopora_acuta_HIv2__         1.86e-01  198_[+8(2.97e-05)]_281
-Pocillopora_acuta_HIv2__         3.68e-01  13_[-1(5.08e-05)]_476
-Pocillopora_acuta_HIv2__         8.61e-03  11_[+2(4.79e-05)]_94_[+1(2.91e-05)]_\
-    68_[-5(8.01e-05)]_272
+Pocillopora_acuta_HIv2__         5.48e-01  500
+Pocillopora_acuta_HIv2__         1.16e-01  95_[+1(6.05e-05)]_14_[+1(4.28e-05)]_\
+    2_[-3(4.96e-05)]_342
+Pocillopora_acuta_HIv2__         3.54e-02  296_[-1(2.84e-06)]_193
+Pocillopora_acuta_HIv2__         6.36e-01  500
+Pocillopora_acuta_HIv2__         2.10e-02  65_[+1(2.91e-05)]_98_[+4(9.36e-05)]_\
+    225_[+3(6.63e-05)]_51
+Pocillopora_acuta_HIv2__         6.25e-01  500
+Pocillopora_acuta_HIv2__         8.91e-01  500
+Pocillopora_acuta_HIv2__         3.41e-01  27_[-1(6.05e-05)]_2_[-1(6.05e-05)]_\
+    449
 Pocillopora_acuta_HIv2__         6.85e-01  500
-Pocillopora_acuta_HIv2__         9.87e-01  500
+Pocillopora_acuta_HIv2__         9.60e-01  500
+Pocillopora_acuta_HIv2__         1.10e-03  202_[+3(7.41e-06)]_9_[-1(8.85e-07)]_\
+    123_[+1(1.32e-05)]_119
+Pocillopora_acuta_HIv2__         5.69e-01  500
+Pocillopora_acuta_HIv2__         3.15e-01  186_[+1(6.05e-05)]_282_\
+    [-1(8.58e-05)]_10
+Pocillopora_acuta_HIv2__         8.08e-01  500
+Pocillopora_acuta_HIv2__         1.05e-01  242_[+3(1.35e-05)]_233
+Pocillopora_acuta_HIv2__         2.74e-02  401_[-4(1.65e-05)]_74
+Pocillopora_acuta_HIv2__         5.58e-01  500
+Pocillopora_acuta_HIv2__         1.10e-01  500
+Pocillopora_acuta_HIv2__         6.23e-01  500
+Pocillopora_acuta_HIv2__         8.04e-03  140_[-4(7.19e-05)]_98_\
+    [-1(5.12e-06)]_226
+Pocillopora_acuta_HIv2__         4.27e-02  15_[+1(5.08e-05)]_280_\
+    [-4(7.98e-05)]_169
+Pocillopora_acuta_HIv2__         7.36e-01  500
+Pocillopora_acuta_HIv2__         7.45e-02  266_[+1(7.76e-05)]_223
+Pocillopora_acuta_HIv2__         7.22e-02  247_[+1(4.28e-05)]_242
+Pocillopora_acuta_HIv2__         6.19e-02  105_[+1(2.36e-05)]_384
+Pocillopora_acuta_HIv2__         2.87e-01  500
+Pocillopora_acuta_HIv2__         1.07e-03  10_[-1(5.12e-06)]_3_[-3(8.07e-06)]_\
+    45_[-1(7.76e-05)]_50_[-1(9.93e-05)]_334
+Pocillopora_acuta_HIv2__         1.08e-02  134_[-3(7.73e-06)]_56_\
+    [-1(6.05e-05)]_52_[-1(9.93e-05)]_211
+Pocillopora_acuta_HIv2__         3.06e-03  14_[-3(8.07e-06)]_56_[-1(6.05e-05)]_\
+    394
+Pocillopora_acuta_HIv2__         3.20e-02  220_[+1(9.34e-06)]_197_\
+    [-1(1.32e-05)]_61
+Pocillopora_acuta_HIv2__         4.11e-03  127_[-1(8.85e-07)]_24_\
+    [-3(9.69e-05)]_164_[-3(8.28e-05)]_124
+Pocillopora_acuta_HIv2__         4.60e-02  12_[-1(9.34e-06)]_477
+Pocillopora_acuta_HIv2__         7.49e-01  500
+Pocillopora_acuta_HIv2__         1.19e-01  346_[+1(3.60e-05)]_143
+Pocillopora_acuta_HIv2__         2.51e-01  457_[+1(9.93e-05)]_32
+Pocillopora_acuta_HIv2__         5.38e-01  82_[-1(9.48e-05)]_407
+Pocillopora_acuta_HIv2__         2.12e-01  131_[-4(8.42e-05)]_344
+Pocillopora_acuta_HIv2__         1.90e-01  4_[-1(6.84e-05)]_485
+Pocillopora_acuta_HIv2__         3.52e-01  500
+Pocillopora_acuta_HIv2__         5.65e-01  276_[-1(6.05e-05)]_181_\
+    [-1(8.58e-05)]_21
+Pocillopora_acuta_HIv2__         3.20e-04  334_[-2(2.90e-08)]_143
+Pocillopora_acuta_HIv2__         6.95e-01  500
+Pocillopora_acuta_HIv2__         4.05e-01  85_[-1(8.58e-05)]_404
+Pocillopora_acuta_HIv2__         2.24e-02  400_[+2(1.07e-05)]_77
+Pocillopora_acuta_HIv2__         4.92e-02  15_[-3(6.42e-05)]_123_\
+    [-1(9.48e-05)]_50_[-1(7.11e-05)]_265
+Pocillopora_acuta_HIv2__         1.24e-02  16_[-4(1.15e-05)]_145_\
+    [+3(2.93e-05)]_289
+Pocillopora_acuta_HIv2__         2.17e-01  243_[-2(8.17e-05)]_234
+Pocillopora_acuta_HIv2__         2.66e-01  500
+Pocillopora_acuta_HIv2__         8.65e-01  500
+Pocillopora_acuta_HIv2__         3.92e-02  69_[-1(6.84e-05)]_95_[-3(1.57e-05)]_\
+    300
+Pocillopora_acuta_HIv2__         9.92e-01  500
+Pocillopora_acuta_HIv2__         7.78e-01  500
+Pocillopora_acuta_HIv2__         2.17e-01  240_[+1(6.84e-05)]_249
+Pocillopora_acuta_HIv2__         2.09e-01  387_[+3(7.77e-05)]_88
+Pocillopora_acuta_HIv2__         1.05e-02  111_[-1(9.34e-06)]_223_\
+    [+4(4.94e-05)]_72_[+1(2.91e-05)]_47
+Pocillopora_acuta_HIv2__         3.65e-01  500
+Pocillopora_acuta_HIv2__         1.02e-01  126_[-1(6.05e-05)]_363
+Pocillopora_acuta_HIv2__         5.02e-01  246_[+1(8.01e-05)]_243
+Pocillopora_acuta_HIv2__         8.92e-01  500
+Pocillopora_acuta_HIv2__         8.98e-01  500
+Pocillopora_acuta_HIv2__         1.94e-02  52_[+4(3.00e-05)]_135_\
+    [-2(1.17e-05)]_265
+Pocillopora_acuta_HIv2__         2.09e-02  212_[-2(7.22e-06)]_265
+Pocillopora_acuta_HIv2__         1.40e-01  346_[+2(2.83e-05)]_131
+Pocillopora_acuta_HIv2__         7.23e-02  67_[-3(3.95e-05)]_408
+Pocillopora_acuta_HIv2__         7.08e-01  500
+Pocillopora_acuta_HIv2__         6.73e-01  500
+Pocillopora_acuta_HIv2__         6.84e-02  229_[+3(4.65e-05)]_246
+Pocillopora_acuta_HIv2__         7.64e-02  40_[-1(1.32e-05)]_449
+Pocillopora_acuta_HIv2__         2.98e-01  500
+Pocillopora_acuta_HIv2__         2.73e-01  236_[-3(6.02e-05)]_239
+Pocillopora_acuta_HIv2__         6.29e-03  351_[-3(7.41e-06)]_124
+Pocillopora_acuta_HIv2__         1.63e-01  500
+Pocillopora_acuta_HIv2__         3.67e-01  500
+Pocillopora_acuta_HIv2__         3.47e-01  500
+Pocillopora_acuta_HIv2__         3.27e-01  500
+Pocillopora_acuta_HIv2__         3.89e-01  500
+Pocillopora_acuta_HIv2__         5.86e-01  500
+Pocillopora_acuta_HIv2__         3.12e-01  500
+Pocillopora_acuta_HIv2__         2.15e-02  255_[+2(5.95e-05)]_65_\
+    [-3(4.08e-05)]_132
+Pocillopora_acuta_HIv2__         2.15e-02  315_[+2(5.95e-05)]_65_\
+    [-3(4.08e-05)]_72
+Pocillopora_acuta_HIv2__         3.84e-01  395_[-3(7.06e-05)]_80
+Pocillopora_acuta_HIv2__         8.49e-03  186_[+1(2.84e-06)]_182_\
+    [-1(2.36e-05)]_110
+Pocillopora_acuta_HIv2__         5.50e-04  188_[+1(8.85e-07)]_69_\
+    [+1(4.28e-05)]_24_[+2(1.40e-05)]_174
+Pocillopora_acuta_HIv2__         9.96e-02  2_[-1(5.12e-06)]_280_[-1(6.84e-05)]_\
+    196
+Pocillopora_acuta_HIv2__         3.55e-02  257_[+3(3.14e-05)]_16_\
+    [-1(5.08e-05)]_191
+Pocillopora_acuta_HIv2__         1.52e-01  56_[+3(9.10e-05)]_369_\
+    [+2(9.78e-05)]_27
+Pocillopora_acuta_HIv2__         1.91e-02  251_[+3(3.82e-05)]_19_\
+    [+3(1.49e-06)]_180
+Pocillopora_acuta_HIv2__         6.68e-03  403_[-1(2.84e-06)]_34_\
+    [+1(6.84e-05)]_41
+Pocillopora_acuta_HIv2__         4.64e-03  434_[-1(2.84e-06)]_15_\
+    [-2(6.98e-05)]_17
+Pocillopora_acuta_HIv2__         4.08e-01  500
+Pocillopora_acuta_HIv2__         3.42e-01  132_[+1(6.19e-05)]_357
+Pocillopora_acuta_HIv2__         6.30e-01  500
+Pocillopora_acuta_HIv2__         4.79e-02  339_[-1(9.34e-06)]_150
+Pocillopora_acuta_HIv2__         2.84e-01  136_[+1(6.84e-05)]_353
+Pocillopora_acuta_HIv2__         5.73e-02  404_[-1(9.34e-06)]_85
+Pocillopora_acuta_HIv2__         2.37e-01  172_[+4(2.64e-05)]_303
+Pocillopora_acuta_HIv2__         5.33e-02  394_[-3(4.10e-06)]_81
+Pocillopora_acuta_HIv2__         1.21e-01  401_[-4(2.08e-05)]_74
+Pocillopora_acuta_HIv2__         9.32e-01  500
+Pocillopora_acuta_HIv2__         7.59e-02  353_[-3(3.46e-05)]_122
+Pocillopora_acuta_HIv2__         3.56e-01  500
+Pocillopora_acuta_HIv2__         1.69e-01  500
+Pocillopora_acuta_HIv2__         9.92e-02  145_[-1(9.93e-05)]_344
+Pocillopora_acuta_HIv2__         6.39e-01  500
+Pocillopora_acuta_HIv2__         6.17e-02  500
+Pocillopora_acuta_HIv2__         2.52e-01  457_[-3(6.63e-05)]_18
+Pocillopora_acuta_HIv2__         8.27e-01  500
+Pocillopora_acuta_HIv2__         1.82e-01  435_[+1(2.91e-05)]_54
+Pocillopora_acuta_HIv2__         1.10e-02  26_[+1(9.93e-05)]_31_[+2(5.79e-05)]_\
+    45_[+4(6.59e-05)]_296_[-1(3.60e-05)]_32
+Pocillopora_acuta_HIv2__         1.97e-02  224_[-1(1.72e-05)]_265
+Pocillopora_acuta_HIv2__         6.16e-01  500
+Pocillopora_acuta_HIv2__         2.69e-01  272_[-1(2.91e-05)]_217
+Pocillopora_acuta_HIv2__         2.31e-02  178_[+3(4.50e-05)]_38_\
+    [+4(8.12e-05)]_234
+Pocillopora_acuta_HIv2__         4.53e-01  500
+Pocillopora_acuta_HIv2__         7.27e-03  323_[+2(1.71e-05)]_122_\
+    [+3(2.56e-05)]_7
+Pocillopora_acuta_HIv2__         2.17e-01  20_[+2(4.92e-05)]_457
+Pocillopora_acuta_HIv2__         2.47e-01  500
+Pocillopora_acuta_HIv2__         6.14e-02  139_[+1(5.08e-05)]_350
+Pocillopora_acuta_HIv2__         1.91e-01  25_[-1(2.91e-05)]_464
+Pocillopora_acuta_HIv2__         2.91e-01  500
+Pocillopora_acuta_HIv2__         9.73e-02  103_[+2(1.21e-05)]_374
+Pocillopora_acuta_HIv2__         8.25e-01  500
+Pocillopora_acuta_HIv2__         6.31e-01  500
+Pocillopora_acuta_HIv2__         1.33e-02  405_[+1(1.32e-05)]_84
+Pocillopora_acuta_HIv2__         8.04e-01  500
+Pocillopora_acuta_HIv2__         1.17e-01  317_[+1(5.21e-05)]_172
+Pocillopora_acuta_HIv2__         4.58e-01  68_[+1(6.05e-05)]_421
+Pocillopora_acuta_HIv2__         1.90e-01  429_[-1(3.60e-05)]_60
+Pocillopora_acuta_HIv2__         1.46e-03  127_[-2(1.14e-08)]_350
+Pocillopora_acuta_HIv2__         1.95e-01  83_[+4(4.67e-05)]_392
+Pocillopora_acuta_HIv2__         2.77e-01  500
+Pocillopora_acuta_HIv2__         2.12e-02  237_[+1(9.34e-06)]_252
+Pocillopora_acuta_HIv2__         3.48e-01  500
+Pocillopora_acuta_HIv2__         2.29e-02  183_[+1(1.32e-05)]_175_\
+    [+3(2.93e-05)]_106
+Pocillopora_acuta_HIv2__         2.70e-01  500
+Pocillopora_acuta_HIv2__         2.81e-01  227_[-1(8.58e-05)]_97_\
+    [+1(6.19e-05)]_154
+Pocillopora_acuta_HIv2__         9.15e-01  500
+Pocillopora_acuta_HIv2__         6.94e-01  500
+Pocillopora_acuta_HIv2__         1.40e-01  500
+Pocillopora_acuta_HIv2__         2.71e-01  355_[-2(6.80e-05)]_122
+Pocillopora_acuta_HIv2__         1.02e-01  179_[-1(6.05e-05)]_310
+Pocillopora_acuta_HIv2__         3.41e-01  296_[-1(4.28e-05)]_193
+Pocillopora_acuta_HIv2__         2.02e-03  81_[-1(2.91e-05)]_168_\
+    [+1(2.84e-06)]_229
+Pocillopora_acuta_HIv2__         9.08e-01  500
+Pocillopora_acuta_HIv2__         5.27e-04  172_[+3(8.02e-05)]_82_\
+    [-2(2.33e-05)]_26_[-3(5.44e-06)]_147
+Pocillopora_acuta_HIv2__         9.71e-04  337_[-3(2.60e-06)]_138
+Pocillopora_acuta_HIv2__         3.37e-01  500
+Pocillopora_acuta_HIv2__         2.05e-01  500
+Pocillopora_acuta_HIv2__         9.55e-02  139_[-1(1.32e-05)]_350
+Pocillopora_acuta_HIv2__         1.58e-03  58_[-3(1.88e-05)]_22_[-1(7.76e-05)]_\
+    312_[+1(3.60e-05)]_1_[+3(2.56e-05)]_35
+Pocillopora_acuta_HIv2__         2.35e-02  16_[+1(6.05e-05)]_108_\
+    [-3(1.88e-05)]_340
+Pocillopora_acuta_HIv2__         3.57e-01  500
+Pocillopora_acuta_HIv2__         1.87e-01  322_[+1(6.84e-05)]_167
+Pocillopora_acuta_HIv2__         6.53e-01  500
+Pocillopora_acuta_HIv2__         7.07e-01  500
+Pocillopora_acuta_HIv2__         2.47e-01  500
+Pocillopora_acuta_HIv2__         7.07e-01  500
+Pocillopora_acuta_HIv2__         3.75e-03  189_[+1(2.84e-06)]_300
+Pocillopora_acuta_HIv2__         5.60e-01  500
+Pocillopora_acuta_HIv2__         8.38e-01  500
+Pocillopora_acuta_HIv2__         2.71e-01  500
 Pocillopora_acuta_HIv2__         4.42e-01  500
-Pocillopora_acuta_HIv2__         1.29e-02  119_[+1(2.84e-06)]_5_[+1(6.84e-05)]_\
-    168_[-6(4.36e-05)]_162
-Pocillopora_acuta_HIv2__         8.87e-01  500
-Pocillopora_acuta_HIv2__         6.89e-02  286_[-1(2.84e-06)]_203
-Pocillopora_acuta_HIv2__         3.19e-02  74_[-3(5.32e-07)]_401
-Pocillopora_acuta_HIv2__         2.29e-03  119_[-2(3.25e-05)]_170_\
-    [+5(2.54e-05)]_105_[+1(5.12e-06)]_51
-Pocillopora_acuta_HIv2__         6.08e-01  282_[-1(5.08e-05)]_207
-Pocillopora_acuta_HIv2__         5.62e-01  341_[+3(5.64e-05)]_27_\
-    [+6(7.67e-05)]_83
-Pocillopora_acuta_HIv2__         1.56e-01  33_[-1(6.84e-05)]_88_[-2(2.68e-05)]_\
-    345
-Pocillopora_acuta_HIv2__         8.09e-01  449_[+4(9.36e-05)]_26
-Pocillopora_acuta_HIv2__         6.81e-01  500
-Pocillopora_acuta_HIv2__         2.23e-02  56_[+2(1.57e-05)]_380_\
-    [-6(2.97e-05)]_17
-Pocillopora_acuta_HIv2__         1.17e-02  289_[+3(2.39e-05)]_16_\
-    [-1(1.32e-05)]_124_[+3(1.86e-07)]_10
-Pocillopora_acuta_HIv2__         5.09e-08  110_[+6(1.35e-13)]_47_\
-    [+7(6.85e-05)]_276_[+1(2.84e-06)]_7
-Pocillopora_acuta_HIv2__         2.00e-01  362_[+6(5.71e-05)]_52_\
-    [+1(3.60e-05)]_51
-Pocillopora_acuta_HIv2__         3.29e-01  384_[-8(7.23e-05)]_95
-Pocillopora_acuta_HIv2__         2.92e-01  301_[-5(9.67e-05)]_178
-Pocillopora_acuta_HIv2__         6.25e-01  189_[+8(8.40e-05)]_290
-Pocillopora_acuta_HIv2__         4.89e-03  98_[-9(4.64e-05)]_232_\
-    [-2(3.07e-08)]_122
-Pocillopora_acuta_HIv2__         1.02e-02  194_[-3(1.22e-07)]_102_\
-    [-2(9.54e-05)]_156
-Pocillopora_acuta_HIv2__         7.06e-01  73_[+8(4.03e-05)]_406
-Pocillopora_acuta_HIv2__         2.39e-01  258_[+1(6.84e-05)]_134_\
-    [+9(7.62e-05)]_72
-Pocillopora_acuta_HIv2__         7.57e-01  500
-Pocillopora_acuta_HIv2__         1.73e-01  6_[+7(6.29e-05)]_469
-Pocillopora_acuta_HIv2__         7.00e-01  161_[+1(4.28e-05)]_328
-Pocillopora_acuta_HIv2__         1.56e-03  40_[+8(7.74e-05)]_70_[-8(4.17e-06)]_\
-    102_[-1(3.60e-05)]_166_[-2(5.79e-05)]_46
-Pocillopora_acuta_HIv2__         4.65e-01  39_[+4(6.15e-05)]_193_\
-    [+8(7.74e-05)]_222
-Pocillopora_acuta_HIv2__         5.06e-02  446_[+1(1.32e-05)]_[+1(5.08e-05)]_\
-    32
-Pocillopora_acuta_HIv2__         6.87e-03  385_[-6(1.41e-08)]_91
-Pocillopora_acuta_HIv2__         5.58e-03  105_[-1(7.76e-05)]_3_\
-    [+10(1.31e-05)]_56_[-7(3.21e-05)]_10_[+5(2.60e-05)]_248
-Pocillopora_acuta_HIv2__         6.35e-01  340_[-3(5.29e-05)]_135
-Pocillopora_acuta_HIv2__         6.83e-02  236_[+5(3.17e-06)]_61_\
-    [-9(5.67e-05)]_157
-Pocillopora_acuta_HIv2__         3.92e-01  500
-Pocillopora_acuta_HIv2__         4.54e-02  164_[-10(6.24e-05)]_174_\
-    [-3(2.36e-07)]_116
-Pocillopora_acuta_HIv2__         1.40e-01  86_[+5(9.25e-05)]_258_\
-    [+9(1.69e-05)]_110
-Pocillopora_acuta_HIv2__         2.18e-03  76_[+1(1.72e-05)]_227_\
-    [+6(9.93e-06)]_91_[-3(8.52e-07)]_46
-Pocillopora_acuta_HIv2__         2.96e-01  218_[-5(4.51e-05)]_261
-Pocillopora_acuta_HIv2__         8.84e-01  500
-Pocillopora_acuta_HIv2__         8.61e-01  500
-Pocillopora_acuta_HIv2__         4.32e-01  142_[-7(6.29e-05)]_333
-Pocillopora_acuta_HIv2__         1.06e-01  121_[-4(8.55e-05)]_55_\
-    [+4(9.36e-05)]_173_[+6(3.67e-05)]_77
-Pocillopora_acuta_HIv2__         2.60e-03  34_[-1(2.36e-05)]_46_[+8(1.58e-05)]_\
-    60_[-1(9.48e-05)]_91_[+6(2.35e-06)]_94_[+2(4.92e-05)]_85
-Pocillopora_acuta_HIv2__         1.00e-01  71_[-6(3.07e-05)]_304_\
-    [-1(5.12e-06)]_90
-Pocillopora_acuta_HIv2__         6.60e-01  415_[+8(9.82e-05)]_64
-Pocillopora_acuta_HIv2__         1.28e-08  22_[+6(3.42e-05)]_110_\
-    [-3(5.97e-08)]_80_[+8(3.69e-11)]_218
-Pocillopora_acuta_HIv2__         2.55e-03  362_[-2(6.82e-07)]_10_\
-    [+2(2.75e-05)]_16_[-10(1.92e-05)]_45
-Pocillopora_acuta_HIv2__         2.12e-01  369_[-4(8.26e-05)]_106
-Pocillopora_acuta_HIv2__         1.99e-01  369_[-4(8.26e-05)]_106
-Pocillopora_acuta_HIv2__         1.68e-02  65_[-10(8.23e-05)]_1_[-1(7.76e-05)]_\
-    217_[+1(2.84e-06)]_174
-Pocillopora_acuta_HIv2__         3.00e-04  75_[+6(1.85e-07)]_22_[+8(3.39e-05)]_\
-    58_[-1(5.21e-05)]_289
-Pocillopora_acuta_HIv2__         5.64e-01  84_[+1(9.34e-06)]_405
-Pocillopora_acuta_HIv2__         8.92e-03  51_[-3(9.41e-08)]_251_\
-    [+6(5.09e-06)]_21_[+3(6.22e-05)]_103
-Pocillopora_acuta_HIv2__         7.96e-04  8_[+9(6.40e-05)]_31_[-10(7.69e-05)]_\
-    39_[-2(5.49e-05)]_144_[-3(7.73e-06)]_21_[+1(1.72e-05)]_121_[-1(5.08e-05)]_\
-    20
-Pocillopora_acuta_HIv2__         1.24e-02  23_[-10(8.23e-05)]_292_\
-    [+7(9.52e-05)]_23_[+2(3.84e-05)]_93
-Pocillopora_acuta_HIv2__         3.59e-01  282_[+6(7.67e-05)]_194
-Pocillopora_acuta_HIv2__         8.77e-01  125_[+1(8.58e-05)]_364
-Pocillopora_acuta_HIv2__         1.39e-01  306_[+2(1.66e-05)]_171
-Pocillopora_acuta_HIv2__         5.84e-01  500
-Pocillopora_acuta_HIv2__         1.33e-01  53_[+6(1.99e-05)]_300_\
-    [-1(2.91e-05)]_43_[-1(2.36e-05)]_58
-Pocillopora_acuta_HIv2__         6.81e-03  49_[+2(4.06e-08)]_168_\
-    [+1(2.36e-05)]_190_[-1(6.05e-05)]_48
-Pocillopora_acuta_HIv2__         4.61e-01  500
-Pocillopora_acuta_HIv2__         1.50e-01  92_[-6(5.34e-05)]_11_[+3(4.22e-05)]_\
-    348
-Pocillopora_acuta_HIv2__         1.58e-01  203_[-6(5.09e-06)]_[+7(9.52e-05)]_\
-    248
-Pocillopora_acuta_HIv2__         5.26e-01  9_[-1(6.84e-05)]_480
-Pocillopora_acuta_HIv2__         1.51e-01  37_[-1(2.36e-05)]_334_\
-    [-1(5.08e-05)]_107
-Pocillopora_acuta_HIv2__         2.02e-59  7_[+2(1.56e-14)]_6_[+3(1.47e-09)]_4_\
-    [+4(3.81e-17)]_2_[+8(8.48e-14)]_[-1(3.60e-05)]_[+10(5.11e-13)]_\
-    [+3(2.57e-09)]_1_[+7(2.36e-16)]_24_[+2(3.17e-10)]_27_[+5(5.22e-13)]_152_\
-    [-3(2.16e-05)]_32
-Pocillopora_acuta_HIv2__         1.42e-04  63_[+6(7.92e-10)]_314_\
-    [+10(7.01e-05)]_78
-Pocillopora_acuta_HIv2__         3.06e-03  264_[+9(3.17e-05)]_150_\
-    [+3(5.58e-09)]_36
-Pocillopora_acuta_HIv2__         9.12e-01  500
-Pocillopora_acuta_HIv2__         1.80e-01  412_[-3(3.37e-06)]_63
-Pocillopora_acuta_HIv2__         2.66e-01  301_[+4(5.13e-05)]_174
-Pocillopora_acuta_HIv2__         6.91e-02  367_[+9(6.31e-06)]_108
+Pocillopora_acuta_HIv2__         5.44e-01  500
+Pocillopora_acuta_HIv2__         1.97e-01  211_[-2(6.28e-05)]_266
+Pocillopora_acuta_HIv2__         3.96e-01  500
+Pocillopora_acuta_HIv2__         9.56e-01  500
+Pocillopora_acuta_HIv2__         7.28e-01  500
+Pocillopora_acuta_HIv2__         1.42e-01  500
+Pocillopora_acuta_HIv2__         6.13e-01  500
+Pocillopora_acuta_HIv2__         2.90e-01  500
+Pocillopora_acuta_HIv2__         2.09e-02  186_[+3(3.82e-05)]_13_\
+    [+2(4.92e-05)]_253
+Pocillopora_acuta_HIv2__         1.16e-02  336_[+3(4.08e-05)]_2_[-2(9.30e-05)]_\
+    114
+Pocillopora_acuta_HIv2__         2.34e-01  117_[+1(5.08e-05)]_372
+Pocillopora_acuta_HIv2__         4.04e-01  500
+Pocillopora_acuta_HIv2__         3.60e-01  500
+Pocillopora_acuta_HIv2__         5.11e-01  500
+Pocillopora_acuta_HIv2__         1.37e-01  500
+Pocillopora_acuta_HIv2__         3.46e-01  402_[+4(7.19e-05)]_73
+Pocillopora_acuta_HIv2__         8.24e-01  500
+Pocillopora_acuta_HIv2__         2.86e-02  146_[-2(2.83e-05)]_331
+Pocillopora_acuta_HIv2__         3.49e-01  56_[-1(9.48e-05)]_433
+Pocillopora_acuta_HIv2__         1.85e-01  500
+Pocillopora_acuta_HIv2__         1.11e-01  229_[-3(6.63e-05)]_246
+Pocillopora_acuta_HIv2__         3.73e-01  500
+Pocillopora_acuta_HIv2__         1.78e-01  262_[-1(6.84e-05)]_227
+Pocillopora_acuta_HIv2__         5.93e-01  500
+Pocillopora_acuta_HIv2__         1.31e-01  84_[-4(3.13e-05)]_391
+Pocillopora_acuta_HIv2__         6.76e-01  35_[+1(9.48e-05)]_454
+Pocillopora_acuta_HIv2__         3.45e-02  352_[+2(1.10e-05)]_125
+Pocillopora_acuta_HIv2__         5.12e-02  420_[-1(2.84e-06)]_69
+Pocillopora_acuta_HIv2__         2.91e-02  57_[-1(6.05e-05)]_48_[-3(2.09e-05)]_\
+    359
+Pocillopora_acuta_HIv2__         1.87e-02  230_[+1(9.34e-06)]_259
+Pocillopora_acuta_HIv2__         5.47e-01  500
+Pocillopora_acuta_HIv2__         2.88e-01  500
+Pocillopora_acuta_HIv2__         4.80e-01  500
+Pocillopora_acuta_HIv2__         5.03e-02  26_[-3(7.77e-05)]_127_\
+    [-1(9.34e-06)]_311
+Pocillopora_acuta_HIv2__         4.80e-01  500
+Pocillopora_acuta_HIv2__         1.60e-01  500
+Pocillopora_acuta_HIv2__         7.42e-02  411_[+3(6.22e-05)]_64
+Pocillopora_acuta_HIv2__         8.45e-01  500
+Pocillopora_acuta_HIv2__         3.16e-02  169_[-1(8.85e-07)]_320
+Pocillopora_acuta_HIv2__         2.81e-02  398_[-2(3.74e-05)]_79
+Pocillopora_acuta_HIv2__         5.99e-01  500
+Pocillopora_acuta_HIv2__         2.95e-02  61_[+3(6.22e-05)]_170_\
+    [+1(6.05e-05)]_233
+Pocillopora_acuta_HIv2__         6.75e-02  63_[+1(5.08e-05)]_336_\
+    [+1(2.36e-05)]_79
+Pocillopora_acuta_HIv2__         1.32e-01  207_[+3(2.93e-05)]_15_\
+    [-3(8.55e-05)]_69_[+3(8.55e-05)]_134
+Pocillopora_acuta_HIv2__         1.88e-02  126_[+1(3.60e-05)]_335_\
+    [-2(6.98e-05)]_5
+Pocillopora_acuta_HIv2__         2.57e-02  54_[-3(9.51e-06)]_70_[-1(8.58e-05)]_\
+    340
+Pocillopora_acuta_HIv2__         1.94e-01  149_[-1(8.58e-05)]_340
+Pocillopora_acuta_HIv2__         9.52e-01  500
+Pocillopora_acuta_HIv2__         3.23e-01  76_[-1(6.05e-05)]_146_\
+    [+1(5.08e-05)]_256
+Pocillopora_acuta_HIv2__         7.74e-02  129_[+2(6.62e-05)]_145_\
+    [-1(4.28e-05)]_192
+Pocillopora_acuta_HIv2__         1.29e-01  411_[+2(2.46e-05)]_66
+Pocillopora_acuta_HIv2__         8.05e-02  269_[+2(6.98e-05)]_208
+Pocillopora_acuta_HIv2__         3.63e-01  500
+Pocillopora_acuta_HIv2__         5.98e-04  11_[+1(6.19e-05)]_70_[+2(2.84e-06)]_\
+    141_[-3(1.57e-05)]_219
+Pocillopora_acuta_HIv2__         1.33e-01  335_[+1(8.85e-05)]_154
+Pocillopora_acuta_HIv2__         1.32e-01  276_[-1(3.60e-05)]_213
+Pocillopora_acuta_HIv2__         2.45e-01  500
+Pocillopora_acuta_HIv2__         5.23e-02  282_[-1(3.60e-05)]_207
+Pocillopora_acuta_HIv2__         2.43e-01  500
+Pocillopora_acuta_HIv2__         2.85e-01  241_[-4(9.52e-05)]_234
+Pocillopora_acuta_HIv2__         1.24e-02  173_[+4(9.19e-05)]_64_\
+    [+1(2.84e-06)]_66_[-1(4.28e-05)]_150
+Pocillopora_acuta_HIv2__         1.42e-01  108_[+1(5.08e-05)]_367_\
+    [+1(5.08e-05)]_3
+Pocillopora_acuta_HIv2__         1.90e-01  279_[+1(3.60e-05)]_210
+Pocillopora_acuta_HIv2__         5.45e-02  248_[-1(1.72e-05)]_23_\
+    [-2(7.56e-05)]_195
+Pocillopora_acuta_HIv2__         9.11e-02  264_[+1(7.76e-05)]_225
+Pocillopora_acuta_HIv2__         1.46e-04  152_[+1(2.91e-05)]_98_\
+    [+1(9.34e-06)]_69_[+1(2.84e-06)]_91_[+3(1.57e-07)]_32
+Pocillopora_acuta_HIv2__         3.05e-01  456_[-1(6.84e-05)]_33
+Pocillopora_acuta_HIv2__         1.43e-02  61_[-3(1.81e-05)]_124_\
+    [+2(6.11e-05)]_267
+Pocillopora_acuta_HIv2__         3.33e-03  107_[+3(5.47e-05)]_116_\
+    [+1(2.84e-06)]_241
+Pocillopora_acuta_HIv2__         2.73e-01  273_[-2(8.83e-05)]_204
+Pocillopora_acuta_HIv2__         1.45e-01  48_[-3(4.36e-05)]_427
+Pocillopora_acuta_HIv2__         1.40e-01  195_[-3(8.82e-05)]_280
+Pocillopora_acuta_HIv2__         1.90e-01  326_[-2(8.83e-05)]_151
+Pocillopora_acuta_HIv2__         1.20e-01  173_[+1(1.32e-05)]_316
+Pocillopora_acuta_HIv2__         8.54e-01  500
+Pocillopora_acuta_HIv2__         6.50e-02  55_[+4(5.42e-05)]_420
+Pocillopora_acuta_HIv2__         3.08e-01  500
+Pocillopora_acuta_HIv2__         2.96e-01  396_[+2(5.34e-05)]_81
+Pocillopora_acuta_HIv2__         8.27e-01  500
+Pocillopora_acuta_HIv2__         5.54e-02  318_[+1(9.34e-06)]_171
 Pocillopora_acuta_HIv2__         4.65e-01  500
-Pocillopora_acuta_HIv2__         2.66e-02  267_[-10(4.57e-05)]_22_\
-    [+6(3.41e-06)]_1_[+6(3.43e-07)]_141
-Pocillopora_acuta_HIv2__         1.04e-01  160_[+6(1.26e-05)]_316
-Pocillopora_acuta_HIv2__         7.72e-01  500
-Pocillopora_acuta_HIv2__         2.11e-03  81_[+1(2.91e-05)]_2_[+3(8.55e-05)]_\
+Pocillopora_acuta_HIv2__         2.13e-03  159_[-3(2.01e-07)]_178_\
+    [-1(6.05e-05)]_127
+Pocillopora_acuta_HIv2__         6.66e-01  500
+Pocillopora_acuta_HIv2__         3.48e-01  480_[-1(3.60e-05)]_9
+Pocillopora_acuta_HIv2__         5.03e-01  500
+Pocillopora_acuta_HIv2__         5.32e-02  129_[-3(2.48e-05)]_346
+Pocillopora_acuta_HIv2__         1.29e-01  206_[+1(2.36e-05)]_283
+Pocillopora_acuta_HIv2__         1.16e-03  3_[+2(8.83e-05)]_421_[-3(9.68e-07)]_\
+    28
+Pocillopora_acuta_HIv2__         2.67e-01  277_[-1(4.28e-05)]_152_\
+    [-1(6.05e-05)]_49
+Pocillopora_acuta_HIv2__         3.01e-01  274_[-1(4.28e-05)]_215
+Pocillopora_acuta_HIv2__         4.12e-02  284_[-1(6.84e-05)]_5_[-1(7.76e-05)]_\
+    189
+Pocillopora_acuta_HIv2__         3.32e-01  500
+Pocillopora_acuta_HIv2__         5.09e-02  369_[-1(5.12e-06)]_120
+Pocillopora_acuta_HIv2__         1.35e-01  500
+Pocillopora_acuta_HIv2__         9.06e-03  440_[+1(2.84e-06)]_49
+Pocillopora_acuta_HIv2__         1.29e-01  252_[+3(5.47e-05)]_223
+Pocillopora_acuta_HIv2__         9.42e-01  500
+Pocillopora_acuta_HIv2__         4.45e-02  298_[+1(3.60e-05)]_191
+Pocillopora_acuta_HIv2__         2.76e-02  82_[+4(5.83e-05)]_182_\
+    [+1(9.48e-05)]_18_[+1(2.36e-05)]_171
+Pocillopora_acuta_HIv2__         2.62e-01  124_[-1(2.91e-05)]_365
+Pocillopora_acuta_HIv2__         4.54e-01  500
+Pocillopora_acuta_HIv2__         1.27e-01  169_[-3(2.84e-05)]_306
+Pocillopora_acuta_HIv2__         9.35e-03  121_[-3(3.20e-07)]_354
+Pocillopora_acuta_HIv2__         1.77e-01  500
+Pocillopora_acuta_HIv2__         7.25e-01  500
+Pocillopora_acuta_HIv2__         5.04e-01  500
+Pocillopora_acuta_HIv2__         6.49e-01  500
+Pocillopora_acuta_HIv2__         3.24e-01  393_[+3(4.08e-05)]_82
+Pocillopora_acuta_HIv2__         2.25e-01  166_[+1(6.19e-05)]_323
+Pocillopora_acuta_HIv2__         1.49e-01  412_[+1(8.01e-05)]_77
+Pocillopora_acuta_HIv2__         3.18e-01  500
+Pocillopora_acuta_HIv2__         3.18e-01  500
+Pocillopora_acuta_HIv2__         1.70e-01  412_[+1(8.85e-05)]_77
+Pocillopora_acuta_HIv2__         8.84e-01  500
+Pocillopora_acuta_HIv2__         1.08e-01  67_[+1(8.01e-05)]_15_[+1(3.60e-05)]_\
+    396
+Pocillopora_acuta_HIv2__         1.46e-03  73_[+2(3.35e-05)]_380_\
+    [-1(9.34e-06)]_13
+Pocillopora_acuta_HIv2__         2.69e-01  280_[+3(9.10e-05)]_195
+Pocillopora_acuta_HIv2__         8.83e-01  500
+Pocillopora_acuta_HIv2__         5.25e-01  500
+Pocillopora_acuta_HIv2__         3.04e-03  404_[-2(4.01e-07)]_73
+Pocillopora_acuta_HIv2__         4.69e-01  500
+Pocillopora_acuta_HIv2__         7.43e-03  173_[-2(1.79e-06)]_304
+Pocillopora_acuta_HIv2__         7.23e-01  500
+Pocillopora_acuta_HIv2__         1.26e-06  50_[+1(1.72e-05)]_316_\
+    [-2(3.89e-09)]_100
+Pocillopora_acuta_HIv2__         1.91e-01  197_[-2(4.66e-05)]_280
+Pocillopora_acuta_HIv2__         8.84e-02  446_[+4(3.54e-05)]_29
+Pocillopora_acuta_HIv2__         3.57e-01  500
+Pocillopora_acuta_HIv2__         3.92e-01  377_[-1(9.48e-05)]_112
+Pocillopora_acuta_HIv2__         2.41e-01  500
+Pocillopora_acuta_HIv2__         2.55e-02  153_[-3(2.39e-05)]_210_\
+    [+1(3.60e-05)]_101
+Pocillopora_acuta_HIv2__         4.84e-01  [+3(8.82e-05)]_475
+Pocillopora_acuta_HIv2__         5.41e-03  149_[-3(1.07e-05)]_98_\
+    [-1(2.91e-05)]_217
+Pocillopora_acuta_HIv2__         1.47e-01  196_[+1(6.05e-05)]_119_\
+    [+1(5.08e-05)]_163
+Pocillopora_acuta_HIv2__         1.62e-01  104_[-1(6.05e-05)]_385
+Pocillopora_acuta_HIv2__         6.33e-01  500
+Pocillopora_acuta_HIv2__         4.62e-01  500
+Pocillopora_acuta_HIv2__         2.90e-07  36_[-4(9.71e-12)]_364_\
+    [+2(4.92e-05)]_52
+Pocillopora_acuta_HIv2__         1.04e-01  4_[+1(3.60e-05)]_291_[-1(2.36e-05)]_\
+    183
+Pocillopora_acuta_HIv2__         4.25e-02  192_[-1(2.84e-06)]_109_\
+    [+1(2.91e-05)]_177
+Pocillopora_acuta_HIv2__         6.37e-02  302_[+2(5.20e-05)]_175
+Pocillopora_acuta_HIv2__         5.05e-03  234_[-1(1.72e-05)]_2_[-1(2.36e-05)]_\
+    9_[-1(3.60e-05)]_222
+Pocillopora_acuta_HIv2__         3.13e-02  402_[+3(1.51e-05)]_73
+Pocillopora_acuta_HIv2__         2.53e-01  168_[+2(9.54e-05)]_309
+Pocillopora_acuta_HIv2__         3.97e-01  500
+Pocillopora_acuta_HIv2__         5.60e-02  271_[+1(9.34e-06)]_79_\
+    [-1(7.76e-05)]_128
+Pocillopora_acuta_HIv2__         8.63e-02  138_[-1(3.60e-05)]_351
+Pocillopora_acuta_HIv2__         4.37e-01  500
+Pocillopora_acuta_HIv2__         2.77e-01  500
+Pocillopora_acuta_HIv2__         3.03e-01  500
+Pocillopora_acuta_HIv2__         1.08e-02  192_[-3(4.22e-05)]_159_\
+    [-2(2.02e-05)]_101
+Pocillopora_acuta_HIv2__         8.97e-01  500
+Pocillopora_acuta_HIv2__         1.60e-01  137_[-1(1.72e-05)]_352
+Pocillopora_acuta_HIv2__         2.87e-01  500
+Pocillopora_acuta_HIv2__         1.45e-01  500
+Pocillopora_acuta_HIv2__         3.99e-01  500
+Pocillopora_acuta_HIv2__         2.89e-01  259_[+1(8.01e-05)]_230
+Pocillopora_acuta_HIv2__         7.19e-01  500
+Pocillopora_acuta_HIv2__         2.94e-01  500
+Pocillopora_acuta_HIv2__         1.89e-01  500
+Pocillopora_acuta_HIv2__         9.23e-01  500
+Pocillopora_acuta_HIv2__         5.83e-02  347_[+1(1.32e-05)]_142
+Pocillopora_acuta_HIv2__         9.13e-03  431_[+1(8.85e-07)]_58
+Pocillopora_acuta_HIv2__         3.94e-01  500
+Pocillopora_acuta_HIv2__         8.00e-01  500
+Pocillopora_acuta_HIv2__         5.22e-01  500
+Pocillopora_acuta_HIv2__         4.05e-01  395_[+2(7.96e-05)]_82
+Pocillopora_acuta_HIv2__         7.49e-01  500
+Pocillopora_acuta_HIv2__         2.45e-02  58_[-1(7.11e-05)]_134_\
+    [-3(1.75e-05)]_272
+Pocillopora_acuta_HIv2__         5.65e-01  500
+Pocillopora_acuta_HIv2__         2.70e-02  126_[+1(9.34e-06)]_363
+Pocillopora_acuta_HIv2__         2.37e-01  258_[+4(5.23e-05)]_217
+Pocillopora_acuta_HIv2__         7.15e-02  469_[+2(6.80e-05)]_8
+Pocillopora_acuta_HIv2__         4.98e-02  96_[+3(6.42e-05)]_109_\
+    [+1(9.93e-05)]_259
+Pocillopora_acuta_HIv2__         8.99e-01  500
+Pocillopora_acuta_HIv2__         1.02e-03  60_[+3(2.74e-05)]_377_\
+    [+3(1.71e-07)]_13
+Pocillopora_acuta_HIv2__         1.66e-04  44_[+2(2.16e-08)]_187_\
+    [+1(6.84e-05)]_235
+Pocillopora_acuta_HIv2__         5.66e-02  50_[+1(1.72e-05)]_439
+Pocillopora_acuta_HIv2__         2.45e-01  91_[-3(6.84e-05)]_384
+Pocillopora_acuta_HIv2__         4.80e-01  500
+Pocillopora_acuta_HIv2__         8.50e-02  467_[-1(5.08e-05)]_22
+Pocillopora_acuta_HIv2__         3.86e-01  500
+Pocillopora_acuta_HIv2__         3.37e-01  500
+Pocillopora_acuta_HIv2__         1.48e-01  477_[-2(2.46e-05)]
+Pocillopora_acuta_HIv2__         2.06e-02  295_[+2(1.36e-05)]_11_\
+    [+3(9.69e-05)]_146
+Pocillopora_acuta_HIv2__         5.49e-01  500
+Pocillopora_acuta_HIv2__         6.90e-01  500
+Pocillopora_acuta_HIv2__         4.07e-03  66_[-1(2.84e-06)]_423
+Pocillopora_acuta_HIv2__         1.54e-01  135_[+3(2.74e-05)]_340
+Pocillopora_acuta_HIv2__         6.24e-01  500
+Pocillopora_acuta_HIv2__         2.56e-02  84_[-3(8.82e-05)]_52_[+2(2.02e-05)]_\
+    316
+Pocillopora_acuta_HIv2__         1.09e-01  276_[+2(1.86e-05)]_201
+Pocillopora_acuta_HIv2__         4.19e-01  500
+Pocillopora_acuta_HIv2__         6.72e-01  500
+Pocillopora_acuta_HIv2__         6.59e-03  51_[-1(7.76e-05)]_122_\
+    [-1(5.12e-06)]_123_[+1(9.48e-05)]_171
+Pocillopora_acuta_HIv2__         2.83e-03  185_[-1(1.32e-05)]_186_\
+    [+3(1.10e-06)]_93
+Pocillopora_acuta_HIv2__         4.43e-01  222_[+1(8.58e-05)]_267
+Pocillopora_acuta_HIv2__         1.57e-01  315_[+4(3.47e-05)]_160
+Pocillopora_acuta_HIv2__         7.71e-01  500
+Pocillopora_acuta_HIv2__         3.58e-01  500
+Pocillopora_acuta_HIv2__         5.78e-03  214_[+1(9.34e-06)]_204_\
+    [-1(7.76e-05)]_60
+Pocillopora_acuta_HIv2__         2.13e-01  255_[+4(8.87e-05)]_220
+Pocillopora_acuta_HIv2__         7.14e-01  500
+Pocillopora_acuta_HIv2__         3.57e-01  483_[+1(8.85e-05)]_6
+Pocillopora_acuta_HIv2__         1.74e-01  8_[-1(6.19e-05)]_46_[-1(2.36e-05)]_\
+    66_[-1(9.93e-05)]_150_[-1(5.08e-05)]_186
+Pocillopora_acuta_HIv2__         5.26e-01  500
+Pocillopora_acuta_HIv2__         3.24e-02  8_[-1(9.34e-06)]_189_[-3(6.84e-05)]_\
+    137_[+1(2.91e-05)]_119
+Pocillopora_acuta_HIv2__         1.19e-04  81_[+3(3.06e-10)]_394
+Pocillopora_acuta_HIv2__         1.04e-01  394_[-4(2.53e-05)]_81
+Pocillopora_acuta_HIv2__         6.26e-03  164_[+3(2.01e-05)]_57_\
+    [+2(4.53e-05)]_75_[+1(4.34e-05)]_145
+Pocillopora_acuta_HIv2__         3.48e-01  347_[+4(4.94e-05)]_128
+Pocillopora_acuta_HIv2__         7.53e-01  500
+Pocillopora_acuta_HIv2__         2.23e-03  60_[-2(6.62e-05)]_113_\
+    [-1(9.34e-06)]_205_[+1(9.34e-06)]_77
+Pocillopora_acuta_HIv2__         4.63e-02  91_[-1(1.32e-05)]_16_[-1(6.05e-05)]_\
+    61_[-2(9.54e-05)]_17_[-2(9.54e-05)]_247
+Pocillopora_acuta_HIv2__         2.14e-01  500
+Pocillopora_acuta_HIv2__         1.25e-01  208_[-1(2.36e-05)]_281
+Pocillopora_acuta_HIv2__         2.10e-02  186_[-1(9.34e-06)]_303
+Pocillopora_acuta_HIv2__         4.65e-01  500
+Pocillopora_acuta_HIv2__         3.31e-03  113_[-1(2.84e-06)]_376
+Pocillopora_acuta_HIv2__         3.98e-03  199_[-3(1.88e-05)]_173_\
+    [-4(3.20e-05)]_78
+Pocillopora_acuta_HIv2__         6.14e-04  153_[-3(1.98e-08)]_322
+Pocillopora_acuta_HIv2__         4.47e-02  13_[+3(9.69e-05)]_252_\
+    [+1(9.34e-06)]_199
+Pocillopora_acuta_HIv2__         2.98e-01  156_[+1(8.01e-05)]_333
+Pocillopora_acuta_HIv2__         1.86e-01  351_[+1(5.21e-05)]_138
+Pocillopora_acuta_HIv2__         8.83e-01  500
+Pocillopora_acuta_HIv2__         2.93e-01  500
+Pocillopora_acuta_HIv2__         5.06e-01  500
+Pocillopora_acuta_HIv2__         5.39e-01  500
+Pocillopora_acuta_HIv2__         1.64e-01  257_[-3(6.42e-05)]_218
+Pocillopora_acuta_HIv2__         2.60e-01  284_[+1(7.76e-05)]_205
+Pocillopora_acuta_HIv2__         3.95e-01  500
+Pocillopora_acuta_HIv2__         2.59e-02  18_[+1(5.08e-05)]_350_\
+    [-3(6.22e-05)]_96
+Pocillopora_acuta_HIv2__         2.06e-02  479_[+1(2.84e-06)]_10
+Pocillopora_acuta_HIv2__         3.61e-01  500
+Pocillopora_acuta_HIv2__         2.53e-03  295_[-1(3.60e-05)]_41_\
+    [-1(3.60e-05)]_4_[-3(5.44e-06)]_113
+Pocillopora_acuta_HIv2__         1.57e-01  500
+Pocillopora_acuta_HIv2__         2.10e-02  220_[-3(2.48e-05)]_118_\
+    [+2(2.83e-05)]_114
+Pocillopora_acuta_HIv2__         6.63e-03  141_[-4(5.77e-07)]_184_\
+    [+2(8.83e-05)]_127
+Pocillopora_acuta_HIv2__         6.85e-01  500
+Pocillopora_acuta_HIv2__         1.21e-01  303_[+1(5.08e-05)]_186
+Pocillopora_acuta_HIv2__         1.75e-01  500
+Pocillopora_acuta_HIv2__         4.12e-01  500
+Pocillopora_acuta_HIv2__         1.96e-01  130_[-1(4.28e-05)]_359
+Pocillopora_acuta_HIv2__         6.36e-01  500
+Pocillopora_acuta_HIv2__         1.42e-01  500
+Pocillopora_acuta_HIv2__         4.76e-01  500
+Pocillopora_acuta_HIv2__         5.53e-01  500
+Pocillopora_acuta_HIv2__         1.93e-01  500
+Pocillopora_acuta_HIv2__         2.50e-02  45_[-1(6.05e-05)]_162_\
+    [-1(1.32e-05)]_271
+Pocillopora_acuta_HIv2__         5.75e-01  500
+Pocillopora_acuta_HIv2__         9.02e-01  500
+Pocillopora_acuta_HIv2__         6.89e-02  317_[+4(1.91e-05)]_158
+Pocillopora_acuta_HIv2__         4.09e-01  500
+Pocillopora_acuta_HIv2__         6.78e-02  57_[-1(6.05e-05)]_5_[-1(3.60e-05)]_\
+    416
+Pocillopora_acuta_HIv2__         9.51e-02  441_[+3(8.82e-05)]_34
+Pocillopora_acuta_HIv2__         2.07e-01  453_[-4(5.72e-05)]_22
+Pocillopora_acuta_HIv2__         1.60e-01  500
+Pocillopora_acuta_HIv2__         2.23e-02  64_[-1(4.28e-05)]_425
+Pocillopora_acuta_HIv2__         1.40e-03  326_[-3(2.24e-05)]_106_\
+    [-2(1.24e-06)]_20
+Pocillopora_acuta_HIv2__         1.77e-01  500
+Pocillopora_acuta_HIv2__         7.99e-02  184_[-1(1.72e-05)]_305
+Pocillopora_acuta_HIv2__         5.74e-01  500
+Pocillopora_acuta_HIv2__         3.17e-01  500
+Pocillopora_acuta_HIv2__         4.38e-01  500
+Pocillopora_acuta_HIv2__         4.94e-02  278_[+4(6.70e-05)]_197
+Pocillopora_acuta_HIv2__         7.28e-01  500
+Pocillopora_acuta_HIv2__         4.94e-03  172_[-4(3.05e-06)]_277_\
+    [-3(5.47e-05)]_1
+Pocillopora_acuta_HIv2__         5.85e-01  500
+Pocillopora_acuta_HIv2__         1.24e-01  266_[-1(4.28e-05)]_223
+Pocillopora_acuta_HIv2__         3.62e-01  147_[-3(3.82e-05)]_328
+Pocillopora_acuta_HIv2__         2.67e-01  500
+Pocillopora_acuta_HIv2__         1.12e-01  146_[-2(8.83e-05)]_331
+Pocillopora_acuta_HIv2__         2.81e-05  212_[+1(2.91e-05)]_252_\
+    [+2(1.48e-08)]_2
+Pocillopora_acuta_HIv2__         7.78e-01  500
+Pocillopora_acuta_HIv2__         2.71e-01  500
+Pocillopora_acuta_HIv2__         8.78e-01  500
+Pocillopora_acuta_HIv2__         1.12e-01  192_[+1(5.12e-06)]_297
+Pocillopora_acuta_HIv2__         6.10e-01  500
+Pocillopora_acuta_HIv2__         6.48e-01  500
+Pocillopora_acuta_HIv2__         2.76e-02  4_[+1(9.34e-06)]_207_[+1(1.72e-05)]_\
+    267
+Pocillopora_acuta_HIv2__         5.39e-02  430_[+4(3.13e-05)]_45
+Pocillopora_acuta_HIv2__         1.93e-01  469_[+1(9.34e-06)]_20
+Pocillopora_acuta_HIv2__         8.48e-01  500
+Pocillopora_acuta_HIv2__         6.60e-01  500
+Pocillopora_acuta_HIv2__         6.95e-02  4_[-4(7.44e-05)]_321_[-1(3.60e-05)]_\
+    139
+Pocillopora_acuta_HIv2__         3.23e-02  18_[-1(2.91e-05)]_471
+Pocillopora_acuta_HIv2__         6.85e-02  300_[-3(6.22e-05)]_175
+Pocillopora_acuta_HIv2__         6.11e-02  134_[+1(1.32e-05)]_355
+Pocillopora_acuta_HIv2__         4.24e-01  500
+Pocillopora_acuta_HIv2__         1.56e-01  261_[-1(7.76e-05)]_228
+Pocillopora_acuta_HIv2__         1.75e-01  88_[-1(4.28e-05)]_401
+Pocillopora_acuta_HIv2__         1.82e-01  500
+Pocillopora_acuta_HIv2__         4.28e-01  500
+Pocillopora_acuta_HIv2__         1.11e-01  500
+Pocillopora_acuta_HIv2__         8.41e-01  500
+Pocillopora_acuta_HIv2__         2.52e-01  500
+Pocillopora_acuta_HIv2__         1.06e-01  251_[+3(4.36e-05)]_224
+Pocillopora_acuta_HIv2__         2.13e-01  156
+Pocillopora_acuta_HIv2__         5.22e-02  76_[+1(9.48e-05)]_14_[+1(6.84e-05)]_\
+    174_[+1(1.72e-05)]_203
+Pocillopora_acuta_HIv2__         1.50e-01  85_[+3(7.29e-05)]_390
+Pocillopora_acuta_HIv2__         8.08e-02  124_[-4(6.56e-06)]_351
+Pocillopora_acuta_HIv2__         2.20e-01  230_[-4(7.98e-05)]_185_\
+    [-4(9.02e-05)]_35
+Pocillopora_acuta_HIv2__         9.90e-03  222_[+1(5.12e-06)]_131_\
+    [+3(4.22e-05)]_111
+Pocillopora_acuta_HIv2__         8.66e-01  500
+Pocillopora_acuta_HIv2__         1.02e-01  275_[+1(2.36e-05)]_214
+Pocillopora_acuta_HIv2__         8.36e-01  500
+Pocillopora_acuta_HIv2__         6.02e-01  500
+Pocillopora_acuta_HIv2__         7.29e-01  500
+Pocillopora_acuta_HIv2__         1.87e-01  83_[-4(3.54e-05)]_392
+Pocillopora_acuta_HIv2__         7.99e-01  500
+Pocillopora_acuta_HIv2__         8.82e-04  87_[-4(1.87e-05)]_300_\
+    [-3(3.37e-06)]_63
+Pocillopora_acuta_HIv2__         3.33e-01  105_[-1(6.05e-05)]_34_\
+    [-1(2.36e-05)]_339
+Pocillopora_acuta_HIv2__         1.25e-01  431_[-4(9.19e-05)]_44
+Pocillopora_acuta_HIv2__         2.42e-02  251_[-1(2.36e-05)]_238
+Pocillopora_acuta_HIv2__         1.67e-01  115_[-1(2.91e-05)]_374
+Pocillopora_acuta_HIv2__         2.58e-02  86_[-3(3.03e-05)]_389
+Pocillopora_acuta_HIv2__         8.07e-03  14_[-2(1.07e-05)]_291_\
+    [-1(6.84e-05)]_161
+Pocillopora_acuta_HIv2__         1.59e-01  441_[-3(8.55e-05)]_34
+Pocillopora_acuta_HIv2__         4.87e-02  445_[+1(9.34e-06)]_44
+Pocillopora_acuta_HIv2__         5.13e-04  78_[+2(6.28e-05)]_262_\
+    [+1(1.72e-05)]_65_[+3(1.24e-06)]_36
+Pocillopora_acuta_HIv2__         4.78e-01  395_[-1(9.93e-05)]_94
+Pocillopora_acuta_HIv2__         4.50e-02  500
+Pocillopora_acuta_HIv2__         9.36e-01  500
+Pocillopora_acuta_HIv2__         2.37e-01  351_[+2(2.53e-05)]_126
+Pocillopora_acuta_HIv2__         1.84e-01  276_[+4(4.25e-05)]_199
+Pocillopora_acuta_HIv2__         6.06e-01  500
+Pocillopora_acuta_HIv2__         2.03e-01  342_[+1(6.05e-05)]_147
+Pocillopora_acuta_HIv2__         7.99e-02  90_[+1(5.12e-06)]_399
+Pocillopora_acuta_HIv2__         3.72e-01  134_[-1(6.19e-05)]_355
+Pocillopora_acuta_HIv2__         2.07e-01  23_[-3(7.53e-05)]_452
+Pocillopora_acuta_HIv2__         6.25e-01  500
+Pocillopora_acuta_HIv2__         1.48e-01  500
+Pocillopora_acuta_HIv2__         2.55e-01  500
+Pocillopora_acuta_HIv2__         4.40e-01  37_[-1(6.05e-05)]_452
+Pocillopora_acuta_HIv2__         1.36e-02  84_[-4(2.27e-05)]_256_\
+    [+4(1.83e-05)]_110
+Pocillopora_acuta_HIv2__         3.95e-03  67_[+3(1.40e-06)]_408
+Pocillopora_acuta_HIv2__         4.48e-01  500
+Pocillopora_acuta_HIv2__         9.56e-02  193_[+1(9.34e-06)]_64_\
+    [-1(1.72e-05)]_221
+Pocillopora_acuta_HIv2__         6.79e-05  30_[-3(1.12e-07)]_144_\
+    [+1(5.12e-06)]_15_[+3(7.77e-05)]_17_[+1(2.36e-05)]_222
+Pocillopora_acuta_HIv2__         4.81e-01  500
+Pocillopora_acuta_HIv2__         4.07e-02  162_[+2(9.23e-06)]_315
+Pocillopora_acuta_HIv2__         2.88e-01  163_[-1(6.84e-05)]_326
+Pocillopora_acuta_HIv2__         2.20e-01  246_[-4(7.84e-05)]_229
+Pocillopora_acuta_HIv2__         4.44e-01  500
+Pocillopora_acuta_HIv2__         1.00e+00  500
+Pocillopora_acuta_HIv2__         5.96e-01  500
+Pocillopora_acuta_HIv2__         2.25e-02  80_[+1(5.08e-05)]_322_\
+    [+1(1.72e-05)]_76
+Pocillopora_acuta_HIv2__         1.86e-02  231_[+4(3.62e-05)]_60_\
+    [-1(9.34e-06)]_173
+Pocillopora_acuta_HIv2__         7.35e-03  309_[-1(9.34e-06)]_180
+Pocillopora_acuta_HIv2__         6.75e-02  354_[-3(3.95e-05)]_121
+Pocillopora_acuta_HIv2__         7.69e-01  500
+Pocillopora_acuta_HIv2__         7.38e-04  39_[+4(3.85e-05)]_52_[+1(5.08e-05)]_\
+    39_[+1(5.08e-05)]_212_[+2(5.42e-06)]_88
+Pocillopora_acuta_HIv2__         4.95e-01  500
+Pocillopora_acuta_HIv2__         4.36e-01  500
+Pocillopora_acuta_HIv2__         5.10e-01  500
+Pocillopora_acuta_HIv2__         3.56e-02  130_[+1(3.60e-05)]_219_\
+    [+3(8.82e-05)]_115
+Pocillopora_acuta_HIv2__         6.96e-01  500
+Pocillopora_acuta_HIv2__         1.65e-01  440_[-1(3.60e-05)]_49
+Pocillopora_acuta_HIv2__         1.92e-01  472_[-1(7.11e-05)]_17
+Pocillopora_acuta_HIv2__         7.57e-01  500
+Pocillopora_acuta_HIv2__         2.76e-01  282_[+1(9.48e-05)]_207
+Pocillopora_acuta_HIv2__         7.44e-01  500
+Pocillopora_acuta_HIv2__         4.62e-05  173_[-2(5.95e-05)]_69_\
+    [+3(7.18e-08)]_13_[-1(6.05e-05)]_186
+Pocillopora_acuta_HIv2__         1.13e-01  142_[+1(1.32e-05)]_347
+Pocillopora_acuta_HIv2__         1.50e-02  94_[-2(2.75e-05)]_307_\
+    [+1(1.32e-05)]_65
+Pocillopora_acuta_HIv2__         5.08e-01  500
+Pocillopora_acuta_HIv2__         1.37e-01  140_[+1(1.32e-05)]_349
+Pocillopora_acuta_HIv2__         4.94e-01  500
+Pocillopora_acuta_HIv2__         1.27e-01  92_[+1(9.34e-06)]_38_[+1(1.32e-05)]_\
+    348
+Pocillopora_acuta_HIv2__         3.33e-03  22_[-4(1.96e-05)]_199_\
+    [-1(5.12e-06)]_243
+Pocillopora_acuta_HIv2__         2.39e-01  500
+Pocillopora_acuta_HIv2__         5.49e-02  86_[-1(8.58e-05)]_403
+Pocillopora_acuta_HIv2__         3.92e-01  500
+Pocillopora_acuta_HIv2__         1.70e-01  500
+Pocillopora_acuta_HIv2__         1.74e-02  26_[+1(9.34e-06)]_[+1(8.01e-05)]_\
+    222_[+1(6.05e-05)]_143_[+1(8.85e-05)]_65
+Pocillopora_acuta_HIv2__         2.20e-02  266_[-1(3.60e-05)]_87_\
+    [+3(5.47e-05)]_111
+Pocillopora_acuta_HIv2__         4.66e-03  168_[-2(7.17e-05)]_111_\
+    [+1(1.72e-05)]_187
+Pocillopora_acuta_HIv2__         4.90e-02  312_[-1(7.76e-05)]_177
+Pocillopora_acuta_HIv2__         4.01e-02  236_[-1(2.84e-06)]_253
+Pocillopora_acuta_HIv2__         3.77e-01  281_[+1(9.93e-05)]_208
+Pocillopora_acuta_HIv2__         4.84e-28  7_[+2(1.56e-14)]_6_[+3(1.47e-09)]_4_\
+    [+4(3.81e-17)]_23_[-1(3.60e-05)]_21_[+3(2.57e-09)]_54_[+1(9.34e-06)]_265
+Pocillopora_acuta_HIv2__         2.37e-01  500
+Pocillopora_acuta_HIv2__         7.80e-01  500
+Pocillopora_acuta_HIv2__         4.81e-01  500
+Pocillopora_acuta_HIv2__         5.97e-02  354_[-2(1.36e-05)]_123
+Pocillopora_acuta_HIv2__         7.10e-01  500
+Pocillopora_acuta_HIv2__         4.45e-01  500
+Pocillopora_acuta_HIv2__         1.52e-03  214_[+2(3.08e-05)]_128_\
+    [-3(1.67e-06)]_110
+Pocillopora_acuta_HIv2__         7.21e-01  500
+Pocillopora_acuta_HIv2__         1.17e-02  116_[-1(6.05e-05)]_99_\
+    [-1(2.84e-06)]_263
+Pocillopora_acuta_HIv2__         2.20e-02  57_[+1(4.28e-05)]_61_[+1(9.34e-06)]_\
+    360
+Pocillopora_acuta_HIv2__         6.61e-02  500
+Pocillopora_acuta_HIv2__         8.88e-01  500
+Pocillopora_acuta_HIv2__         3.94e-01  500
+Pocillopora_acuta_HIv2__         3.23e-01  29_[+1(6.84e-05)]_460
+Pocillopora_acuta_HIv2__         5.20e-02  132_[-2(2.68e-05)]_118_\
+    [+3(2.65e-05)]_202
+Pocillopora_acuta_HIv2__         2.76e-01  500
+Pocillopora_acuta_HIv2__         9.40e-02  44_[+2(5.95e-05)]_433
+Pocillopora_acuta_HIv2__         8.30e-01  500
+Pocillopora_acuta_HIv2__         2.46e-02  63_[-3(8.41e-06)]_216_\
+    [-3(5.83e-05)]_171
+Pocillopora_acuta_HIv2__         3.83e-02  359_[+1(8.85e-05)]_130
+Pocillopora_acuta_HIv2__         3.55e-02  191_[+1(5.08e-05)]_16_\
+    [-3(3.14e-05)]_257
+Pocillopora_acuta_HIv2__         1.42e-03  14_[+4(6.36e-05)]_117_\
+    [-1(6.05e-05)]_104_[-4(2.64e-06)]_166_[+2(7.17e-05)]_15
+Pocillopora_acuta_HIv2__         3.36e-01  57_[-3(6.63e-05)]_418
+Pocillopora_acuta_HIv2__         6.55e-02  254_[+3(3.14e-05)]_16_\
+    [-1(5.08e-05)]_194
+Pocillopora_acuta_HIv2__         7.68e-01  500
+Pocillopora_acuta_HIv2__         2.55e-01  230_[-1(5.08e-05)]_259
+Pocillopora_acuta_HIv2__         6.05e-01  209_[-4(7.98e-05)]_266
+Pocillopora_acuta_HIv2__         6.27e-01  500
+Pocillopora_acuta_HIv2__         9.11e-01  500
+Pocillopora_acuta_HIv2__         2.77e-01  500
+Pocillopora_acuta_HIv2__         2.55e-01  272_[+1(9.48e-05)]_217
+Pocillopora_acuta_HIv2__         2.02e-01  272_[+1(9.48e-05)]_217
+Pocillopora_acuta_HIv2__         1.01e-03  34_[+3(2.45e-08)]_441
+Pocillopora_acuta_HIv2__         1.37e-01  257_[+1(2.36e-05)]_106_\
+    [+1(2.91e-05)]_45_[-1(7.11e-05)]_59
+Pocillopora_acuta_HIv2__         4.53e-01  500
+Pocillopora_acuta_HIv2__         2.67e-01  500
+Pocillopora_acuta_HIv2__         8.16e-01  500
+Pocillopora_acuta_HIv2__         7.24e-01  500
+Pocillopora_acuta_HIv2__         5.38e-02  5_[-3(3.70e-05)]_252_[-1(6.05e-05)]_\
+    207
+Pocillopora_acuta_HIv2__         2.26e-01  500
+Pocillopora_acuta_HIv2__         3.13e-01  500
+Pocillopora_acuta_HIv2__         8.55e-01  500
+Pocillopora_acuta_HIv2__         2.21e-01  500
+Pocillopora_acuta_HIv2__         6.86e-01  500
+Pocillopora_acuta_HIv2__         7.88e-01  500
+Pocillopora_acuta_HIv2__         1.56e-01  457_[+4(2.58e-05)]_18
+Pocillopora_acuta_HIv2__         4.79e-01  500
+Pocillopora_acuta_HIv2__         6.79e-02  158_[+1(9.93e-05)]_331
+Pocillopora_acuta_HIv2__         1.41e-01  154_[-3(3.70e-05)]_251_\
+    [+3(3.82e-05)]_45
+Pocillopora_acuta_HIv2__         8.13e-01  500
+Pocillopora_acuta_HIv2__         2.59e-02  204_[+3(7.41e-06)]_271
+Pocillopora_acuta_HIv2__         7.88e-02  217_[-1(2.36e-05)]_272
+Pocillopora_acuta_HIv2__         2.72e-01  293_[-1(2.36e-05)]_196
+Pocillopora_acuta_HIv2__         2.86e-01  500
+Pocillopora_acuta_HIv2__         4.47e-03  212_[+1(1.72e-05)]_116_\
+    [+4(3.07e-05)]_30_[-3(4.36e-05)]_81
+Pocillopora_acuta_HIv2__         4.43e-02  10_[+1(1.32e-05)]_288_\
+    [+4(8.55e-05)]_166
+Pocillopora_acuta_HIv2__         5.63e-01  500
+Pocillopora_acuta_HIv2__         5.45e-01  500
+Pocillopora_acuta_HIv2__         3.38e-02  306_[+1(5.12e-06)]_183
+Pocillopora_acuta_HIv2__         4.22e-01  500
+Pocillopora_acuta_HIv2__         1.45e-01  230_[+3(6.02e-05)]_245
+Pocillopora_acuta_HIv2__         5.33e-02  406_[+4(6.15e-05)]_69
+Pocillopora_acuta_HIv2__         1.16e-01  66_[+3(6.42e-05)]_409
+Pocillopora_acuta_HIv2__         9.08e-02  392_[+1(2.36e-05)]_97
+Pocillopora_acuta_HIv2__         6.52e-02  191_[-3(1.21e-05)]_284
+Pocillopora_acuta_HIv2__         2.05e-01  417_[+1(9.93e-05)]_72
+Pocillopora_acuta_HIv2__         3.68e-01  500
+Pocillopora_acuta_HIv2__         4.63e-01  500
+Pocillopora_acuta_HIv2__         5.08e-01  500
+Pocillopora_acuta_HIv2__         1.77e-02  70_[-2(9.06e-05)]_369_\
+    [+4(2.92e-06)]_13
+Pocillopora_acuta_HIv2__         5.66e-02  96_[-1(2.36e-05)]_393
+Pocillopora_acuta_HIv2__         4.49e-02  334_[+3(2.74e-05)]_86_\
+    [-1(2.36e-05)]_44
+Pocillopora_acuta_HIv2__         5.62e-01  500
+Pocillopora_acuta_HIv2__         8.42e-02  9_[+1(8.58e-05)]_480
+Pocillopora_acuta_HIv2__         3.86e-02  288_[-2(1.21e-05)]_189
+Pocillopora_acuta_HIv2__         3.43e-02  84_[-1(2.84e-06)]_26_[-1(5.08e-05)]_\
+    17_[-1(3.60e-05)]_340
+Pocillopora_acuta_HIv2__         3.53e-02  217_[+2(3.51e-06)]_260
+Pocillopora_acuta_HIv2__         1.59e-01  192_[+1(6.84e-05)]_141_\
+    [+1(9.48e-05)]_145
+Pocillopora_acuta_HIv2__         8.59e-03  116_[+1(2.84e-06)]_107_\
+    [+1(9.93e-05)]_255
+Pocillopora_acuta_HIv2__         2.76e-03  15_[-1(1.32e-05)]_173_\
+    [-3(1.03e-05)]_224_[-1(8.85e-05)]_41
+Pocillopora_acuta_HIv2__         9.64e-02  332_[-3(5.29e-05)]_143
+Pocillopora_acuta_HIv2__         3.85e-01  500
+Pocillopora_acuta_HIv2__         1.65e-01  500
+Pocillopora_acuta_HIv2__         5.37e-01  500
+Pocillopora_acuta_HIv2__         1.08e-01  456_[-2(1.71e-05)]_21
+Pocillopora_acuta_HIv2__         1.34e-01  87_[-1(8.85e-05)]_402
+Pocillopora_acuta_HIv2__         1.07e-01  338_[+1(5.08e-05)]_151
+Pocillopora_acuta_HIv2__         1.24e-01  445_[+4(6.59e-05)]_30
+Pocillopora_acuta_HIv2__         8.26e-01  500
+Pocillopora_acuta_HIv2__         1.50e-02  6_[-1(2.36e-05)]_332_[-1(9.34e-06)]_\
+    39_[+3(3.70e-05)]_76
+Pocillopora_acuta_HIv2__         2.56e-01  500
+Pocillopora_acuta_HIv2__         2.54e-02  13_[-1(5.08e-05)]_476
+Pocillopora_acuta_HIv2__         2.90e-03  11_[+2(4.79e-05)]_94_[+1(2.91e-05)]_\
+    361
+Pocillopora_acuta_HIv2__         4.06e-01  500
+Pocillopora_acuta_HIv2__         9.09e-01  500
+Pocillopora_acuta_HIv2__         4.61e-01  500
+Pocillopora_acuta_HIv2__         9.34e-04  119_[+1(2.84e-06)]_5_[+1(6.84e-05)]_\
+    354
+Pocillopora_acuta_HIv2__         6.00e-01  500
+Pocillopora_acuta_HIv2__         3.96e-02  286_[-1(2.84e-06)]_203
+Pocillopora_acuta_HIv2__         2.80e-03  74_[-3(5.32e-07)]_401
+Pocillopora_acuta_HIv2__         7.90e-04  119_[-2(3.25e-05)]_161_\
+    [-4(4.50e-05)]_110_[+1(5.12e-06)]_51
+Pocillopora_acuta_HIv2__         3.31e-01  282_[-1(5.08e-05)]_207
+Pocillopora_acuta_HIv2__         3.71e-01  341_[+3(5.64e-05)]_134
+Pocillopora_acuta_HIv2__         7.78e-02  33_[-1(6.84e-05)]_88_[-2(2.68e-05)]_\
+    345
+Pocillopora_acuta_HIv2__         2.50e-01  449_[+4(9.36e-05)]_26
+Pocillopora_acuta_HIv2__         4.44e-01  500
+Pocillopora_acuta_HIv2__         4.98e-02  56_[+2(1.57e-05)]_421
+Pocillopora_acuta_HIv2__         1.22e-04  289_[+3(2.39e-05)]_16_\
+    [-1(1.32e-05)]_124_[+3(1.86e-07)]_10
+Pocillopora_acuta_HIv2__         1.43e-02  482_[+1(2.84e-06)]_7
+Pocillopora_acuta_HIv2__         1.04e-01  438_[+1(3.60e-05)]_51
+Pocillopora_acuta_HIv2__         2.17e-01  500
+Pocillopora_acuta_HIv2__         3.35e-01  500
+Pocillopora_acuta_HIv2__         5.77e-01  500
+Pocillopora_acuta_HIv2__         2.37e-03  355_[-2(3.07e-08)]_122
+Pocillopora_acuta_HIv2__         1.42e-04  194_[-3(1.22e-07)]_102_\
+    [-2(9.54e-05)]_156
+Pocillopora_acuta_HIv2__         8.93e-01  500
+Pocillopora_acuta_HIv2__         2.15e-01  258_[+1(6.84e-05)]_231
+Pocillopora_acuta_HIv2__         3.40e-01  500
+Pocillopora_acuta_HIv2__         3.45e-01  500
+Pocillopora_acuta_HIv2__         1.61e-01  161_[+1(4.28e-05)]_328
+Pocillopora_acuta_HIv2__         3.77e-02  254_[-1(3.60e-05)]_166_\
+    [-2(5.79e-05)]_46
+Pocillopora_acuta_HIv2__         2.88e-01  39_[+4(6.15e-05)]_436
+Pocillopora_acuta_HIv2__         3.84e-02  446_[+1(1.32e-05)]_[+1(5.08e-05)]_\
+    32
+Pocillopora_acuta_HIv2__         3.96e-01  500
+Pocillopora_acuta_HIv2__         1.25e-01  105_[-1(7.76e-05)]_384
+Pocillopora_acuta_HIv2__         1.91e-01  340_[-3(5.29e-05)]_135
+Pocillopora_acuta_HIv2__         8.20e-01  500
+Pocillopora_acuta_HIv2__         3.08e-01  500
+Pocillopora_acuta_HIv2__         4.31e-03  359_[-3(2.36e-07)]_116
+Pocillopora_acuta_HIv2__         8.79e-01  500
+Pocillopora_acuta_HIv2__         1.34e-03  76_[+1(1.72e-05)]_342_\
+    [-3(8.52e-07)]_46
+Pocillopora_acuta_HIv2__         2.63e-01  500
+Pocillopora_acuta_HIv2__         5.67e-01  500
+Pocillopora_acuta_HIv2__         5.19e-01  500
+Pocillopora_acuta_HIv2__         3.92e-01  500
+Pocillopora_acuta_HIv2__         2.39e-01  121_[-4(8.55e-05)]_55_\
+    [+4(9.36e-05)]_274
+Pocillopora_acuta_HIv2__         3.80e-02  34_[-1(2.36e-05)]_127_\
+    [-1(9.48e-05)]_209_[+2(4.92e-05)]_85
+Pocillopora_acuta_HIv2__         7.05e-02  399_[-1(5.12e-06)]_90
+Pocillopora_acuta_HIv2__         8.34e-01  500
+Pocillopora_acuta_HIv2__         2.96e-04  156_[-3(5.97e-08)]_319
+Pocillopora_acuta_HIv2__         3.99e-03  362_[-2(6.82e-07)]_10_\
+    [+2(2.75e-05)]_82
+Pocillopora_acuta_HIv2__         1.03e-01  369_[-4(8.26e-05)]_106
+Pocillopora_acuta_HIv2__         9.29e-02  369_[-4(8.26e-05)]_106
+Pocillopora_acuta_HIv2__         9.52e-03  87_[-1(7.76e-05)]_217_\
+    [+1(2.84e-06)]_174
+Pocillopora_acuta_HIv2__         7.22e-02  112_[-4(4.50e-05)]_63_\
+    [-1(5.21e-05)]_289
+Pocillopora_acuta_HIv2__         1.68e-01  84_[+1(9.34e-06)]_405
+Pocillopora_acuta_HIv2__         2.75e-03  51_[-3(9.41e-08)]_296_\
+    [+3(6.22e-05)]_103
+Pocillopora_acuta_HIv2__         1.83e-03  124_[-2(5.49e-05)]_144_\
+    [-3(7.73e-06)]_21_[+1(1.72e-05)]_121_[-1(5.08e-05)]_20
+Pocillopora_acuta_HIv2__         5.17e-02  384_[+2(3.84e-05)]_93
+Pocillopora_acuta_HIv2__         5.60e-01  500
+Pocillopora_acuta_HIv2__         3.32e-01  125_[+1(8.58e-05)]_364
+Pocillopora_acuta_HIv2__         2.10e-01  306_[+2(1.66e-05)]_171
+Pocillopora_acuta_HIv2__         3.98e-01  500
+Pocillopora_acuta_HIv2__         1.45e-01  377_[-1(2.91e-05)]_43_\
+    [-1(2.36e-05)]_58
+Pocillopora_acuta_HIv2__         1.08e-04  49_[+2(4.06e-08)]_168_\
+    [+1(2.36e-05)]_190_[-1(6.05e-05)]_48
+Pocillopora_acuta_HIv2__         8.61e-01  500
+Pocillopora_acuta_HIv2__         1.02e-01  127_[+3(4.22e-05)]_348
+Pocillopora_acuta_HIv2__         8.34e-01  500
+Pocillopora_acuta_HIv2__         3.54e-01  9_[-1(6.84e-05)]_480
+Pocillopora_acuta_HIv2__         5.00e-02  37_[-1(2.36e-05)]_334_\
+    [-1(5.08e-05)]_107
+Pocillopora_acuta_HIv2__         1.75e-27  7_[+2(1.56e-14)]_6_[+3(1.47e-09)]_4_\
+    [+4(3.81e-17)]_23_[-1(3.60e-05)]_21_[+3(2.57e-09)]_50_[+2(3.17e-10)]_200_\
+    [-3(2.16e-05)]_32
+Pocillopora_acuta_HIv2__         2.50e-01  500
+Pocillopora_acuta_HIv2__         3.83e-04  439_[+3(5.58e-09)]_36
+Pocillopora_acuta_HIv2__         6.59e-01  500
+Pocillopora_acuta_HIv2__         1.61e-02  412_[-3(3.37e-06)]_63
+Pocillopora_acuta_HIv2__         1.51e-01  301_[+4(5.13e-05)]_174
+Pocillopora_acuta_HIv2__         2.01e-01  500
+Pocillopora_acuta_HIv2__         3.44e-01  500
+Pocillopora_acuta_HIv2__         6.32e-01  500
+Pocillopora_acuta_HIv2__         7.98e-01  500
+Pocillopora_acuta_HIv2__         5.63e-01  500
+Pocillopora_acuta_HIv2__         1.23e-04  81_[+1(2.91e-05)]_2_[+3(8.55e-05)]_\
     125_[-1(6.84e-05)]_7_[-1(9.34e-06)]_30_[-3(5.70e-07)]_4_[-1(9.34e-06)]_10_\
     [-1(2.84e-06)]_136
-Pocillopora_acuta_HIv2__         2.91e-01  280_[+7(1.45e-05)]_195
-Pocillopora_acuta_HIv2__         4.18e-01  244_[+2(3.54e-05)]_68_\
+Pocillopora_acuta_HIv2__         5.77e-01  500
+Pocillopora_acuta_HIv2__         1.43e-01  244_[+2(3.54e-05)]_68_\
     [+4(9.87e-05)]_140
-Pocillopora_acuta_HIv2__         1.58e-02  16_[+2(1.97e-05)]_52_[-1(6.19e-05)]_\
-    350_[+7(4.45e-05)]_23
-Pocillopora_acuta_HIv2__         1.33e-01  54_[-1(6.05e-05)]_51_[-1(9.48e-05)]_\
+Pocillopora_acuta_HIv2__         4.98e-03  16_[+2(1.97e-05)]_52_[-1(6.19e-05)]_\
+    398
+Pocillopora_acuta_HIv2__         9.38e-02  54_[-1(6.05e-05)]_51_[-1(9.48e-05)]_\
     238_[+1(1.72e-05)]_124
-Pocillopora_acuta_HIv2__         3.01e-01  318_[-8(6.05e-05)]_161
-Pocillopora_acuta_HIv2__         8.02e-01  500
-Pocillopora_acuta_HIv2__         7.47e-03  29_[-3(5.83e-05)]_67_[-6(1.05e-06)]_\
-    251_[+1(8.58e-05)]_93
-Pocillopora_acuta_HIv2__         6.07e-03  218_[+1(5.08e-05)]_51_\
-    [+6(1.53e-07)]_196
-Pocillopora_acuta_HIv2__         1.16e-01  48_[-3(2.48e-05)]_216_\
+Pocillopora_acuta_HIv2__         5.05e-01  500
+Pocillopora_acuta_HIv2__         8.15e-01  500
+Pocillopora_acuta_HIv2__         8.77e-02  29_[-3(5.83e-05)]_342_\
+    [+1(8.58e-05)]_93
+Pocillopora_acuta_HIv2__         1.93e-01  218_[+1(5.08e-05)]_271
+Pocillopora_acuta_HIv2__         1.34e-02  48_[-3(2.48e-05)]_216_\
     [+3(3.04e-06)]_186
-Pocillopora_acuta_HIv2__         5.80e-03  43_[-1(7.11e-05)]_12_[+4(3.54e-05)]_\
+Pocillopora_acuta_HIv2__         1.38e-04  43_[-1(7.11e-05)]_12_[+4(3.54e-05)]_\
     198_[+3(7.10e-06)]_97_[+3(1.77e-06)]_64
-Pocillopora_acuta_HIv2__         3.26e-01  139_[+4(2.53e-05)]_336
-Pocillopora_acuta_HIv2__         3.09e-04  131_[-6(3.73e-06)]_28_\
-    [-6(4.28e-10)]_160_[-1(6.05e-05)]_122
-Pocillopora_acuta_HIv2__         5.68e-01  236_[-8(4.03e-05)]_243
-Pocillopora_acuta_HIv2__         8.73e-01  500
-Pocillopora_acuta_HIv2__         3.58e-01  361_[+6(2.76e-05)]_101_\
-    [-1(6.05e-05)]_3
-Pocillopora_acuta_HIv2__         5.60e-01  500
-Pocillopora_acuta_HIv2__         4.25e-01  95_[-5(1.31e-05)]_384
-Pocillopora_acuta_HIv2__         1.87e-01  500
-Pocillopora_acuta_HIv2__         1.70e-01  81_[-7(3.50e-05)]_42_[+3(9.69e-05)]_\
-    147_[-8(4.92e-05)]_159
-Pocillopora_acuta_HIv2__         9.97e-01  500
-Pocillopora_acuta_HIv2__         7.30e-01  300_[+3(6.22e-05)]_175
-Pocillopora_acuta_HIv2__         1.98e-01  347_[-2(3.51e-06)]_130
-Pocillopora_acuta_HIv2__         2.91e-01  45_[+3(2.65e-05)]_55_[-4(8.26e-05)]_\
+Pocillopora_acuta_HIv2__         2.33e-01  139_[+4(2.53e-05)]_336
+Pocillopora_acuta_HIv2__         9.80e-02  367_[-1(6.05e-05)]_122
+Pocillopora_acuta_HIv2__         8.79e-01  500
+Pocillopora_acuta_HIv2__         5.94e-01  500
+Pocillopora_acuta_HIv2__         2.63e-01  486_[-1(6.05e-05)]_3
+Pocillopora_acuta_HIv2__         6.67e-01  500
+Pocillopora_acuta_HIv2__         6.03e-01  500
+Pocillopora_acuta_HIv2__         6.93e-02  500
+Pocillopora_acuta_HIv2__         4.41e-01  148_[+3(9.69e-05)]_327
+Pocillopora_acuta_HIv2__         8.91e-01  500
+Pocillopora_acuta_HIv2__         4.33e-01  300_[+3(6.22e-05)]_175
+Pocillopora_acuta_HIv2__         6.63e-02  347_[-2(3.51e-06)]_130
+Pocillopora_acuta_HIv2__         9.44e-02  45_[+3(2.65e-05)]_55_[-4(8.26e-05)]_\
     350
-Pocillopora_acuta_HIv2__         6.15e-01  500
-Pocillopora_acuta_HIv2__         6.15e-01  500
-Pocillopora_acuta_HIv2__         3.88e-02  142_[-8(7.74e-05)]_83_\
-    [+3(1.81e-05)]_144_[+7(9.52e-05)]_60
-Pocillopora_acuta_HIv2__         2.79e-59  7_[+2(1.56e-14)]_6_[+3(1.47e-09)]_4_\
-    [+4(3.81e-17)]_2_[+8(4.24e-14)]_[-1(3.60e-05)]_[+10(2.34e-11)]_\
-    [+3(3.06e-10)]_1_[+7(3.85e-16)]_54_[+2(3.17e-10)]_27_[+5(5.22e-13)]_179
-Pocillopora_acuta_HIv2__         7.54e-02  244_[-3(1.51e-05)]_231
-Pocillopora_acuta_HIv2__         7.48e-01  147
-Pocillopora_acuta_HIv2__         2.42e-01  283_[-7(2.22e-05)]_148_\
-    [-1(8.58e-05)]_33
-Pocillopora_acuta_HIv2__         2.59e-03  119_[-9(4.97e-05)]_8_[+1(2.91e-05)]_\
-    178_[+1(2.84e-06)]_91_[+3(2.18e-07)]_32
-Pocillopora_acuta_HIv2__         1.06e-01  2_[+2(5.34e-05)]_152_[-1(8.01e-05)]_\
-    123_[+7(6.85e-05)]_55_[+7(9.52e-05)]_84
-Pocillopora_acuta_HIv2__         7.31e-02  315_[+4(3.47e-05)]_160
-Pocillopora_acuta_HIv2__         7.07e-01  237_[+5(7.04e-05)]_242
-Pocillopora_acuta_HIv2__         7.05e-01  69_[+5(2.04e-05)]_410
-Pocillopora_acuta_HIv2__         7.91e-03  334_[+2(2.41e-09)]_143
-Pocillopora_acuta_HIv2__         7.40e-01  500
-Pocillopora_acuta_HIv2__         9.21e-04  4_[-10(7.51e-05)]_94_[+5(4.14e-05)]_\
-    27_[+10(2.28e-05)]_41_[-8(2.12e-05)]_145_[+6(7.46e-06)]_81
+Pocillopora_acuta_HIv2__         5.07e-01  500
+Pocillopora_acuta_HIv2__         5.07e-01  500
+Pocillopora_acuta_HIv2__         6.84e-02  246_[+3(1.81e-05)]_229
+Pocillopora_acuta_HIv2__         3.88e-28  7_[+2(1.56e-14)]_6_[+3(1.47e-09)]_4_\
+    [+4(3.81e-17)]_23_[-1(3.60e-05)]_21_[+3(3.06e-10)]_80_[+2(3.17e-10)]_227
+Pocillopora_acuta_HIv2__         6.61e-02  244_[-3(1.51e-05)]_231
+Pocillopora_acuta_HIv2__         8.21e-02  147
+Pocillopora_acuta_HIv2__         2.86e-01  456_[-1(8.58e-05)]_33
+Pocillopora_acuta_HIv2__         6.40e-05  152_[+1(2.91e-05)]_178_\
+    [+1(2.84e-06)]_91_[+3(2.18e-07)]_32
+Pocillopora_acuta_HIv2__         4.20e-02  2_[+2(5.34e-05)]_152_[-1(8.01e-05)]_\
+    312
+Pocillopora_acuta_HIv2__         1.57e-01  315_[+4(3.47e-05)]_160
+Pocillopora_acuta_HIv2__         8.31e-01  500
+Pocillopora_acuta_HIv2__         9.62e-01  500
+Pocillopora_acuta_HIv2__         1.91e-04  334_[+2(2.41e-09)]_143
+Pocillopora_acuta_HIv2__         3.15e-01  500
+Pocillopora_acuta_HIv2__         7.10e-01  500
 --------------------------------------------------------------------------------
 
 ********************************************************************************
 
 
 ********************************************************************************
-Stopped because requested number of motifs (10) found.
+Stopped because the next motif E-value > 5.00e-02.
 ********************************************************************************
 
-CPU: uri-cpu044
+CPU: gypsum-gpu071
 
 ********************************************************************************

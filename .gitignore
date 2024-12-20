@@ -30,6 +30,7 @@ references/*gff3
 references/*gtf
 random/strandedness
 references/annotation/SwissProt-Annot-GO_111524.tsv
+references/motif_dbs/
 
 #bams and sams and hisat index files and stringtie gtfs
 *bam
