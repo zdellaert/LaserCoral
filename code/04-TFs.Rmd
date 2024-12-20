@@ -68,10 +68,9 @@ seqlengths(gff) <- chromosome_lengths[names(chromosome_lengths) %in% seqlevels(g
 head(seqlengths(gff))
 ```
 
-Filter the gff for differentially expressed genes and all expressed genes in the dataset (filtered, this is not all genes in the genome)
+Filter the gff for all expressed genes in the dataset (filtered, this is not all genes in the genome)
 
 ```{r}
-gff_05 <- gff[gff$ID %in% DE_05$query]
 gff_expressed <- gff[gff$ID %in% DESeq$query] 
 ```
 
@@ -98,128 +97,6 @@ for ranges on the + or * strand, and as
 > (end(x) - downstream + 1) to (end(x) + upstream)
 
 for ranges on the - strand. Be aware that the returned object might contain **out-of-bound ranges** i.e. ranges that start before the first nucleotide position and/or end after the last nucleotide position of the underlying sequence.
-
-```{r}
-promoters_500_UP <- promoters(gff_05, upstream = 500, downstream = 0)
-
-# are any of these regions out of bounds?
-
-summary(start(promoters_500_UP))
-
-#yes! I have some regions starting at -499, which is not good.
-
-#trim any promoters that exit the boundaries of the chromosomes, none of mine did but just in case
-promoters_500_UP <- GenomicRanges::trim(promoters_500_UP)
-
-summary(start(promoters_500_UP))
-
-# also remove any rows where the promoter sequence had a width of 0
-data.frame(promoters_500_UP[promoters_500_UP@ranges@width == 0])$ID
-
-promoters_500_UP <- promoters_500_UP[promoters_500_UP@ranges@width != 0]
-```
-
-This removed these three genes:
-"Pocillopora_acuta_HIv2___RNAseq.g8520.t1", "Pocillopora_acuta_HIv2___RNAseq.g23688.t1", and "Pocillopora_acuta_HIv2___RNAseq.g3131.t1" 
-
-Then, extract these sequences, by chromosome, using the function "DNAStringSet":
-
-```{r}
-#create a DNAStringSet object to house all the sequences
-promoters_all <- DNAStringSet()
-
-for (chromosome in unique(seqnames(promoters_500_UP))) {
-  
-  # filter the genome, one chromosome at a time
-  genome_filtered <- genome[genome@ranges@NAMES %in% chromosome]
-  
-  # one chromosome at a time, filter the gff dataframe
-  promoters_500_UP_filtered <- data.frame(promoters_500_UP) %>% filter(seqnames == chromosome)
-  
-  # set up a list for this chromosome
-  promoters_chromosome <- DNAStringSetList()
-  
-  # then iterate over every row (transcript) for that chromosome
-  for (i in 1:nrow(promoters_500_UP_filtered)) {
-    
-    #use the DNAStringSet function to subset the chromosome into the promoter regions of interest
-    promoter <- DNAStringSet(genome_filtered,
-                             start= promoters_500_UP_filtered$start[i],
-                             end= promoters_500_UP_filtered$end[i])
-    
-    #carry over the transcript name (what we really care about!)
-    names(promoter) <- promoters_500_UP_filtered$ID[i]
-    
-    #append this extracted sequence to the promoter list for this chromosome
-    promoters_chromosome <-  c(promoters_chromosome, promoter)
-  }
-  
-  #append this chromosome list to the DNAStringSetList for all chromosomes
-  promoters_all <- c(promoters_all, unlist(promoters_chromosome))
-}
-
-writeXStringSet(promoters_all, filepath = "../output_RNA/differential_expression/TFs/promoters_500_upstream.fasta")
-
-promoters_upAboral <- promoters_all[promoters_all@ranges@NAMES %in% DE_05[which(DE_05$log2FoldChange > 0),]$query]
-
-promoters_upOralEpi <- promoters_all[promoters_all@ranges@NAMES %in% DE_05[which(DE_05$log2FoldChange < 0),]$query]
-
-writeXStringSet(promoters_upAboral, filepath = "../output_RNA/differential_expression/TFs/promoters_500_upstream_upAboral.fasta")
-writeXStringSet(promoters_upOralEpi, filepath = "../output_RNA/differential_expression/TFs/promoters_500_upstream_upOralEpi.fasta")
-```
-
-
-## Run MEME in Linux environment using the [Docker image of MEMESuite](https://hub.docker.com/r/memesuite/memesuite) via Singularity
-
-alternatively submit jobs via their webserver: https://meme-suite.org/meme/
-
-### In unity:
-
-```{bash, eval=FALSE}
-cd ../scripts
-nano MEME.sh
-```
-
-
-```{bash, eval=FALSE}
-#!/usr/bin/env bash
-#SBATCH --export=NONE
-#SBATCH --nodes=1 --ntasks-per-node=24
-#SBATCH --signal=2
-#SBATCH --no-requeue
-#SBATCH --mem=200GB
-#SBATCH --error=../scripts/outs_errs/"%x_error.%j"
-#SBATCH --output=../scripts/outs_errs/"%x_output.%j"
-#SBATCH -t 24:00:00
-#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
-
-SINGULARITY_IMAGE="docker://memesuite/memesuite:latest"
-
-#Download Motif databases
-cd ../references
-wget https://meme-suite.org/meme/meme-software/Databases/motifs/motif_databases.12.25.tgz
-tar -xvzf motif_databases.12.25.tgz
-mv motif_databases motif_dbs
-
-cd ../output_RNA/differential_expression/TFs
-
-module load apptainer/latest
-
-singularity exec --cleanenv $SINGULARITY_IMAGE meme promoters_500_upstream_upAboral.fasta -dna -maxw 25 -mod anr -nmotifs 10 -p 6 -oc meme_output_upAboral -revcomp
-
-singularity exec --cleanenv $SINGULARITY_IMAGE meme promoters_500_upstream_upOralEpi.fasta -dna -maxw 25 -mod anr -nmotifs 10 -p 6 -oc meme_output_upOralEpi -revcomp
-
-singularity exec --cleanenv $SINGULARITY_IMAGE tomtom -no-ssc -oc tomtom_output_upAboral -min-overlap 5 -dist pearson -evalue -thresh 10.0 meme_output_upAboral/meme.txt ../../../references/motif_dbs/JASPAR/JASPAR2022_CORE_non-redundant_v2.meme
-
-singularity exec --cleanenv $SINGULARITY_IMAGE tomtom -no-ssc -oc tomtom_output_upOralEpi -min-overlap 5 -dist pearson -evalue -thresh 10.0 meme_output_upOralEpi/meme.txt ../../../references/motif_dbs/JASPAR/JASPAR2022_CORE_non-redundant_v2.meme
-
-## timo should be run against whole genome, so i need to make a new file with promoters for all genes
-#singularity exec --cleanenv $SINGULARITY_IMAGE fimo --oc fimo_output_upAboral meme_output_upAboral/motifs.meme all_promoters.fasta
-
-#singularity exec --cleanenv $SINGULARITY_IMAGE fimo --oc fimo_output_upOralEpi meme_output_upOralEpi/motifs.meme all_promoters.fasta
-```
-
-## Extract promoters for ALL sequences:
 
 ```{r}
 promoters_500_UP <- promoters(gff_expressed, upstream = 500, downstream = 0)
@@ -280,10 +157,67 @@ for (chromosome in unique(seqnames(promoters_500_UP))) {
   promoters_all <- c(promoters_all, unlist(promoters_chromosome))
 }
 
-writeXStringSet(promoters_all, filepath = "../output_RNA/differential_expression/TFs/promoters_500_upstream_allgenes.fasta")
+writeXStringSet(promoters_all, filepath = "../output_RNA/differential_expression/TFs/promoters_500_upstream.fasta")
 
+promoters_upAboral <- promoters_all[promoters_all@ranges@NAMES %in% DE_05[which(DE_05$log2FoldChange > 0),]$query]
+
+promoters_upOralEpi <- promoters_all[promoters_all@ranges@NAMES %in% DE_05[which(DE_05$log2FoldChange < 0),]$query]
+
+writeXStringSet(promoters_upAboral, filepath = "../output_RNA/differential_expression/TFs/promoters_500_upstream_upAboral.fasta")
+writeXStringSet(promoters_upOralEpi, filepath = "../output_RNA/differential_expression/TFs/promoters_500_upstream_upOralEpi.fasta")
 
 # I could define differentially expressed as having a log fold change cutoff as well
+```
+
+
+## Run MEME in Linux environment using the [Docker image of MEMESuite](https://hub.docker.com/r/memesuite/memesuite) via Singularity
+
+alternatively submit jobs via their webserver: https://meme-suite.org/meme/
+
+### In unity:
+
+```{bash, eval=FALSE}
+cd ../scripts
+nano MEME.sh
+```
+
+
+```{bash, eval=FALSE}
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=24
+#SBATCH --signal=2
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH --error=../scripts/outs_errs/"%x_error.%j"
+#SBATCH --output=../scripts/outs_errs/"%x_output.%j"
+#SBATCH -t 24:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+
+SINGULARITY_IMAGE="docker://memesuite/memesuite:latest"
+
+#Download Motif databases
+cd ../references
+wget https://meme-suite.org/meme/meme-software/Databases/motifs/motif_databases.12.25.tgz
+tar -xvzf motif_databases.12.25.tgz
+mv motif_databases motif_dbs
+
+cd ../output_RNA/differential_expression/TFs
+
+module load apptainer/latest
+
+singularity exec --cleanenv $SINGULARITY_IMAGE meme promoters_500_upstream_upAboral.fasta -dna -maxw 25 -mod anr -nmotifs 10 -p 6 -oc meme_output_upAboral -revcomp
+
+singularity exec --cleanenv $SINGULARITY_IMAGE meme promoters_500_upstream_upOralEpi.fasta -dna -maxw 25 -mod anr -nmotifs 10 -p 6 -oc meme_output_upOralEpi -revcomp
+
+singularity exec --cleanenv $SINGULARITY_IMAGE tomtom -no-ssc -oc tomtom_output_upAboral -min-overlap 5 -dist pearson -evalue -thresh 10.0 meme_output_upAboral/meme.txt ../../../references/motif_dbs/JASPAR/JASPAR2022_CORE_non-redundant_v2.meme
+
+singularity exec --cleanenv $SINGULARITY_IMAGE tomtom -no-ssc -oc tomtom_output_upOralEpi -min-overlap 5 -dist pearson -evalue -thresh 10.0 meme_output_upOralEpi/meme.txt ../../../references/motif_dbs/JASPAR/JASPAR2022_CORE_non-redundant_v2.meme
+
+## timo should be run against whole genome, so i need to make a new file with promoters for all genes
+#singularity exec --cleanenv $SINGULARITY_IMAGE fimo --oc fimo_output_upAboral meme_output_upAboral/motifs.meme all_promoters.fasta
+
+#singularity exec --cleanenv $SINGULARITY_IMAGE fimo --oc fimo_output_upOralEpi meme_output_upOralEpi/motifs.meme all_promoters.fasta
 ```
 
 ## Updating Renv environment:

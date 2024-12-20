@@ -550,8 +550,9 @@ head(seqlengths(gff))</code></pre>
 ##                           11458840                           11317442 
 ## Pocillopora_acuta_HIv2___Sc0000004 Pocillopora_acuta_HIv2___Sc0000005 
 ##                           10346329                            9803754</code></pre>
-<p>Filter the gff for differentially expressed genes</p>
-<pre class="r"><code>gff_05 &lt;- gff[gff$ID %in% DE_05$query]</code></pre>
+<p>Filter the gff for all expressed genes in the dataset (filtered, this
+is not all genes in the genome)</p>
+<pre class="r"><code>gff_expressed &lt;- gff[gff$ID %in% DESeq$query] </code></pre>
 </div>
 <div id="define-promoter-regions" class="section level2">
 <h2>Define promoter regions</h2>
@@ -587,17 +588,46 @@ respectively. More precisely, the output range is defined as</p>
 contain <strong>out-of-bound ranges</strong> i.e. ranges that start
 before the first nucleotide position and/or end after the last
 nucleotide position of the underlying sequence.</p>
-<pre class="r"><code>promoters_500_UP &lt;- promoters(gff_05, upstream = 500, downstream = 0)</code></pre>
-<pre><code>## Warning in valid.GenomicRanges.seqinfo(x, suggest.trim = TRUE): GRanges object contains 12 out-of-bound ranges located on sequences
+<pre class="r"><code>promoters_500_UP &lt;- promoters(gff_expressed, upstream = 500, downstream = 0)</code></pre>
+<pre><code>## Warning in valid.GenomicRanges.seqinfo(x, suggest.trim = TRUE): GRanges object contains 42 out-of-bound ranges located on sequences
+##   Pocillopora_acuta_HIv2___Sc0000016,
+##   Pocillopora_acuta_HIv2___xfSc0000017,
+##   Pocillopora_acuta_HIv2___Sc0000010,
 ##   Pocillopora_acuta_HIv2___xfSc0000231,
+##   Pocillopora_acuta_HIv2___xfSc0000071,
+##   Pocillopora_acuta_HIv2___Sc0000021,
+##   Pocillopora_acuta_HIv2___xfSc0000033,
+##   Pocillopora_acuta_HIv2___xpSc0000390,
 ##   Pocillopora_acuta_HIv2___xfSc0000015,
+##   Pocillopora_acuta_HIv2___Sc0000015,
 ##   Pocillopora_acuta_HIv2___xfSc0000161,
+##   Pocillopora_acuta_HIv2___Sc0000036,
+##   Pocillopora_acuta_HIv2___xfSc0000021,
 ##   Pocillopora_acuta_HIv2___xfSc0000177,
+##   Pocillopora_acuta_HIv2___Sc0000039, Pocillopora_acuta_HIv2___Sc0000035,
+##   Pocillopora_acuta_HIv2___xfSc0000029,
+##   Pocillopora_acuta_HIv2___xfSc0000163,
 ##   Pocillopora_acuta_HIv2___xfSc0000350,
+##   Pocillopora_acuta_HIv2___xfSc0000108,
 ##   Pocillopora_acuta_HIv2___xfSc0000278,
+##   Pocillopora_acuta_HIv2___xfSc0000152,
+##   Pocillopora_acuta_HIv2___xfSc0000227,
+##   Pocillopora_acuta_HIv2___xfSc0000129,
+##   Pocillopora_acuta_HIv2___xfSc0000271,
+##   Pocillopora_acuta_HIv2___xfSc0000229,
+##   Pocillopora_acuta_HIv2___xfSc0000262,
+##   Pocillopora_acuta_HIv2___xfSc0000212,
+##   Pocillopora_acuta_HIv2___xfSc0000143,
+##   Pocillopora_acuta_HIv2___xfSc0000142,
+##   Pocillopora_acuta_HIv2___xfSc0000107,
+##   Pocillopora_acuta_HIv2___xfSc0000210,
+##   Pocillopora_acuta_HIv2___Sc0000066,
 ##   Pocillopora_acuta_HIv2___xfSc0000287,
+##   Pocillopora_acuta_HIv2___xfSc0000213,
 ##   Pocillopora_acuta_HIv2___xfSc0000230,
 ##   Pocillopora_acuta_HIv2___xfSc0000288,
+##   Pocillopora_acuta_HIv2___xfSc0000185,
+##   Pocillopora_acuta_HIv2___xfSc0000384,
 ##   Pocillopora_acuta_HIv2___xfSc0000380,
 ##   Pocillopora_acuta_HIv2___xfSc0000381, and
 ##   Pocillopora_acuta_HIv2___xfSc0000302. Note that ranges located on a
@@ -610,7 +640,7 @@ nucleotide position of the underlying sequence.</p>
 
 summary(start(promoters_500_UP))</code></pre>
 <pre><code>##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
-##     -499   911572  2376274  3263669  4651098 15660880</code></pre>
+##     -499   858876  2271955  3196995  4589764 16591922</code></pre>
 <pre class="r"><code>#yes! I have some regions starting at -499, which is not good.
 
 #trim any promoters that exit the boundaries of the chromosomes, none of mine did but just in case
@@ -618,17 +648,19 @@ promoters_500_UP &lt;- GenomicRanges::trim(promoters_500_UP)
 
 summary(start(promoters_500_UP))</code></pre>
 <pre><code>##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
-##        1   911572  2376274  3263669  4651098 15660880</code></pre>
+##        1   858876  2271955  3196996  4589764 16591922</code></pre>
 <pre class="r"><code># also remove any rows where the promoter sequence had a width of 0
 data.frame(promoters_500_UP[promoters_500_UP@ranges@width == 0])$ID</code></pre>
-<pre><code>## [1] &quot;Pocillopora_acuta_HIv2___RNAseq.g8520.t1&quot; 
-## [2] &quot;Pocillopora_acuta_HIv2___RNAseq.g23688.t1&quot;
-## [3] &quot;Pocillopora_acuta_HIv2___RNAseq.g3131.t1&quot;</code></pre>
+<pre><code>## [1] &quot;Pocillopora_acuta_HIv2___RNAseq.g28711.t1&quot;
+## [2] &quot;Pocillopora_acuta_HIv2___RNAseq.g8520.t1&quot; 
+## [3] &quot;Pocillopora_acuta_HIv2___RNAseq.g23688.t1&quot;
+## [4] &quot;Pocillopora_acuta_HIv2___RNAseq.g3131.t1&quot;</code></pre>
 <pre class="r"><code>promoters_500_UP &lt;- promoters_500_UP[promoters_500_UP@ranges@width != 0]</code></pre>
-<p>This removed these three genes: -
-“Pocillopora_acuta_HIv2_<strong>RNAseq.g8520.t1” -
-”Pocillopora_acuta_HIv2</strong>_RNAseq.g23688.t1” -
-“Pocillopora_acuta_HIv2___RNAseq.g3131.t1”</p>
+<p>This removed these four genes:
+“Pocillopora_acuta_HIv2_<strong>RNAseq.g8520.t1”,
+”Pocillopora_acuta_HIv2</strong>_RNAseq.g23688.t1”,
+“Pocillopora_acuta_HIv2_<strong>RNAseq.g3131.t1” , and
+”Pocillopora_acuta_HIv2</strong>_RNAseq.g28711.t1”</p>
 <p>Then, extract these sequences, by chromosome, using the function
 “DNAStringSet”:</p>
 <pre class="r"><code>#create a DNAStringSet object to house all the sequences
@@ -664,7 +696,61 @@ for (chromosome in unique(seqnames(promoters_500_UP))) {
   promoters_all &lt;- c(promoters_all, unlist(promoters_chromosome))
 }
 
-writeXStringSet(promoters_all, filepath = &quot;../output_RNA/differential_expression/TFs/promoters_500_upstream.fasta&quot;)</code></pre>
+writeXStringSet(promoters_all, filepath = &quot;../output_RNA/differential_expression/TFs/promoters_500_upstream.fasta&quot;)
+
+promoters_upAboral &lt;- promoters_all[promoters_all@ranges@NAMES %in% DE_05[which(DE_05$log2FoldChange &gt; 0),]$query]
+
+promoters_upOralEpi &lt;- promoters_all[promoters_all@ranges@NAMES %in% DE_05[which(DE_05$log2FoldChange &lt; 0),]$query]
+
+writeXStringSet(promoters_upAboral, filepath = &quot;../output_RNA/differential_expression/TFs/promoters_500_upstream_upAboral.fasta&quot;)
+writeXStringSet(promoters_upOralEpi, filepath = &quot;../output_RNA/differential_expression/TFs/promoters_500_upstream_upOralEpi.fasta&quot;)
+
+# I could define differentially expressed as having a log fold change cutoff as well</code></pre>
+</div>
+<div id="run-meme-in-linux-environment-using-the-docker-image-of-memesuite-via-singularity" class="section level2">
+<h2>Run MEME in Linux environment using the <a href="https://hub.docker.com/r/memesuite/memesuite">Docker image of
+MEMESuite</a> via Singularity</h2>
+<p>alternatively submit jobs via their webserver: <a href="https://meme-suite.org/meme/" class="uri">https://meme-suite.org/meme/</a></p>
+<div id="in-unity" class="section level3">
+<h3>In unity:</h3>
+<pre class="bash"><code>cd ../scripts
+nano MEME.sh</code></pre>
+<pre class="bash"><code>#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=24
+#SBATCH --signal=2
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH --error=../scripts/outs_errs/&quot;%x_error.%j&quot;
+#SBATCH --output=../scripts/outs_errs/&quot;%x_output.%j&quot;
+#SBATCH -t 24:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+
+SINGULARITY_IMAGE=&quot;docker://memesuite/memesuite:latest&quot;
+
+#Download Motif databases
+cd ../references
+wget https://meme-suite.org/meme/meme-software/Databases/motifs/motif_databases.12.25.tgz
+tar -xvzf motif_databases.12.25.tgz
+mv motif_databases motif_dbs
+
+cd ../output_RNA/differential_expression/TFs
+
+module load apptainer/latest
+
+singularity exec --cleanenv $SINGULARITY_IMAGE meme promoters_500_upstream_upAboral.fasta -dna -maxw 25 -mod anr -nmotifs 10 -p 6 -oc meme_output_upAboral -revcomp
+
+singularity exec --cleanenv $SINGULARITY_IMAGE meme promoters_500_upstream_upOralEpi.fasta -dna -maxw 25 -mod anr -nmotifs 10 -p 6 -oc meme_output_upOralEpi -revcomp
+
+singularity exec --cleanenv $SINGULARITY_IMAGE tomtom -no-ssc -oc tomtom_output_upAboral -min-overlap 5 -dist pearson -evalue -thresh 10.0 meme_output_upAboral/meme.txt ../../../references/motif_dbs/JASPAR/JASPAR2022_CORE_non-redundant_v2.meme
+
+singularity exec --cleanenv $SINGULARITY_IMAGE tomtom -no-ssc -oc tomtom_output_upOralEpi -min-overlap 5 -dist pearson -evalue -thresh 10.0 meme_output_upOralEpi/meme.txt ../../../references/motif_dbs/JASPAR/JASPAR2022_CORE_non-redundant_v2.meme
+
+## timo should be run against whole genome, so i need to make a new file with promoters for all genes
+#singularity exec --cleanenv $SINGULARITY_IMAGE fimo --oc fimo_output_upAboral meme_output_upAboral/motifs.meme all_promoters.fasta
+
+#singularity exec --cleanenv $SINGULARITY_IMAGE fimo --oc fimo_output_upOralEpi meme_output_upOralEpi/motifs.meme all_promoters.fasta</code></pre>
+</div>
 </div>
 <div id="updating-renv-environment" class="section level2">
 <h2>Updating Renv environment:</h2>
