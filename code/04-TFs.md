@@ -197,7 +197,7 @@ Aboral tissue, and positive LFC = higher in Oral tissue.
 
 ``` r
 DESeq <- read.csv("../output_RNA/differential_expression/DESeq_results.csv", header = TRUE) %>% dplyr::rename("query" ="X")
-DE_05 <- DE_05 <- DESeq %>% filter(padj < 0.05)
+DE_05 <- DESeq %>% filter(padj < 0.05)
 ```
 
 I want to identify promoter sequences of the differentially expressed
@@ -513,11 +513,13 @@ motif is not interesting to me.
 **up_OralEpi**: Based on the TOMTOM results, only three motifs had
 significant (q \< 0.05) matches to the JASPAR database:
 
-1.  <img height="100" alt="motif1" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/differential_expression/TFs/meme_output_upOralEpi/logo2.png?raw=true">
-2.  <img height="100" alt="motif1" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/differential_expression/TFs/meme_output_upOralEpi/logo3.png?raw=true">
-3.  <img height="100" alt="motif1" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/differential_expression/TFs/meme_output_upOralEpi/logo6.png?raw=true">
+1.  Poly-C, not interesting:
+    <img height="100" alt="motif1" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/differential_expression/TFs/meme_output_upOralEpi/logo2.png?raw=true">
+2.  Poly-T, not interesting:
+    <img height="100" alt="motif1" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/differential_expression/TFs/meme_output_upOralEpi/logo3.png?raw=true">
+3.  CCGCCATBTTK (MEME-6):
+    <img height="100" alt="motif1" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/differential_expression/TFs/meme_output_upOralEpi/logo6.png?raw=true">
 
-- This one is actually interesting! ID = CCGCCATBTTK
 - Both of the matches matched to the **Reverse complement** of this
   motif.
 - Match 1: MA1651.1 (ZFP42)
@@ -540,9 +542,11 @@ significant (q \< 0.05) matches to the JASPAR database:
   - Offset -1
   - Orientation Reverse Complement
 
+I am going to run FIMO to quantify this motif against all the genes.
+
 ``` bash
 cd ../scripts
-nano MEME_TIMO.sh
+nano MEME_FIMO.sh
 ```
 
 ``` bash
@@ -564,10 +568,235 @@ cd ../output_RNA/differential_expression/TFs
 module load apptainer/latest
 
 # run FIMO 
-## fimo should be run against whole genome, so i need to make a new file with promoters for all genes
 
-singularity exec --cleanenv $SINGULARITY_IMAGE fimo --oc fimo_output_upOralEpi meme_output_upOralEpi/motifs.meme --motif "CCGCCATBTTK" promoters_500_upstream.fasta
+singularity exec --cleanenv $SINGULARITY_IMAGE fimo --oc fimo_output_upOralEpi --motif "CCGCCATBTTK" meme_output_upOralEpi/meme.txt promoters_500_upstream.fasta
 ```
+
+Visualize log-fold change of genes that have this motif in their
+promoter sequences:
+
+``` r
+fimo <- read.table("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo.tsv", header = TRUE)
+
+fimo_filtered <- fimo %>% filter(q.value < 0.05)  
+
+# Merge FIMO results with DESeq data 
+fimo_merged <- fimo_filtered %>% full_join(DESeq, by = c("sequence_name" = "query"))
+
+#summarize
+
+fimo_counts <- fimo_merged %>% group_by(sequence_name, log2FoldChange, padj,  motif_id) %>% count() %>%
+  mutate(n = if_else(is.na(motif_id), 0, n)) 
+
+fimo_counts_DE <- fimo_counts %>% filter(padj < 0.05)
+
+ggplot(fimo_counts, aes(x = factor(n), y = log2FoldChange, fill = factor(n))) +
+  geom_jitter(width = 0.2, alpha = 0.3, aes(color = factor(n))) +
+  geom_violin(alpha = 0.7) + 
+  theme_minimal() +
+  labs(
+    title = "Log2 Fold Change by Motif Presence/Absence",
+    x = "Motif Copies ",
+    y = "Log2 Fold Change"
+  ) 
+```
+
+    ## Warning: Groups with fewer than two datapoints have been dropped.
+    ## ℹ Set `drop = FALSE` to consider such groups for position adjustment purposes.
+
+![](04-TFs_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
+``` r
+ggplot(fimo_counts_DE, aes(x = factor(n), y = log2FoldChange, fill = factor(n))) +
+  geom_jitter(width = 0.2, alpha = 0.3, aes(color = factor(n))) +
+  geom_violin(alpha = 0.7) + 
+  theme_minimal() +
+  labs(
+    title = "Log2 Fold Change by Motif Presence/Absence, significantly DE genes",
+    x = "Motif Copies ",
+    y = "Log2 Fold Change"
+  ) 
+```
+
+![](04-TFs_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
+
+``` r
+fimo_presence_absence <- fimo_counts %>% mutate(n = if_else(n>0, 1, n))
+
+fimo_presence_absence_DE <- fimo_presence_absence %>% filter(padj < 0.05)
+
+ggplot(fimo_presence_absence, aes(x = factor(n), y = log2FoldChange, fill = factor(n))) +
+  geom_jitter(width = 0.2, alpha = 0.3, aes(color = factor(n))) +
+  geom_violin(alpha = 0.7) + 
+  theme_minimal() +
+  labs(
+    title = "Log2 Fold Change by Motif Presence/Absence",
+    x = "Motif Copies ",
+    y = "Log2 Fold Change"
+  ) 
+```
+
+![](04-TFs_files/figure-gfm/unnamed-chunk-9-3.png)<!-- -->
+
+``` r
+ggplot(fimo_presence_absence_DE, aes(x = factor(n), y = log2FoldChange, fill = factor(n))) +
+  geom_jitter(width = 0.2, alpha = 0.3, aes(color = factor(n))) +
+  geom_violin(alpha = 0.7) + 
+  theme_minimal() +
+  labs(
+    title = "Log2 Fold Change by Motif Presence/Absence, significantly DE genes",
+    x = "Motif Copies ",
+    y = "Log2 Fold Change"
+  ) 
+```
+
+![](04-TFs_files/figure-gfm/unnamed-chunk-9-4.png)<!-- -->
+
+Wow! It looks like the presence of this motif may be reflected in
+log2FoldChange! The genes with 1 or 2 sites have predominately negative
+fold change.
+
+``` r
+# Fisher's exact test for presence/absence
+fisher_table <- table(fimo_presence_absence_DE$n, fimo_presence_absence_DE$log2FoldChange > 0)
+fisher_table
+```
+
+    ##    
+    ##     FALSE TRUE
+    ##   0  2501  784
+    ##   1   301   20
+
+``` r
+fisher.test(fisher_table)
+```
+
+    ## 
+    ##  Fisher's Exact Test for Count Data
+    ## 
+    ## data:  fisher_table
+    ## p-value = 5.622e-16
+    ## alternative hypothesis: true odds ratio is not equal to 1
+    ## 95 percent confidence interval:
+    ##  0.1267615 0.3362519
+    ## sample estimates:
+    ## odds ratio 
+    ##  0.2120124
+
+``` r
+logistic_model <- glm((log2FoldChange > 0) ~ n, data = fimo_presence_absence_DE, family = binomial)
+summary(logistic_model)
+```
+
+    ## 
+    ## Call:
+    ## glm(formula = (log2FoldChange > 0) ~ n, family = binomial, data = fimo_presence_absence_DE)
+    ## 
+    ## Coefficients:
+    ##             Estimate Std. Error z value Pr(>|z|)    
+    ## (Intercept) -1.16004    0.04093 -28.341  < 2e-16 ***
+    ## n           -1.55134    0.23451  -6.615 3.71e-11 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## (Dispersion parameter for binomial family taken to be 1)
+    ## 
+    ##     Null deviance: 3826.9  on 3605  degrees of freedom
+    ## Residual deviance: 3760.2  on 3604  degrees of freedom
+    ## AIC: 3764.2
+    ## 
+    ## Number of Fisher Scoring iterations: 5
+
+``` r
+plot_data <- fimo_counts %>%
+  mutate(motif_count = case_when(
+    n == 0 ~ "0 Motifs",
+    n == 1 ~ "1 Motif",
+    n > 1 ~ ">1 Motifs"
+  )) %>%
+  mutate(motif_count = factor(motif_count, levels = c("0 Motifs", "1 Motif", ">1 Motifs")))
+
+plot <- ggplot(plot_data, aes(x = motif_count, y = log2FoldChange, fill = motif_count)) +
+  geom_jitter(aes(color = motif_count), width = 0.2, size = 1.5, alpha = 0.6) +  
+  geom_violin(alpha = 0.7, width = 0.5) +  
+  stat_summary(fun = mean, geom = "point", shape = 21,  size = 2, fill = "white", color = "black") + 
+  scale_fill_brewer(palette = "Set2") +  
+  scale_color_brewer(palette = "Set2") + 
+  labs(
+    title = "Log2 Fold Change by Motif Presence",
+    subtitle = "All Genes",
+    x = "Number of Motifs in Promoter",
+    y = "Log2 Fold Change",
+    fill = "Motif Count",
+    color = "Motif Count"
+  ) +
+  theme_minimal(base_size = 14) + 
+  theme(
+    legend.position = "none",  
+    plot.title = element_text(face = "bold", size = 16),
+    plot.subtitle = element_text(size = 14),
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 14),
+    panel.grid.major = element_line(size = 0.5, linetype = "dashed", color = "gray80")
+  )
+```
+
+    ## Warning: The `size` argument of `element_line()` is deprecated as of ggplot2 3.4.0.
+    ## ℹ Please use the `linewidth` argument instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+``` r
+# Save the plot as a high-quality PNG
+ggsave("../output_RNA/differential_expression/TFs/fimo_motif6.png", plot, width = 8, height = 6, dpi = 300)
+
+# Display the plot
+print(plot)
+```
+
+![](04-TFs_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+
+``` r
+plot_data <- fimo_counts_DE %>%
+  mutate(motif_count = case_when(
+    n == 0 ~ "0 Motifs",
+    n == 1 ~ "1 Motif",
+    n > 1 ~ ">1 Motifs"
+  )) %>%
+  mutate(motif_count = factor(motif_count, levels = c("0 Motifs", "1 Motif", ">1 Motifs")))
+
+plot <- ggplot(plot_data, aes(x = motif_count, y = log2FoldChange, fill = motif_count)) +
+  geom_jitter(aes(color = motif_count), width = 0.2, size = 1.5, alpha = 0.6) +  
+  geom_violin(alpha = 0.7, width = 0.5) + 
+  stat_summary(fun = mean, geom = "point", shape = 21, size = 2, fill = "white", color = "black") +  
+  scale_fill_brewer(palette = "Set2") + 
+  scale_color_brewer(palette = "Set2") +  
+  labs(
+    title = "Log2 Fold Change by Motif Presence",
+    subtitle = "Significantly DE Genes",
+    x = "Number of Motifs in Promoter",
+    y = "Log2 Fold Change",
+    fill = "Motif Count",
+    color = "Motif Count"
+  ) +
+  theme_minimal(base_size = 14) +  
+  theme(
+    legend.position = "none", 
+    plot.title = element_text(face = "bold", size = 16),
+    plot.subtitle = element_text(size = 14),
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 14),
+    panel.grid.major = element_line(size = 0.5, linetype = "dashed", color = "gray80")
+  )
+
+ggsave("../output_RNA/differential_expression/TFs/fimo_motif6_DE.png", plot, width = 8, height = 6, dpi = 300)
+
+# Display the plot
+print(plot)
+```
+
+![](04-TFs_files/figure-gfm/unnamed-chunk-12-2.png)<!-- -->
 
 ## 0.7 Updating Renv environment:
 
