@@ -1,0 +1,26 @@
+Loading apptainer version latest
+INFO:    Using cached SIF image
+Skipping motif +TGTGTATAGCCCTGTATAGCYGTGT.
+Skipping motif -TGTGTATAGCCCTGTATAGCYGTGT.
+Skipping motif +CYCYCCCCCCCCCCCCCCCCC.
+Skipping motif -CYCYCCCCCCCCCCCCCCCCC.
+Skipping motif +TTYYTTTBTTTTTTTTTTTTT.
+Skipping motif -TTYYTTTBTTTTTTTTTTTTT.
+Skipping motif +CTGGGTGACCTGAGTCAGGCAAAGG.
+Skipping motif -CTGGGTGACCTGAGTCAGGCAAAGG.
+Skipping motif +GACGAAGGGCTAACGCTCGA.
+Skipping motif -GACGAAGGGCTAACGCTCGA.
+Using motif +CCGCCATBTTK of width 11.
+Using motif -CCGCCATBTTK of width 11.
+Finding best site passing the output threshold in each of the 14460 sequences.
+Found a best site in 3700 sequences.
+Computing q-values.
+# Computing q-values.
+#   Estimating pi_0 from a uniformly sampled set of 10000 p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.997419
+#   Estimated pi_0=0.999296
+Skipping motif +ATAGCYGTGTATAGC.
+Skipping motif -ATAGCYGTGTATAGC.
+Skipping motif +YGTAAAWTGGCCACCGTAAAGAGTT.
+Skipping motif -YGTAAAWTGGCCACCGTAAAGAGTT.
