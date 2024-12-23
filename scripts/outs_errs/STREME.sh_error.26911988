@@ -1,0 +1,613 @@
+Loading apptainer version latest
+INFO:    Using cached SIF image
+The output directory 'tomtom_streme_output_upAboral' already exists.
+Its contents will be overwritten.
+Processing query 1 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00182
+#   Estimated pi_0=1
+Processing query 2 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00249
+#   Estimated pi_0=1
+Processing query 3 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.966102
+#   Estimated pi_0=0.970403
+Processing query 4 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00131
+#   Estimated pi_0=1
+Processing query 5 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.996754
+#   Estimated pi_0=0.996754
+Processing query 6 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.003
+#   Estimated pi_0=1
+Processing query 7 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.003
+#   Estimated pi_0=1
+Processing query 8 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00351
+#   Estimated pi_0=1
+Processing query 9 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.003
+#   Estimated pi_0=1
+Processing query 10 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00081
+#   Estimated pi_0=1
+Processing query 11 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00182
+#   Estimated pi_0=1
+Processing query 12 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00435
+#   Estimated pi_0=1
+Processing query 13 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.976181
+#   Estimated pi_0=0.976181
+Processing query 14 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.999624
+#   Estimated pi_0=0.999624
+Processing query 15 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.999583
+#   Estimated pi_0=1
+Processing query 16 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.997092
+#   Estimated pi_0=0.997092
+Processing query 17 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00418
+#   Estimated pi_0=1
+Processing query 18 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.003
+#   Estimated pi_0=1
+Processing query 19 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00334
+#   Estimated pi_0=1
+Processing query 20 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.984807
+#   Estimated pi_0=0.986412
+Processing query 21 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00097
+#   Estimated pi_0=1
+Processing query 22 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00367
+#   Estimated pi_0=1
+Processing query 23 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.999792
+#   Estimated pi_0=0.999792
+Processing query 24 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.003
+#   Estimated pi_0=1
+Processing query 25 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.972089
+#   Estimated pi_0=0.975492
+Processing query 26 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00418
+#   Estimated pi_0=1
+Processing query 27 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.0003
+#   Estimated pi_0=1
+Processing query 28 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00266
+#   Estimated pi_0=1
+Processing query 29 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00469
+#   Estimated pi_0=1
+Processing query 30 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00148
+#   Estimated pi_0=1
+Processing query 31 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00452
+#   Estimated pi_0=1
+Processing query 32 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00469
+#   Estimated pi_0=1
+Processing query 33 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.987885
+#   Estimated pi_0=0.990672
+Processing query 34 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00452
+#   Estimated pi_0=1
+Processing query 35 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00418
+#   Estimated pi_0=1
+Processing query 36 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.993815
+#   Estimated pi_0=0.994728
+Processing query 37 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00199
+#   Estimated pi_0=1
+Processing query 38 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00249
+#   Estimated pi_0=1
+Processing query 39 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00165
+#   Estimated pi_0=1
+Processing query 40 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00401
+#   Estimated pi_0=1
+Processing query 41 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.99726
+#   Estimated pi_0=0.99726
+Processing query 42 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00232
+#   Estimated pi_0=1
+Processing query 43 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00418
+#   Estimated pi_0=1
+Processing query 44 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00334
+#   Estimated pi_0=1
+Processing query 45 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00351
+#   Estimated pi_0=1
+Processing query 46 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00232
+#   Estimated pi_0=1
+Processing query 47 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00401
+#   Estimated pi_0=1
+Processing query 48 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00047
+#   Estimated pi_0=1
+Processing query 49 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00097
+#   Estimated pi_0=1
+Processing query 50 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.998104
+#   Estimated pi_0=0.998104
+Processing query 51 out of 51 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00334
+#   Estimated pi_0=1
+INFO:    Using cached SIF image
+The output directory 'tomtom_streme_output_upOralEpi' already exists.
+Its contents will be overwritten.
+Processing query 1 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00334
+#   Estimated pi_0=1
+Processing query 2 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.997716
+#   Estimated pi_0=0.999286
+Processing query 3 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00111
+#   Estimated pi_0=1
+Processing query 4 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00334
+#   Estimated pi_0=1
+Processing query 5 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00418
+#   Estimated pi_0=1
+Processing query 6 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00452
+#   Estimated pi_0=1
+Processing query 7 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.983047
+#   Estimated pi_0=0.983047
+Processing query 8 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.999455
+#   Estimated pi_0=0.999455
+Processing query 9 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.996416
+#   Estimated pi_0=0.996416
+Processing query 10 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00047
+#   Estimated pi_0=1
+Processing query 11 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00401
+#   Estimated pi_0=1
+Processing query 12 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.968803
+#   Estimated pi_0=0.970266
+Processing query 13 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00452
+#   Estimated pi_0=1
+Processing query 14 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00216
+#   Estimated pi_0=1
+Processing query 15 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00081
+#   Estimated pi_0=1
+Processing query 16 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.996984
+#   Estimated pi_0=0.996984
+Processing query 17 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00486
+#   Estimated pi_0=1
+Processing query 18 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00452
+#   Estimated pi_0=1
+Processing query 19 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00334
+#   Estimated pi_0=1
+Processing query 20 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00418
+#   Estimated pi_0=1
+Processing query 21 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00216
+#   Estimated pi_0=1
+Processing query 22 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00351
+#   Estimated pi_0=1
+Processing query 23 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.998273
+#   Estimated pi_0=0.998273
+Processing query 24 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00334
+#   Estimated pi_0=1
+Processing query 25 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00232
+#   Estimated pi_0=1
+Processing query 26 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00216
+#   Estimated pi_0=1
+Processing query 27 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00165
+#   Estimated pi_0=1
+Processing query 28 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00503
+#   Estimated pi_0=1
+Processing query 29 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.987363
+#   Estimated pi_0=0.989045
+Processing query 30 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00418
+#   Estimated pi_0=1
+Processing query 31 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00283
+#   Estimated pi_0=1
+Processing query 32 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00266
+#   Estimated pi_0=1
+Processing query 33 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.984195
+#   Estimated pi_0=0.984195
+Processing query 34 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00401
+#   Estimated pi_0=1
+Processing query 35 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00334
+#   Estimated pi_0=1
+Processing query 36 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00026
+#   Estimated pi_0=1
+Processing query 37 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00452
+#   Estimated pi_0=1
+Processing query 38 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00114
+#   Estimated pi_0=1
+Processing query 39 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00283
+#   Estimated pi_0=1
+Processing query 40 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00182
+#   Estimated pi_0=1
+Processing query 41 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00384
+#   Estimated pi_0=1
+Processing query 42 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00418
+#   Estimated pi_0=1
+Processing query 43 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00469
+#   Estimated pi_0=1
+Processing query 44 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00283
+#   Estimated pi_0=1
+Processing query 45 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00401
+#   Estimated pi_0=1
+Processing query 46 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00064
+#   Estimated pi_0=1
+Processing query 47 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00232
+#   Estimated pi_0=1
+Processing query 48 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.986602
+#   Estimated pi_0=0.987435
+Processing query 49 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00401
+#   Estimated pi_0=1
+Processing query 50 out of 50 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.995002
+#   Estimated pi_0=0.99591
