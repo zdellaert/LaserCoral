@@ -25,7 +25,13 @@ Zoe Dellaert
     MEMESuite via
     Singularity](#071-run-streme-in-linux-environment-using-the-docker-image-of-memesuite-via-singularity)
   - [0.7.2 In unity:](#072-in-unity)
-- [0.8 Updating Renv environment:](#08-updating-renv-environment)
+- [0.8 STREME: Relative enrichment of motifs compared to opposite
+  direction](#08-streme-relative-enrichment-of-motifs-compared-to-opposite-direction)
+  - [0.8.1 Run STREME in Linux environment using the Docker image of
+    MEMESuite via
+    Singularity](#081-run-streme-in-linux-environment-using-the-docker-image-of-memesuite-via-singularity)
+  - [0.8.2 In unity:](#082-in-unity)
+- [0.9 Updating Renv environment:](#09-updating-renv-environment)
 
 ## 0.1 Transcription Factor analysis of LCM RNA Data
 
@@ -1124,12 +1130,93 @@ singularity exec --cleanenv $SINGULARITY_IMAGE streme --oc streme_output_upOralE
 
 # run TOMTOM on the STREME-identified motifs from above
 
-singularity exec --cleanenv $SINGULARITY_IMAGE tomtom -no-ssc -oc tomtom_streme_output_upAboral -min-overlap 5 -dist pearson -thresh 0.05 streme_output_upAboral/streme.txt ../../../references/motif_dbs/JASPAR/JASPAR2022_CORE_non-redundant_v2.meme
+singularity exec --cleanenv $SINGULARITY_IMAGE tomtom -no-ssc -oc tomtom_streme_output_upAboral -min-overlap 5 -dist pearson -thresh 0.05 streme_output_upAboral/streme.txt ../../../references/motif_dbs/JASPAR/JASPAR2022_CORE_non-redundant_v2.meme ../../../references/motif_dbs/EUKARYOTE/homeodomain.meme ../../../references/motif_dbs/EUKARYOTE/jolma2013.meme
 
-singularity exec --cleanenv $SINGULARITY_IMAGE tomtom -no-ssc -oc tomtom_streme_output_upOralEpi -min-overlap 5 -dist pearson -thresh 0.05 streme_output_upOralEpi/streme.txt ../../../references/motif_dbs/JASPAR/JASPAR2022_CORE_non-redundant_v2.meme
+singularity exec --cleanenv $SINGULARITY_IMAGE tomtom -no-ssc -oc tomtom_streme_output_upOralEpi -min-overlap 5 -dist pearson -thresh 0.05 streme_output_upOralEpi/streme.txt ../../../references/motif_dbs/JASPAR/JASPAR2022_CORE_non-redundant_v2.meme ../../../references/motif_dbs/EUKARYOTE/homeodomain.meme ../../../references/motif_dbs/EUKARYOTE/jolma2013.meme
 ```
 
-## 0.8 Updating Renv environment:
+No significant STREME results in either LFC direction with significant
+TOMTOM results.
+
+## 0.8 STREME: Relative enrichment of motifs compared to opposite direction
+
+Okay, I found no relative enrichment of motifs compared to all the
+promoters in the genome. What about the positive LFC promoters compared
+to the negative LFC promoters and vice versa?
+
+### 0.8.1 Run STREME in Linux environment using the [Docker image of MEMESuite](https://hub.docker.com/r/memesuite/memesuite) via Singularity
+
+alternatively submit jobs via their webserver:
+<https://meme-suite.org/meme/>
+
+### 0.8.2 In unity:
+
+``` bash
+cd ../scripts
+nano STREME_relative.sh
+```
+
+``` bash
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --signal=2
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH --error=../scripts/outs_errs/"%x_error.%j"
+#SBATCH --output=../scripts/outs_errs/"%x_output.%j"
+#SBATCH -t 24:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+
+SINGULARITY_IMAGE="docker://memesuite/memesuite:latest"
+
+#Download Motif databases
+#cd ../references
+#wget https://meme-suite.org/meme/meme-software/Databases/motifs/motif_databases.12.25.tgz
+#tar -xvzf motif_databases.12.25.tgz
+#mv motif_databases motif_dbs
+
+cd ../output_RNA/differential_expression/TFs
+
+module load apptainer/latest
+
+# Run STREME for relative enrichment, only report motifs with e-value < 0.05
+singularity exec --cleanenv $SINGULARITY_IMAGE streme --oc streme_relative_output_upAboral \
+  --p promoters_500_upstream_upAboral.fasta \
+  --n promoters_500_upstream_upOralEpi.fasta \
+  --patience 50 \
+  --dna --thresh 0.05
+
+singularity exec --cleanenv $SINGULARITY_IMAGE streme --oc streme_relative_output_upOralEpi \
+  --p promoters_500_upstream_upOralEpi.fasta \
+  --n promoters_500_upstream_upAboral.fasta \
+  --patience 50 \
+  --dna --thresh 0.05
+
+# run TOMTOM on the STREME-identified motifs from above
+
+singularity exec --cleanenv $SINGULARITY_IMAGE tomtom -no-ssc -oc tomtom_streme_relative_output_upAboral -min-overlap 5 -dist pearson -thresh 0.05 streme_relative_output_upAboral/streme.txt ../../../references/motif_dbs/JASPAR/JASPAR2022_CORE_non-redundant_v2.meme ../../../references/motif_dbs/EUKARYOTE/homeodomain.meme ../../../references/motif_dbs/EUKARYOTE/jolma2013.meme
+
+singularity exec --cleanenv $SINGULARITY_IMAGE tomtom -no-ssc -oc tomtom_streme_relative_output_upOralEpi -min-overlap 5 -dist pearson -thresh 0.05 streme_relative_output_upOralEpi/streme.txt ../../../references/motif_dbs/JASPAR/JASPAR2022_CORE_non-redundant_v2.meme ../../../references/motif_dbs/EUKARYOTE/homeodomain.meme ../../../references/motif_dbs/EUKARYOTE/jolma2013.meme
+```
+
+**up_OralEpi**: Based on the TOMTOM results, one motif had a significant
+(q \< 0.05) match to the databases queried:
+
+1.  AANATGGCGG (STREME-3):
+    - <img height="200" width="248" alt="match" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/differential_expression/TFs/tomtom_streme_output_upOralEpi/STREME_3_Match1.png?raw=true">
+    - Name YY2_full_1
+    - Database jolma2013
+    - p-value 3.86e-06
+    - E-value 1.15e-02
+    - q-value 2.30e-02
+    - Overlap 10
+    - Offset 0
+    - Orientation Reverse Complement
+
+Great, this matches the MEME result for upOralEpi!
+
+## 0.9 Updating Renv environment:
 
 After you’ve confirmed your code works as expected, use renv::snapshot()
 to record the packages and their sources in the lockfile.
