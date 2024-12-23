@@ -14,7 +14,18 @@ Zoe Dellaert
   via
   Singularity](#06-run-meme-in-linux-environment-using-the-docker-image-of-memesuite-via-singularity)
   - [0.6.1 In unity:](#061-in-unity)
-- [0.7 Updating Renv environment:](#07-updating-renv-environment)
+  - [0.6.2 FIMO: I am going to run FIMO to quantify these 2 motifs
+    against all the
+    genes.](#062-fimo-i-am-going-to-run-fimo-to-quantify-these-2-motifs-against-all-the-genes)
+  - [0.6.3 FIMO Results, up Aboral](#063-fimo-results-up-aboral)
+  - [0.6.4 FIMO Results, up OralEpi](#064-fimo-results-up-oralepi)
+- [0.7 STREME: Relative enrichment of motifs compared to
+  background](#07-streme-relative-enrichment-of-motifs-compared-to-background)
+  - [0.7.1 Run STREME in Linux environment using the Docker image of
+    MEMESuite via
+    Singularity](#071-run-streme-in-linux-environment-using-the-docker-image-of-memesuite-via-singularity)
+  - [0.7.2 In unity:](#072-in-unity)
+- [0.8 Updating Renv environment:](#08-updating-renv-environment)
 
 ## 0.1 Transcription Factor analysis of LCM RNA Data
 
@@ -387,24 +398,12 @@ summary(start(promoters_500_UP))
     ##        1   858876  2271955  3196996  4589764 16591922
 
 ``` r
-# also remove any rows where the promoter sequence had a width of 0
-data.frame(promoters_500_UP[promoters_500_UP@ranges@width == 0])$ID
+# also remove any rows where the promoter sequence now has a width < 500
+
+promoters_500_UP <- promoters_500_UP[promoters_500_UP@ranges@width == 500]
+
+write_tsv(data.frame(promoters_500_UP), "../output_RNA/differential_expression/TFs/promoters.gff", col_names = FALSE)
 ```
-
-    ## [1] "Pocillopora_acuta_HIv2___RNAseq.g28711.t1"
-    ## [2] "Pocillopora_acuta_HIv2___RNAseq.g8520.t1" 
-    ## [3] "Pocillopora_acuta_HIv2___RNAseq.g23688.t1"
-    ## [4] "Pocillopora_acuta_HIv2___RNAseq.g3131.t1"
-
-``` r
-promoters_500_UP <- promoters_500_UP[promoters_500_UP@ranges@width != 0]
-```
-
-This removed these four genes:
-“Pocillopora_acuta_HIv2\_**RNAseq.g8520.t1”,
-”Pocillopora_acuta_HIv2**\_RNAseq.g23688.t1”,
-“Pocillopora_acuta_HIv2\_**RNAseq.g3131.t1” , and
-”Pocillopora_acuta_HIv2**\_RNAseq.g28711.t1”
 
 Then, extract these sequences, by chromosome, using the function
 “DNAStringSet”:
@@ -452,7 +451,8 @@ promoters_upOralEpi <- promoters_all[promoters_all@ranges@NAMES %in% DE_05[which
 writeXStringSet(promoters_upAboral, filepath = "../output_RNA/differential_expression/TFs/promoters_500_upstream_upAboral.fasta")
 writeXStringSet(promoters_upOralEpi, filepath = "../output_RNA/differential_expression/TFs/promoters_500_upstream_upOralEpi.fasta")
 
-# I could define differentially expressed as having a log fold change cutoff as well
+promoters_notDE <- promoters_all[!(promoters_all@ranges@NAMES %in% DE_05$query)]
+writeXStringSet(promoters_notDE, filepath = "../output_RNA/differential_expression/TFs/promoters_500_upstream_notDE.fasta")
 ```
 
 ## 0.6 Run MEME in Linux environment using the [Docker image of MEMESuite](https://hub.docker.com/r/memesuite/memesuite) via Singularity
@@ -493,56 +493,81 @@ module load apptainer/latest
 
 # run MEME on the differentially expressed gene fasta files, only report motifs with e-value < 0.05
 
-singularity exec --cleanenv $SINGULARITY_IMAGE meme promoters_500_upstream_upAboral.fasta -dna -maxw 25 -mod anr -evt 0.05 -p 6 -oc meme_output_upAboral -revcomp
+singularity exec --cleanenv $SINGULARITY_IMAGE meme promoters_500_upstream_upAboral.fasta -dna -maxw 15 -mod anr -evt 0.05 -p 6 -oc meme_output_upAboral -revcomp
 
-singularity exec --cleanenv $SINGULARITY_IMAGE meme promoters_500_upstream_upOralEpi.fasta -dna -maxw 25 -mod anr -evt 0.05 -p 6 -oc meme_output_upOralEpi -revcomp
+singularity exec --cleanenv $SINGULARITY_IMAGE meme promoters_500_upstream_upOralEpi.fasta -dna -maxw 15 -mod anr -evt 0.05 -p 6 -oc meme_output_upOralEpi -revcomp
 
 # run TOMTOM on the MEME-identified motifs from above
 
-singularity exec --cleanenv $SINGULARITY_IMAGE tomtom -no-ssc -oc tomtom_output_upAboral -min-overlap 5 -dist pearson -thresh 0.05 meme_output_upAboral/meme.txt ../../../references/motif_dbs/JASPAR/JASPAR2022_CORE_non-redundant_v2.meme
+singularity exec --cleanenv $SINGULARITY_IMAGE tomtom -no-ssc -oc tomtom_output_upAboral -min-overlap 5 -dist pearson -thresh 0.05 meme_output_upAboral/meme.txt ../../../references/motif_dbs/JASPAR/JASPAR2022_CORE_non-redundant_v2.meme ../../../references/motif_dbs/EUKARYOTE/homeodomain.meme ../../../references/motif_dbs/EUKARYOTE/jolma2013.meme
 
-singularity exec --cleanenv $SINGULARITY_IMAGE tomtom -no-ssc -oc tomtom_output_upOralEpi -min-overlap 5 -dist pearson -thresh 0.05 meme_output_upOralEpi/meme.txt ../../../references/motif_dbs/JASPAR/JASPAR2022_CORE_non-redundant_v2.meme
+singularity exec --cleanenv $SINGULARITY_IMAGE tomtom -no-ssc -oc tomtom_output_upOralEpi -min-overlap 5 -dist pearson -thresh 0.05 meme_output_upOralEpi/meme.txt ../../../references/motif_dbs/JASPAR/JASPAR2022_CORE_non-redundant_v2.meme ../../../references/motif_dbs/EUKARYOTE/homeodomain.meme ../../../references/motif_dbs/EUKARYOTE/jolma2013.meme
 ```
 
-**up_Aboral**: Based on the TOMTOM results, only the motif had any
-significant (q \< 0.05) matches to the JASPAR database. This poly-T
-motif is not interesting to me.
-
-<img height="100" alt="motif1" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/differential_expression/TFs/meme_output_upAboral/logo1.png?raw=true">
-
-**up_OralEpi**: Based on the TOMTOM results, only three motifs had
-significant (q \< 0.05) matches to the JASPAR database:
+**up_Aboral**: Based on the TOMTOM results, three motifs had significant
+(q \< 0.05) matches to the databases queried:
 
 1.  Poly-C, not interesting:
-    <img height="100" alt="motif1" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/differential_expression/TFs/meme_output_upOralEpi/logo2.png?raw=true">
+    <img height="100" width = "227" alt="motif1" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/differential_expression/TFs/meme_output_upAboral/logo1.png?raw=true">
 2.  Poly-T, not interesting:
-    <img height="100" alt="motif1" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/differential_expression/TFs/meme_output_upOralEpi/logo3.png?raw=true">
-3.  CCGCCATBTTK (MEME-6):
-    <img height="100" alt="motif1" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/differential_expression/TFs/meme_output_upOralEpi/logo6.png?raw=true">
+    <img height="100" width = "227" alt="motif4" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/differential_expression/TFs/meme_output_upAboral/logo4.png?raw=true">
+3.  KGGAATTCCTAGGAA (MEME-3):
+    <img height="100" width = "227" alt="motif3" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/differential_expression/TFs/meme_output_upAboral/logo3.png?raw=true">
 
-- Both of the matches matched to the **Reverse complement** of this
-  motif.
-- Match 1: MA1651.1 (ZFP42)
-  - <img height="300" alt="motif1" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/differential_expression/TFs/tomtom_output_upOralEpi/MEME_6_Match1.png?raw=true">
+- There was a match to the **Reverse complement** of this motif.
+- Match 1: MA0731.1 (BCL6B)
+  - <img height="200" width = "400" alt="motif1" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/differential_expression/TFs/tomtom_output_upAboral/MEME_3_Match1.png?raw=true">
   - Database JASPAR2022_CORE_non-redundant_v2
-  - p-value 5.17e-06
-  - E-value 1.01e-02
-  - q-value 1.93e-02
-  - Overlap 11
-  - Offset 6
-  - Orientation Reverse Complement
-- Match 2:
-  - <img height="300" alt="motif1" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/differential_expression/TFs/tomtom_output_upOralEpi/MEME_6_Match2.png?raw=true">
-  - Name MA0095.3 (Yy1)
-  - Database JASPAR2022_CORE_non-redundant_v2
-  - p-value 9.87e-06
-  - E-value 1.93e-02
-  - q-value 1.93e-02
-  - Overlap 10
+    - Identical match from **jolma2013** database: BCL6B_DBD
+  - p-value 2.54e-06
+  - E-value 7.57e-03
+  - q-value 7.57e-03
+  - Overlap 14
   - Offset -1
   - Orientation Reverse Complement
 
-I am going to run FIMO to quantify this motif against all the genes.
+**up_OralEpi**: Based on the TOMTOM results, three motifs had
+significant (q \< 0.05) matches to the databases queried:
+
+1.  Poly-G, not interesting:
+    <img height="100" width = "227" alt="motif1" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/differential_expression/TFs/meme_output_upOralEpi/logo1.png?raw=true">
+2.  Poly-A, not interesting:
+    <img height="100" width = "227" alt="motif4" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/differential_expression/TFs/meme_output_upOralEpi/logo4.png?raw=true">
+3.  CAAVATGGCGG (MEME-3):
+    <img height="100" width = "227" alt="motif3" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/differential_expression/TFs/meme_output_upOralEpi/logo3.png?raw=true">
+
+- Match 1:
+  - <img height="200" width="262" alt="match" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/differential_expression/TFs/tomtom_output_upOralEpi/MEME_3_Match1.png?raw=true">
+  - Name YY2_full_1
+  - Database jolma2013
+  - p-value 7.01e-07
+  - E-value 2.09e-03
+  - q-value 4.17e-03
+  - Overlap 10
+  - Offset -1
+  - Orientation Reverse Complement
+- Match 2
+  - <img height="200" width="464" alt="match2" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/differential_expression/TFs/tomtom_output_upOralEpi/MEME_3_Match2.png?raw=true">
+  - Name MA1651.1 (ZFP42)
+  - Database JASPAR2022_CORE_non-redundant_v2
+  - p-value 7.48e-06
+  - E-value 2.23e-02
+  - q-value 1.67e-02
+  - Overlap 11
+  - Offset 4
+  - Orientation Normal
+- Match 3:
+  - <img height="200" width="299" alt="match3" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/differential_expression/TFs/tomtom_output_upOralEpi/MEME_3_Match3.png?raw=true">
+  - Name MA0095.3 (Yy1)
+  - Database JASPAR2022_CORE_non-redundant_v2
+  - p-value 8.41e-06
+  - E-value 2.51e-02
+  - q-value 1.67e-02
+  - Overlap 10
+  - Offset 2
+  - Orientation Normal
+
+### 0.6.2 FIMO: I am going to run FIMO to quantify these 2 motifs against all the genes.
 
 ``` bash
 cd ../scripts
@@ -569,14 +594,18 @@ module load apptainer/latest
 
 # run FIMO 
 
-singularity exec --cleanenv $SINGULARITY_IMAGE fimo --oc fimo_output_upOralEpi --motif "CCGCCATBTTK" meme_output_upOralEpi/meme.txt promoters_500_upstream.fasta
+singularity exec --cleanenv $SINGULARITY_IMAGE fimo --oc fimo_output_upAboral --motif "KGGAATTCCTAGGAA" meme_output_upAboral/meme.txt promoters_500_upstream.fasta
+
+singularity exec --cleanenv $SINGULARITY_IMAGE fimo --oc fimo_output_upOralEpi --motif "CAAVATGGCGG" meme_output_upOralEpi/meme.txt promoters_500_upstream.fasta
 ```
+
+### 0.6.3 FIMO Results, up Aboral
 
 Visualize log-fold change of genes that have this motif in their
 promoter sequences:
 
 ``` r
-fimo <- read.table("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo.tsv", header = TRUE)
+fimo <- read.table("../output_RNA/differential_expression/TFs/fimo_output_upAboral/fimo.tsv", header = TRUE)
 
 fimo_filtered <- fimo %>% filter(q.value < 0.05)  
 
@@ -603,6 +632,10 @@ ggplot(fimo_counts, aes(x = factor(n), y = log2FoldChange, fill = factor(n))) +
 
     ## Warning: Groups with fewer than two datapoints have been dropped.
     ## ℹ Set `drop = FALSE` to consider such groups for position adjustment purposes.
+    ## Groups with fewer than two datapoints have been dropped.
+    ## ℹ Set `drop = FALSE` to consider such groups for position adjustment purposes.
+    ## Groups with fewer than two datapoints have been dropped.
+    ## ℹ Set `drop = FALSE` to consider such groups for position adjustment purposes.
 
 ![](04-TFs_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
@@ -618,94 +651,12 @@ ggplot(fimo_counts_DE, aes(x = factor(n), y = log2FoldChange, fill = factor(n)))
   ) 
 ```
 
+    ## Warning: Groups with fewer than two datapoints have been dropped.
+    ## ℹ Set `drop = FALSE` to consider such groups for position adjustment purposes.
+    ## Groups with fewer than two datapoints have been dropped.
+    ## ℹ Set `drop = FALSE` to consider such groups for position adjustment purposes.
+
 ![](04-TFs_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
-
-``` r
-fimo_presence_absence <- fimo_counts %>% mutate(n = if_else(n>0, 1, n))
-
-fimo_presence_absence_DE <- fimo_presence_absence %>% filter(padj < 0.05)
-
-ggplot(fimo_presence_absence, aes(x = factor(n), y = log2FoldChange, fill = factor(n))) +
-  geom_jitter(width = 0.2, alpha = 0.3, aes(color = factor(n))) +
-  geom_violin(alpha = 0.7) + 
-  theme_minimal() +
-  labs(
-    title = "Log2 Fold Change by Motif Presence/Absence",
-    x = "Motif Copies ",
-    y = "Log2 Fold Change"
-  ) 
-```
-
-![](04-TFs_files/figure-gfm/unnamed-chunk-9-3.png)<!-- -->
-
-``` r
-ggplot(fimo_presence_absence_DE, aes(x = factor(n), y = log2FoldChange, fill = factor(n))) +
-  geom_jitter(width = 0.2, alpha = 0.3, aes(color = factor(n))) +
-  geom_violin(alpha = 0.7) + 
-  theme_minimal() +
-  labs(
-    title = "Log2 Fold Change by Motif Presence/Absence, significantly DE genes",
-    x = "Motif Copies ",
-    y = "Log2 Fold Change"
-  ) 
-```
-
-![](04-TFs_files/figure-gfm/unnamed-chunk-9-4.png)<!-- -->
-
-Wow! It looks like the presence of this motif may be reflected in
-log2FoldChange! The genes with 1 or 2 sites have predominately negative
-fold change.
-
-``` r
-# Fisher's exact test for presence/absence
-fisher_table <- table(fimo_presence_absence_DE$n, fimo_presence_absence_DE$log2FoldChange > 0)
-fisher_table
-```
-
-    ##    
-    ##     FALSE TRUE
-    ##   0  2501  784
-    ##   1   301   20
-
-``` r
-fisher.test(fisher_table)
-```
-
-    ## 
-    ##  Fisher's Exact Test for Count Data
-    ## 
-    ## data:  fisher_table
-    ## p-value = 5.622e-16
-    ## alternative hypothesis: true odds ratio is not equal to 1
-    ## 95 percent confidence interval:
-    ##  0.1267615 0.3362519
-    ## sample estimates:
-    ## odds ratio 
-    ##  0.2120124
-
-``` r
-logistic_model <- glm((log2FoldChange > 0) ~ n, data = fimo_presence_absence_DE, family = binomial)
-summary(logistic_model)
-```
-
-    ## 
-    ## Call:
-    ## glm(formula = (log2FoldChange > 0) ~ n, family = binomial, data = fimo_presence_absence_DE)
-    ## 
-    ## Coefficients:
-    ##             Estimate Std. Error z value Pr(>|z|)    
-    ## (Intercept) -1.16004    0.04093 -28.341  < 2e-16 ***
-    ## n           -1.55134    0.23451  -6.615 3.71e-11 ***
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-    ## 
-    ## (Dispersion parameter for binomial family taken to be 1)
-    ## 
-    ##     Null deviance: 3826.9  on 3605  degrees of freedom
-    ## Residual deviance: 3760.2  on 3604  degrees of freedom
-    ## AIC: 3764.2
-    ## 
-    ## Number of Fisher Scoring iterations: 5
 
 ``` r
 plot_data <- fimo_counts %>%
@@ -749,13 +700,13 @@ plot <- ggplot(plot_data, aes(x = motif_count, y = log2FoldChange, fill = motif_
 
 ``` r
 # Save the plot as a high-quality PNG
-ggsave("../output_RNA/differential_expression/TFs/fimo_motif6.png", plot, width = 8, height = 6, dpi = 300)
+ggsave("../output_RNA/differential_expression/TFs/fimo_output_upAboral/fimo_motif6.png", plot, width = 8, height = 6, dpi = 300)
 
 # Display the plot
 print(plot)
 ```
 
-![](04-TFs_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](04-TFs_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ``` r
 plot_data <- fimo_counts_DE %>%
@@ -790,15 +741,395 @@ plot <- ggplot(plot_data, aes(x = motif_count, y = log2FoldChange, fill = motif_
     panel.grid.major = element_line(size = 0.5, linetype = "dashed", color = "gray80")
   )
 
-ggsave("../output_RNA/differential_expression/TFs/fimo_motif6_DE.png", plot, width = 8, height = 6, dpi = 300)
+ggsave("../output_RNA/differential_expression/TFs/fimo_output_upAboral/fimo_motif6_DE.png", plot, width = 8, height = 6, dpi = 300)
 
 # Display the plot
 print(plot)
 ```
 
-![](04-TFs_files/figure-gfm/unnamed-chunk-12-2.png)<!-- -->
+![](04-TFs_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
 
-## 0.7 Updating Renv environment:
+Not a huge effect of this motif on the log2foldchange. FIMO found 26
+occurances of this motif in the promoter of one gene, and the repetitive
+nature of the motif definitely contributed to this.
+
+``` r
+fimo_presence_absence <- fimo_counts %>% mutate(n = if_else(n>0, 1, n))
+
+fimo_presence_absence_DE <- fimo_presence_absence %>% filter(padj < 0.05)
+
+# Fisher's exact test for presence/absence
+fisher_table <- table(fimo_presence_absence_DE$n, fimo_presence_absence_DE$log2FoldChange < 0)
+fisher_table
+```
+
+    ##    
+    ##     FALSE TRUE
+    ##   0   799 2799
+    ##   1     5    3
+
+``` r
+fisher.test(fisher_table)
+```
+
+    ## 
+    ##  Fisher's Exact Test for Count Data
+    ## 
+    ## data:  fisher_table
+    ## p-value = 0.01662
+    ## alternative hypothesis: true odds ratio is not equal to 1
+    ## 95 percent confidence interval:
+    ##  0.02655846 0.88305120
+    ## sample estimates:
+    ## odds ratio 
+    ##  0.1713858
+
+``` r
+fisher_table <- table(fimo_presence_absence$n, fimo_presence_absence$log2FoldChange < 0)
+fisher_table
+```
+
+    ##    
+    ##     FALSE TRUE
+    ##   0  4794 9653
+    ##   1     7   10
+
+``` r
+fisher.test(fisher_table)
+```
+
+    ## 
+    ##  Fisher's Exact Test for Count Data
+    ## 
+    ## data:  fisher_table
+    ## p-value = 0.6069
+    ## alternative hypothesis: true odds ratio is not equal to 1
+    ## 95 percent confidence interval:
+    ##  0.2435957 2.1974682
+    ## sample estimates:
+    ## odds ratio 
+    ##  0.7094708
+
+``` r
+logistic_model <- glm((log2FoldChange > 0) ~ n, data = fimo_presence_absence_DE, family = binomial)
+summary(logistic_model)
+```
+
+    ## 
+    ## Call:
+    ## glm(formula = (log2FoldChange > 0) ~ n, family = binomial, data = fimo_presence_absence_DE)
+    ## 
+    ## Coefficients:
+    ##             Estimate Std. Error z value Pr(>|z|)    
+    ## (Intercept) -1.25366    0.04011 -31.255   <2e-16 ***
+    ## n            1.76448    0.73140   2.412   0.0158 *  
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## (Dispersion parameter for binomial family taken to be 1)
+    ## 
+    ##     Null deviance: 3826.9  on 3605  degrees of freedom
+    ## Residual deviance: 3821.0  on 3604  degrees of freedom
+    ## AIC: 3825
+    ## 
+    ## Number of Fisher Scoring iterations: 4
+
+``` r
+logistic_model <- glm((log2FoldChange > 0) ~ n, data = fimo_presence_absence, family = binomial)
+summary(logistic_model)
+```
+
+    ## 
+    ## Call:
+    ## glm(formula = (log2FoldChange > 0) ~ n, family = binomial, data = fimo_presence_absence)
+    ## 
+    ## Coefficients:
+    ##             Estimate Std. Error z value Pr(>|z|)    
+    ## (Intercept) -0.69990    0.01767 -39.612   <2e-16 ***
+    ## n            0.34323    0.49312   0.696    0.486    
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## (Dispersion parameter for binomial family taken to be 1)
+    ## 
+    ##     Null deviance: 18385  on 14463  degrees of freedom
+    ## Residual deviance: 18384  on 14462  degrees of freedom
+    ## AIC: 18388
+    ## 
+    ## Number of Fisher Scoring iterations: 4
+
+### 0.6.4 FIMO Results, up OralEpi
+
+Visualize log-fold change of genes that have this motif in their
+promoter sequences:
+
+``` r
+fimo <- read.table("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo.tsv", header = TRUE)
+
+fimo_filtered <- fimo %>% filter(q.value < 0.05)  
+
+# Merge FIMO results with DESeq data 
+fimo_merged <- fimo_filtered %>% full_join(DESeq, by = c("sequence_name" = "query"))
+
+#summarize
+
+fimo_counts <- fimo_merged %>% group_by(sequence_name, log2FoldChange, padj,  motif_id) %>% count() %>%
+  mutate(n = if_else(is.na(motif_id), 0, n)) 
+
+fimo_counts_DE <- fimo_counts %>% filter(padj < 0.05)
+```
+
+``` r
+plot_data <- fimo_counts %>%
+  mutate(motif_count = case_when(
+    n == 0 ~ "0 Motifs",
+    n == 1 ~ "1 Motif",
+    n > 1 ~ ">1 Motifs"
+  )) %>%
+  mutate(motif_count = factor(motif_count, levels = c("0 Motifs", "1 Motif", ">1 Motifs")))
+
+plot <- ggplot(plot_data, aes(x = motif_count, y = log2FoldChange, fill = motif_count)) +
+  geom_jitter(aes(color = motif_count), width = 0.2, size = 1.5, alpha = 0.6) +  
+  geom_violin(alpha = 0.7, width = 0.5) +  
+  stat_summary(fun = mean, geom = "point", shape = 21,  size = 2, fill = "white", color = "black") + 
+  scale_fill_brewer(palette = "Set2") +  
+  scale_color_brewer(palette = "Set2") + 
+  labs(
+    title = "Log2 Fold Change by Motif Presence",
+    subtitle = "All Genes",
+    x = "Number of Motifs in Promoter",
+    y = "Log2 Fold Change",
+    fill = "Motif Count",
+    color = "Motif Count"
+  ) +
+  theme_minimal(base_size = 14) + 
+  theme(
+    legend.position = "none",  
+    plot.title = element_text(face = "bold", size = 16),
+    plot.subtitle = element_text(size = 14),
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 14),
+    panel.grid.major = element_line(size = 0.5, linetype = "dashed", color = "gray80")
+  )
+
+# Save the plot as a high-quality PNG
+ggsave("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif6.png", plot, width = 8, height = 6, dpi = 300)
+
+# Display the plot
+print(plot)
+```
+
+![](04-TFs_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+
+``` r
+plot_data <- fimo_counts_DE %>%
+  mutate(motif_count = case_when(
+    n == 0 ~ "0 Motifs",
+    n == 1 ~ "1 Motif",
+    n > 1 ~ ">1 Motifs"
+  )) %>%
+  mutate(motif_count = factor(motif_count, levels = c("0 Motifs", "1 Motif", ">1 Motifs")))
+
+plot <- ggplot(plot_data, aes(x = motif_count, y = log2FoldChange, fill = motif_count)) +
+  geom_jitter(aes(color = motif_count), width = 0.2, size = 1.5, alpha = 0.6) +  
+  geom_violin(alpha = 0.7, width = 0.5) + 
+  stat_summary(fun = mean, geom = "point", shape = 21, size = 2, fill = "white", color = "black") +  
+  scale_fill_brewer(palette = "Set2") + 
+  scale_color_brewer(palette = "Set2") +  
+  labs(
+    title = "Log2 Fold Change by Motif Presence",
+    subtitle = "Significantly DE Genes",
+    x = "Number of Motifs in Promoter",
+    y = "Log2 Fold Change",
+    fill = "Motif Count",
+    color = "Motif Count"
+  ) +
+  theme_minimal(base_size = 14) +  
+  theme(
+    legend.position = "none", 
+    plot.title = element_text(face = "bold", size = 16),
+    plot.subtitle = element_text(size = 14),
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 14),
+    panel.grid.major = element_line(size = 0.5, linetype = "dashed", color = "gray80")
+  )
+
+ggsave("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif6_DE.png", plot, width = 8, height = 6, dpi = 300)
+
+# Display the plot
+print(plot)
+```
+
+![](04-TFs_files/figure-gfm/unnamed-chunk-14-2.png)<!-- -->
+
+Wow! It looks like the presence of this motif may be reflected in
+log2FoldChange! The genes with 1 or 2 sites have predominately negative
+fold change.
+
+``` r
+fimo_presence_absence <- fimo_counts %>% mutate(n = if_else(n>0, 1, n))
+
+fimo_presence_absence_DE <- fimo_presence_absence %>% filter(padj < 0.05)
+
+# Fisher's exact test for presence/absence
+fisher_table <- table(fimo_presence_absence_DE$n, fimo_presence_absence_DE$log2FoldChange > 0)
+fisher_table
+```
+
+    ##    
+    ##     FALSE TRUE
+    ##   0  2533  787
+    ##   1   269   17
+
+``` r
+fisher.test(fisher_table)
+```
+
+    ## 
+    ##  Fisher's Exact Test for Count Data
+    ## 
+    ## data:  fisher_table
+    ## p-value = 1.127e-14
+    ## alternative hypothesis: true odds ratio is not equal to 1
+    ## 95 percent confidence interval:
+    ##  0.1160307 0.3346326
+    ## sample estimates:
+    ## odds ratio 
+    ##  0.2034528
+
+``` r
+fisher_table <- table(fimo_presence_absence$n, fimo_presence_absence$log2FoldChange > 0)
+fisher_table
+```
+
+    ##    
+    ##     FALSE TRUE
+    ##   0  8553 4391
+    ##   1  1110  410
+
+``` r
+fisher.test(fisher_table)
+```
+
+    ## 
+    ##  Fisher's Exact Test for Count Data
+    ## 
+    ## data:  fisher_table
+    ## p-value = 3.664e-08
+    ## alternative hypothesis: true odds ratio is not equal to 1
+    ## 95 percent confidence interval:
+    ##  0.6371654 0.8113133
+    ## sample estimates:
+    ## odds ratio 
+    ##   0.719492
+
+``` r
+logistic_model <- glm((log2FoldChange > 0) ~ n, data = fimo_presence_absence_DE, family = binomial)
+summary(logistic_model)
+```
+
+    ## 
+    ## Call:
+    ## glm(formula = (log2FoldChange > 0) ~ n, family = binomial, data = fimo_presence_absence_DE)
+    ## 
+    ## Coefficients:
+    ##             Estimate Std. Error z value Pr(>|z|)    
+    ## (Intercept) -1.16893    0.04081 -28.643  < 2e-16 ***
+    ## n           -1.59257    0.25339  -6.285 3.28e-10 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## (Dispersion parameter for binomial family taken to be 1)
+    ## 
+    ##     Null deviance: 3826.9  on 3605  degrees of freedom
+    ## Residual deviance: 3765.4  on 3604  degrees of freedom
+    ## AIC: 3769.4
+    ## 
+    ## Number of Fisher Scoring iterations: 5
+
+``` r
+logistic_model <- glm((log2FoldChange > 0) ~ n, data = fimo_presence_absence, family = binomial)
+summary(logistic_model)
+```
+
+    ## 
+    ## Call:
+    ## glm(formula = (log2FoldChange > 0) ~ n, family = binomial, data = fimo_presence_absence)
+    ## 
+    ## Coefficients:
+    ##             Estimate Std. Error z value Pr(>|z|)    
+    ## (Intercept) -0.66673    0.01856 -35.913  < 2e-16 ***
+    ## n           -0.32923    0.06070  -5.424 5.83e-08 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## (Dispersion parameter for binomial family taken to be 1)
+    ## 
+    ##     Null deviance: 18385  on 14463  degrees of freedom
+    ## Residual deviance: 18354  on 14462  degrees of freedom
+    ## AIC: 18358
+    ## 
+    ## Number of Fisher Scoring iterations: 4
+
+## 0.7 STREME: Relative enrichment of motifs compared to background
+
+### 0.7.1 Run STREME in Linux environment using the [Docker image of MEMESuite](https://hub.docker.com/r/memesuite/memesuite) via Singularity
+
+alternatively submit jobs via their webserver:
+<https://meme-suite.org/meme/>
+
+### 0.7.2 In unity:
+
+``` bash
+cd ../scripts
+nano STREME.sh
+```
+
+``` bash
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=24
+#SBATCH --signal=2
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH --error=../scripts/outs_errs/"%x_error.%j"
+#SBATCH --output=../scripts/outs_errs/"%x_output.%j"
+#SBATCH -t 24:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+
+SINGULARITY_IMAGE="docker://memesuite/memesuite:latest"
+
+#Download Motif databases
+#cd ../references
+#wget https://meme-suite.org/meme/meme-software/Databases/motifs/motif_databases.12.25.tgz
+#tar -xvzf motif_databases.12.25.tgz
+#mv motif_databases motif_dbs
+
+cd ../output_RNA/differential_expression/TFs
+
+module load apptainer/latest
+
+# Run STREME for relative enrichment, only report motifs with e-value < 0.05
+singularity exec --cleanenv $SINGULARITY_IMAGE streme --oc streme_output_upAboral \
+  --p promoters_500_upstream_upAboral.fasta \
+  --n promoters_500_upstream.fasta \
+  --patience 50 \
+  --dna --thresh 0.05
+
+singularity exec --cleanenv $SINGULARITY_IMAGE streme --oc streme_output_upOralEpi \
+  --p promoters_500_upstream_upOralEpi.fasta \
+  --n promoters_500_upstream.fasta \
+  --patience 50 \
+  --dna --thresh 0.05
+
+# run TOMTOM on the STREME-identified motifs from above
+
+singularity exec --cleanenv $SINGULARITY_IMAGE tomtom -no-ssc -oc tomtom_streme_output_upAboral -min-overlap 5 -dist pearson -thresh 0.05 streme_output_upAboral/streme.txt ../../../references/motif_dbs/JASPAR/JASPAR2022_CORE_non-redundant_v2.meme
+
+singularity exec --cleanenv $SINGULARITY_IMAGE tomtom -no-ssc -oc tomtom_streme_output_upOralEpi -min-overlap 5 -dist pearson -thresh 0.05 streme_output_upOralEpi/streme.txt ../../../references/motif_dbs/JASPAR/JASPAR2022_CORE_non-redundant_v2.meme
+```
+
+## 0.8 Updating Renv environment:
 
 After you’ve confirmed your code works as expected, use renv::snapshot()
 to record the packages and their sources in the lockfile.
