@@ -1,0 +1,133 @@
+Loading apptainer version latest
+INFO:    Using cached SIF image
+The output directory 'meme_output_upAboral' already exists.
+Its contents will be overwritten.
+BACKGROUND: using background model of order 0
+PRIMARY (classic): n 802 p0 200 p1 602 p2 0
+SEQUENCE GROUP USAGE-- Starts/EM: p0; Trim: p0; pvalue: p0; nsites: p0,p1,p2
+SEEDS: maxwords 60316 highwater mark: seq 123 pos 162
+BALANCE: samples 123 chars 61500 nodes 8 chars/node 7687
+Initializing the motif probability tables for 2 to 1000 sites...
+nsites = 8nsites = 16nsites = 24nsites = 32nsites = 40nsites = 48nsites = 56nsites = 64nsites = 72nsites = 80nsites = 88nsites = 96nsites = 104nsites = 112nsites = 120nsites = 128nsites = 136nsites = 144nsites = 152nsites = 160nsites = 168nsites = 176nsites = 184nsites = 192nsites = 200nsites = 208nsites = 216nsites = 224nsites = 232nsites = 240nsites = 248nsites = 256nsites = 264nsites = 272nsites = 280nsites = 288nsites = 296nsites = 304nsites = 312nsites = 320nsites = 328nsites = 336nsites = 344nsites = 352nsites = 360nsites = 368nsites = 376nsites = 384nsites = 392nsites = 400nsites = 408nsites = 416nsites = 424nsites = 432nsites = 440nsites = 448nsites = 456nsites = 464nsites = 472nsites = 480nsites = 488nsites = 496nsites = 504nsites = 512nsites = 520nsites = 528nsites = 536nsites = 544nsites = 552nsites = 560nsites = 568nsites = 576nsites = 584nsites = 592nsites = 600nsites = 608nsites = 616nsites = 624nsites = 632nsites = 640nsites = 648nsites = 656nsites = 664nsites = 672nsites = 680nsites = 688nsites = 696nsites = 704nsites = 712nsites = 720nsites = 728nsites = 736nsites = 744nsites = 752nsites = 760nsites = 768nsites = 776nsites = 784nsites = 792nsites = 800nsites = 808nsites = 816nsites = 824nsites = 832nsites = 840nsites = 848nsites = 856nsites = 864nsites = 872nsites = 880nsites = 888nsites = 896nsites = 904nsites = 912nsites = 920nsites = 928nsites = 936nsites = 944nsites = 952nsites = 960nsites = 968nsites = 976nsites = 984nsites = 992nsites = 1000
+Done initializing.
+
+seqs=   802, min_w= 500, max_w=  500, total_size=   401000
+
+motif=1
+SEED DEPTHS: 2 4 8 16 32 64 128 249
+SEED WIDTHS: 8 11 15
+starts: w=8, seq=0, l=500				starts: w=8, seq=5, l=500				starts: w=8, seq=10, l=500				starts: w=8, seq=15, l=500				starts: w=11, seq=0, l=500				starts: w=11, seq=5, l=500				starts: w=11, seq=10, l=500				starts: w=11, seq=15, l=500				starts: w=15, seq=0, l=500				starts: w=15, seq=5, l=500				starts: w=15, seq=10, l=500				starts: w=15, seq=15, l=500				em: w=   8, psites=   2, iter=   0 em: w=   8, psites=   2, iter=  10 em: w=   8, psites=   2, iter=  20 em: w=   8, psites=   2, iter=  30 em: w=   8, psites=   2, iter=  40 em: w=  11, psites=   2, iter=   0 em: w=  11, psites=   2, iter=  10 em: w=  11, psites=   2, iter=  20 em: w=  11, psites=   2, iter=  30 em: w=  11, psites=   2, iter=  40 em: w=  15, psites=   2, iter=   0 em: w=  15, psites=   2, iter=  10 em: w=  15, psites=   2, iter=  20 em: w=  15, psites=   2, iter=  30 
+motif=2
+SEED DEPTHS: 2 4 8 16 32 64 128 249
+SEED WIDTHS: 8 11 15
+starts: w=8, seq=0, l=500				starts: w=8, seq=5, l=500				starts: w=8, seq=10, l=500				starts: w=8, seq=15, l=500				starts: w=11, seq=0, l=500				starts: w=11, seq=5, l=500				starts: w=11, seq=10, l=500				starts: w=11, seq=15, l=500				starts: w=15, seq=0, l=500				starts: w=15, seq=5, l=500				starts: w=15, seq=10, l=500				starts: w=15, seq=15, l=500				em: w=   8, psites=   2, iter=   0 em: w=   8, psites=   2, iter=  10 em: w=   8, psites=   2, iter=  20 em: w=   8, psites=   2, iter=  30 em: w=   8, psites=   2, iter=  40 em: w=  11, psites=   2, iter=   0 em: w=  11, psites=   2, iter=  10 em: w=  11, psites=   2, iter=  20 em: w=  11, psites=   2, iter=  30 em: w=  11, psites=   2, iter=  40 em: w=  15, psites=   2, iter=   0 
+motif=3
+SEED DEPTHS: 2 4 8 16 32 64 128 249
+SEED WIDTHS: 8 11 15
+starts: w=8, seq=0, l=500				starts: w=8, seq=5, l=500				starts: w=8, seq=10, l=500				starts: w=8, seq=15, l=500				starts: w=11, seq=0, l=500				starts: w=11, seq=5, l=500				starts: w=11, seq=10, l=500				starts: w=11, seq=15, l=500				starts: w=15, seq=0, l=500				starts: w=15, seq=5, l=500				starts: w=15, seq=10, l=500				starts: w=15, seq=15, l=500				em: w=   8, psites=   2, iter=   0 em: w=   8, psites=   2, iter=  10 em: w=   8, psites=   2, iter=  20 em: w=   8, psites=   2, iter=  30 em: w=   8, psites=   2, iter=  40 em: w=  11, psites=   2, iter=   0 em: w=  11, psites=   2, iter=  10 em: w=  11, psites=   2, iter=  20 em: w=  11, psites=   2, iter=  30 em: w=  11, psites=   2, iter=  40 em: w=  15, psites=   2, iter=   0 em: w=  15, psites=   2, iter=  10 em: w=  15, psites=   2, iter=  20 em: w=  15, psites=   2, iter=  30 em: w=  15, psites=   2, iter=  40 
+motif=4
+SEED DEPTHS: 2 4 8 16 32 64 128 249
+SEED WIDTHS: 8 11 15
+starts: w=8, seq=0, l=500				starts: w=8, seq=5, l=500				starts: w=8, seq=10, l=500				starts: w=8, seq=15, l=500				starts: w=11, seq=0, l=500				starts: w=11, seq=5, l=500				starts: w=11, seq=10, l=500				starts: w=11, seq=15, l=500				starts: w=15, seq=0, l=500				starts: w=15, seq=5, l=500				starts: w=15, seq=10, l=500				starts: w=15, seq=15, l=500				em: w=   8, psites=   2, iter=   0 em: w=   8, psites=   2, iter=  10 em: w=   8, psites=   2, iter=  20 em: w=   8, psites=   2, iter=  30 em: w=   8, psites=   2, iter=  40 em: w=  11, psites=   2, iter=   0 em: w=  11, psites=   2, iter=  10 em: w=  11, psites=   2, iter=  20 em: w=  11, psites=   2, iter=  30 em: w=  11, psites=   2, iter=  40 em: w=  15, psites=   2, iter=   0 em: w=  15, psites=   2, iter=  10 em: w=  15, psites=   2, iter=  20 em: w=  15, psites=   2, iter=  30 em: w=  15, psites=   2, iter=  40 
+motif=5
+SEED DEPTHS: 2 4 8 16 32 64 128 249
+SEED WIDTHS: 8 11 15
+starts: w=8, seq=0, l=500				starts: w=8, seq=5, l=500				starts: w=8, seq=10, l=500				starts: w=8, seq=15, l=500				starts: w=11, seq=0, l=500				starts: w=11, seq=5, l=500				starts: w=11, seq=10, l=500				starts: w=11, seq=15, l=500				starts: w=15, seq=0, l=500				starts: w=15, seq=5, l=500				starts: w=15, seq=10, l=500				starts: w=15, seq=15, l=500				em: w=   8, psites=   2, iter=   0 em: w=   8, psites=   2, iter=  10 em: w=   8, psites=   2, iter=  20 em: w=   8, psites=   2, iter=  30 em: w=   8, psites=   2, iter=  40 em: w=  11, psites=   2, iter=   0 em: w=  11, psites=   2, iter=  10 em: w=  11, psites=   2, iter=  20 em: w=  11, psites=   2, iter=  30 em: w=  11, psites=   2, iter=  40 em: w=  15, psites=   2, iter=   0 em: w=  15, psites=   2, iter=  10 em: w=  15, psites=   2, iter=  20 em: w=  15, psites=   2, iter=  30 em: w=  15, psites=   2, iter=  40 
+INFO:    Using cached SIF image
+The output directory 'meme_output_upOralEpi' already exists.
+Its contents will be overwritten.
+BACKGROUND: using background model of order 0
+PRIMARY (classic): n 2792 p0 200 p1 2592 p2 0
+SEQUENCE GROUP USAGE-- Starts/EM: p0; Trim: p0; pvalue: p0; nsites: p0,p1,p2
+SEEDS: maxwords 60316 highwater mark: seq 123 pos 162
+BALANCE: samples 123 chars 61500 nodes 8 chars/node 7687
+Initializing the motif probability tables for 2 to 1000 sites...
+nsites = 8nsites = 16nsites = 24nsites = 32nsites = 40nsites = 48nsites = 56nsites = 64nsites = 72nsites = 80nsites = 88nsites = 96nsites = 104nsites = 112nsites = 120nsites = 128nsites = 136nsites = 144nsites = 152nsites = 160nsites = 168nsites = 176nsites = 184nsites = 192nsites = 200nsites = 208nsites = 216nsites = 224nsites = 232nsites = 240nsites = 248nsites = 256nsites = 264nsites = 272nsites = 280nsites = 288nsites = 296nsites = 304nsites = 312nsites = 320nsites = 328nsites = 336nsites = 344nsites = 352nsites = 360nsites = 368nsites = 376nsites = 384nsites = 392nsites = 400nsites = 408nsites = 416nsites = 424nsites = 432nsites = 440nsites = 448nsites = 456nsites = 464nsites = 472nsites = 480nsites = 488nsites = 496nsites = 504nsites = 512nsites = 520nsites = 528nsites = 536nsites = 544nsites = 552nsites = 560nsites = 568nsites = 576nsites = 584nsites = 592nsites = 600nsites = 608nsites = 616nsites = 624nsites = 632nsites = 640nsites = 648nsites = 656nsites = 664nsites = 672nsites = 680nsites = 688nsites = 696nsites = 704nsites = 712nsites = 720nsites = 728nsites = 736nsites = 744nsites = 752nsites = 760nsites = 768nsites = 776nsites = 784nsites = 792nsites = 800nsites = 808nsites = 816nsites = 824nsites = 832nsites = 840nsites = 848nsites = 856nsites = 864nsites = 872nsites = 880nsites = 888nsites = 896nsites = 904nsites = 912nsites = 920nsites = 928nsites = 936nsites = 944nsites = 952nsites = 960nsites = 968nsites = 976nsites = 984nsites = 992nsites = 1000
+Done initializing.
+
+seqs=  2792, min_w= 500, max_w=  500, total_size=  1396000
+
+motif=1
+SEED DEPTHS: 2 4 8 16 32 64 72
+SEED WIDTHS: 8 11 15
+starts: w=8, seq=0, l=500				starts: w=8, seq=5, l=500				starts: w=8, seq=10, l=500				starts: w=8, seq=15, l=500				starts: w=11, seq=0, l=500				starts: w=11, seq=5, l=500				starts: w=11, seq=10, l=500				starts: w=11, seq=15, l=500				starts: w=15, seq=0, l=500				starts: w=15, seq=5, l=500				starts: w=15, seq=10, l=500				starts: w=15, seq=15, l=500				em: w=   8, psites=   2, iter=   0 em: w=   8, psites=   2, iter=  10 em: w=   8, psites=   2, iter=  20 em: w=   8, psites=   2, iter=  30 em: w=   8, psites=   2, iter=  40 em: w=  11, psites=   4, iter=   0 em: w=  11, psites=   4, iter=  10 em: w=  11, psites=   4, iter=  20 em: w=  11, psites=   4, iter=  30 em: w=  11, psites=   4, iter=  40 em: w=  15, psites=   8, iter=   0 em: w=  15, psites=   8, iter=  10 em: w=  15, psites=   8, iter=  20 em: w=  15, psites=   8, iter=  30 
+motif=2
+SEED DEPTHS: 2 4 8 16 32 64 72
+SEED WIDTHS: 8 11 15
+starts: w=8, seq=0, l=500				starts: w=8, seq=5, l=500				starts: w=8, seq=10, l=500				starts: w=8, seq=15, l=500				starts: w=11, seq=0, l=500				starts: w=11, seq=5, l=500				starts: w=11, seq=10, l=500				starts: w=11, seq=15, l=500				starts: w=15, seq=0, l=500				starts: w=15, seq=5, l=500				starts: w=15, seq=10, l=500				starts: w=15, seq=15, l=500				em: w=   8, psites=   2, iter=   0 em: w=   8, psites=   2, iter=  10 em: w=   8, psites=   2, iter=  20 em: w=   8, psites=   2, iter=  30 em: w=   8, psites=   2, iter=  40 em: w=  11, psites=   4, iter=   0 em: w=  11, psites=   4, iter=  10 em: w=  11, psites=   4, iter=  20 em: w=  11, psites=   4, iter=  30 em: w=  11, psites=   4, iter=  40 em: w=  15, psites=   8, iter=   0 em: w=  15, psites=   8, iter=  10 
+motif=3
+SEED DEPTHS: 2 4 8 16 32 64 72
+SEED WIDTHS: 8 11 15
+starts: w=8, seq=0, l=500				starts: w=8, seq=5, l=500				starts: w=8, seq=10, l=500				starts: w=8, seq=15, l=500				starts: w=11, seq=0, l=500				starts: w=11, seq=5, l=500				starts: w=11, seq=10, l=500				starts: w=11, seq=15, l=500				starts: w=15, seq=0, l=500				starts: w=15, seq=5, l=500				starts: w=15, seq=10, l=500				starts: w=15, seq=15, l=500				em: w=   8, psites=   2, iter=   0 em: w=   8, psites=   2, iter=  10 em: w=   8, psites=   2, iter=  20 em: w=   8, psites=   2, iter=  30 em: w=   8, psites=   2, iter=  40 em: w=  11, psites=   4, iter=   0 em: w=  11, psites=   4, iter=  10 em: w=  11, psites=   4, iter=  20 em: w=  11, psites=   4, iter=  30 em: w=  11, psites=   4, iter=  40 em: w=  15, psites=   8, iter=   0 em: w=  15, psites=   8, iter=  10 
+motif=4
+SEED DEPTHS: 2 4 8 16 32 64 72
+SEED WIDTHS: 8 11 15
+starts: w=8, seq=0, l=500				starts: w=8, seq=5, l=500				starts: w=8, seq=10, l=500				starts: w=8, seq=15, l=500				starts: w=11, seq=0, l=500				starts: w=11, seq=5, l=500				starts: w=11, seq=10, l=500				starts: w=11, seq=15, l=500				starts: w=15, seq=0, l=500				starts: w=15, seq=5, l=500				starts: w=15, seq=10, l=500				starts: w=15, seq=15, l=500				em: w=   8, psites=   2, iter=   0 em: w=   8, psites=   2, iter=  10 em: w=   8, psites=   2, iter=  20 em: w=   8, psites=   2, iter=  30 em: w=   8, psites=   2, iter=  40 em: w=  11, psites=   4, iter=   0 em: w=  11, psites=   4, iter=  10 em: w=  11, psites=   4, iter=  20 em: w=  11, psites=   4, iter=  30 em: w=  11, psites=   4, iter=  40 em: w=  15, psites=   8, iter=   0 em: w=  15, psites=   8, iter=  10 
+motif=5
+SEED DEPTHS: 2 4 8 16 32 64 72
+SEED WIDTHS: 8 11 15
+starts: w=8, seq=0, l=500				starts: w=8, seq=5, l=500				starts: w=8, seq=10, l=500				starts: w=8, seq=15, l=500				starts: w=11, seq=0, l=500				starts: w=11, seq=5, l=500				starts: w=11, seq=10, l=500				starts: w=11, seq=15, l=500				starts: w=15, seq=0, l=500				starts: w=15, seq=5, l=500				starts: w=15, seq=10, l=500				starts: w=15, seq=15, l=500				em: w=   8, psites=   2, iter=   0 em: w=   8, psites=   2, iter=  10 em: w=   8, psites=   2, iter=  20 em: w=   8, psites=   2, iter=  30 em: w=   8, psites=   2, iter=  40 em: w=  11, psites=   4, iter=   0 em: w=  11, psites=   4, iter=  10 em: w=  11, psites=   4, iter=  20 em: w=  11, psites=   4, iter=  30 em: w=  11, psites=   4, iter=  40 em: w=  15, psites=   8, iter=   0 em: w=  15, psites=   8, iter=  10 
+motif=6
+SEED DEPTHS: 2 4 8 16 32 64 72
+SEED WIDTHS: 8 11 15
+starts: w=8, seq=0, l=500				starts: w=8, seq=5, l=500				starts: w=8, seq=10, l=500				starts: w=8, seq=15, l=500				starts: w=11, seq=0, l=500				starts: w=11, seq=5, l=500				starts: w=11, seq=10, l=500				starts: w=11, seq=15, l=500				starts: w=15, seq=0, l=500				starts: w=15, seq=5, l=500				starts: w=15, seq=10, l=500				starts: w=15, seq=15, l=500				em: w=   8, psites=   2, iter=   0 em: w=   8, psites=   2, iter=  10 em: w=   8, psites=   2, iter=  20 em: w=   8, psites=   2, iter=  30 em: w=   8, psites=   2, iter=  40 em: w=  11, psites=   4, iter=   0 em: w=  11, psites=   4, iter=  10 em: w=  11, psites=   4, iter=  20 em: w=  11, psites=   4, iter=  30 em: w=  11, psites=   4, iter=  40 em: w=  15, psites=   8, iter=   0 em: w=  15, psites=   8, iter=  10 
+INFO:    Using cached SIF image
+The output directory 'tomtom_output_upAboral' already exists.
+Its contents will be overwritten.
+Processing query 1 out of 4 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.988046
+#   Estimated pi_0=0.989496
+Processing query 2 out of 4 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00131
+#   Estimated pi_0=1
+Processing query 3 out of 4 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00165
+#   Estimated pi_0=1
+Processing query 4 out of 4 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.994897
+#   Estimated pi_0=0.994897
+INFO:    Using cached SIF image
+The output directory 'tomtom_output_upOralEpi' already exists.
+Its contents will be overwritten.
+Processing query 1 out of 5 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.991015
+#   Estimated pi_0=0.991015
+Processing query 2 out of 5 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00367
+#   Estimated pi_0=1
+Processing query 3 out of 5 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00013
+#   Estimated pi_0=1
+Processing query 4 out of 5 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 0.996416
+#   Estimated pi_0=0.996416
+Processing query 5 out of 5 
+# Computing q-values.
+#   Estimating pi_0 from all 5954 observed p-values.
+#   Estimating pi_0.
+# Minimal pi_zero = 1.00317
+#   Estimated pi_0=1
