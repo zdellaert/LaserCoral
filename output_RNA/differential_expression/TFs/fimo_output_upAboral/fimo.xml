@@ -4,10 +4,10 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation=  xmlns:fimo="http://noble.gs.washington.edu/schema/fimo"
 >
-<command-line>fimo --oc fimo_output_upOralEpi --motif CAAVATGGCGG meme_output_upOralEpi/meme.txt promoters_500_upstream.fasta</command-line>
+<command-line>fimo --oc fimo_output_upAboral --motif KGGAATTCCTAGGAA meme_output_upAboral/meme.txt promoters_500_upstream.fasta</command-line>
 <settings>
-<setting name="output directory">fimo_output_upOralEpi</setting>
-<setting name="MEME file name">meme_output_upOralEpi/meme.txt</setting>
+<setting name="output directory">fimo_output_upAboral</setting>
+<setting name="MEME file name">meme_output_upAboral/meme.txt</setting>
 <setting name="sequence file name">promoters_500_upstream.fasta</setting>
 <setting name="background file name">--nrdb--</setting>
 <setting name="allow clobber">true</setting>
@@ -20,7 +20,7 @@
 <setting name="max stored scores">100000</setting>
 <setting name="pseudocount">0.1</setting>
 <setting name="verbosity">2</setting>
-<setting name="selected motif">CAAVATGGCGG</setting>
+<setting name="selected motif">KGGAATTCCTAGGAA</setting>
 </settings>
 <sequence-data num-sequences="14422" num-residues="7211000" />
 <alphabet name="DNA" like="dna">
@@ -40,11 +40,10 @@
 <letter id="Y" symbol="Y" equals="CT" name="Pyrimidine"/>
 <letter id="K" symbol="K" equals="GT" name="Keto"/>
 </alphabet>
-<motif name="GGGGGGGGGGGGGRG" alt="MEME-1" width="15" best-possible-match="GGGGGGGGGGGGGGG"/>
-<motif name="GAACCACGAGAACCA" alt="MEME-2" width="15" best-possible-match="GAACCACGAGAACCA"/>
-<motif name="CAAVATGGCGG" alt="MEME-3" width="11" best-possible-match="CAAAATGGCGG"/>
-<motif name="ARAAAAAAAAA" alt="MEME-4" width="11" best-possible-match="AAAAAAAAAAA"/>
-<motif name="AGCCCGGTTACCGRG" alt="MEME-5" width="15" best-possible-match="AGCCCGGTTACCGGG"/>
+<motif name="CCYCCCCCCCCCCCC" alt="MEME-1" width="15" best-possible-match="CCTCCCCCCCCCCCC"/>
+<motif name="TGGGCCAGTTGGGBC" alt="MEME-2" width="15" best-possible-match="TGGGCCAGTTGGGTC"/>
+<motif name="KGGAATTCCTAGGAA" alt="MEME-3" width="15" best-possible-match="GGGAATTCCTAGGAA"/>
+<motif name="TTTTTBTTYTTTTTT" alt="MEME-4" width="15" best-possible-match="TTTTTTTTTTTTTTT"/>
 <background source="--nrdb--">
 <value letter="A">0.275</value>
 <value letter="C">0.225</value>

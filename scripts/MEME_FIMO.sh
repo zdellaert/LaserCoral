@@ -17,5 +17,6 @@ module load apptainer/latest
 
 # run FIMO 
 
-#singularity exec --cleanenv $SINGULARITY_IMAGE fimo --oc fimo_output_upOralEpi meme_output_upOralEpi/motifs.meme --motif "CCGCCATBTTK" promoters_500_upstream.fasta
-singularity exec --cleanenv $SINGULARITY_IMAGE fimo --oc fimo_output_upOralEpi --motif "CCGCCATBTTK" meme_output_upOralEpi/meme.txt promoters_500_upstream.fasta
+singularity exec --cleanenv $SINGULARITY_IMAGE fimo --oc fimo_output_upAboral --motif "KGGAATTCCTAGGAA" meme_output_upAboral/meme.txt promoters_500_upstream.fasta
+
+singularity exec --cleanenv $SINGULARITY_IMAGE fimo --oc fimo_output_upOralEpi --motif "CAAVATGGCGG" meme_output_upOralEpi/meme.txt promoters_500_upstream.fasta
