@@ -33,6 +33,7 @@ renv::restore() #reinstall all the package versions in the renv lockfile
 require("rtracklayer")
 require("Biostrings")
 require("GenomicRanges")
+require("knitr")
 require("tidyverse")
 
 sessionInfo() #provides list of loaded packages and version of R.
@@ -122,8 +123,6 @@ summary(start(promoters_500_UP))
 # also remove any rows where the promoter sequence now has a width < 500
 
 promoters_500_UP <- promoters_500_UP[promoters_500_UP@ranges@width == 500]
-
-write_tsv(data.frame(promoters_500_UP), "../output_RNA/differential_expression/TFs/promoters.gff", col_names = FALSE)
 ```
 
 Then, extract these sequences, by chromosome, using the function "DNAStringSet":
@@ -350,85 +349,7 @@ ggplot(fimo_counts_DE, aes(x = factor(n), y = log2FoldChange, fill = factor(n)))
   ) 
 ```
 
-
-```{r}
-plot_data <- fimo_counts %>%
-  mutate(motif_count = case_when(
-    n == 0 ~ "0 Motifs",
-    n == 1 ~ "1 Motif",
-    n > 1 ~ ">1 Motifs"
-  )) %>%
-  mutate(motif_count = factor(motif_count, levels = c("0 Motifs", "1 Motif", ">1 Motifs")))
-
-plot <- ggplot(plot_data, aes(x = motif_count, y = log2FoldChange, fill = motif_count)) +
-  geom_jitter(aes(color = motif_count), width = 0.2, size = 1.5, alpha = 0.6) +  
-  geom_violin(alpha = 0.7, width = 0.5) +  
-  stat_summary(fun = mean, geom = "point", shape = 21,  size = 2, fill = "white", color = "black") + 
-  scale_fill_brewer(palette = "Set2") +  
-  scale_color_brewer(palette = "Set2") + 
-  labs(
-    title = "Log2 Fold Change by Motif Presence",
-    subtitle = "All Genes",
-    x = "Number of Motifs in Promoter",
-    y = "Log2 Fold Change",
-    fill = "Motif Count",
-    color = "Motif Count"
-  ) +
-  theme_minimal(base_size = 14) + 
-  theme(
-    legend.position = "none",  
-    plot.title = element_text(face = "bold", size = 16),
-    plot.subtitle = element_text(size = 14),
-    axis.text = element_text(size = 12),
-    axis.title = element_text(size = 14),
-    panel.grid.major = element_line(size = 0.5, linetype = "dashed", color = "gray80")
-  )
-
-# Save the plot as a high-quality PNG
-ggsave("../output_RNA/differential_expression/TFs/fimo_output_upAboral/fimo_motif6.png", plot, width = 8, height = 6, dpi = 300)
-
-# Display the plot
-print(plot)
-
-plot_data <- fimo_counts_DE %>%
-  mutate(motif_count = case_when(
-    n == 0 ~ "0 Motifs",
-    n == 1 ~ "1 Motif",
-    n > 1 ~ ">1 Motifs"
-  )) %>%
-  mutate(motif_count = factor(motif_count, levels = c("0 Motifs", "1 Motif", ">1 Motifs")))
-
-plot <- ggplot(plot_data, aes(x = motif_count, y = log2FoldChange, fill = motif_count)) +
-  geom_jitter(aes(color = motif_count), width = 0.2, size = 1.5, alpha = 0.6) +  
-  geom_violin(alpha = 0.7, width = 0.5) + 
-  stat_summary(fun = mean, geom = "point", shape = 21, size = 2, fill = "white", color = "black") +  
-  scale_fill_brewer(palette = "Set2") + 
-  scale_color_brewer(palette = "Set2") +  
-  labs(
-    title = "Log2 Fold Change by Motif Presence",
-    subtitle = "Significantly DE Genes",
-    x = "Number of Motifs in Promoter",
-    y = "Log2 Fold Change",
-    fill = "Motif Count",
-    color = "Motif Count"
-  ) +
-  theme_minimal(base_size = 14) +  
-  theme(
-    legend.position = "none", 
-    plot.title = element_text(face = "bold", size = 16),
-    plot.subtitle = element_text(size = 14),
-    axis.text = element_text(size = 12),
-    axis.title = element_text(size = 14),
-    panel.grid.major = element_line(size = 0.5, linetype = "dashed", color = "gray80")
-  )
-
-ggsave("../output_RNA/differential_expression/TFs/fimo_output_upAboral/fimo_motif6_DE.png", plot, width = 8, height = 6, dpi = 300)
-
-# Display the plot
-print(plot)
-```
-
-Not a huge effect of this motif on the log2foldchange. FIMO found 26 occurances of this motif in the promoter of one gene, and the repetitive nature of the motif definitely contributed to this.
+Not a huge effect of this motif on the log2foldchange. FIMO found 26 occurrences of this motif in the promoter of one gene, and the repetitive nature of the motif definitely contributed to this.
 
 ```{r}
 fimo_presence_absence <- fimo_counts %>% mutate(n = if_else(n>0, 1, n))
@@ -551,7 +472,7 @@ ggsave("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_mot
 print(plot)
 ```
 
-Wow! It looks like the presence of this motif may be reflected in log2FoldChange! The genes with 1 or 2 sites have predominately negative fold change.
+**Wow! It looks like the presence of this motif may be reflected in log2FoldChange! The genes with 1 or 2 sites have predominately negative fold change.**
 
 ```{r}
 fimo_presence_absence <- fimo_counts %>% mutate(n = if_else(n>0, 1, n))
@@ -575,6 +496,76 @@ summary(logistic_model)
 logistic_model <- glm((log2FoldChange > 0) ~ n, data = fimo_presence_absence, family = binomial)
 summary(logistic_model)
 ```
+
+### Further looking into this motif, CAAVATGGCGG (MEME-3) - higher in OralEpi (negative L2FC)
+
+As a reminder, these were the MEME/TOMTOM results:
+
+- **CAAVATGGCGG (MEME-3)**: <img height="100" width = "227" alt="motif3" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/differential_expression/TFs/meme_output_upOralEpi/logo3.png?raw=true">
+  - Match 1: **YY2_full_1**
+    - Database 	jolma2013
+    - p-value 	7.01e-07
+    - E-value 	2.09e-03
+    - q-value 	4.17e-03
+    - Overlap 	10
+    - Offset 	-1
+    - Orientation 	Reverse Complement
+  - Match 2: **MA1651.1 (ZFP42)**
+    - Database 	JASPAR2022_CORE_non-redundant_v2
+    - p-value 	7.48e-06
+    - E-value 	2.23e-02
+    - q-value 	1.67e-02
+    - Overlap 	11
+    - Offset 	4
+    - Orientation 	Normal
+  - Match 3: **MA0095.3 (Yy1)**
+    - Database 	JASPAR2022_CORE_non-redundant_v2
+    - p-value 	8.41e-06
+    - E-value 	2.51e-02
+    - q-value   1.67e-02
+    - Overlap 	10
+    - Offset 	2
+    - Orientation 	Normal
+
+More info about: YY2, YY1, and ZFP42:
+
+- "YY1 may direct histone deacetylases and histone acetyltransferases to a promoter in order to activate or repress the promoter, thus implicating histone modification in the function of YY1"
+- "Functions as a multifunctional transcription factor that may exhibit positive and negative control on a large number of genes. May antagonize YY1 and function in development and differentiation
+- "Rex1 (Zfp-42) is a known marker of pluripotency, and is usually found in undifferentiated embryonic stem cells. In addition to being a marker for pluripotency, its regulation is also critical in maintaining a pluripotent state"
+
+### Annotation of CAAVATGGCGG-motif-containing genes
+
+```{r}
+EggNog <- read.delim("../references/Pocillopora_acuta_HIv2.genes.EggNog_results.txt") %>% dplyr::rename("query" = X.query)
+
+CDSearch <- read.delim("../references/Pocillopora_acuta_HIv2.genes.Conserved_Domain_Search_results.txt", quote = "") %>% dplyr::rename("query" = X.Query)
+```
+
+```{r}
+# Merge FIMO results (for all genes, including those with no FIMO match) with annotation data 
+fimo_annot <- fimo_merged %>% left_join(EggNog, by = c("sequence_name" = "query"))
+
+# filter to have only the FIMO-match genes
+fimo_annot_filtered <- fimo_annot %>% filter(motif_id == "CAAVATGGCGG")
+
+# annotate by counts
+fimo_annot_counts <- fimo_annot %>% group_by(sequence_name, log2FoldChange, padj, Preferred_name,Description,PFAMs,motif_id) %>% count() %>%
+  mutate(n = if_else(is.na(motif_id), 0, n)) 
+
+# annotate by counts
+fimo_annot_counts_filt <- fimo_annot_filtered %>% group_by(sequence_name, log2FoldChange, padj, Preferred_name,Description,PFAMs,motif_id) %>% count() %>%
+  mutate(n = if_else(is.na(motif_id), 0, n)) %>% arrange(desc(n))
+
+fimo_annot_counts_filt_DE <- fimo_annot_counts_filt %>% filter(padj < 0.05) %>% arrange(log2FoldChange)
+
+kable(head(fimo_annot_counts_filt_DE,10), format = "markdown")
+```
+
+```{r}
+kable(fimo_annot_counts_filt_DE %>% filter(grepl("hist",Description,ignore.case = TRUE) | grepl("hist",PFAMs,ignore.case = TRUE)), format = "markdown")
+```
+
+There are three differentially expressed histone deacetylases containig the motif in their promoter, one which has 2 occurances of the motif. All three have negative log2FoldChanges, indicating they have higher expression in the Oral Epiderimis tissues (though, they are pretty close to zero -- but found significantly DE by DESeq).
 
 
 ## STREME: Relative enrichment of motifs compared to background

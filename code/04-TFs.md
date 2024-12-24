@@ -19,6 +19,11 @@ Zoe Dellaert
     genes.](#062-fimo-i-am-going-to-run-fimo-to-quantify-these-2-motifs-against-all-the-genes)
   - [0.6.3 FIMO Results, up Aboral](#063-fimo-results-up-aboral)
   - [0.6.4 FIMO Results, up OralEpi](#064-fimo-results-up-oralepi)
+  - [0.6.5 Further looking into this motif, CAAVATGGCGG (MEME-3) -
+    higher in OralEpi (negative
+    L2FC)](#065-further-looking-into-this-motif-caavatggcgg-meme-3---higher-in-oralepi-negative-l2fc)
+  - [0.6.6 Annotation of CAAVATGGCGG-motif-containing
+    genes](#066-annotation-of-caavatggcgg-motif-containing-genes)
 - [0.7 STREME: Relative enrichment of motifs compared to
   background](#07-streme-relative-enrichment-of-motifs-compared-to-background)
   - [0.7.1 Run STREME in Linux environment using the Docker image of
@@ -115,6 +120,14 @@ require("Biostrings")
 
 ``` r
 require("GenomicRanges")
+require("knitr")
+```
+
+    ## Loading required package: knitr
+
+    ## Warning: package 'knitr' was built under R version 4.3.3
+
+``` r
 require("tidyverse")
 ```
 
@@ -170,9 +183,10 @@ sessionInfo() #provides list of loaded packages and version of R.
     ##  [1] lubridate_1.9.3      forcats_1.0.0        stringr_1.5.1       
     ##  [4] dplyr_1.1.4          purrr_1.0.2          readr_2.1.5         
     ##  [7] tidyr_1.3.1          tibble_3.2.1         ggplot2_3.5.1       
-    ## [10] tidyverse_2.0.0      Biostrings_2.70.3    XVector_0.40.0      
-    ## [13] rtracklayer_1.62.0   GenomicRanges_1.54.1 GenomeInfoDb_1.36.4 
-    ## [16] IRanges_2.34.1       S4Vectors_0.38.2     BiocGenerics_0.46.0 
+    ## [10] tidyverse_2.0.0      knitr_1.48           Biostrings_2.70.3   
+    ## [13] XVector_0.40.0       rtracklayer_1.62.0   GenomicRanges_1.54.1
+    ## [16] GenomeInfoDb_1.36.4  IRanges_2.34.1       S4Vectors_0.38.2    
+    ## [19] BiocGenerics_0.46.0 
     ## 
     ## loaded via a namespace (and not attached):
     ##  [1] SummarizedExperiment_1.30.2 gtable_0.3.5               
@@ -199,12 +213,12 @@ sessionInfo() #provides list of loaded packages and version of R.
     ## [43] withr_3.0.1                 scales_1.3.0               
     ## [45] timechange_0.3.0            rmarkdown_2.28             
     ## [47] matrixStats_1.4.1           hms_1.1.3                  
-    ## [49] evaluate_1.0.1              knitr_1.48                 
-    ## [51] BiocIO_1.12.0               rlang_1.1.4                
-    ## [53] glue_1.8.0                  BiocManager_1.30.25        
-    ## [55] renv_1.0.11                 rstudioapi_0.17.0          
-    ## [57] R6_2.5.1                    MatrixGenerics_1.12.3      
-    ## [59] GenomicAlignments_1.38.2    zlibbioc_1.46.0
+    ## [49] evaluate_1.0.1              BiocIO_1.12.0              
+    ## [51] rlang_1.1.4                 glue_1.8.0                 
+    ## [53] BiocManager_1.30.25         renv_1.0.11                
+    ## [55] rstudioapi_0.17.0           R6_2.5.1                   
+    ## [57] MatrixGenerics_1.12.3       GenomicAlignments_1.38.2   
+    ## [59] zlibbioc_1.46.0
 
 ## 0.4 Load in reference files and differential expression data
 
@@ -664,100 +678,9 @@ ggplot(fimo_counts_DE, aes(x = factor(n), y = log2FoldChange, fill = factor(n)))
 
 ![](04-TFs_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
 
-``` r
-plot_data <- fimo_counts %>%
-  mutate(motif_count = case_when(
-    n == 0 ~ "0 Motifs",
-    n == 1 ~ "1 Motif",
-    n > 1 ~ ">1 Motifs"
-  )) %>%
-  mutate(motif_count = factor(motif_count, levels = c("0 Motifs", "1 Motif", ">1 Motifs")))
-
-plot <- ggplot(plot_data, aes(x = motif_count, y = log2FoldChange, fill = motif_count)) +
-  geom_jitter(aes(color = motif_count), width = 0.2, size = 1.5, alpha = 0.6) +  
-  geom_violin(alpha = 0.7, width = 0.5) +  
-  stat_summary(fun = mean, geom = "point", shape = 21,  size = 2, fill = "white", color = "black") + 
-  scale_fill_brewer(palette = "Set2") +  
-  scale_color_brewer(palette = "Set2") + 
-  labs(
-    title = "Log2 Fold Change by Motif Presence",
-    subtitle = "All Genes",
-    x = "Number of Motifs in Promoter",
-    y = "Log2 Fold Change",
-    fill = "Motif Count",
-    color = "Motif Count"
-  ) +
-  theme_minimal(base_size = 14) + 
-  theme(
-    legend.position = "none",  
-    plot.title = element_text(face = "bold", size = 16),
-    plot.subtitle = element_text(size = 14),
-    axis.text = element_text(size = 12),
-    axis.title = element_text(size = 14),
-    panel.grid.major = element_line(size = 0.5, linetype = "dashed", color = "gray80")
-  )
-```
-
-    ## Warning: The `size` argument of `element_line()` is deprecated as of ggplot2 3.4.0.
-    ## ℹ Please use the `linewidth` argument instead.
-    ## This warning is displayed once every 8 hours.
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
-
-``` r
-# Save the plot as a high-quality PNG
-ggsave("../output_RNA/differential_expression/TFs/fimo_output_upAboral/fimo_motif6.png", plot, width = 8, height = 6, dpi = 300)
-
-# Display the plot
-print(plot)
-```
-
-![](04-TFs_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
-
-``` r
-plot_data <- fimo_counts_DE %>%
-  mutate(motif_count = case_when(
-    n == 0 ~ "0 Motifs",
-    n == 1 ~ "1 Motif",
-    n > 1 ~ ">1 Motifs"
-  )) %>%
-  mutate(motif_count = factor(motif_count, levels = c("0 Motifs", "1 Motif", ">1 Motifs")))
-
-plot <- ggplot(plot_data, aes(x = motif_count, y = log2FoldChange, fill = motif_count)) +
-  geom_jitter(aes(color = motif_count), width = 0.2, size = 1.5, alpha = 0.6) +  
-  geom_violin(alpha = 0.7, width = 0.5) + 
-  stat_summary(fun = mean, geom = "point", shape = 21, size = 2, fill = "white", color = "black") +  
-  scale_fill_brewer(palette = "Set2") + 
-  scale_color_brewer(palette = "Set2") +  
-  labs(
-    title = "Log2 Fold Change by Motif Presence",
-    subtitle = "Significantly DE Genes",
-    x = "Number of Motifs in Promoter",
-    y = "Log2 Fold Change",
-    fill = "Motif Count",
-    color = "Motif Count"
-  ) +
-  theme_minimal(base_size = 14) +  
-  theme(
-    legend.position = "none", 
-    plot.title = element_text(face = "bold", size = 16),
-    plot.subtitle = element_text(size = 14),
-    axis.text = element_text(size = 12),
-    axis.title = element_text(size = 14),
-    panel.grid.major = element_line(size = 0.5, linetype = "dashed", color = "gray80")
-  )
-
-ggsave("../output_RNA/differential_expression/TFs/fimo_output_upAboral/fimo_motif6_DE.png", plot, width = 8, height = 6, dpi = 300)
-
-# Display the plot
-print(plot)
-```
-
-![](04-TFs_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
-
 Not a huge effect of this motif on the log2foldchange. FIMO found 26
-occurances of this motif in the promoter of one gene, and the repetitive
-nature of the motif definitely contributed to this.
+occurrences of this motif in the promoter of one gene, and the
+repetitive nature of the motif definitely contributed to this.
 
 ``` r
 fimo_presence_absence <- fimo_counts %>% mutate(n = if_else(n>0, 1, n))
@@ -917,7 +840,15 @@ plot <- ggplot(plot_data, aes(x = motif_count, y = log2FoldChange, fill = motif_
     axis.title = element_text(size = 14),
     panel.grid.major = element_line(size = 0.5, linetype = "dashed", color = "gray80")
   )
+```
 
+    ## Warning: The `size` argument of `element_line()` is deprecated as of ggplot2 3.4.0.
+    ## ℹ Please use the `linewidth` argument instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+``` r
 # Save the plot as a high-quality PNG
 ggsave("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif6.png", plot, width = 8, height = 6, dpi = 300)
 
@@ -925,7 +856,7 @@ ggsave("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_mot
 print(plot)
 ```
 
-![](04-TFs_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](04-TFs_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ``` r
 plot_data <- fimo_counts_DE %>%
@@ -966,11 +897,11 @@ ggsave("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_mot
 print(plot)
 ```
 
-![](04-TFs_files/figure-gfm/unnamed-chunk-14-2.png)<!-- -->
+![](04-TFs_files/figure-gfm/unnamed-chunk-13-2.png)<!-- -->
 
-Wow! It looks like the presence of this motif may be reflected in
+**Wow! It looks like the presence of this motif may be reflected in
 log2FoldChange! The genes with 1 or 2 sites have predominately negative
-fold change.
+fold change.**
 
 ``` r
 fimo_presence_absence <- fimo_counts %>% mutate(n = if_else(n>0, 1, n))
@@ -1076,6 +1007,107 @@ summary(logistic_model)
     ## AIC: 18358
     ## 
     ## Number of Fisher Scoring iterations: 4
+
+### 0.6.5 Further looking into this motif, CAAVATGGCGG (MEME-3) - higher in OralEpi (negative L2FC)
+
+As a reminder, these were the MEME/TOMTOM results:
+
+- **CAAVATGGCGG (MEME-3)**:
+  <img height="100" width = "227" alt="motif3" src="https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/differential_expression/TFs/meme_output_upOralEpi/logo3.png?raw=true">
+  - Match 1: **YY2_full_1**
+    - Database jolma2013
+    - p-value 7.01e-07
+    - E-value 2.09e-03
+    - q-value 4.17e-03
+    - Overlap 10
+    - Offset -1
+    - Orientation Reverse Complement
+  - Match 2: **MA1651.1 (ZFP42)**
+    - Database JASPAR2022_CORE_non-redundant_v2
+    - p-value 7.48e-06
+    - E-value 2.23e-02
+    - q-value 1.67e-02
+    - Overlap 11
+    - Offset 4
+    - Orientation Normal
+  - Match 3: **MA0095.3 (Yy1)**
+    - Database JASPAR2022_CORE_non-redundant_v2
+    - p-value 8.41e-06
+    - E-value 2.51e-02
+    - q-value 1.67e-02
+    - Overlap 10
+    - Offset 2
+    - Orientation Normal
+
+More info about: YY2, YY1, and ZFP42:
+
+- “YY1 may direct histone deacetylases and histone acetyltransferases to
+  a promoter in order to activate or repress the promoter, thus
+  implicating histone modification in the function of YY1”
+- “Functions as a multifunctional transcription factor that may exhibit
+  positive and negative control on a large number of genes. May
+  antagonize YY1 and function in development and differentiation
+- “Rex1 (Zfp-42) is a known marker of pluripotency, and is usually found
+  in undifferentiated embryonic stem cells. In addition to being a
+  marker for pluripotency, its regulation is also critical in
+  maintaining a pluripotent state”
+
+### 0.6.6 Annotation of CAAVATGGCGG-motif-containing genes
+
+``` r
+EggNog <- read.delim("../references/Pocillopora_acuta_HIv2.genes.EggNog_results.txt") %>% dplyr::rename("query" = X.query)
+
+CDSearch <- read.delim("../references/Pocillopora_acuta_HIv2.genes.Conserved_Domain_Search_results.txt", quote = "") %>% dplyr::rename("query" = X.Query)
+```
+
+``` r
+# Merge FIMO results (for all genes, including those with no FIMO match) with annotation data 
+fimo_annot <- fimo_merged %>% left_join(EggNog, by = c("sequence_name" = "query"))
+
+# filter to have only the FIMO-match genes
+fimo_annot_filtered <- fimo_annot %>% filter(motif_id == "CAAVATGGCGG")
+
+# annotate by counts
+fimo_annot_counts <- fimo_annot %>% group_by(sequence_name, log2FoldChange, padj, Preferred_name,Description,PFAMs,motif_id) %>% count() %>%
+  mutate(n = if_else(is.na(motif_id), 0, n)) 
+
+# annotate by counts
+fimo_annot_counts_filt <- fimo_annot_filtered %>% group_by(sequence_name, log2FoldChange, padj, Preferred_name,Description,PFAMs,motif_id) %>% count() %>%
+  mutate(n = if_else(is.na(motif_id), 0, n)) %>% arrange(desc(n))
+
+fimo_annot_counts_filt_DE <- fimo_annot_counts_filt %>% filter(padj < 0.05) %>% arrange(log2FoldChange)
+
+kable(head(fimo_annot_counts_filt_DE,10), format = "markdown")
+```
+
+| sequence_name | log2FoldChange | padj | Preferred_name | Description | PFAMs | motif_id | n |
+|:---|---:|---:|:---|:---|:---|:---|---:|
+| Pocillopora_acuta_HIv2\_\_\_RNAseq.g13796.t1 | -14.23655 | 0.0e+00 | TBCB | cell differentiation | CAP_GLY,Ubiquitin_2 | CAAVATGGCGG | 1 |
+| Pocillopora_acuta_HIv2\_\_\_RNAseq.g31136.t1 | -13.87595 | 0.0e+00 | GATAD1 | zinc ion binding | GATA | CAAVATGGCGG | 1 |
+| Pocillopora_acuta_HIv2\_\_\_RNAseq.g26267.t1 | -13.41658 | 0.0e+00 | OS9 | protein retention in ER lumen | PRKCSH | CAAVATGGCGG | 1 |
+| Pocillopora_acuta_HIv2\_\_\_RNAseq.g2437.t1 | -13.24189 | 0.0e+00 | NA | NA | NA | CAAVATGGCGG | 1 |
+| Pocillopora_acuta_HIv2\_\_\_RNAseq.g21915.t1 | -12.66087 | 0.0e+00 | LRP2BP | Sel1-like repeats. | Sel1 | CAAVATGGCGG | 1 |
+| Pocillopora_acuta_HIv2\_\_\_RNAseq.g6506.t1 | -12.28540 | 0.0e+00 | C12orf45 | Domain of unknown function (DUF4598) | DUF4598 | CAAVATGGCGG | 1 |
+| Pocillopora_acuta_HIv2\_\_\_RNAseq.g15137.t1 | -12.22825 | 1.0e-07 | ERN1 | Endoplasmic reticulum to nucleus signaling | Pkinase,Ribonuc_2-5A | CAAVATGGCGG | 2 |
+| Pocillopora_acuta_HIv2\_\_\_TS.g16956.t1a | -12.18190 | 1.0e-07 | NA | NA | NA | CAAVATGGCGG | 1 |
+| Pocillopora_acuta_HIv2\_\_\_TS.g3401.t1 | -11.20190 | 1.5e-06 | ASNSD1 | asparagine synthase (glutamine-hydrolyzing) activity | Asn_synthase,GATase_7 | CAAVATGGCGG | 1 |
+| Pocillopora_acuta_HIv2\_\_\_RNAseq.g5752.t1 | -11.00020 | 2.4e-06 | NA | NA | NA | CAAVATGGCGG | 1 |
+
+``` r
+kable(fimo_annot_counts_filt_DE %>% filter(grepl("hist",Description,ignore.case = TRUE) | grepl("hist",PFAMs,ignore.case = TRUE)), format = "markdown")
+```
+
+| sequence_name | log2FoldChange | padj | Preferred_name | Description | PFAMs | motif_id | n |
+|:---|---:|---:|:---|:---|:---|:---|---:|
+| Pocillopora_acuta_HIv2\_\_\_RNAseq.g19671.t1 | -0.7556675 | 0.0001264 | HDAC3 | Belongs to the histone deacetylase family. HD Type 1 subfamily | Hist_deacetyl | CAAVATGGCGG | 2 |
+| Pocillopora_acuta_HIv2\_\_\_RNAseq.g28759.t1 | -0.3091423 | 0.0042824 | ATXN7L3 | Component of the transcription regulatory histone acetylation (HAT) complex SAGA, a multiprotein complex that activates transcription by remodeling chromatin and mediating histone acetylation and deubiquitination. Within the SAGA complex, participates in a subcomplex that specifically deubiquitinates | SCA7,Sgf11 | CAAVATGGCGG | 1 |
+| Pocillopora_acuta_HIv2\_\_\_RNAseq.g28106.t1b | -0.1518225 | 0.0352330 | HDAC11 | protein deacetylase activity | Hist_deacetyl | CAAVATGGCGG | 1 |
+
+There are three differentially expressed histone deacetylases containig
+the motif in their promoter, one which has 2 occurances of the motif.
+All three have negative log2FoldChanges, indicating they have higher
+expression in the Oral Epiderimis tissues (though, they are pretty close
+to zero – but found significantly DE by DESeq).
 
 ## 0.7 STREME: Relative enrichment of motifs compared to background
 

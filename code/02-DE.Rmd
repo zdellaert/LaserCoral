@@ -277,7 +277,6 @@ mv *gz ../references
 gunzip ../references/*gz
 ```
 
-
 ```{r}
 EggNog <- read.delim("../references/Pocillopora_acuta_HIv2.genes.EggNog_results.txt") %>% dplyr::rename("query" = X.query)
 
@@ -290,9 +289,6 @@ KEGG <- read.delim("../references/Pocillopora_acuta_HIv2.genes.KEGG_results.txt"
 DE_05$query <- rownames(DE_05)
 DE_05_annot <- DE_05 %>% left_join(CDSearch) %>% select(query,everything())
 DE_05_eggnog <- DE_05 %>% left_join(EggNog) %>% select(query,everything())
-
-annot_all <- as.data.frame(rownames(dds)) %>% dplyr::rename("query" = `rownames(dds)`) %>% left_join(CDSearch)
-eggnog_all <- as.data.frame(rownames(dds)) %>% dplyr::rename("query" = `rownames(dds)`) %>% left_join(EggNog)
 
 write.csv(as.data.frame(DE_05_eggnog), 
           file="../output_RNA/differential_expression/DE_05_eggnog_annotation.csv")
