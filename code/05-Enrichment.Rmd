@@ -1,0 +1,174 @@
+---
+title: "Enrichment"
+author: "Zoe Dellaert"
+date: "2024-12-09"
+output:
+  github_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    html_preview: true
+always_allow_html: true
+---
+
+## Gene Ontology Analysis analysis of LCM RNA Data
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Managing Packages Using Renv
+
+To run this code in my project using the renv environment, run the following lines of code
+
+```{r, eval=FALSE}
+install.packages("renv") #install the package on the new computer (may not be necessary if renv bootstraps itself as expected)
+renv::restore() #reinstall all the package versions in the renv lockfile
+```
+
+## Load packages
+
+```{r packages}
+require("tidyverse")
+
+sessionInfo() #provides list of loaded packages and version of R.
+```
+
+## Description of pipeline
+
+I am going to perform functional enrichment of GO terms using (GO_MWU)[https://github.com/z0on/GO_MWU].
+
+As described in the [README](https://github.com/z0on/GO_MWU) of the package, the steps to running this analysis are as follows:
+
+1. Make a directory for GO_MWU files. I am creating one in this code/ directory: LaserCoral/code/go_mwu
+2. Download the following scripts into that directory: GO_MWU.R, gomwu_a.pl, gomwu_b.pl, gomwu.functions.R (downloaded from the github, linked above)
+3. Download the GO hierarchy file, go.obo, from this website: http://www.geneontology.org/GO.downloads.ontology.shtml
+4. table of GO annotations for your sequences:
+  - "two-column (gene id - GO terms), tab-delimited, one line per gene, multiple GO terms separated by semicolon. If you have multiple lines per gene, use nrify_GOtable.pl to merge them. Do NOT include genes without GO annotations."
+5. table of measure of interest for your sequences:
+  - "two columns of comma-separated values: gene id, continuous measure of change such as log(fold-change). To perform standard GO enrichment analysis based on Fisher's exact test, use binary measure (1 or 0, i.e., either significant or not)."
+
+## Load in reference files and differential expression data
+
+In the next chunk I am loadinf in my DESeq data. These results are ordered by adjusted p-value. As a reminder, negative LFC = higher in Aboral tissue, and positive LFC = higher in Oral tissue.
+
+```{r load_data}
+#load in DESeq results
+DESeq <- read.csv("../output_RNA/differential_expression/DESeq_results.csv", header = TRUE) %>% dplyr::rename("query" ="X")
+
+#make dataframes of just differentially expressed genes for each LFC direction
+DE_05_Aboral <- DESeq %>% filter(padj < 0.05 & log2FoldChange > 0)
+DE_05_OralEpi <- DESeq %>% filter(padj < 0.05& log2FoldChange < 0)
+
+#load in annotation data 
+EggNog <- read.delim("../references/Pocillopora_acuta_HIv2.genes.EggNog_results.txt") %>% dplyr::rename("query" = X.query) 
+
+#filter annotation data for just expressed genes 
+EggNog <- EggNog %>% filter(query %in% DESeq$query)
+EggNog$GOs <- gsub("-", NA, EggNog$GOs)
+EggNog$GOs <- gsub(",", ";", EggNog$GOs)
+
+nrow(EggNog)
+nrow(EggNog)/nrow(DESeq)
+```
+
+Only 9482/14464 genes in our dataset have annotation information in this file. That is 66%.
+
+```{r}
+sum(EggNog$query %in% DE_05_Aboral$query)
+sum(EggNog$query %in% DE_05_Aboral$query)/nrow(DE_05_Aboral)
+
+sum(EggNog$query %in% DE_05_OralEpi$query)
+sum(EggNog$query %in% DE_05_OralEpi$query)/nrow(DE_05_OralEpi)
+```
+
+Only 383/804 genes that are significantly upregulated in the Aboral tissue have annotation information. That is only 47% of the genes.
+
+Only 1689/2802 genes that are significantly upregulated in the Oral Epidermis tissue have annotation information. That is 60% of the genes.
+
+## Create gene_to_go.tab file for running GO_MWU
+
+```{r}
+GO.terms <- EggNog %>% select(query,GOs) %>% dplyr::rename("GO.terms" = GOs)
+
+GO.terms_only <- GO.terms %>% na.omit()
+nrow(GO.terms_only)
+nrow(GO.terms_only)/nrow(DESeq)
+
+write.table(GO.terms_only, "go_mwu/gene_to_go.tab",row.names = FALSE, sep = "\t", quote = FALSE)
+```
+
+Only 6580/14464 genes in our dataset have GO term information. That is less than half: 45%.
+
+```{r}
+sum(GO.terms_only$query %in% DE_05_Aboral$query)
+sum(GO.terms_only$query %in% DE_05_Aboral$query)/nrow(DE_05_Aboral)
+
+sum(GO.terms_only$query %in% DE_05_OralEpi$query)
+sum(GO.terms_only$query %in% DE_05_OralEpi$query)/nrow(DE_05_OralEpi)
+```
+
+Only 214/804 genes that are significantly upregulated in the Aboral tissue have GO term information. That is only 27% of the genes.
+
+Only 1045/2802 genes that are significantly upregulated in the Oral Epidermis tissue have GO term information. That is 37% of the genes.
+
+## Create the GO_MWU input csv files for the binary analysis
+
+```{r}
+### Generate vector with 1 for the 214 significant DEGs that have positive LFC and GO annotation, and 0 for the other genes that have GO annotation
+
+UpAboral <- GO.terms_only %>% inner_join(DESeq) %>%
+    mutate(DE = ifelse(padj < 0.05 & log2FoldChange > 0, 1, 0)) %>%
+    dplyr::select(query, DE) 
+  
+print(sum(UpAboral$DE)) #only 214 of these have GO annotations
+  
+write.csv(UpAboral, "go_mwu/UpAboral.csv", row.names = FALSE, quote = FALSE)
+
+### Generate vector with 1 for the 1045 significant DEGs that have positive LFC and GO annotation, and 0 for the other genes that have GO annotation
+
+UpOralEpi <- GO.terms_only %>% inner_join(DESeq) %>%
+    mutate(DE = ifelse(padj < 0.05 & log2FoldChange < 0, 1, 0)) %>%
+    dplyr::select(query, DE) 
+  
+print(sum(UpOralEpi$DE)) #only 1045 of these have GO annotations
+  
+write.csv(UpOralEpi, "go_mwu/UpOralEpi.csv", row.names = FALSE, quote = FALSE)
+```
+
+## Create the GO_MWU input csv files for the continuous LFC analysis
+
+```{r}
+### Generate vector with all of the genes that are expressed and have GO annotation, with their Log2FoldChanges
+DE_LFC <- GO.terms_only %>% inner_join(DESeq) %>%
+    dplyr::select(query, log2FoldChange) 
+  
+write.csv(DE_LFC, "go_mwu/DE_LFC.csv", row.names = FALSE, quote = FALSE)
+```
+
+## Run GO_MWU
+
+1. Open the script go_mwu/GO_MWU.R and run the code there or run the script chunk by chunk below:
+
+2. Edit these to match your data file names:
+```{r, eval=FALSE}
+input="UpAboral.csv" # two columns of comma-separated values: gene id, continuous measure of significance. To perform standard GO enrichment analysis based on Fisher's exact test, use binary measure (0 or 1, i.e., either sgnificant or not).
+goAnnotations="gene_to_go.tab" # two-column, tab-delimited, one line per gene, multiple GO terms separated by semicolon.
+goDatabase="go.obo" # download from http://www.geneontology.org/GO.downloads.ontology.shtml
+goDivision="BP" # either MF, or BP, or CC
+source("gomwu.functions.R")
+```
+
+3. Run the next chunk of code
+
+```{r, eval=FALSE}
+setwd("go_mwu")
+gomwuStats(input, goDatabase, goAnnotations, goDivision,
+	perlPath="perl", # replace with full path to perl executable if it is not in your system's PATH already
+	largest=0.1,  # a GO category will not be considered if it contains more than this fraction of the total number of genes
+	smallest=5,   # a GO category should contain at least this many genes to be considered
+	clusterCutHeight=0.25 # threshold for merging similar (gene-sharing) terms. See README for details.
+#	,Alternative="g" # by default the MWU test is two-tailed; specify "g" or "l" of you want to test for "greater" or "less" instead.  
+)
+```
+
