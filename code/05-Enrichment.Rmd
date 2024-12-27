@@ -149,21 +149,17 @@ write.csv(DE_LFC, "go_mwu/DE_LFC.csv", row.names = FALSE, quote = FALSE)
 
 ## Run GO_MWU
 
-1. Open the script go_mwu/GO_MWU.R and run the code there or run the script chunk by chunk below:
+### Up Aboral Fisher Exact Test
 
-2. Edit these to match your data file names:
 ```{r, eval=FALSE}
+setwd("go_mwu")
+
 input="UpAboral.csv" # two columns of comma-separated values: gene id, continuous measure of significance. To perform standard GO enrichment analysis based on Fisher's exact test, use binary measure (0 or 1, i.e., either sgnificant or not).
 goAnnotations="gene_to_go.tab" # two-column, tab-delimited, one line per gene, multiple GO terms separated by semicolon.
 goDatabase="go.obo" # download from http://www.geneontology.org/GO.downloads.ontology.shtml
 goDivision="BP" # either MF, or BP, or CC
-source("go_mwu/gomwu.functions.R")
-```
+source("gomwu.functions.R")
 
-3. Run the next chunk of code
-
-```{r, eval=FALSE}
-setwd("go_mwu")
 gomwuStats(input, goDatabase, goAnnotations, goDivision,
 	perlPath="perl", # replace with full path to perl executable if it is not in your system's PATH already
 	largest=0.1,  # a GO category will not be considered if it contains more than this fraction of the total number of genes
@@ -172,7 +168,6 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
 #	,Alternative="g" # by default the MWU test is two-tailed; specify "g" or "l" of you want to test for "greater" or "less" instead.
 )
 ```
-
 
 go.obo gene_to_go.tab UpAboral.csv BP largest=0.1 smallest=5 cutHeight=0.25
 
@@ -210,10 +205,12 @@ Binary classification detected; will perform Fisher's test
 331 GO terms at 10% FDR
 
 
-4. Plotting
+#### Plotting
 
-```{r}
+```{r, eval=FALSE}
 setwd("go_mwu")
+
+png(filename = paste0(input, "_plot.png"), width = 800, height = 800)
 results=gomwuPlot(input,goAnnotations,goDivision,
  	absValue=0.001,  #Specify absValue=0.001 if you are doing Fisher's exact test for standard GO enrichment .
  #	absValue=1, # un-remark this if you are using log2-fold changes
@@ -224,19 +221,68 @@ results=gomwuPlot(input,goAnnotations,goDivision,
  	treeHeight=0.5, # height of the hierarchical clustering tree
  	colors=c("dodgerblue2","firebrick1","skyblue2","lightcoral") 
  )
-
+dev.off()
+ 
 # text representation of results, with actual adjusted p-values
 results[[1]]
-
 ```
+
+```{r, eval=FALSE}
+# ------- extracting representative GOs
+
+# this module chooses GO terms that best represent *independent* groups of significant GO terms
+
+pcut=1e-2 # adjusted pvalue cutoff for representative GO
+hcut=0.9 # height at which cut the GO terms tree to get "independent groups". 
+
+# plotting the GO tree with the cut level (un-remark the next two lines to plot)
+ plot(results[[2]],cex=0.6)
+ abline(h=hcut,col="red")
+
+# cutting
+ct=cutree(results[[2]],h=hcut)
+annots=c();ci=1
+for (ci in unique(ct)) {
+  message(ci)
+	rn=names(ct)[ct==ci]
+	obs=grep("obsolete",rn)
+	if(length(obs)>0) { rn=rn[-obs] }
+	if (length(rn)==0) {next}
+	rr=results[[1]][rn,]
+	bestrr=rr[which(rr$pval==min(rr$pval)),]
+	best=1
+	if(nrow(bestrr)>1) {
+		nns=sub(" .+","",row.names(bestrr))
+		fr=c()
+		for (i in 1:length(nns)) { fr=c(fr,eval(parse(text=nns[i]))) }
+		best=which(fr==max(fr))
+	}
+	if (bestrr$pval[best]<=pcut) { annots=c(annots,sub("\\d+\\/\\d+ ","",row.names(bestrr)[best]))}
+}
+
+setwd("go_mwu")
+mwus=read.table(paste("MWU",goDivision,input,sep="_"),header=T)
+bestGOs=mwus[mwus$name %in% annots,]
+bestGOs
+```
+
+452	0	3.685232e-09	3	80	GO:0006022;GO:0030203	aminoglycan metabolic process	
+4408	0	6.840667e-05	3	8	GO:0072376;GO:0072378	protein activation cascade	
+5095	0	2.165615e-11	2	13	GO:1905483;GO:1905485	regulation of motor neuron migration
 
 ---
 
-3. Run the next chunk of code
+### Oral Epidermis tissue fisher exact test
 
 ```{r, eval=FALSE}
 setwd("go_mwu")
-input="UpOralEpi.csv"
+
+input="UpOralEpi.csv" # two columns of comma-separated values: gene id, continuous measure of significance. To perform standard GO enrichment analysis based on Fisher's exact test, use binary measure (0 or 1, i.e., either sgnificant or not).
+goAnnotations="gene_to_go.tab" # two-column, tab-delimited, one line per gene, multiple GO terms separated by semicolon.
+goDatabase="go.obo" # download from http://www.geneontology.org/GO.downloads.ontology.shtml
+goDivision="BP" # either MF, or BP, or CC
+source("gomwu.functions.R")
+
 gomwuStats(input, goDatabase, goAnnotations, goDivision,
 	perlPath="perl", # replace with full path to perl executable if it is not in your system's PATH already
 	largest=0.1,  # a GO category will not be considered if it contains more than this fraction of the total number of genes
@@ -279,4 +325,29 @@ calculating GO term similarities based on shared genes...
 Secondary clustering:
 calculating similarities....
 Binary classification detected; will perform Fisher's test
-0 GO terms at 10% FDR
+**0 GO terms at 10% FDR**
+
+
+#### No further analysis for this LFC direction.
+
+---
+
+### Oral Epidermis tissue fisher exact test
+
+```{r, eval=FALSE}
+setwd("go_mwu")
+
+input="DE_LFC.csv" # two columns of comma-separated values: gene id, continuous measure of significance. To perform standard GO enrichment analysis based on Fisher's exact test, use binary measure (0 or 1, i.e., either sgnificant or not).
+goAnnotations="gene_to_go.tab" # two-column, tab-delimited, one line per gene, multiple GO terms separated by semicolon.
+goDatabase="go.obo" # download from http://www.geneontology.org/GO.downloads.ontology.shtml
+goDivision="BP" # either MF, or BP, or CC
+source("gomwu.functions.R")
+
+gomwuStats(input, goDatabase, goAnnotations, goDivision,
+	perlPath="perl", # replace with full path to perl executable if it is not in your system's PATH already
+	largest=0.1,  # a GO category will not be considered if it contains more than this fraction of the total number of genes
+	smallest=5,   # a GO category should contain at least this many genes to be considered
+	clusterCutHeight=0.25 # threshold for merging similar (gene-sharing) terms. See README for details.
+#	,Alternative="g" # by default the MWU test is two-tailed; specify "g" or "l" of you want to test for "greater" or "less" instead.
+)
+```
