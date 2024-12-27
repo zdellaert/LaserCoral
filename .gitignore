@@ -52,3 +52,4 @@ references/blast_dbs/*
 
 #large unzipped output files
 output_RNA/differential_expression/blast/DEG_05_blast_results_full.txt
+code/go_mwu/dissim*

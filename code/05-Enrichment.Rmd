@@ -29,6 +29,7 @@ renv::restore() #reinstall all the package versions in the renv lockfile
 ## Load packages
 
 ```{r packages}
+require("ape")
 require("tidyverse")
 
 sessionInfo() #provides list of loaded packages and version of R.
@@ -156,7 +157,7 @@ input="UpAboral.csv" # two columns of comma-separated values: gene id, continuou
 goAnnotations="gene_to_go.tab" # two-column, tab-delimited, one line per gene, multiple GO terms separated by semicolon.
 goDatabase="go.obo" # download from http://www.geneontology.org/GO.downloads.ontology.shtml
 goDivision="BP" # either MF, or BP, or CC
-source("gomwu.functions.R")
+source("go_mwu/gomwu.functions.R")
 ```
 
 3. Run the next chunk of code
@@ -168,7 +169,56 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
 	largest=0.1,  # a GO category will not be considered if it contains more than this fraction of the total number of genes
 	smallest=5,   # a GO category should contain at least this many genes to be considered
 	clusterCutHeight=0.25 # threshold for merging similar (gene-sharing) terms. See README for details.
-#	,Alternative="g" # by default the MWU test is two-tailed; specify "g" or "l" of you want to test for "greater" or "less" instead.  
+#	,Alternative="g" # by default the MWU test is two-tailed; specify "g" or "l" of you want to test for "greater" or "less" instead.
 )
 ```
 
+
+go.obo gene_to_go.tab UpAboral.csv BP largest=0.1 smallest=5 cutHeight=0.25
+
+Run parameters:
+
+largest GO category as fraction of all genes (largest)  : 0.1
+         smallest GO category as # of genes (smallest)  : 5
+                clustering threshold (clusterCutHeight) : 0.25
+
+-----------------
+retrieving GO hierarchy, reformatting data...
+
+-------------
+go_reformat:
+Genes with GO annotations, but not listed in measure table: 1
+
+Terms without defined level (old ontology?..): 969
+-------------
+-------------
+go_nrify:
+13950 categories, 6284 genes; size range 5-628.4
+	214 too broad
+	6258 too small
+	7478 remaining
+
+removing redundancy:
+
+calculating GO term similarities based on shared genes...
+5277 non-redundant GO categories of good size
+-------------
+
+Secondary clustering:
+calculating similarities....
+Binary classification detected; will perform Fisher's test
+331 GO terms at 10% FDR
+
+3. Run the next chunk of code
+
+```{r, eval=FALSE}
+setwd("go_mwu")
+input="UpOralEpi.csv"
+gomwuStats(input, goDatabase, goAnnotations, goDivision,
+	perlPath="perl", # replace with full path to perl executable if it is not in your system's PATH already
+	largest=0.1,  # a GO category will not be considered if it contains more than this fraction of the total number of genes
+	smallest=5,   # a GO category should contain at least this many genes to be considered
+	clusterCutHeight=0.25 # threshold for merging similar (gene-sharing) terms. See README for details.
+#	,Alternative="g" # by default the MWU test is two-tailed; specify "g" or "l" of you want to test for "greater" or "less" instead.
+)
+```
