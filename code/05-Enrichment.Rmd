@@ -210,16 +210,16 @@ Binary classification detected; will perform Fisher's test
 ```{r, eval=FALSE}
 setwd("go_mwu")
 
-png(filename = paste0(input, "_plot.png"), width = 800, height = 800)
+png(filename = paste0(input, "_plot.png"), width = 1200, height = 4800)
 results=gomwuPlot(input,goAnnotations,goDivision,
  	absValue=0.001,  #Specify absValue=0.001 if you are doing Fisher's exact test for standard GO enrichment .
  #	absValue=1, # un-remark this if you are using log2-fold changes
- 	level1=0.1, # FDR threshold for plotting. Specify level1=1 to plot all GO categories containing genes exceeding the absValue.
- 	level2=0.05, # FDR cutoff to print in regular (not italic) font.
- 	level3=0.01, # FDR cutoff to print in large bold font.
- 	txtsize=.2,    # decrease to fit more on one page, or increase (after rescaling the plot so the tree fits the text) for better "word cloud" effect
+ 	level1=0.05, # FDR threshold for plotting. Specify level1=1 to plot all GO categories containing genes exceeding the absValue.
+ 	level2=0.01, # FDR cutoff to print in regular (not italic) font.
+ 	level3=0.001, # FDR cutoff to print in large bold font.
+ 	txtsize=2,    # decrease to fit more on one page, or increase (after rescaling the plot so the tree fits the text) for better "word cloud" effect
  	treeHeight=0.5, # height of the hierarchical clustering tree
- 	colors=c("dodgerblue2","firebrick1","skyblue2","lightcoral") 
+ 	#colors=c("dodgerblue2","firebrick1","skyblue2","lightcoral") 
  )
 dev.off()
  
@@ -351,3 +351,38 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
 #	,Alternative="g" # by default the MWU test is two-tailed; specify "g" or "l" of you want to test for "greater" or "less" instead.
 )
 ```
+
+go.obo gene_to_go.tab DE_LFC.csv BP largest=0.1 smallest=5 cutHeight=0.25
+
+Run parameters:
+
+largest GO category as fraction of all genes (largest)  : 0.1
+         smallest GO category as # of genes (smallest)  : 5
+                clustering threshold (clusterCutHeight) : 0.25
+
+-----------------
+retrieving GO hierarchy, reformatting data...
+
+-------------
+go_reformat:
+Genes with GO annotations, but not listed in measure table: 1
+
+Terms without defined level (old ontology?..): 969
+-------------
+-------------
+go_nrify:
+13950 categories, 6284 genes; size range 5-628.4
+	214 too broad
+	6258 too small
+	7478 remaining
+
+removing redundancy:
+
+calculating GO term similarities based on shared genes...
+5277 non-redundant GO categories of good size
+-------------
+
+Secondary clustering:
+calculating similarities....
+Continuous measure of interest: will perform MWU test
+602 GO terms at 10% FDR
