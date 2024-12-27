@@ -34,6 +34,8 @@ require("rtracklayer")
 require("Biostrings")
 require("GenomicRanges")
 require("knitr")
+require("tidyplots")
+require("rstatix")
 require("tidyverse")
 
 sessionInfo() #provides list of loaded packages and version of R.
@@ -389,112 +391,97 @@ fimo_merged <- fimo_filtered %>% full_join(DESeq, by = c("sequence_name" = "quer
 #summarize
 
 fimo_counts <- fimo_merged %>% group_by(sequence_name, log2FoldChange, padj,  motif_id) %>% count() %>%
-  mutate(n = if_else(is.na(motif_id), 0, n)) 
+  mutate(n = if_else(is.na(motif_id), 0, n)) %>% rename(n_motif = n)
 
 fimo_counts_DE <- fimo_counts %>% filter(padj < 0.05)
 ```
 
 
 ```{r}
-plot_data <- fimo_counts %>%
-  mutate(motif_count = case_when(
-    n == 0 ~ "0 Motifs",
-    n == 1 ~ "1 Motif",
-    n > 1 ~ ">1 Motifs"
-  )) %>%
-  mutate(motif_count = factor(motif_count, levels = c("0 Motifs", "1 Motif", ">1 Motifs")))
+fimo_counts %>% mutate(n_motif= as.character(n_motif)) %>% 
+  tidyplot(x = n_motif,  y = log2FoldChange, color = n_motif) %>%
+  add_data_points_jitter(size = 1.5, jitter_width = 0.5, alpha=0.5) %>%
+  add_violin(alpha = 0.8,color="black", width=0.3, linewidth = 0.5, trim=TRUE)  %>%
+  add_mean_dot(color="black",shape=23, fill="white", size=2) %>%
+  adjust_y_axis(limits = c(-17,19.9)) %>%
+  add_title("Log Fold Change by Motif Presence: All Genes") %>%
+  adjust_x_axis_title("Number of Motifs in Promoter") %>% 
+  adjust_y_axis_title("$Log[2]~Fold~Change$") %>%
+  adjust_legend_title("Motif Count") %>%
+  adjust_colors(new_colors= c("#66C2A5", "#FC8D62", "#8DA0CB"))  %>%
+  adjust_size(width = NA, height = NA) %>%
+  theme_minimal_y(fontsize = 14) %>% remove_x_axis_ticks() %>%
+  remove_legend() %>% remove_x_axis_line() %>% 
+  adjust_title(face = "bold") %>%
+  save_plot("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif6.png",
+            width = 8, height = 6, units="in",bg = "transparent")
 
-plot <- ggplot(plot_data, aes(x = motif_count, y = log2FoldChange, fill = motif_count)) +
-  geom_jitter(aes(color = motif_count), width = 0.2, size = 1.5, alpha = 0.6) +  
-  geom_violin(alpha = 0.7, width = 0.5) +  
-  stat_summary(fun = mean, geom = "point", shape = 21,  size = 2, fill = "white", color = "black") + 
-  scale_fill_brewer(palette = "Set2") +  
-  scale_color_brewer(palette = "Set2") + 
-  labs(
-    title = "Log2 Fold Change by Motif Presence",
-    subtitle = "All Genes",
-    x = "Number of Motifs in Promoter",
-    y = "Log2 Fold Change",
-    fill = "Motif Count",
-    color = "Motif Count"
-  ) +
-  theme_minimal(base_size = 14) + 
-  theme(
-    legend.position = "none",  
-    plot.title = element_text(face = "bold", size = 16),
-    plot.subtitle = element_text(size = 14),
-    axis.text = element_text(size = 12),
-    axis.title = element_text(size = 14),
-    panel.grid.major = element_line(size = 0.5, linetype = "dashed", color = "gray80")
-  )
+fimo_counts_DE  %>% mutate(n_motif= as.character(n_motif)) %>% 
+  tidyplot(x = n_motif,  y = log2FoldChange, color = n_motif) %>%
+  add_data_points_jitter(size = 1.5, jitter_width = 0.5, alpha=0.5) %>%
+  add_violin(alpha = 0.8,color="black", width=0.3, linewidth = 0.5, trim=TRUE)  %>%
+  add_mean_dot(color="black",shape=23, fill="white", size=2) %>%
+  adjust_y_axis(limits = c(-17,19.9))  %>%
+  add_title("Log Fold Change by Motif Presence: Differentially Expressed Genes") %>%
+  adjust_x_axis_title("Number of Motifs in Promoter") %>% 
+  adjust_y_axis_title("$Log[2]~Fold~Change$") %>%
+  adjust_legend_title("Motif Count") %>%
+  adjust_colors(new_colors= c("#66C2A5", "#FC8D62", "#8DA0CB"))  %>%
+  adjust_size(width = NA, height = NA) %>%
+  theme_minimal_y(fontsize = 15) %>% remove_x_axis_ticks() %>%
+  remove_legend() %>% remove_x_axis_line() %>% 
+  adjust_title(face = "bold") %>%
+  save_plot("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif6_DE.png",
+            width = 8, height = 6, units="in", bg = "transparent")
 
-# Save the plot as a high-quality PNG
-ggsave("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif6.png", plot, width = 8, height = 6, dpi = 300)
-
-# Display the plot
-print(plot)
-
-plot_data <- fimo_counts_DE %>%
-  mutate(motif_count = case_when(
-    n == 0 ~ "0 Motifs",
-    n == 1 ~ "1 Motif",
-    n > 1 ~ ">1 Motifs"
-  )) %>%
-  mutate(motif_count = factor(motif_count, levels = c("0 Motifs", "1 Motif", ">1 Motifs")))
-
-plot <- ggplot(plot_data, aes(x = motif_count, y = log2FoldChange, fill = motif_count)) +
-  geom_jitter(aes(color = motif_count), width = 0.2, size = 1.5, alpha = 0.6) +  
-  geom_violin(alpha = 0.7, width = 0.5) + 
-  stat_summary(fun = mean, geom = "point", shape = 21, size = 2, fill = "white", color = "black") +  
-  scale_fill_brewer(palette = "Set2") + 
-  scale_color_brewer(palette = "Set2") +  
-  labs(
-    title = "Log2 Fold Change by Motif Presence",
-    subtitle = "Significantly DE Genes",
-    x = "Number of Motifs in Promoter",
-    y = "Log2 Fold Change",
-    fill = "Motif Count",
-    color = "Motif Count"
-  ) +
-  theme_minimal(base_size = 14) +  
-  theme(
-    legend.position = "none", 
-    plot.title = element_text(face = "bold", size = 16),
-    plot.subtitle = element_text(size = 14),
-    axis.text = element_text(size = 12),
-    axis.title = element_text(size = 14),
-    panel.grid.major = element_line(size = 0.5, linetype = "dashed", color = "gray80")
-  )
-
-ggsave("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif6_DE.png", plot, width = 8, height = 6, dpi = 300)
-
-# Display the plot
-print(plot)
 ```
 
 **Wow! It looks like the presence of this motif may be reflected in log2FoldChange! The genes with 1 or 2 sites have predominately negative fold change.**
 
 ```{r}
-fimo_presence_absence <- fimo_counts %>% mutate(n = if_else(n>0, 1, n))
+# Fisher's exact test 
+allgenes_table <- table(fimo_counts$n_motif, fimo_counts$log2FoldChange > 0)
+allgenes_table
+fisher_allgenes <- allgenes_table %>% pairwise_fisher_test() %>% mutate(y.position = c(1.05, 1.1, 1.02), LFCDirection = "upAboral") 
+fisher_allgenes
 
-fimo_presence_absence_DE <- fimo_presence_absence %>% filter(padj < 0.05)
 
-# Fisher's exact test for presence/absence
-fisher_table <- table(fimo_presence_absence_DE$n, fimo_presence_absence_DE$log2FoldChange > 0)
-fisher_table
-fisher.test(fisher_table)
-
-fisher_table <- table(fimo_presence_absence$n, fimo_presence_absence$log2FoldChange > 0)
-fisher_table
-fisher.test(fisher_table)
+DE_table <- table(fimo_counts_DE$n_motif, fimo_counts_DE$log2FoldChange > 0)
+DE_table
+fisher_DE <- DE_table %>% pairwise_fisher_test() %>% mutate(y.position = c(1.05, 1.1, 1.02), LFCDirection = "upAboral") 
+fisher_DE
 ```
 
 ```{r}
-logistic_model <- glm((log2FoldChange > 0) ~ n, data = fimo_presence_absence_DE, family = binomial)
-summary(logistic_model)
+fimo_counts %>% mutate(n_motif = as.character(n_motif)) %>%
+  mutate(LFCDirection = ifelse(log2FoldChange > 0,"upAboral", "upOralEpi")) %>% 
+  tidyplot(x = n_motif, color = LFCDirection) %>%
+  add_barstack_relative(alpha = 0.9) %>%
+  add(ggplot2::geom_bar(stat = "count", position = "fill",color="slategray", width = 0.8)) %>%
+  adjust_colors(new_colors= c("mediumpurple1", "darkgreen"))  %>%
+  adjust_size(width = NA, height = NA) %>%
+  theme_minimal_y(fontsize = 12) %>% remove_x_axis_ticks() %>%
+  adjust_y_axis_title("Proportion") %>%
+  adjust_x_axis_title("Number of Motifs in Promoter") %>%
+  adjust_title(face = "bold") %>% 
+  add(ggpubr::stat_pvalue_manual(fisher_allgenes)) %>%
+  save_plot("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif6_LFC_direction.png",
+            width = 8, height = 6, units="in",bg = "transparent") 
 
-logistic_model <- glm((log2FoldChange > 0) ~ n, data = fimo_presence_absence, family = binomial)
-summary(logistic_model)
+fimo_counts_DE %>% mutate(n_motif = as.character(n_motif)) %>%
+  mutate(LFCDirection = ifelse(log2FoldChange > 0,"upAboral", "upOralEpi")) %>% 
+  tidyplot(x = n_motif, color = LFCDirection) %>%
+  add_barstack_relative(alpha = 0.9) %>%
+  add(ggplot2::geom_bar(stat = "count", position = "fill",color="slategray", width = 0.8)) %>%
+  adjust_colors(new_colors= c("mediumpurple1", "darkgreen"))  %>%
+  adjust_size(width = NA, height = NA) %>%
+  theme_minimal_y(fontsize = 12) %>% remove_x_axis_ticks() %>%
+  adjust_y_axis_title("Proportion") %>%
+  adjust_x_axis_title("Number of Motifs in Promoter") %>%
+  adjust_title(face = "bold") %>% 
+  add(ggpubr::stat_pvalue_manual(fisher_DE)) %>%
+  save_plot("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif6_LFC_direction_DE.png",
+            width = 8, height = 6, units="in",bg = "transparent") 
 ```
 
 ### Further looking into this motif, CAAVATGGCGG (MEME-3) - higher in OralEpi (negative L2FC)
@@ -544,6 +531,7 @@ CDSearch <- read.delim("../references/Pocillopora_acuta_HIv2.genes.Conserved_Dom
 ```{r}
 # Merge FIMO results (for all genes, including those with no FIMO match) with annotation data 
 fimo_annot <- fimo_merged %>% left_join(EggNog, by = c("sequence_name" = "query"))
+fimo_cd <- fimo_merged %>% left_join(CDSearch, by = c("sequence_name" = "query"))
 
 # filter to have only the FIMO-match genes
 fimo_annot_filtered <- fimo_annot %>% filter(motif_id == "CAAVATGGCGG")
@@ -566,7 +554,6 @@ kable(fimo_annot_counts_filt_DE %>% filter(grepl("hist",Description,ignore.case 
 ```
 
 There are three differentially expressed histone deacetylases containig the motif in their promoter, one which has 2 occurances of the motif. All three have negative log2FoldChanges, indicating they have higher expression in the Oral Epiderimis tissues (though, they are pretty close to zero -- but found significantly DE by DESeq).
-
 
 ## STREME: Relative enrichment of motifs compared to background
 

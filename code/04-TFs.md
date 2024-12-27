@@ -128,6 +128,31 @@ require("knitr")
     ## Warning: package 'knitr' was built under R version 4.3.3
 
 ``` r
+require("tidyplots")
+```
+
+    ## Loading required package: tidyplots
+
+    ## Warning: package 'tidyplots' was built under R version 4.3.3
+
+``` r
+require("rstatix")
+```
+
+    ## Loading required package: rstatix
+
+    ## 
+    ## Attaching package: 'rstatix'
+
+    ## The following object is masked from 'package:IRanges':
+    ## 
+    ##     desc
+
+    ## The following object is masked from 'package:stats':
+    ## 
+    ##     filter
+
+``` r
 require("tidyverse")
 ```
 
@@ -144,9 +169,9 @@ require("tidyverse")
     ## ✖ dplyr::collapse()     masks Biostrings::collapse(), IRanges::collapse()
     ## ✖ dplyr::combine()      masks BiocGenerics::combine()
     ## ✖ purrr::compact()      masks XVector::compact()
-    ## ✖ dplyr::desc()         masks IRanges::desc()
+    ## ✖ dplyr::desc()         masks rstatix::desc(), IRanges::desc()
     ## ✖ tidyr::expand()       masks S4Vectors::expand()
-    ## ✖ dplyr::filter()       masks stats::filter()
+    ## ✖ dplyr::filter()       masks rstatix::filter(), stats::filter()
     ## ✖ dplyr::first()        masks S4Vectors::first()
     ## ✖ dplyr::lag()          masks stats::lag()
     ## ✖ ggplot2::Position()   masks BiocGenerics::Position(), base::Position()
@@ -183,10 +208,10 @@ sessionInfo() #provides list of loaded packages and version of R.
     ##  [1] lubridate_1.9.3      forcats_1.0.0        stringr_1.5.1       
     ##  [4] dplyr_1.1.4          purrr_1.0.2          readr_2.1.5         
     ##  [7] tidyr_1.3.1          tibble_3.2.1         ggplot2_3.5.1       
-    ## [10] tidyverse_2.0.0      knitr_1.48           Biostrings_2.70.3   
-    ## [13] XVector_0.40.0       rtracklayer_1.62.0   GenomicRanges_1.54.1
-    ## [16] GenomeInfoDb_1.36.4  IRanges_2.34.1       S4Vectors_0.38.2    
-    ## [19] BiocGenerics_0.46.0 
+    ## [10] tidyverse_2.0.0      rstatix_0.7.2        tidyplots_0.2.0     
+    ## [13] knitr_1.48           Biostrings_2.70.3    XVector_0.40.0      
+    ## [16] rtracklayer_1.62.0   GenomicRanges_1.54.1 GenomeInfoDb_1.36.4 
+    ## [19] IRanges_2.34.1       S4Vectors_0.38.2     BiocGenerics_0.46.0 
     ## 
     ## loaded via a namespace (and not attached):
     ##  [1] SummarizedExperiment_1.30.2 gtable_0.3.5               
@@ -199,26 +224,28 @@ sessionInfo() #provides list of loaded packages and version of R.
     ## [15] Matrix_1.6-5                lifecycle_1.0.4            
     ## [17] GenomeInfoDbData_1.2.10     compiler_4.3.2             
     ## [19] Rsamtools_2.18.0            munsell_0.5.1              
-    ## [21] codetools_0.2-20            htmltools_0.5.8.1          
-    ## [23] RCurl_1.98-1.16             yaml_2.3.10                
-    ## [25] pillar_1.9.0                crayon_1.5.3               
-    ## [27] BiocParallel_1.34.2         DelayedArray_0.26.7        
-    ## [29] abind_1.4-8                 tidyselect_1.2.1           
-    ## [31] digest_0.6.37               stringi_1.8.4              
-    ## [33] restfulr_0.0.15             fastmap_1.2.0              
-    ## [35] grid_4.3.2                  colorspace_2.1-1           
-    ## [37] cli_3.6.3                   SparseArray_1.2.4          
-    ## [39] magrittr_2.0.3              S4Arrays_1.0.6             
-    ## [41] XML_3.99-0.17               utf8_1.2.4                 
-    ## [43] withr_3.0.1                 scales_1.3.0               
-    ## [45] timechange_0.3.0            rmarkdown_2.28             
-    ## [47] matrixStats_1.4.1           hms_1.1.3                  
-    ## [49] evaluate_1.0.1              BiocIO_1.12.0              
-    ## [51] rlang_1.1.4                 glue_1.8.0                 
-    ## [53] BiocManager_1.30.25         renv_1.0.11                
-    ## [55] rstudioapi_0.17.0           R6_2.5.1                   
-    ## [57] MatrixGenerics_1.12.3       GenomicAlignments_1.38.2   
-    ## [59] zlibbioc_1.46.0
+    ## [21] codetools_0.2-20            carData_3.0-5              
+    ## [23] htmltools_0.5.8.1           RCurl_1.98-1.16            
+    ## [25] yaml_2.3.10                 Formula_1.2-5              
+    ## [27] pillar_1.9.0                car_3.1-3                  
+    ## [29] crayon_1.5.3                BiocParallel_1.34.2        
+    ## [31] DelayedArray_0.26.7         abind_1.4-8                
+    ## [33] tidyselect_1.2.1            digest_0.6.37              
+    ## [35] stringi_1.8.4               restfulr_0.0.15            
+    ## [37] fastmap_1.2.0               grid_4.3.2                 
+    ## [39] colorspace_2.1-1            cli_3.6.3                  
+    ## [41] SparseArray_1.2.4           magrittr_2.0.3             
+    ## [43] S4Arrays_1.0.6              XML_3.99-0.17              
+    ## [45] utf8_1.2.4                  broom_1.0.7                
+    ## [47] withr_3.0.1                 scales_1.3.0               
+    ## [49] backports_1.5.0             timechange_0.3.0           
+    ## [51] rmarkdown_2.28              matrixStats_1.4.1          
+    ## [53] hms_1.1.3                   evaluate_1.0.1             
+    ## [55] BiocIO_1.12.0               rlang_1.1.4                
+    ## [57] glue_1.8.0                  BiocManager_1.30.25        
+    ## [59] renv_1.0.11                 rstudioapi_0.17.0          
+    ## [61] R6_2.5.1                    MatrixGenerics_1.12.3      
+    ## [63] GenomicAlignments_1.38.2    zlibbioc_1.46.0
 
 ## 0.4 Load in reference files and differential expression data
 
@@ -421,8 +448,6 @@ summary(start(promoters_500_UP))
 # also remove any rows where the promoter sequence now has a width < 500
 
 promoters_500_UP <- promoters_500_UP[promoters_500_UP@ranges@width == 500]
-
-write_tsv(data.frame(promoters_500_UP), "../output_RNA/differential_expression/TFs/promoters.gff", col_names = FALSE)
 ```
 
 Then, extract these sequences, by chromosome, using the function
@@ -803,99 +828,56 @@ fimo_merged <- fimo_filtered %>% full_join(DESeq, by = c("sequence_name" = "quer
 #summarize
 
 fimo_counts <- fimo_merged %>% group_by(sequence_name, log2FoldChange, padj,  motif_id) %>% count() %>%
-  mutate(n = if_else(is.na(motif_id), 0, n)) 
+  mutate(n = if_else(is.na(motif_id), 0, n)) %>% rename(n_motif = n)
 
 fimo_counts_DE <- fimo_counts %>% filter(padj < 0.05)
 ```
 
 ``` r
-plot_data <- fimo_counts %>%
-  mutate(motif_count = case_when(
-    n == 0 ~ "0 Motifs",
-    n == 1 ~ "1 Motif",
-    n > 1 ~ ">1 Motifs"
-  )) %>%
-  mutate(motif_count = factor(motif_count, levels = c("0 Motifs", "1 Motif", ">1 Motifs")))
-
-plot <- ggplot(plot_data, aes(x = motif_count, y = log2FoldChange, fill = motif_count)) +
-  geom_jitter(aes(color = motif_count), width = 0.2, size = 1.5, alpha = 0.6) +  
-  geom_violin(alpha = 0.7, width = 0.5) +  
-  stat_summary(fun = mean, geom = "point", shape = 21,  size = 2, fill = "white", color = "black") + 
-  scale_fill_brewer(palette = "Set2") +  
-  scale_color_brewer(palette = "Set2") + 
-  labs(
-    title = "Log2 Fold Change by Motif Presence",
-    subtitle = "All Genes",
-    x = "Number of Motifs in Promoter",
-    y = "Log2 Fold Change",
-    fill = "Motif Count",
-    color = "Motif Count"
-  ) +
-  theme_minimal(base_size = 14) + 
-  theme(
-    legend.position = "none",  
-    plot.title = element_text(face = "bold", size = 16),
-    plot.subtitle = element_text(size = 14),
-    axis.text = element_text(size = 12),
-    axis.title = element_text(size = 14),
-    panel.grid.major = element_line(size = 0.5, linetype = "dashed", color = "gray80")
-  )
+fimo_counts %>% mutate(n_motif= as.character(n_motif)) %>% 
+  tidyplot(x = n_motif,  y = log2FoldChange, color = n_motif) %>%
+  add_data_points_jitter(size = 1.5, jitter_width = 0.5, alpha=0.5) %>%
+  add_violin(alpha = 0.8,color="black", width=0.3, linewidth = 0.5, trim=TRUE)  %>%
+  add_mean_dot(color="black",shape=23, fill="white", size=2) %>%
+  adjust_y_axis(limits = c(-17,19.9)) %>%
+  add_title("Log Fold Change by Motif Presence: All Genes") %>%
+  adjust_x_axis_title("Number of Motifs in Promoter") %>% 
+  adjust_y_axis_title("$Log[2]~Fold~Change$") %>%
+  adjust_legend_title("Motif Count") %>%
+  adjust_colors(new_colors= c("#66C2A5", "#FC8D62", "#8DA0CB"))  %>%
+  adjust_size(width = NA, height = NA) %>%
+  theme_minimal_y(fontsize = 14) %>% remove_x_axis_ticks() %>%
+  remove_legend() %>% remove_x_axis_line() %>% 
+  adjust_title(face = "bold") %>%
+  save_plot("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif6.png",
+            width = 8, height = 6, units="in",bg = "transparent")
 ```
 
-    ## Warning: The `size` argument of `element_line()` is deprecated as of ggplot2 3.4.0.
-    ## ℹ Please use the `linewidth` argument instead.
-    ## This warning is displayed once every 8 hours.
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
-
-``` r
-# Save the plot as a high-quality PNG
-ggsave("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif6.png", plot, width = 8, height = 6, dpi = 300)
-
-# Display the plot
-print(plot)
-```
+    ## ✔ save_plot: saved to '../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif6.png'
 
 ![](04-TFs_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ``` r
-plot_data <- fimo_counts_DE %>%
-  mutate(motif_count = case_when(
-    n == 0 ~ "0 Motifs",
-    n == 1 ~ "1 Motif",
-    n > 1 ~ ">1 Motifs"
-  )) %>%
-  mutate(motif_count = factor(motif_count, levels = c("0 Motifs", "1 Motif", ">1 Motifs")))
-
-plot <- ggplot(plot_data, aes(x = motif_count, y = log2FoldChange, fill = motif_count)) +
-  geom_jitter(aes(color = motif_count), width = 0.2, size = 1.5, alpha = 0.6) +  
-  geom_violin(alpha = 0.7, width = 0.5) + 
-  stat_summary(fun = mean, geom = "point", shape = 21, size = 2, fill = "white", color = "black") +  
-  scale_fill_brewer(palette = "Set2") + 
-  scale_color_brewer(palette = "Set2") +  
-  labs(
-    title = "Log2 Fold Change by Motif Presence",
-    subtitle = "Significantly DE Genes",
-    x = "Number of Motifs in Promoter",
-    y = "Log2 Fold Change",
-    fill = "Motif Count",
-    color = "Motif Count"
-  ) +
-  theme_minimal(base_size = 14) +  
-  theme(
-    legend.position = "none", 
-    plot.title = element_text(face = "bold", size = 16),
-    plot.subtitle = element_text(size = 14),
-    axis.text = element_text(size = 12),
-    axis.title = element_text(size = 14),
-    panel.grid.major = element_line(size = 0.5, linetype = "dashed", color = "gray80")
-  )
-
-ggsave("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif6_DE.png", plot, width = 8, height = 6, dpi = 300)
-
-# Display the plot
-print(plot)
+fimo_counts_DE  %>% mutate(n_motif= as.character(n_motif)) %>% 
+  tidyplot(x = n_motif,  y = log2FoldChange, color = n_motif) %>%
+  add_data_points_jitter(size = 1.5, jitter_width = 0.5, alpha=0.5) %>%
+  add_violin(alpha = 0.8,color="black", width=0.3, linewidth = 0.5, trim=TRUE)  %>%
+  add_mean_dot(color="black",shape=23, fill="white", size=2) %>%
+  adjust_y_axis(limits = c(-17,19.9))  %>%
+  add_title("Log Fold Change by Motif Presence: Differentially Expressed Genes") %>%
+  adjust_x_axis_title("Number of Motifs in Promoter") %>% 
+  adjust_y_axis_title("$Log[2]~Fold~Change$") %>%
+  adjust_legend_title("Motif Count") %>%
+  adjust_colors(new_colors= c("#66C2A5", "#FC8D62", "#8DA0CB"))  %>%
+  adjust_size(width = NA, height = NA) %>%
+  theme_minimal_y(fontsize = 15) %>% remove_x_axis_ticks() %>%
+  remove_legend() %>% remove_x_axis_line() %>% 
+  adjust_title(face = "bold") %>%
+  save_plot("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif6_DE.png",
+            width = 8, height = 6, units="in", bg = "transparent")
 ```
+
+    ## ✔ save_plot: saved to '../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif6_DE.png'
 
 ![](04-TFs_files/figure-gfm/unnamed-chunk-13-2.png)<!-- -->
 
@@ -904,109 +886,93 @@ log2FoldChange! The genes with 1 or 2 sites have predominately negative
 fold change.**
 
 ``` r
-fimo_presence_absence <- fimo_counts %>% mutate(n = if_else(n>0, 1, n))
-
-fimo_presence_absence_DE <- fimo_presence_absence %>% filter(padj < 0.05)
-
-# Fisher's exact test for presence/absence
-fisher_table <- table(fimo_presence_absence_DE$n, fimo_presence_absence_DE$log2FoldChange > 0)
-fisher_table
-```
-
-    ##    
-    ##     FALSE TRUE
-    ##   0  2533  787
-    ##   1   269   17
-
-``` r
-fisher.test(fisher_table)
-```
-
-    ## 
-    ##  Fisher's Exact Test for Count Data
-    ## 
-    ## data:  fisher_table
-    ## p-value = 1.127e-14
-    ## alternative hypothesis: true odds ratio is not equal to 1
-    ## 95 percent confidence interval:
-    ##  0.1160307 0.3346326
-    ## sample estimates:
-    ## odds ratio 
-    ##  0.2034528
-
-``` r
-fisher_table <- table(fimo_presence_absence$n, fimo_presence_absence$log2FoldChange > 0)
-fisher_table
+# Fisher's exact test 
+allgenes_table <- table(fimo_counts$n_motif, fimo_counts$log2FoldChange > 0)
+allgenes_table
 ```
 
     ##    
     ##     FALSE TRUE
     ##   0  8553 4391
-    ##   1  1110  410
+    ##   1  1039  392
+    ##   2    71   18
 
 ``` r
-fisher.test(fisher_table)
+fisher_allgenes <- allgenes_table %>% pairwise_fisher_test() %>% mutate(y.position = c(1.05, 1.1, 1.02), LFCDirection = "upAboral") 
+fisher_allgenes
 ```
 
-    ## 
-    ##  Fisher's Exact Test for Count Data
-    ## 
-    ## data:  fisher_table
-    ## p-value = 3.664e-08
-    ## alternative hypothesis: true odds ratio is not equal to 1
-    ## 95 percent confidence interval:
-    ##  0.6371654 0.8113133
-    ## sample estimates:
-    ## odds ratio 
-    ##   0.719492
+    ## # A tibble: 3 × 8
+    ##   group1 group2     n           p     p.adj p.adj.signif y.position LFCDirection
+    ##   <chr>  <chr>  <int>       <dbl>     <dbl> <chr>             <dbl> <chr>       
+    ## 1 0      1      14375 0.000000488   1.46e-6 ****               1.05 upAboral    
+    ## 2 0      2      13033 0.00663       1.33e-2 *                  1.1  upAboral    
+    ## 3 1      2       1520 0.175         1.75e-1 ns                 1.02 upAboral
 
 ``` r
-logistic_model <- glm((log2FoldChange > 0) ~ n, data = fimo_presence_absence_DE, family = binomial)
-summary(logistic_model)
+DE_table <- table(fimo_counts_DE$n_motif, fimo_counts_DE$log2FoldChange > 0)
+DE_table
 ```
 
-    ## 
-    ## Call:
-    ## glm(formula = (log2FoldChange > 0) ~ n, family = binomial, data = fimo_presence_absence_DE)
-    ## 
-    ## Coefficients:
-    ##             Estimate Std. Error z value Pr(>|z|)    
-    ## (Intercept) -1.16893    0.04081 -28.643  < 2e-16 ***
-    ## n           -1.59257    0.25339  -6.285 3.28e-10 ***
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-    ## 
-    ## (Dispersion parameter for binomial family taken to be 1)
-    ## 
-    ##     Null deviance: 3826.9  on 3605  degrees of freedom
-    ## Residual deviance: 3765.4  on 3604  degrees of freedom
-    ## AIC: 3769.4
-    ## 
-    ## Number of Fisher Scoring iterations: 5
+    ##    
+    ##     FALSE TRUE
+    ##   0  2533  787
+    ##   1   255   16
+    ##   2    14    1
 
 ``` r
-logistic_model <- glm((log2FoldChange > 0) ~ n, data = fimo_presence_absence, family = binomial)
-summary(logistic_model)
+fisher_DE <- DE_table %>% pairwise_fisher_test() %>% mutate(y.position = c(1.05, 1.1, 1.02), LFCDirection = "upAboral") 
+fisher_DE
 ```
 
-    ## 
-    ## Call:
-    ## glm(formula = (log2FoldChange > 0) ~ n, family = binomial, data = fimo_presence_absence)
-    ## 
-    ## Coefficients:
-    ##             Estimate Std. Error z value Pr(>|z|)    
-    ## (Intercept) -0.66673    0.01856 -35.913  < 2e-16 ***
-    ## n           -0.32923    0.06070  -5.424 5.83e-08 ***
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-    ## 
-    ## (Dispersion parameter for binomial family taken to be 1)
-    ## 
-    ##     Null deviance: 18385  on 14463  degrees of freedom
-    ## Residual deviance: 18354  on 14462  degrees of freedom
-    ## AIC: 18358
-    ## 
-    ## Number of Fisher Scoring iterations: 4
+    ## # A tibble: 3 × 8
+    ##   group1 group2     n        p    p.adj p.adj.signif y.position LFCDirection
+    ##   <chr>  <chr>  <int>    <dbl>    <dbl> <chr>             <dbl> <chr>       
+    ## 1 0      1       3591 3.27e-14 9.81e-14 ****               1.05 upAboral    
+    ## 2 0      2       3335 2.18e- 1 4.36e- 1 ns                 1.1  upAboral    
+    ## 3 1      2        286 1   e+ 0 1   e+ 0 ns                 1.02 upAboral
+
+``` r
+fimo_counts %>% mutate(n_motif = as.character(n_motif)) %>%
+  mutate(LFCDirection = ifelse(log2FoldChange > 0,"upAboral", "upOralEpi")) %>% 
+  tidyplot(x = n_motif, color = LFCDirection) %>%
+  add_barstack_relative(alpha = 0.9) %>%
+  add(ggplot2::geom_bar(stat = "count", position = "fill",color="slategray", width = 0.8)) %>%
+  adjust_colors(new_colors= c("mediumpurple1", "darkgreen"))  %>%
+  adjust_size(width = NA, height = NA) %>%
+  theme_minimal_y(fontsize = 12) %>% remove_x_axis_ticks() %>%
+  adjust_y_axis_title("Proportion") %>%
+  adjust_x_axis_title("Number of Motifs in Promoter") %>%
+  adjust_title(face = "bold") %>% 
+  add(ggpubr::stat_pvalue_manual(fisher_allgenes)) %>%
+  save_plot("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif6_LFC_direction.png",
+            width = 8, height = 6, units="in",bg = "transparent") 
+```
+
+    ## ✔ save_plot: saved to '../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif6_LFC_direction.png'
+
+![](04-TFs_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+
+``` r
+fimo_counts_DE %>% mutate(n_motif = as.character(n_motif)) %>%
+  mutate(LFCDirection = ifelse(log2FoldChange > 0,"upAboral", "upOralEpi")) %>% 
+  tidyplot(x = n_motif, color = LFCDirection) %>%
+  add_barstack_relative(alpha = 0.9) %>%
+  add(ggplot2::geom_bar(stat = "count", position = "fill",color="slategray", width = 0.8)) %>%
+  adjust_colors(new_colors= c("mediumpurple1", "darkgreen"))  %>%
+  adjust_size(width = NA, height = NA) %>%
+  theme_minimal_y(fontsize = 12) %>% remove_x_axis_ticks() %>%
+  adjust_y_axis_title("Proportion") %>%
+  adjust_x_axis_title("Number of Motifs in Promoter") %>%
+  adjust_title(face = "bold") %>% 
+  add(ggpubr::stat_pvalue_manual(fisher_DE)) %>%
+  save_plot("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif6_LFC_direction_DE.png",
+            width = 8, height = 6, units="in",bg = "transparent") 
+```
+
+    ## ✔ save_plot: saved to '../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif6_LFC_direction_DE.png'
+
+![](04-TFs_files/figure-gfm/unnamed-chunk-15-2.png)<!-- -->
 
 ### 0.6.5 Further looking into this motif, CAAVATGGCGG (MEME-3) - higher in OralEpi (negative L2FC)
 
@@ -1063,7 +1029,16 @@ CDSearch <- read.delim("../references/Pocillopora_acuta_HIv2.genes.Conserved_Dom
 ``` r
 # Merge FIMO results (for all genes, including those with no FIMO match) with annotation data 
 fimo_annot <- fimo_merged %>% left_join(EggNog, by = c("sequence_name" = "query"))
+fimo_cd <- fimo_merged %>% left_join(CDSearch, by = c("sequence_name" = "query"))
+```
 
+    ## Warning in left_join(., CDSearch, by = c(sequence_name = "query")): Detected an unexpected many-to-many relationship between `x` and `y`.
+    ## ℹ Row 3 of `x` matches multiple rows in `y`.
+    ## ℹ Row 24564 of `y` matches multiple rows in `x`.
+    ## ℹ If a many-to-many relationship is expected, set `relationship =
+    ##   "many-to-many"` to silence this warning.
+
+``` r
 # filter to have only the FIMO-match genes
 fimo_annot_filtered <- fimo_annot %>% filter(motif_id == "CAAVATGGCGG")
 
