@@ -442,7 +442,7 @@ pcut=1e-2 # adjusted pvalue cutoff for representative GO
 hcut=0.9 # height at which cut the GO terms tree to get "independent groups". 
 
 # plotting the GO tree with the cut level (un-remark the next two lines to plot)
- plot(results[[2]],cex=0.6)
+ plot(results[[2]],cex=0.3)
  abline(h=hcut,col="red")
 ```
 
@@ -671,7 +671,7 @@ pcut=1e-2 # adjusted pvalue cutoff for representative GO
 hcut=0.9 # height at which cut the GO terms tree to get "independent groups". 
 
 # plotting the GO tree with the cut level (un-remark the next two lines to plot)
- plot(results[[2]],cex=0.6)
+ plot(results[[2]],cex=0.1)
  abline(h=hcut,col="red")
 ```
 
@@ -764,37 +764,7 @@ bestGOs
 ``` r
 MWU_BP_DE_LFC <- read.table("go_mwu/MWU_BP_DE_LFC.csv", header = TRUE)
 BP_DE_LFC <- read.table("go_mwu/BP_DE_LFC.csv", header = TRUE)
-
-# Plot terms p.adj < 0.01
-
-freq_fig <- MWU_BP_DE_LFC %>% dplyr::filter(p.adj<0.01) %>%
-    filter(level==2) %>%
-    #filter(!str_detect(name, "obsolete")) %>%
-    ggplot(aes(y=nseqs,x=reorder(name, nseqs)))+
-    geom_point(size=3, color="black")+
-    geom_segment(aes(x=name, xend=name, y=0, yend=nseqs)) +
-    geom_hline(yintercept = 0, linetype="solid", color = 'black', size=0.5, show.legend = TRUE)+
-    coord_flip()+
-    #scale_y_continuous(limits=c(0,430))+
-    scale_x_discrete(labels = label_wrap(60)) +
-    labs(title = "Enriched Biological Process Level 2 GO Terms, DE Genes", x="Term", y="Number of Significant (p.adj < 0.01)\nGO Terms", colour="p-value") +
-    theme_classic() + 
-    theme(axis.text.y = element_text(size = 8), 
-              axis.title = element_text(size = 8), 
-              plot.title = element_text(hjust = 0.5, size = 8))
 ```
-
-    ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
-    ## ℹ Please use `linewidth` instead.
-    ## This warning is displayed once every 8 hours.
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
-
-``` r
-  print(freq_fig)
-```
-
-![](05-Enrichment_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
 MWU_BP_DE_LFC %>% dplyr::filter(p.adj<0.05 & delta.rank > 0) %>% 
