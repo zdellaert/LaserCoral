@@ -30,6 +30,8 @@ renv::restore() #reinstall all the package versions in the renv lockfile
 
 ```{r packages}
 require("ape")
+require("scales")
+require("tidyplots")
 require("tidyverse")
 
 sessionInfo() #provides list of loaded packages and version of R.
@@ -37,7 +39,7 @@ sessionInfo() #provides list of loaded packages and version of R.
 
 ## Description of pipeline
 
-I am going to perform functional enrichment of GO terms using (GO_MWU)[https://github.com/z0on/GO_MWU].
+I am going to perform functional enrichment of GO terms using [GO_MWU](https://github.com/z0on/GO_MWU).
 
 As described in the [README](https://github.com/z0on/GO_MWU) of the package, the steps to running this analysis are as follows:
 
@@ -149,16 +151,21 @@ write.csv(DE_LFC, "go_mwu/DE_LFC.csv", row.names = FALSE, quote = FALSE)
 
 ## Run GO_MWU
 
-### Up Aboral Fisher Exact Test
-
-```{r, eval=FALSE}
+```{r}
 setwd("go_mwu")
 
-input="UpAboral.csv" # two columns of comma-separated values: gene id, continuous measure of significance. To perform standard GO enrichment analysis based on Fisher's exact test, use binary measure (0 or 1, i.e., either sgnificant or not).
 goAnnotations="gene_to_go.tab" # two-column, tab-delimited, one line per gene, multiple GO terms separated by semicolon.
 goDatabase="go.obo" # download from http://www.geneontology.org/GO.downloads.ontology.shtml
 goDivision="BP" # either MF, or BP, or CC
 source("gomwu.functions.R")
+```
+
+
+### Up Aboral Fisher Exact Test
+
+```{r, eval=FALSE}
+setwd("go_mwu")
+input="UpAboral.csv"
 
 gomwuStats(input, goDatabase, goAnnotations, goDivision,
 	perlPath="perl", # replace with full path to perl executable if it is not in your system's PATH already
@@ -169,6 +176,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
 )
 ```
 
+```
 go.obo gene_to_go.tab UpAboral.csv BP largest=0.1 smallest=5 cutHeight=0.25
 
 Run parameters:
@@ -203,33 +211,32 @@ Secondary clustering:
 calculating similarities....
 Binary classification detected; will perform Fisher's test
 331 GO terms at 10% FDR
-
+```
 
 #### Plotting
 
-```{r, eval=FALSE}
+```{r}
 setwd("go_mwu")
+input="UpAboral.csv"
 
 png(filename = paste0(input, "_plot.png"), width = 1200, height = 4800)
 results=gomwuPlot(input,goAnnotations,goDivision,
- 	absValue=0.001,  #Specify absValue=0.001 if you are doing Fisher's exact test for standard GO enrichment .
- #	absValue=1, # un-remark this if you are using log2-fold changes
+ 	absValue=0.001,  #Specify absValue=0.001 if you are doing Fisher's exact test for standard GO enrichment
  	level1=0.05, # FDR threshold for plotting. Specify level1=1 to plot all GO categories containing genes exceeding the absValue.
  	level2=0.01, # FDR cutoff to print in regular (not italic) font.
  	level3=0.001, # FDR cutoff to print in large bold font.
  	txtsize=2,    # decrease to fit more on one page, or increase (after rescaling the plot so the tree fits the text) for better "word cloud" effect
  	treeHeight=0.5, # height of the hierarchical clustering tree
- 	#colors=c("dodgerblue2","firebrick1","skyblue2","lightcoral") 
  )
 dev.off()
  
 # text representation of results, with actual adjusted p-values
-results[[1]]
+head(results[[1]])
 ```
 
-```{r, eval=FALSE}
-# ------- extracting representative GOs
+#### extracting representative GOs
 
+```{r}
 # this module chooses GO terms that best represent *independent* groups of significant GO terms
 
 pcut=1e-2 # adjusted pvalue cutoff for representative GO
@@ -266,22 +273,13 @@ bestGOs=mwus[mwus$name %in% annots,]
 bestGOs
 ```
 
-452	0	3.685232e-09	3	80	GO:0006022;GO:0030203	aminoglycan metabolic process	
-4408	0	6.840667e-05	3	8	GO:0072376;GO:0072378	protein activation cascade	
-5095	0	2.165615e-11	2	13	GO:1905483;GO:1905485	regulation of motor neuron migration
-
 ---
 
 ### Oral Epidermis tissue fisher exact test
 
 ```{r, eval=FALSE}
 setwd("go_mwu")
-
-input="UpOralEpi.csv" # two columns of comma-separated values: gene id, continuous measure of significance. To perform standard GO enrichment analysis based on Fisher's exact test, use binary measure (0 or 1, i.e., either sgnificant or not).
-goAnnotations="gene_to_go.tab" # two-column, tab-delimited, one line per gene, multiple GO terms separated by semicolon.
-goDatabase="go.obo" # download from http://www.geneontology.org/GO.downloads.ontology.shtml
-goDivision="BP" # either MF, or BP, or CC
-source("gomwu.functions.R")
+input="UpOralEpi.csv"
 
 gomwuStats(input, goDatabase, goAnnotations, goDivision,
 	perlPath="perl", # replace with full path to perl executable if it is not in your system's PATH already
@@ -292,6 +290,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
 )
 ```
 
+```
 go.obo gene_to_go.tab UpOralEpi.csv BP largest=0.1 smallest=5 cutHeight=0.25
 
 Run parameters:
@@ -325,6 +324,9 @@ calculating GO term similarities based on shared genes...
 Secondary clustering:
 calculating similarities....
 Binary classification detected; will perform Fisher's test
+0 GO terms at 10% FDR
+```
+
 **0 GO terms at 10% FDR**
 
 
@@ -332,16 +334,11 @@ Binary classification detected; will perform Fisher's test
 
 ---
 
-### Oral Epidermis tissue fisher exact test
+### Differential Expression using LFC
 
 ```{r, eval=FALSE}
 setwd("go_mwu")
-
-input="DE_LFC.csv" # two columns of comma-separated values: gene id, continuous measure of significance. To perform standard GO enrichment analysis based on Fisher's exact test, use binary measure (0 or 1, i.e., either sgnificant or not).
-goAnnotations="gene_to_go.tab" # two-column, tab-delimited, one line per gene, multiple GO terms separated by semicolon.
-goDatabase="go.obo" # download from http://www.geneontology.org/GO.downloads.ontology.shtml
-goDivision="BP" # either MF, or BP, or CC
-source("gomwu.functions.R")
+input="DE_LFC.csv"
 
 gomwuStats(input, goDatabase, goAnnotations, goDivision,
 	perlPath="perl", # replace with full path to perl executable if it is not in your system's PATH already
@@ -352,6 +349,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
 )
 ```
 
+```
 go.obo gene_to_go.tab DE_LFC.csv BP largest=0.1 smallest=5 cutHeight=0.25
 
 Run parameters:
@@ -386,3 +384,139 @@ Secondary clustering:
 calculating similarities....
 Continuous measure of interest: will perform MWU test
 602 GO terms at 10% FDR
+```
+
+#### Plotting
+
+```{r}
+setwd("go_mwu")
+input="DE_LFC.csv"
+
+png(filename = paste0(input, "_plot.png"), width = 1200, height = 4800)
+results=gomwuPlot(input,goAnnotations,goDivision,
+ 	absValue=1, # un-remark this if you are using log2-fold changes
+ 	level1=0.05, # FDR threshold for plotting. Specify level1=1 to plot all GO categories containing genes exceeding the absValue.
+ 	level2=0.01, # FDR cutoff to print in regular (not italic) font.
+ 	level3=0.001, # FDR cutoff to print in large bold font.
+ 	txtsize=1.9,    # decrease to fit more on one page
+ 	treeHeight=0.5, # height of the hierarchical clustering tree
+ 	colors=c("dodgerblue2","firebrick1","skyblue2","lightcoral") 
+ )
+dev.off()
+ 
+# text representation of results, with actual adjusted p-values
+head(results[[1]])
+```
+
+#### extracting representative GOs
+
+```{r}
+# this module chooses GO terms that best represent *independent* groups of significant GO terms
+
+pcut=1e-2 # adjusted pvalue cutoff for representative GO
+hcut=0.9 # height at which cut the GO terms tree to get "independent groups". 
+
+# plotting the GO tree with the cut level (un-remark the next two lines to plot)
+ plot(results[[2]],cex=0.6)
+ abline(h=hcut,col="red")
+
+# cutting
+ct=cutree(results[[2]],h=hcut)
+annots=c();ci=1
+for (ci in unique(ct)) {
+  message(ci)
+	rn=names(ct)[ct==ci]
+	obs=grep("obsolete",rn)
+	if(length(obs)>0) { rn=rn[-obs] }
+	if (length(rn)==0) {next}
+	rr=results[[1]][rn,]
+	bestrr=rr[which(rr$pval==min(rr$pval)),]
+	best=1
+	if(nrow(bestrr)>1) {
+		nns=sub(" .+","",row.names(bestrr))
+		fr=c()
+		for (i in 1:length(nns)) { fr=c(fr,eval(parse(text=nns[i]))) }
+		best=which(fr==max(fr))
+	}
+	if (bestrr$pval[best]<=pcut) { annots=c(annots,sub("\\d+\\/\\d+ ","",row.names(bestrr)[best]))}
+}
+
+setwd("go_mwu")
+mwus=read.table(paste("MWU",goDivision,input,sep="_"),header=T)
+bestGOs=mwus[mwus$name %in% annots,]
+bestGOs
+```
+
+## Custom plots
+
+```{r}
+MWU_BP_DE_LFC <- read.table("go_mwu/MWU_BP_DE_LFC.csv", header = TRUE)
+BP_DE_LFC <- read.table("go_mwu/BP_DE_LFC.csv", header = TRUE)
+
+# Plot terms p.adj < 0.01
+
+freq_fig <- MWU_BP_DE_LFC %>% dplyr::filter(p.adj<0.01) %>%
+    filter(level==2) %>%
+    #filter(!str_detect(name, "obsolete")) %>%
+    ggplot(aes(y=nseqs,x=reorder(name, nseqs)))+
+    geom_point(size=3, color="black")+
+    geom_segment(aes(x=name, xend=name, y=0, yend=nseqs)) +
+    geom_hline(yintercept = 0, linetype="solid", color = 'black', size=0.5, show.legend = TRUE)+
+    coord_flip()+
+    #scale_y_continuous(limits=c(0,430))+
+    scale_x_discrete(labels = label_wrap(60)) +
+    labs(title = "Enriched Biological Process Level 2 GO Terms, DE Genes", x="Term", y="Number of Significant (p.adj < 0.01)\nGO Terms", colour="p-value") +
+    theme_classic() + 
+    theme(axis.text.y = element_text(size = 8), 
+              axis.title = element_text(size = 8), 
+              plot.title = element_text(hjust = 0.5, size = 8))
+
+  print(freq_fig)
+```
+
+```{r}
+MWU_BP_DE_LFC %>% dplyr::filter(p.adj<0.05 & delta.rank > 0) %>% 
+  mutate(log10padj = -log10(p.adj)) %>%
+  tidyplot(y = name, x = nseqs, fill = log10padj) %>%
+  adjust_size(height = NA, width=NA) %>%
+  theme_minimal_x() %>%
+  add_sum_bar() %>% #adjust_colors(new_colors = colors_continuous_mako) %>%
+  sort_y_axis_labels(delta.rank) %>%
+  adjust_padding(right = 0.1) %>%
+  add_data_labels(delta.rank, label_position = c("right")) %>%
+  adjust_legend_title("$-log_[10]~(Adjusted~p-value)$") %>%
+  add_title("Enriched GO terms by GO_MWU, Up in Aboral Tissue, padj < 0.05") %>%
+  save_plot("../output_RNA/differential_expression/enrichment/GO_MWU_UpAboral_05.png",
+            width = 8, height = 30, units="in",bg = "transparent") 
+
+MWU_BP_DE_LFC %>% dplyr::filter(p.adj<0.001 & delta.rank > 0) %>% 
+  mutate(log10padj = -log10(p.adj)) %>%
+  tidyplot(y = name, x = nseqs, fill = log10padj) %>%
+  adjust_size(height = NA, width=NA) %>%
+  theme_minimal_x() %>%
+  add_sum_bar() %>% #adjust_colors(new_colors = colors_continuous_mako) %>%
+  sort_y_axis_labels(delta.rank) %>%
+  adjust_padding(right = 0.1) %>%
+  add_data_labels(delta.rank, label_position = c("right")) %>%
+  adjust_legend_title("$-log_[10]~(Adjusted~p-value)$") %>%
+  add_title("Enriched GO terms by GO_MWU, Up in Aboral Tissue, padj < 0.001") %>%
+  save_plot("../output_RNA/differential_expression/enrichment/GO_MWU_UpAboral.png",
+            width = 8, height = 6, units="in",bg = "transparent") 
+
+MWU_BP_DE_LFC %>% dplyr::filter(p.adj<0.05 & delta.rank < 0) %>% 
+  mutate(log10padj = -log10(p.adj)) %>%
+  tidyplot(y = name, x = nseqs, fill = log10padj) %>%
+  adjust_size(height = NA, width=NA) %>%
+  theme_minimal_x() %>%
+  add_sum_bar() %>% #adjust_colors(new_colors = colors_continuous_mako) %>%
+  sort_y_axis_labels(-delta.rank) %>%
+  adjust_padding(right = 0.1) %>%
+  add_data_labels(delta.rank, label_position = c("right")) %>%
+  adjust_legend_title("$-log_[10]~(Adjusted~p-value)$") %>%
+  add_title("Enriched GO terms by GO_MWU, Up in Oral Epidermis Tissue, padj < 0.05")  %>%
+  save_plot("../output_RNA/differential_expression/enrichment/GO_MWU_UpOralEpi.png",
+            width = 8, height = 6, units="in",bg = "transparent")
+
+
+```
+
