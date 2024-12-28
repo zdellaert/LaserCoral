@@ -401,7 +401,7 @@ fimo_counts_DE <- fimo_counts %>% filter(padj < 0.05)
 fimo_counts %>% mutate(n_motif= as.character(n_motif)) %>% 
   tidyplot(x = n_motif,  y = log2FoldChange, color = n_motif) %>%
   add_data_points_jitter(size = 1.5, jitter_width = 0.5, alpha=0.5) %>%
-  add_violin(alpha = 0.8,color="black", width=0.3, linewidth = 0.5, trim=TRUE)  %>%
+  add_violin(alpha = 0.8,color="black", width=0.3, linewidth = 0.5, trim=TRUE) %>%
   add_mean_dot(color="black",shape=23, fill="white", size=2) %>%
   adjust_y_axis(limits = c(-17,19.9)) %>%
   add_title("Log Fold Change by Motif Presence: All Genes") %>%
@@ -413,7 +413,41 @@ fimo_counts %>% mutate(n_motif= as.character(n_motif)) %>%
   theme_minimal_y(fontsize = 14) %>% remove_x_axis_ticks() %>%
   remove_legend() %>% remove_x_axis_line() %>% 
   adjust_title(face = "bold") %>%
-  save_plot("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif6.png",
+  save_plot("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif3.png",
+            width = 8, height = 6, units="in",bg = "transparent")
+
+fimo_counts %>% mutate(n_motif= as.character(n_motif)) %>% 
+  tidyplot(x = log2FoldChange, color = n_motif) %>% 
+  adjust_size(width = NA, height = NA) %>%
+  add_reference_lines(x=0) %>%
+  add(ggplot2::geom_density(alpha=0.4,  aes(x = log2FoldChange,after_stat(scaled))))  %>%
+  add(coord_cartesian(ylim = c(0, 0.03))) %>%
+  add_title("Log Fold Change by Motif Presence: All Genes") %>%
+  adjust_y_axis_title("Density") %>% 
+  adjust_x_axis_title("$Log[2]~Fold~Change$") %>%
+  adjust_legend_title("Motif Count") %>%
+  #adjust_colors(new_colors= c("#66C2A5", "#FC8D62", "#8DA0CB"))  %>%
+  adjust_size(width = NA, height = NA) %>%
+  theme_minimal_y(fontsize = 14) %>% 
+  adjust_title(face = "bold") %>%
+  save_plot("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif3_density.png",
+            width = 8, height = 6, units="in",bg = "transparent")
+
+fimo_counts %>% mutate(n_motif= as.character(n_motif)) %>% 
+  tidyplot(x = log2FoldChange, color = n_motif) %>% 
+  adjust_size(width = NA, height = NA) %>%
+  add_reference_lines(x=0) %>%
+  add(ggplot2::geom_density(alpha=0.4,  aes(x = log2FoldChange,after_stat(scaled))))  %>%
+  #add(coord_cartesian(ylim = c(0, 0.05))) %>%
+  add_title("Log Fold Change by Motif Presence: All Genes") %>%
+  adjust_y_axis_title("Density") %>% 
+  adjust_x_axis_title("$Log[2]~Fold~Change$") %>%
+  adjust_legend_title("Motif Count") %>%
+  #adjust_colors(new_colors= c("#66C2A5", "#FC8D62", "#8DA0CB"))  %>%
+  adjust_size(width = NA, height = NA) %>%
+  theme_minimal_y(fontsize = 14) %>% 
+  adjust_title(face = "bold") %>%
+  save_plot("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif3_density_full.png",
             width = 8, height = 6, units="in",bg = "transparent")
 
 fimo_counts_DE  %>% mutate(n_motif= as.character(n_motif)) %>% 
@@ -431,9 +465,42 @@ fimo_counts_DE  %>% mutate(n_motif= as.character(n_motif)) %>%
   theme_minimal_y(fontsize = 15) %>% remove_x_axis_ticks() %>%
   remove_legend() %>% remove_x_axis_line() %>% 
   adjust_title(face = "bold") %>%
-  save_plot("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif6_DE.png",
+  save_plot("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif3_DE.png",
             width = 8, height = 6, units="in", bg = "transparent")
 
+fimo_counts_DE %>% mutate(n_motif= as.character(n_motif)) %>% 
+  tidyplot(x = log2FoldChange, color = n_motif) %>% 
+  adjust_size(width = NA, height = NA) %>%
+  add_reference_lines(x=0) %>%
+  add(ggplot2::geom_density(alpha=0.4,  aes(x = log2FoldChange,after_stat(scaled))))  %>%
+  add(coord_cartesian(ylim = c(0, 0.15))) %>%
+  add_title("Log Fold Change by Motif Presence: DE Genes") %>%
+  adjust_y_axis_title("Density") %>% 
+  adjust_x_axis_title("$Log[2]~Fold~Change$") %>%
+  adjust_legend_title("Motif Count") %>%
+  #adjust_colors(new_colors= c("#66C2A5", "#FC8D62", "#8DA0CB"))  %>%
+  adjust_size(width = NA, height = NA) %>%
+  theme_minimal_y(fontsize = 14) %>% 
+  adjust_title(face = "bold") %>%
+  save_plot("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif3_DE_density.png",
+            width = 8, height = 6, units="in",bg = "transparent")
+
+fimo_counts_DE %>% mutate(n_motif= as.character(n_motif)) %>% 
+  tidyplot(x = log2FoldChange, color = n_motif) %>% 
+  adjust_size(width = NA, height = NA) %>%
+  add_reference_lines(x=0) %>%
+  add(ggplot2::geom_density(alpha=0.4,  aes(x = log2FoldChange,after_stat(scaled))))  %>%
+  #add(coord_cartesian(ylim = c(0, 0.25))) %>%
+  add_title("Log Fold Change by Motif Presence: DE Genes") %>%
+  adjust_y_axis_title("Density") %>% 
+  adjust_x_axis_title("$Log[2]~Fold~Change$") %>%
+  adjust_legend_title("Motif Count") %>%
+  #adjust_colors(new_colors= c("#66C2A5", "#FC8D62", "#8DA0CB"))  %>%
+  adjust_size(width = NA, height = NA) %>%
+  theme_minimal_y(fontsize = 14) %>% 
+  adjust_title(face = "bold") %>%
+  save_plot("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif3_DE_density_full.png",
+            width = 8, height = 6, units="in",bg = "transparent")
 ```
 
 **Wow! It looks like the presence of this motif may be reflected in log2FoldChange! The genes with 1 or 2 sites have predominately negative fold change.**
@@ -465,7 +532,7 @@ fimo_counts %>% mutate(n_motif = as.character(n_motif)) %>%
   adjust_x_axis_title("Number of Motifs in Promoter") %>%
   adjust_title(face = "bold") %>% 
   add(ggpubr::stat_pvalue_manual(fisher_allgenes)) %>%
-  save_plot("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif6_LFC_direction.png",
+  save_plot("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif3_LFC_direction.png",
             width = 8, height = 6, units="in",bg = "transparent") 
 
 fimo_counts_DE %>% mutate(n_motif = as.character(n_motif)) %>%
@@ -480,7 +547,7 @@ fimo_counts_DE %>% mutate(n_motif = as.character(n_motif)) %>%
   adjust_x_axis_title("Number of Motifs in Promoter") %>%
   adjust_title(face = "bold") %>% 
   add(ggpubr::stat_pvalue_manual(fisher_DE)) %>%
-  save_plot("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif6_LFC_direction_DE.png",
+  save_plot("../output_RNA/differential_expression/TFs/fimo_output_upOralEpi/fimo_motif3_LFC_direction_DE.png",
             width = 8, height = 6, units="in",bg = "transparent") 
 ```
 
