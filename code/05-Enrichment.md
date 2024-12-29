@@ -24,6 +24,8 @@ Zoe Dellaert
   - [0.9.3 Differential Expression using
     LFC](#093-differential-expression-using-lfc)
 - [0.10 Custom plots](#010-custom-plots)
+  - [0.10.1 up aboral, fisher](#0101-up-aboral-fisher)
+  - [0.10.2 continuous by LFC](#0102-continuous-by-lfc)
 
 ## 0.1 Gene Ontology Analysis analysis of LCM RNA Data
 
@@ -167,110 +169,111 @@ DE_05_Aboral <- DESeq %>% filter(padj < 0.05 & log2FoldChange > 0)
 DE_05_OralEpi <- DESeq %>% filter(padj < 0.05& log2FoldChange < 0)
 
 #load in annotation data 
-EggNog <- read.delim("../references/Pocillopora_acuta_HIv2.genes.EggNog_results.txt") %>% dplyr::rename("query" = X.query) 
+annot_tab <- read.delim("../references/annotation/protein-GO.tsv") %>% rename(GOs = GeneOntologyIDs)
 
 #filter annotation data for just expressed genes 
-EggNog <- EggNog %>% filter(query %in% DESeq$query)
-EggNog$GOs <- gsub("-", NA, EggNog$GOs)
-EggNog$GOs <- gsub(",", ";", EggNog$GOs)
+annot_tab <- annot_tab %>% filter(query %in% DESeq$query) 
 
-nrow(EggNog)
+annot_tab$GOs <- gsub("; ", ";", annot_tab$GOs)
+annot_tab$GOs[annot_tab$GOs==""] <- NA
+
+nrow(annot_tab)
 ```
 
-    ## [1] 9482
+    ## [1] 10927
 
 ``` r
-nrow(EggNog)/nrow(DESeq)
+nrow(annot_tab)/nrow(DESeq)
 ```
 
-    ## [1] 0.6555586
+    ## [1] 0.7554618
 
-Only 9482/14464 genes in our dataset have annotation information in this
-file. That is 66%.
+10927/14464 genes in our dataset have annotation information in this
+file. That is 76%.
 
 ``` r
-sum(EggNog$query %in% DE_05_Aboral$query)
+sum(annot_tab$query %in% DE_05_Aboral$query)
 ```
 
-    ## [1] 383
+    ## [1] 549
 
 ``` r
-sum(EggNog$query %in% DE_05_Aboral$query)/nrow(DE_05_Aboral)
+sum(annot_tab$query %in% DE_05_Aboral$query)/nrow(DE_05_Aboral)
 ```
 
-    ## [1] 0.4763682
+    ## [1] 0.6828358
 
 ``` r
-sum(EggNog$query %in% DE_05_OralEpi$query)
+sum(annot_tab$query %in% DE_05_OralEpi$query)
 ```
 
-    ## [1] 1689
+    ## [1] 2033
 
 ``` r
-sum(EggNog$query %in% DE_05_OralEpi$query)/nrow(DE_05_OralEpi)
+sum(annot_tab$query %in% DE_05_OralEpi$query)/nrow(DE_05_OralEpi)
 ```
 
-    ## [1] 0.6027837
+    ## [1] 0.7255532
 
-Only 383/804 genes that are significantly upregulated in the Aboral
-tissue have annotation information. That is only 47% of the genes.
+549/804 genes that are significantly upregulated in the Aboral tissue
+have annotation information. That is 68% of the genes.
 
-Only 1689/2802 genes that are significantly upregulated in the Oral
-Epidermis tissue have annotation information. That is 60% of the genes.
+2033/2802 genes that are significantly upregulated in the Oral Epidermis
+tissue have annotation information. That is 73% of the genes.
 
 ## 0.6 Create gene_to_go.tab file for running GO_MWU
 
 ``` r
-GO.terms <- EggNog %>% select(query,GOs) %>% dplyr::rename("GO.terms" = GOs)
+GO.terms <- annot_tab %>% select(query,GOs) %>% dplyr::rename("GO.terms" = GOs)
 
 GO.terms_only <- GO.terms %>% na.omit()
+
 nrow(GO.terms_only)
 ```
 
-    ## [1] 6580
+    ## [1] 10638
 
 ``` r
 nrow(GO.terms_only)/nrow(DESeq)
 ```
 
-    ## [1] 0.4549226
+    ## [1] 0.7354812
 
 ``` r
 write.table(GO.terms_only, "go_mwu/gene_to_go.tab",row.names = FALSE, sep = "\t", quote = FALSE)
 ```
 
-Only 6580/14464 genes in our dataset have GO term information. That is
-less than half: 45%.
+10638/14464 genes in our dataset have GO term information. That is 74%.
 
 ``` r
 sum(GO.terms_only$query %in% DE_05_Aboral$query)
 ```
 
-    ## [1] 214
+    ## [1] 545
 
 ``` r
 sum(GO.terms_only$query %in% DE_05_Aboral$query)/nrow(DE_05_Aboral)
 ```
 
-    ## [1] 0.2661692
+    ## [1] 0.6778607
 
 ``` r
 sum(GO.terms_only$query %in% DE_05_OralEpi$query)
 ```
 
-    ## [1] 1045
+    ## [1] 1979
 
 ``` r
 sum(GO.terms_only$query %in% DE_05_OralEpi$query)/nrow(DE_05_OralEpi)
 ```
 
-    ## [1] 0.3729479
+    ## [1] 0.7062812
 
-Only 214/804 genes that are significantly upregulated in the Aboral
-tissue have GO term information. That is only 27% of the genes.
+545/804 genes that are significantly upregulated in the Aboral tissue
+have GO term information. That is 68% of the genes.
 
-Only 1045/2802 genes that are significantly upregulated in the Oral
-Epidermis tissue have GO term information. That is 37% of the genes.
+1979/2802 genes that are significantly upregulated in the Oral Epidermis
+tissue have GO term information. That is 71% of the genes.
 
 ## 0.7 Create the GO_MWU input csv files for the binary analysis
 
@@ -285,10 +288,10 @@ UpAboral <- GO.terms_only %>% inner_join(DESeq) %>%
     ## Joining with `by = join_by(query)`
 
 ``` r
-print(sum(UpAboral$DE)) #only 214 of these have GO annotations
+print(sum(UpAboral$DE)) #only 545 of these have GO annotations
 ```
 
-    ## [1] 214
+    ## [1] 545
 
 ``` r
 write.csv(UpAboral, "go_mwu/UpAboral.csv", row.names = FALSE, quote = FALSE)
@@ -303,10 +306,10 @@ UpOralEpi <- GO.terms_only %>% inner_join(DESeq) %>%
     ## Joining with `by = join_by(query)`
 
 ``` r
-print(sum(UpOralEpi$DE)) #only 1045 of these have GO annotations
+print(sum(UpOralEpi$DE)) #only 1979 of these have GO annotations
 ```
 
-    ## [1] 1045
+    ## [1] 1979
 
 ``` r
 write.csv(UpOralEpi, "go_mwu/UpOralEpi.csv", row.names = FALSE, quote = FALSE)
@@ -367,25 +370,25 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
     go_reformat:
     Genes with GO annotations, but not listed in measure table: 1
 
-    Terms without defined level (old ontology?..): 969
+    Terms without defined level (old ontology?..): 58
     -------------
     -------------
     go_nrify:
-    13950 categories, 6284 genes; size range 5-628.4
-        214 too broad
-        6258 too small
-        7478 remaining
+    12179 categories, 9535 genes; size range 5-953.5
+        68 too broad
+        6074 too small
+        6037 remaining
 
     removing redundancy:
 
     calculating GO term similarities based on shared genes...
-    5277 non-redundant GO categories of good size
+    4441 non-redundant GO categories of good size
     -------------
 
     Secondary clustering:
     calculating similarities....
     Binary classification detected; will perform Fisher's test
-    331 GO terms at 10% FDR
+    185 GO terms at 10% FDR
 
 #### 0.9.1.1 Plotting
 
@@ -393,7 +396,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
 setwd("go_mwu")
 input="UpAboral.csv"
 
-png(filename = paste0(input, "_plot.png"), width = 1200, height = 4800)
+png(filename = paste0(input, "_plot.png"), width = 1200, height = 2400)
 results=gomwuPlot(input,goAnnotations,goDivision,
     absValue=0.001,  #Specify absValue=0.001 if you are doing Fisher's exact test for standard GO enrichment
     level1=0.05, # FDR threshold for plotting. Specify level1=1 to plot all GO categories containing genes exceeding the absValue.
@@ -409,9 +412,9 @@ results=gomwuPlot(input,goAnnotations,goDivision,
     ## Warning in plot.formula(c(1:top) ~ c(1:top), type = "n", axes = F, xlab = "", :
     ## the formula 'c(1:top) ~ c(1:top)' is treated as 'c(1:top) ~ 1'
 
-    ## GO terms dispayed: 243
+    ## GO terms dispayed: 136
 
-    ## "Good genes" accounted for:  152 out of 202 ( 75% )
+    ## "Good genes" accounted for:  312 out of 482 ( 65% )
 
 ``` r
 dev.off()
@@ -425,13 +428,13 @@ dev.off()
 head(results[[1]])
 ```
 
-    ##                                                          pval direction  color
-    ## 8/54 proteoglycan metabolic process              1.164399e-02         0 grey50
-    ## 13/126 carbohydrate derivative catabolic process 8.425550e-03         0  black
-    ## 10/43 aminoglycan catabolic process              1.544289e-04         0  black
-    ## 3/5 chitin catabolic process                     1.164399e-02         0 grey50
-    ## 5/12 chitin metabolic process                    1.798878e-03         0  black
-    ## 16/80 aminoglycan metabolic process              6.157244e-06         0  black
+    ##                                                      pval direction  color
+    ## 4/8 one-carbon compound transport            1.934813e-02         0 grey50
+    ## 17/143 inflammatory response                 3.595249e-02         0 grey50
+    ## 11/42 humoral immune response                7.576116e-04         0  black
+    ## 8/14 complement activation                   3.427772e-05         0  black
+    ## 5/7 complement activation, classical pathway 7.716448e-04         0  black
+    ## 7/32 male gonad development                  3.595249e-02         0 grey50
 
 #### 0.9.1.2 extracting representative GOs
 
@@ -477,6 +480,10 @@ for (ci in unique(ct)) {
 
     ## 3
 
+    ## 4
+
+    ## 5
+
 ``` r
 setwd("go_mwu")
 mwus=read.table(paste("MWU",goDivision,input,sep="_"),header=T)
@@ -484,14 +491,16 @@ bestGOs=mwus[mwus$name %in% annots,]
 bestGOs
 ```
 
-    ##      delta.rank         pval level nseqs                  term
-    ## 452           0 3.685232e-09     3    80 GO:0006022;GO:0030203
-    ## 3095          0 2.353664e-06     2   140            GO:0045229
-    ## 5095          0 2.165615e-11     2    13 GO:1905483;GO:1905485
-    ##                                               name        p.adj
-    ## 452                  aminoglycan metabolic process 6.157244e-06
-    ## 3095 external encapsulating structure organization 3.184085e-04
-    ## 5095          regulation of motor neuron migration 1.142579e-07
+    ##      delta.rank         pval level nseqs                             term
+    ## 666           0 1.009558e-07     3    14                       GO:0006956
+    ## 731           0 3.433500e-21     2   144            GO:0007156;GO:0098742
+    ## 1520          0 1.377638e-14     3   184 GO:0030198;GO:0043062;GO:0045229
+    ## 3991          0 7.625083e-05     2    22                       GO:1901071
+    ##                                                           name        p.adj
+    ## 666                                      complement activation 3.427772e-05
+    ## 731  cell-cell adhesion via plasma-membrane adhesion molecules 7.622370e-18
+    ## 1520             external encapsulating structure organization 1.529179e-11
+    ## 3991         glucosamine-containing compound metabolic process 5.652920e-03
 
 ------------------------------------------------------------------------
 
@@ -525,31 +534,120 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
     go_reformat:
     Genes with GO annotations, but not listed in measure table: 1
 
-    Terms without defined level (old ontology?..): 969
+    Terms without defined level (old ontology?..): 58
     -------------
     -------------
     go_nrify:
-    13950 categories, 6284 genes; size range 5-628.4
-        214 too broad
-        6258 too small
-        7478 remaining
+    12179 categories, 9535 genes; size range 5-953.5
+        68 too broad
+        6074 too small
+        6037 remaining
 
     removing redundancy:
 
     calculating GO term similarities based on shared genes...
-    5277 non-redundant GO categories of good size
+    4441 non-redundant GO categories of good size
     -------------
 
     Secondary clustering:
     calculating similarities....
     Binary classification detected; will perform Fisher's test
-    0 GO terms at 10% FDR
+    17 GO terms at 10% FDR
 
-**0 GO terms at 10% FDR**
+#### 0.9.2.1 Plotting
 
-#### 0.9.2.1 No further analysis for this LFC direction.
+``` r
+setwd("go_mwu")
+input="UpOralEpi.csv"
 
-------------------------------------------------------------------------
+png(filename = paste0(input, "_plot.png"), width = 1200, height = 600)
+results=gomwuPlot(input,goAnnotations,goDivision,
+    absValue=0.001,  #Specify absValue=0.001 if you are doing Fisher's exact test for standard GO enrichment
+    level1=0.05, # FDR threshold for plotting. Specify level1=1 to plot all GO categories containing genes exceeding the absValue.
+    level2=0.01, # FDR cutoff to print in regular (not italic) font.
+    level3=0.001, # FDR cutoff to print in large bold font.
+    txtsize=3,    # decrease to fit more on one page, or increase (after rescaling the plot so the tree fits the text) for better "word cloud" effect
+    treeHeight=0.25, # height of the hierarchical clustering tree
+ )
+```
+
+    ## Warning in plot.formula(c(1:top) ~ c(1:top), type = "n", axes = F, xlab = "", :
+    ## the formula 'c(1:top) ~ c(1:top)' is treated as 'c(1:top) ~ 1'
+    ## Warning in plot.formula(c(1:top) ~ c(1:top), type = "n", axes = F, xlab = "", :
+    ## the formula 'c(1:top) ~ c(1:top)' is treated as 'c(1:top) ~ 1'
+
+    ## GO terms dispayed: 3
+
+    ## "Good genes" accounted for:  157 out of 1719 ( 9% )
+
+``` r
+dev.off()
+```
+
+    ## quartz_off_screen 
+    ##                 2
+
+``` r
+# text representation of results, with actual adjusted p-values
+head(results[[1]])
+```
+
+    ##                                                      pval direction color
+    ## 109/385 monoatomic ion transport             0.0007379949         0 black
+    ## 135/481 transmembrane transport              0.0001626729         0 black
+    ## 86/282 inorganic ion transmembrane transport 0.0006127779         0 black
+
+#### 0.9.2.2 extracting representative GOs
+
+``` r
+# this module chooses GO terms that best represent *independent* groups of significant GO terms
+
+pcut=1e-2 # adjusted pvalue cutoff for representative GO
+hcut=0.9 # height at which cut the GO terms tree to get "independent groups". 
+
+# plotting the GO tree with the cut level (un-remark the next two lines to plot)
+ plot(results[[2]],cex=0.3)
+ abline(h=hcut,col="red")
+```
+
+![](05-Enrichment_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+
+``` r
+# cutting
+ct=cutree(results[[2]],h=hcut)
+annots=c();ci=1
+for (ci in unique(ct)) {
+  message(ci)
+    rn=names(ct)[ct==ci]
+    obs=grep("obsolete",rn)
+    if(length(obs)>0) { rn=rn[-obs] }
+    if (length(rn)==0) {next}
+    rr=results[[1]][rn,]
+    bestrr=rr[which(rr$pval==min(rr$pval)),]
+    best=1
+    if(nrow(bestrr)>1) {
+        nns=sub(" .+","",row.names(bestrr))
+        fr=c()
+        for (i in 1:length(nns)) { fr=c(fr,eval(parse(text=nns[i]))) }
+        best=which(fr==max(fr))
+    }
+    if (bestrr$pval[best]<=pcut) { annots=c(annots,sub("\\d+\\/\\d+ ","",row.names(bestrr)[best]))}
+}
+```
+
+    ## 1
+
+``` r
+setwd("go_mwu")
+mwus=read.table(paste("MWU",goDivision,input,sep="_"),header=T)
+bestGOs=mwus[mwus$name %in% annots,]
+bestGOs
+```
+
+    ##      delta.rank         pval level nseqs       term                    name
+    ## 3189          0 3.663805e-08     3   481 GO:0055085 transmembrane transport
+    ##             p.adj
+    ## 3189 0.0001626729
 
 ### 0.9.3 Differential Expression using LFC
 
@@ -581,25 +679,25 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
     go_reformat:
     Genes with GO annotations, but not listed in measure table: 1
 
-    Terms without defined level (old ontology?..): 969
+    Terms without defined level (old ontology?..): 58
     -------------
     -------------
     go_nrify:
-    13950 categories, 6284 genes; size range 5-628.4
-        214 too broad
-        6258 too small
-        7478 remaining
+    12179 categories, 9535 genes; size range 5-953.5
+        68 too broad
+        6074 too small
+        6037 remaining
 
     removing redundancy:
 
     calculating GO term similarities based on shared genes...
-    5277 non-redundant GO categories of good size
+    4441 non-redundant GO categories of good size
     -------------
 
     Secondary clustering:
     calculating similarities....
     Continuous measure of interest: will perform MWU test
-    602 GO terms at 10% FDR
+    78 GO terms at 10% FDR
 
 #### 0.9.3.1 Plotting
 
@@ -607,15 +705,16 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
 setwd("go_mwu")
 input="DE_LFC.csv"
 
-png(filename = paste0(input, "_plot.png"), width = 1200, height = 4800)
+png(filename = paste0(input, "_plot.png"), width = 1800, height = 1600)
 results=gomwuPlot(input,goAnnotations,goDivision,
     absValue=1, # un-remark this if you are using log2-fold changes
     level1=0.05, # FDR threshold for plotting. Specify level1=1 to plot all GO categories containing genes exceeding the absValue.
     level2=0.01, # FDR cutoff to print in regular (not italic) font.
     level3=0.001, # FDR cutoff to print in large bold font.
-    txtsize=1.9,    # decrease to fit more on one page
-    treeHeight=0.5, # height of the hierarchical clustering tree
-    colors=c("dodgerblue2","firebrick1","skyblue2","lightcoral") 
+    txtsize=4.5,    # decrease to fit more on one page
+    treeHeight=.5, # height of the hierarchical clustering tree
+    # colors=c("dodgerblue2","firebrick1","skyblue2","lightcoral") 
+    colors = c("forestgreen", "purple", "seagreen3", "orchid")
  )
 ```
 
@@ -624,9 +723,9 @@ results=gomwuPlot(input,goAnnotations,goDivision,
     ## Warning in plot.formula(c(1:top) ~ c(1:top), type = "n", axes = F, xlab = "", :
     ## the formula 'c(1:top) ~ c(1:top)' is treated as 'c(1:top) ~ 1'
 
-    ## GO terms dispayed: 436
+    ## GO terms dispayed: 41
 
-    ## "Good genes" accounted for:  479 out of 632 ( 76% )
+    ## "Good genes" accounted for:  388 out of 1265 ( 31% )
 
 ``` r
 dev.off()
@@ -640,27 +739,27 @@ dev.off()
 head(results[[1]])
 ```
 
-    ##                                                                                                              pval
-    ## 0/9 endonucleolytic cleavage in 5'-ETS of tricistronic rRNA transcript (SSU-rRNA, 5.8S rRNA, LSU-rRNA) 0.04144612
-    ## 2/33 spliceosomal snRNP assembly                                                                       0.02858913
-    ## 4/43 regulation of DNA recombination                                                                   0.03375225
-    ## 3/20 meiotic chromosome separation                                                                     0.04562801
-    ## 5/80 nucleotide-excision repair                                                                        0.02769915
-    ## 3/6 DNA unwinding involved in DNA replication                                                          0.02869358
-    ##                                                                                                        direction
-    ## 0/9 endonucleolytic cleavage in 5'-ETS of tricistronic rRNA transcript (SSU-rRNA, 5.8S rRNA, LSU-rRNA)         1
-    ## 2/33 spliceosomal snRNP assembly                                                                               0
-    ## 4/43 regulation of DNA recombination                                                                           0
-    ## 3/20 meiotic chromosome separation                                                                             0
-    ## 5/80 nucleotide-excision repair                                                                                0
-    ## 3/6 DNA unwinding involved in DNA replication                                                                  0
-    ##                                                                                                             color
-    ## 0/9 endonucleolytic cleavage in 5'-ETS of tricistronic rRNA transcript (SSU-rRNA, 5.8S rRNA, LSU-rRNA) lightcoral
-    ## 2/33 spliceosomal snRNP assembly                                                                         skyblue2
-    ## 4/43 regulation of DNA recombination                                                                     skyblue2
-    ## 3/20 meiotic chromosome separation                                                                       skyblue2
-    ## 5/80 nucleotide-excision repair                                                                          skyblue2
-    ## 3/6 DNA unwinding involved in DNA replication                                                            skyblue2
+    ##                                                                    pval
+    ## 7/12 nucleoside bisphosphate metabolic process              0.004999363
+    ## 5/7 3'-phosphoadenosine 5'-phosphosulfate metabolic process 0.012611628
+    ## 0/34 cytoplasmic translation                                0.004999363
+    ## 8/163 translation                                           0.007197692
+    ## 16/50 amino acid transmembrane transport                    0.038654610
+    ## 8/15 amino acid import across plasma membrane               0.028246748
+    ##                                                             direction
+    ## 7/12 nucleoside bisphosphate metabolic process                      0
+    ## 5/7 3'-phosphoadenosine 5'-phosphosulfate metabolic process         0
+    ## 0/34 cytoplasmic translation                                        1
+    ## 8/163 translation                                                   1
+    ## 16/50 amino acid transmembrane transport                            0
+    ## 8/15 amino acid import across plasma membrane                       0
+    ##                                                                   color
+    ## 7/12 nucleoside bisphosphate metabolic process              forestgreen
+    ## 5/7 3'-phosphoadenosine 5'-phosphosulfate metabolic process   seagreen3
+    ## 0/34 cytoplasmic translation                                     purple
+    ## 8/163 translation                                                purple
+    ## 16/50 amino acid transmembrane transport                      seagreen3
+    ## 8/15 amino acid import across plasma membrane                 seagreen3
 
 #### 0.9.3.2 extracting representative GOs
 
@@ -675,7 +774,7 @@ hcut=0.9 # height at which cut the GO terms tree to get "independent groups".
  abline(h=hcut,col="red")
 ```
 
-![](05-Enrichment_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](05-Enrichment_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 ``` r
 # cutting
@@ -720,16 +819,6 @@ for (ci in unique(ct)) {
 
     ## 10
 
-    ## 11
-
-    ## 12
-
-    ## 13
-
-    ## 14
-
-    ## 15
-
 ``` r
 setwd("go_mwu")
 mwus=read.table(paste("MWU",goDivision,input,sep="_"),header=T)
@@ -738,28 +827,80 @@ bestGOs
 ```
 
     ##      delta.rank         pval level nseqs
-    ## 256        1230 8.595238e-11     2    91
-    ## 452        1149 1.276802e-08     2    80
-    ## 705        -996 1.599151e-05     2    61
-    ## 4553       1129 2.059403e-04     2    35
-    ## 4988       1168 1.774295e-07     2    65
-    ## 5086       1169 6.916407e-11     2   102
-    ##                                                        term
-    ## 256                                              GO:0002181
-    ## 452                                   GO:0006022;GO:0030203
-    ## 705  GO:0006754;GO:0009206;GO:0009145;GO:0009201;GO:0009142
-    ## 4553                                             GO:0097006
-    ## 4988                                             GO:1903725
-    ## 5086                                             GO:1905330
-    ##                                                  name        p.adj
-    ## 256                           cytoplasmic translation 2.267424e-07
-    ## 452                     aminoglycan metabolic process 8.420510e-06
-    ## 705      nucleoside triphosphate biosynthetic process 1.298019e-03
-    ## 4553 regulation of plasma lipoprotein particle levels 6.280583e-03
-    ## 4988     regulation of phospholipid metabolic process 4.586727e-05
-    ## 5086     regulation of morphogenesis of an epithelium 2.267424e-07
+    ## 218        2076 9.007862e-06     4    34
+    ## 731        1295 1.454180e-08     2   144
+    ## 881        2259 1.655694e-05     7    27
+    ## 1519       1053 2.016719e-07     4   184
+    ## 1918      -3511 7.924011e-06     3    12
+    ##                                             term
+    ## 218                                   GO:0002181
+    ## 731                        GO:0007156;GO:0098742
+    ## 881                                   GO:0008286
+    ## 1519            GO:0030198;GO:0043062;GO:0045229
+    ## 1918 GO:0034035;GO:0033875;GO:0034032;GO:0033865
+    ##                                                           name        p.adj
+    ## 218                                    cytoplasmic translation 4.999363e-03
+    ## 731  cell-cell adhesion via plasma-membrane adhesion molecules 6.456561e-05
+    ## 881                         insulin receptor signaling pathway 7.197692e-03
+    ## 1519             external encapsulating structure organization 2.984745e-04
+    ## 1918                 nucleoside bisphosphate metabolic process 4.999363e-03
 
 ## 0.10 Custom plots
+
+### 0.10.1 up aboral, fisher
+
+``` r
+MWU_BP_UpAboral <- read.table("go_mwu/MWU_BP_UpAboral.csv", header = TRUE)
+BP_UpAboral <- read.table("go_mwu/BP_UpAboral.csv", header = TRUE)
+```
+
+``` r
+MWU_BP_UpAboral %>% dplyr::filter(p.adj<0.05) %>% 
+  mutate(log10padj = -log10(p.adj)) %>%
+  tidyplot(y = name, x = nseqs, fill = log10padj) %>%
+  adjust_size(height = NA, width=NA) %>%
+  theme_minimal_x() %>%
+  add_sum_bar() %>% #adjust_colors(new_colors = colors_continuous_mako) %>%
+  sort_y_axis_labels(nseqs) %>%
+  adjust_padding(right = 0.1) %>%
+  add_data_labels(nseqs, label_position = c("right")) %>%
+  adjust_legend_title("$-log10~(Adjusted~p-value)$") %>%
+  add_title("Enriched GO terms by GO_MWU, Up in Aboral Tissue, padj < 0.05") %>%
+  save_plot("../output_RNA/differential_expression/enrichment/GO_MWU_UpAboral_Fisher_05.png",
+            width = 8, height = 15, units="in",bg = "transparent") 
+```
+
+    ## ✔ save_plot: saved to '../output_RNA/differential_expression/enrichment/GO_MWU_UpAboral_Fisher_05.png'
+
+![](05-Enrichment_files/figure-gfm/unnamed-chunk-18-1.png)<!-- --> \###
+up oral epi, fisher
+
+``` r
+MWU_BP_UpOralEpi <- read.table("go_mwu/MWU_BP_UpOralEpi.csv", header = TRUE)
+BP_UpOralEpi <- read.table("go_mwu/BP_UpOralEpi.csv", header = TRUE)
+```
+
+``` r
+MWU_BP_UpOralEpi %>% dplyr::filter(p.adj<0.05) %>% 
+  mutate(log10padj = -log10(p.adj)) %>%
+  tidyplot(y = name, x = nseqs, fill = log10padj) %>%
+  adjust_size(height = NA, width=NA) %>%
+  theme_minimal_x() %>%
+  add_sum_bar() %>% #adjust_colors(new_colors = colors_continuous_mako) %>%
+  sort_y_axis_labels(nseqs) %>%
+  adjust_padding(right = 0.1) %>%
+  add_data_labels(nseqs, label_position = c("right")) %>%
+  adjust_legend_title("$-log10~(Adjusted~p-value)$") %>%
+  add_title("Enriched GO terms by GO_MWU, Up in Aboral Tissue, padj < 0.05") %>%
+  save_plot("../output_RNA/differential_expression/enrichment/GO_MWU_UpOralEpi_Fisher_05.png",
+            width = 8, height = 5, units="in",bg = "transparent") 
+```
+
+    ## ✔ save_plot: saved to '../output_RNA/differential_expression/enrichment/GO_MWU_UpOralEpi_Fisher_05.png'
+
+![](05-Enrichment_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+
+### 0.10.2 continuous by LFC
 
 ``` r
 MWU_BP_DE_LFC <- read.table("go_mwu/MWU_BP_DE_LFC.csv", header = TRUE)
@@ -771,57 +912,105 @@ MWU_BP_DE_LFC %>% dplyr::filter(p.adj<0.05 & delta.rank > 0) %>%
   mutate(log10padj = -log10(p.adj)) %>%
   tidyplot(y = name, x = nseqs, fill = log10padj) %>%
   adjust_size(height = NA, width=NA) %>%
-  theme_minimal_x() %>%
-  add_sum_bar() %>% #adjust_colors(new_colors = colors_continuous_mako) %>%
+  theme_minimal_x(fontsize=9) %>%
+  add_sum_bar() %>% adjust_colors(new_colors = colors_continuous_turbo) %>%
   sort_y_axis_labels(delta.rank) %>%
   adjust_padding(right = 0.1) %>%
   add_data_labels(delta.rank, label_position = c("right")) %>%
-  adjust_legend_title("$-log_[10]~(Adjusted~p-value)$") %>%
+  adjust_legend_title("$-log10~(Adjusted~p-value)$") %>%
   add_title("Enriched GO terms by GO_MWU, Up in Aboral Tissue, padj < 0.05") %>%
-  save_plot("../output_RNA/differential_expression/enrichment/GO_MWU_UpAboral_05.png",
-            width = 8, height = 30, units="in",bg = "transparent") 
-```
-
-    ## ✔ save_plot: saved to '../output_RNA/differential_expression/enrichment/GO_MWU_UpAboral_05.png'
-
-![](05-Enrichment_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
-
-``` r
-MWU_BP_DE_LFC %>% dplyr::filter(p.adj<0.001 & delta.rank > 0) %>% 
-  mutate(log10padj = -log10(p.adj)) %>%
-  tidyplot(y = name, x = nseqs, fill = log10padj) %>%
-  adjust_size(height = NA, width=NA) %>%
-  theme_minimal_x() %>%
-  add_sum_bar() %>% #adjust_colors(new_colors = colors_continuous_mako) %>%
-  sort_y_axis_labels(delta.rank) %>%
-  adjust_padding(right = 0.1) %>%
-  add_data_labels(delta.rank, label_position = c("right")) %>%
-  adjust_legend_title("$-log_[10]~(Adjusted~p-value)$") %>%
-  add_title("Enriched GO terms by GO_MWU, Up in Aboral Tissue, padj < 0.001") %>%
   save_plot("../output_RNA/differential_expression/enrichment/GO_MWU_UpAboral.png",
             width = 8, height = 6, units="in",bg = "transparent") 
 ```
 
     ## ✔ save_plot: saved to '../output_RNA/differential_expression/enrichment/GO_MWU_UpAboral.png'
 
-![](05-Enrichment_files/figure-gfm/unnamed-chunk-16-2.png)<!-- -->
+![](05-Enrichment_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
 
 ``` r
 MWU_BP_DE_LFC %>% dplyr::filter(p.adj<0.05 & delta.rank < 0) %>% 
   mutate(log10padj = -log10(p.adj)) %>%
   tidyplot(y = name, x = nseqs, fill = log10padj) %>%
   adjust_size(height = NA, width=NA) %>%
-  theme_minimal_x() %>%
-  add_sum_bar() %>% #adjust_colors(new_colors = colors_continuous_mako) %>%
+  theme_minimal_x(fontsize=9) %>%
+  add_sum_bar() %>% adjust_colors(new_colors = colors_continuous_turbo) %>%
   sort_y_axis_labels(-delta.rank) %>%
   adjust_padding(right = 0.1) %>%
   add_data_labels(delta.rank, label_position = c("right")) %>%
-  adjust_legend_title("$-log_[10]~(Adjusted~p-value)$") %>%
+  adjust_legend_title("$-log10~(Adjusted~p-value)$") %>%
   add_title("Enriched GO terms by GO_MWU, Up in Oral Epidermis Tissue, padj < 0.05")  %>%
   save_plot("../output_RNA/differential_expression/enrichment/GO_MWU_UpOralEpi.png",
-            width = 8, height = 6, units="in",bg = "transparent")
+            width = 8, height = 1.75, units="in",bg = "transparent")
 ```
 
     ## ✔ save_plot: saved to '../output_RNA/differential_expression/enrichment/GO_MWU_UpOralEpi.png'
 
-![](05-Enrichment_files/figure-gfm/unnamed-chunk-16-3.png)<!-- -->
+![](05-Enrichment_files/figure-gfm/unnamed-chunk-22-2.png)<!-- -->
+
+``` r
+MWU_BP_DE_LFC %>% dplyr::filter(p.adj<0.05) %>% 
+  mutate(log10padj = -log10(p.adj)) %>%
+  tidyplot(y = name, x = delta.rank, color = log10padj) %>%
+  adjust_size(height = NA, width=NA) %>%
+  theme_minimal_x(fontsize=8) %>%
+  add_sum_bar() %>% #add_sum_dot() %>% 
+  adjust_colors(new_colors = colors_continuous_turbo) %>%
+  sort_y_axis_labels(delta.rank) %>%
+  adjust_padding(right = 0.1, left = 0.1) %>%
+  #add_data_labels(delta.rank, label_position = c("right")) %>%
+  adjust_legend_title("$-log10~(Adjusted~p-value)$") %>%
+  add_title("Enriched GO terms by GO_MWU, padj < 0.05") %>%
+  save_plot("../output_RNA/differential_expression/enrichment/GO_MWU.png",
+            width = 8, height = 6, units="in",bg = "transparent")
+```
+
+    ## ✔ save_plot: saved to '../output_RNA/differential_expression/enrichment/GO_MWU.png'
+
+![](05-Enrichment_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+
+``` r
+MWU_BP_DE_LFC %>% dplyr::filter(p.adj<0.05) %>% 
+  mutate(log10padj = -log10(p.adj)) %>%
+  tidyplot(y = name, x = delta.rank) %>%
+  adjust_size(height = NA, width=NA) %>%
+  theme_minimal_x(fontsize=8) %>%
+  add_sum_bar(width=0.2, data = filter_rows(delta.rank < 0), fill = "palegreen4") %>%
+  add_sum_bar(width=0.2, data = filter_rows(delta.rank > 0), fill = "mediumpurple") %>%
+  add(ggplot2::stat_summary(data = filter_rows(delta.rank < 0),fun = identity,geom = "point",
+                            aes(size = log10padj), color="palegreen4", alpha=0.5)) %>%
+  add(ggplot2::stat_summary(data = filter_rows(delta.rank > 0),fun = identity,geom = "point",
+                            aes(size = log10padj), color="mediumpurple", alpha=0.5)) %>%
+  sort_y_axis_labels(delta.rank) %>%
+  adjust_padding(right = 0.1, left = 0.1) %>%
+  #add(ggplot2::scale_size_continuous(name = "$-log10~(Adjusted~p-value)$", range=c(0,6))) %>%
+  adjust_legend_title("$-log10~(Adjusted~p-value)$") %>%
+  add_title("Enriched GO terms by GO_MWU, padj < 0.05") %>%
+  save_plot("../output_RNA/differential_expression/enrichment/GO_MWU_dots.png",
+            width = 8, height = 6, units="in",bg = "transparent")
+```
+
+    ## ✔ save_plot: saved to '../output_RNA/differential_expression/enrichment/GO_MWU_dots.png'
+
+![](05-Enrichment_files/figure-gfm/unnamed-chunk-23-2.png)<!-- -->
+
+``` r
+MWU_BP_DE_LFC %>% dplyr::filter(p.adj<0.05) %>% 
+  mutate(log10padj = -log10(p.adj)) %>%
+  tidyplot(y = name, x = delta.rank, color = log10padj) %>%
+  adjust_size(height = NA, width=NA) %>%
+  theme_minimal_x(fontsize=8) %>%
+  add_sum_bar(width=0.2, fill="gray") %>% 
+  add(ggplot2::stat_summary(fun = identity,geom = "point",
+                            aes(size = nseqs), alpha=0.8)) %>%
+  adjust_colors(new_colors = c("#0000FF", "#CA0088", "#FF0000")) %>%
+  sort_y_axis_labels(delta.rank) %>%
+  adjust_padding(right = 0.1, left = 0.1) %>%
+  adjust_legend_title("$-log10~(Adjusted~p-value)$") %>%
+  add_title("Enriched GO terms by GO_MWU, padj < 0.05") %>%
+  save_plot("../output_RNA/differential_expression/enrichment/GO_MWU_bubble.png",
+            width = 8, height = 6, units="in",bg = "transparent")
+```
+
+    ## ✔ save_plot: saved to '../output_RNA/differential_expression/enrichment/GO_MWU_bubble.png'
+
+![](05-Enrichment_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
