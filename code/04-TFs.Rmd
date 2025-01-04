@@ -325,7 +325,7 @@ fimo_merged <- fimo_filtered %>% full_join(DESeq, by = c("sequence_name" = "quer
 
 #summarize
 
-fimo_counts <- fimo_merged %>% group_by(sequence_name, log2FoldChange, padj,  motif_id) %>% count() %>%
+fimo_counts <- fimo_merged %>% group_by(sequence_name, log2FoldChange, padj,  motif_id) %>% dplyr::count() %>%
   mutate(n = if_else(is.na(motif_id), 0, n)) 
 
 fimo_counts_DE <- fimo_counts %>% filter(padj < 0.05)
@@ -368,14 +368,6 @@ fisher_table
 fisher.test(fisher_table)
 ```
 
-```{r}
-logistic_model <- glm((log2FoldChange > 0) ~ n, data = fimo_presence_absence_DE, family = binomial)
-summary(logistic_model)
-
-logistic_model <- glm((log2FoldChange > 0) ~ n, data = fimo_presence_absence, family = binomial)
-summary(logistic_model)
-```
-
 ### FIMO Results, up OralEpi
 
 Visualize log-fold change of genes that have this motif in their promoter sequences:
@@ -390,7 +382,7 @@ fimo_merged <- fimo_filtered %>% full_join(DESeq, by = c("sequence_name" = "quer
 
 #summarize
 
-fimo_counts <- fimo_merged %>% group_by(sequence_name, log2FoldChange, padj,  motif_id) %>% count() %>%
+fimo_counts <- fimo_merged %>% group_by(sequence_name, log2FoldChange, padj,  motif_id) %>% dplyr::count() %>%
   mutate(n = if_else(is.na(motif_id), 0, n)) %>% rename(n_motif = n)
 
 fimo_counts_DE <- fimo_counts %>% filter(padj < 0.05)
@@ -400,15 +392,15 @@ fimo_counts_DE <- fimo_counts %>% filter(padj < 0.05)
 ```{r}
 fimo_counts %>% mutate(n_motif= as.character(n_motif)) %>% 
   tidyplot(x = n_motif,  y = log2FoldChange, color = n_motif) %>%
-  add_data_points_jitter(size = 1.5, jitter_width = 0.5, alpha=0.5) %>%
-  add_violin(alpha = 0.8,color="black", width=0.3, linewidth = 0.5, trim=TRUE) %>%
+  add_data_points_jitter(size = 1.5, jitter_width = 0.5, alpha=0.3) %>%
+  add_violin(alpha = 0.6,color="black", width=0.3, linewidth = 0.5, trim=TRUE) %>%
   add_mean_dot(color="black",shape=23, fill="white", size=2) %>%
   adjust_y_axis(limits = c(-17,19.9)) %>%
   add_title("Log Fold Change by Motif Presence: All Genes") %>%
   adjust_x_axis_title("Number of Motifs in Promoter") %>% 
   adjust_y_axis_title("$Log[2]~Fold~Change$") %>%
   adjust_legend_title("Motif Count") %>%
-  adjust_colors(new_colors= c("#66C2A5", "#FC8D62", "#8DA0CB"))  %>%
+  #adjust_colors(new_colors= c("#66C2A5", "#FC8D62", "#8DA0CB"))  %>%
   adjust_size(width = NA, height = NA) %>%
   theme_minimal_y(fontsize = 14) %>% remove_x_axis_ticks() %>%
   remove_legend() %>% remove_x_axis_line() %>% 
@@ -452,15 +444,15 @@ fimo_counts %>% mutate(n_motif= as.character(n_motif)) %>%
 
 fimo_counts_DE  %>% mutate(n_motif= as.character(n_motif)) %>% 
   tidyplot(x = n_motif,  y = log2FoldChange, color = n_motif) %>%
-  add_data_points_jitter(size = 1.5, jitter_width = 0.5, alpha=0.5) %>%
-  add_violin(alpha = 0.8,color="black", width=0.3, linewidth = 0.5, trim=TRUE)  %>%
+  add_data_points_jitter(size = 1.5, jitter_width = 0.5, alpha=0.3) %>%
+  add_violin(alpha = 0.6,color="black", width=0.3, linewidth = 0.5, trim=TRUE)  %>%
   add_mean_dot(color="black",shape=23, fill="white", size=2) %>%
   adjust_y_axis(limits = c(-17,19.9))  %>%
   add_title("Log Fold Change by Motif Presence: Differentially Expressed Genes") %>%
   adjust_x_axis_title("Number of Motifs in Promoter") %>% 
   adjust_y_axis_title("$Log[2]~Fold~Change$") %>%
   adjust_legend_title("Motif Count") %>%
-  adjust_colors(new_colors= c("#66C2A5", "#FC8D62", "#8DA0CB"))  %>%
+  #adjust_colors(new_colors= c("#66C2A5", "#FC8D62", "#8DA0CB"))  %>%
   adjust_size(width = NA, height = NA) %>%
   theme_minimal_y(fontsize = 15) %>% remove_x_axis_ticks() %>%
   remove_legend() %>% remove_x_axis_line() %>% 
@@ -524,8 +516,8 @@ fimo_counts %>% mutate(n_motif = as.character(n_motif)) %>%
   mutate(LFCDirection = ifelse(log2FoldChange > 0,"upAboral", "upOralEpi")) %>% 
   tidyplot(x = n_motif, color = LFCDirection) %>%
   add_barstack_relative(alpha = 0.9) %>%
-  add(ggplot2::geom_bar(stat = "count", position = "fill",color="slategray", width = 0.8)) %>%
-  adjust_colors(new_colors= c("mediumpurple1", "darkgreen"))  %>%
+  add(ggplot2::geom_bar(stat = "count", position = "fill", width = 0.8)) %>%
+  adjust_colors(new_colors= c("mediumpurple1", "palegreen4"))  %>%
   adjust_size(width = NA, height = NA) %>%
   theme_minimal_y(fontsize = 12) %>% remove_x_axis_ticks() %>%
   adjust_y_axis_title("Proportion") %>%
@@ -539,8 +531,8 @@ fimo_counts_DE %>% mutate(n_motif = as.character(n_motif)) %>%
   mutate(LFCDirection = ifelse(log2FoldChange > 0,"upAboral", "upOralEpi")) %>% 
   tidyplot(x = n_motif, color = LFCDirection) %>%
   add_barstack_relative(alpha = 0.9) %>%
-  add(ggplot2::geom_bar(stat = "count", position = "fill",color="slategray", width = 0.8)) %>%
-  adjust_colors(new_colors= c("mediumpurple1", "darkgreen"))  %>%
+  add(ggplot2::geom_bar(stat = "count", position = "fill", width = 0.8)) %>%
+  adjust_colors(new_colors= c("mediumpurple1", "palegreen4"))  %>%
   adjust_size(width = NA, height = NA) %>%
   theme_minimal_y(fontsize = 12) %>% remove_x_axis_ticks() %>%
   adjust_y_axis_title("Proportion") %>%
