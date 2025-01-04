@@ -117,30 +117,6 @@ sum(GO.terms_only$query %in% DE_05_OralEpi$query)/nrow(DE_05_OralEpi)
 
 1979/2802 genes that are significantly upregulated in the Oral Epidermis tissue have GO term information. That is 71% of the genes.
 
-## Create the GO_MWU input csv files for the binary analysis
-
-```{r}
-### Generate vector with 1 for the 214 significant DEGs that have positive LFC and GO annotation, and 0 for the other genes that have GO annotation
-
-UpAboral <- GO.terms_only %>% inner_join(DESeq) %>%
-    mutate(DE = ifelse(padj < 0.05 & log2FoldChange > 0, 1, 0)) %>%
-    dplyr::select(query, DE) 
-  
-print(sum(UpAboral$DE)) #only 545 of these have GO annotations
-  
-write.csv(UpAboral, "go_mwu/UpAboral.csv", row.names = FALSE, quote = FALSE)
-
-### Generate vector with 1 for the 1045 significant DEGs that have positive LFC and GO annotation, and 0 for the other genes that have GO annotation
-
-UpOralEpi <- GO.terms_only %>% inner_join(DESeq) %>%
-    mutate(DE = ifelse(padj < 0.05 & log2FoldChange < 0, 1, 0)) %>%
-    dplyr::select(query, DE) 
-  
-print(sum(UpOralEpi$DE)) #only 1979 of these have GO annotations
-  
-write.csv(UpOralEpi, "go_mwu/UpOralEpi.csv", row.names = FALSE, quote = FALSE)
-```
-
 ## Create the GO_MWU input csv files for the continuous LFC analysis
 
 ```{r}
@@ -160,233 +136,6 @@ goAnnotations="gene_to_go.tab" # two-column, tab-delimited, one line per gene, m
 goDatabase="go.obo" # download from http://www.geneontology.org/GO.downloads.ontology.shtml
 goDivision="BP" # either MF, or BP, or CC
 source("gomwu.functions.R")
-```
-
-
-### Up Aboral Fisher Exact Test
-
-```{r, eval=FALSE}
-setwd("go_mwu")
-input="UpAboral.csv"
-
-gomwuStats(input, goDatabase, goAnnotations, goDivision,
-	perlPath="perl", # replace with full path to perl executable if it is not in your system's PATH already
-	largest=0.1,  # a GO category will not be considered if it contains more than this fraction of the total number of genes
-	smallest=5,   # a GO category should contain at least this many genes to be considered
-	clusterCutHeight=0.25 # threshold for merging similar (gene-sharing) terms. See README for details.
-#	,Alternative="g" # by default the MWU test is two-tailed; specify "g" or "l" of you want to test for "greater" or "less" instead.
-)
-```
-
-```
-go.obo gene_to_go.tab UpAboral.csv BP largest=0.1 smallest=5 cutHeight=0.25
-
-Run parameters:
-
-largest GO category as fraction of all genes (largest)  : 0.1
-         smallest GO category as # of genes (smallest)  : 5
-                clustering threshold (clusterCutHeight) : 0.25
-
------------------
-retrieving GO hierarchy, reformatting data...
-
--------------
-go_reformat:
-Genes with GO annotations, but not listed in measure table: 1
-
-Terms without defined level (old ontology?..): 58
--------------
--------------
-go_nrify:
-12179 categories, 9535 genes; size range 5-953.5
-	68 too broad
-	6074 too small
-	6037 remaining
-
-removing redundancy:
-
-calculating GO term similarities based on shared genes...
-4441 non-redundant GO categories of good size
--------------
-
-Secondary clustering:
-calculating similarities....
-Binary classification detected; will perform Fisher's test
-185 GO terms at 10% FDR
-```
-
-#### Plotting
-
-```{r}
-setwd("go_mwu")
-input="UpAboral.csv"
-
-png(filename = paste0(input, "_plot.png"), width = 1200, height = 2400)
-results=gomwuPlot(input,goAnnotations,goDivision,
- 	absValue=0.001,  #Specify absValue=0.001 if you are doing Fisher's exact test for standard GO enrichment
- 	level1=0.05, # FDR threshold for plotting. Specify level1=1 to plot all GO categories containing genes exceeding the absValue.
- 	level2=0.01, # FDR cutoff to print in regular (not italic) font.
- 	level3=0.001, # FDR cutoff to print in large bold font.
- 	txtsize=2,    # decrease to fit more on one page, or increase (after rescaling the plot so the tree fits the text) for better "word cloud" effect
- 	treeHeight=0.5, # height of the hierarchical clustering tree
- )
-dev.off()
- 
-# text representation of results, with actual adjusted p-values
-head(results[[1]])
-```
-
-#### extracting representative GOs
-
-```{r}
-# this module chooses GO terms that best represent *independent* groups of significant GO terms
-
-pcut=1e-2 # adjusted pvalue cutoff for representative GO
-hcut=0.9 # height at which cut the GO terms tree to get "independent groups". 
-
-# plotting the GO tree with the cut level (un-remark the next two lines to plot)
- plot(results[[2]],cex=0.3)
- abline(h=hcut,col="red")
-
-# cutting
-ct=cutree(results[[2]],h=hcut)
-annots=c();ci=1
-for (ci in unique(ct)) {
-  message(ci)
-	rn=names(ct)[ct==ci]
-	obs=grep("obsolete",rn)
-	if(length(obs)>0) { rn=rn[-obs] }
-	if (length(rn)==0) {next}
-	rr=results[[1]][rn,]
-	bestrr=rr[which(rr$pval==min(rr$pval)),]
-	best=1
-	if(nrow(bestrr)>1) {
-		nns=sub(" .+","",row.names(bestrr))
-		fr=c()
-		for (i in 1:length(nns)) { fr=c(fr,eval(parse(text=nns[i]))) }
-		best=which(fr==max(fr))
-	}
-	if (bestrr$pval[best]<=pcut) { annots=c(annots,sub("\\d+\\/\\d+ ","",row.names(bestrr)[best]))}
-}
-
-setwd("go_mwu")
-mwus=read.table(paste("MWU",goDivision,input,sep="_"),header=T)
-bestGOs=mwus[mwus$name %in% annots,]
-bestGOs
-```
-
----
-
-### Oral Epidermis tissue fisher exact test
-
-```{r, eval=FALSE}
-setwd("go_mwu")
-input="UpOralEpi.csv"
-
-gomwuStats(input, goDatabase, goAnnotations, goDivision,
-	perlPath="perl", # replace with full path to perl executable if it is not in your system's PATH already
-	largest=0.1,  # a GO category will not be considered if it contains more than this fraction of the total number of genes
-	smallest=5,   # a GO category should contain at least this many genes to be considered
-	clusterCutHeight=0.25 # threshold for merging similar (gene-sharing) terms. See README for details.
-#	,Alternative="g" # by default the MWU test is two-tailed; specify "g" or "l" of you want to test for "greater" or "less" instead.
-)
-```
-
-```
-go.obo gene_to_go.tab UpOralEpi.csv BP largest=0.1 smallest=5 cutHeight=0.25
-
-Run parameters:
-
-largest GO category as fraction of all genes (largest)  : 0.1
-         smallest GO category as # of genes (smallest)  : 5
-                clustering threshold (clusterCutHeight) : 0.25
-
------------------
-retrieving GO hierarchy, reformatting data...
-
--------------
-go_reformat:
-Genes with GO annotations, but not listed in measure table: 1
-
-Terms without defined level (old ontology?..): 58
--------------
--------------
-go_nrify:
-12179 categories, 9535 genes; size range 5-953.5
-	68 too broad
-	6074 too small
-	6037 remaining
-
-removing redundancy:
-
-calculating GO term similarities based on shared genes...
-4441 non-redundant GO categories of good size
--------------
-
-Secondary clustering:
-calculating similarities....
-Binary classification detected; will perform Fisher's test
-17 GO terms at 10% FDR
-```
-
-#### Plotting
-
-```{r}
-setwd("go_mwu")
-input="UpOralEpi.csv"
-
-png(filename = paste0(input, "_plot.png"), width = 1200, height = 600)
-results=gomwuPlot(input,goAnnotations,goDivision,
- 	absValue=0.001,  #Specify absValue=0.001 if you are doing Fisher's exact test for standard GO enrichment
- 	level1=0.05, # FDR threshold for plotting. Specify level1=1 to plot all GO categories containing genes exceeding the absValue.
- 	level2=0.01, # FDR cutoff to print in regular (not italic) font.
- 	level3=0.001, # FDR cutoff to print in large bold font.
- 	txtsize=3,    # decrease to fit more on one page, or increase (after rescaling the plot so the tree fits the text) for better "word cloud" effect
- 	treeHeight=0.25, # height of the hierarchical clustering tree
- )
-dev.off()
- 
-# text representation of results, with actual adjusted p-values
-head(results[[1]])
-```
-
-#### extracting representative GOs
-
-```{r}
-# this module chooses GO terms that best represent *independent* groups of significant GO terms
-
-pcut=1e-2 # adjusted pvalue cutoff for representative GO
-hcut=0.9 # height at which cut the GO terms tree to get "independent groups". 
-
-# plotting the GO tree with the cut level (un-remark the next two lines to plot)
- plot(results[[2]],cex=0.3)
- abline(h=hcut,col="red")
-
-# cutting
-ct=cutree(results[[2]],h=hcut)
-annots=c();ci=1
-for (ci in unique(ct)) {
-  message(ci)
-	rn=names(ct)[ct==ci]
-	obs=grep("obsolete",rn)
-	if(length(obs)>0) { rn=rn[-obs] }
-	if (length(rn)==0) {next}
-	rr=results[[1]][rn,]
-	bestrr=rr[which(rr$pval==min(rr$pval)),]
-	best=1
-	if(nrow(bestrr)>1) {
-		nns=sub(" .+","",row.names(bestrr))
-		fr=c()
-		for (i in 1:length(nns)) { fr=c(fr,eval(parse(text=nns[i]))) }
-		best=which(fr==max(fr))
-	}
-	if (bestrr$pval[best]<=pcut) { annots=c(annots,sub("\\d+\\/\\d+ ","",row.names(bestrr)[best]))}
-}
-
-setwd("go_mwu")
-mwus=read.table(paste("MWU",goDivision,input,sep="_"),header=T)
-bestGOs=mwus[mwus$name %in% annots,]
-bestGOs
 ```
 
 ### Differential Expression using LFC
@@ -508,51 +257,6 @@ bestGOs
 
 ## Custom plots
 
-### up aboral, fisher
-
-```{r}
-MWU_BP_UpAboral <- read.table("go_mwu/MWU_BP_UpAboral.csv", header = TRUE)
-BP_UpAboral <- read.table("go_mwu/BP_UpAboral.csv", header = TRUE)
-```
-
-```{r}
-MWU_BP_UpAboral %>% dplyr::filter(p.adj<0.05) %>% 
-  mutate(log10padj = -log10(p.adj)) %>%
-  tidyplot(y = name, x = nseqs, fill = log10padj) %>%
-  adjust_size(height = NA, width=NA) %>%
-  theme_minimal_x() %>%
-  add_sum_bar() %>% #adjust_colors(new_colors = colors_continuous_mako) %>%
-  sort_y_axis_labels(nseqs) %>%
-  adjust_padding(right = 0.1) %>%
-  add_data_labels(nseqs, label_position = c("right")) %>%
-  adjust_legend_title("$-log10~(Adjusted~p-value)$") %>%
-  add_title("Enriched GO terms by GO_MWU, Up in Aboral Tissue, padj < 0.05") %>%
-  save_plot("../output_RNA/differential_expression/enrichment/GO_MWU_UpAboral_Fisher_05.png",
-            width = 8, height = 15, units="in",bg = "transparent") 
-```
-### up oral epi, fisher
-
-```{r}
-MWU_BP_UpOralEpi <- read.table("go_mwu/MWU_BP_UpOralEpi.csv", header = TRUE)
-BP_UpOralEpi <- read.table("go_mwu/BP_UpOralEpi.csv", header = TRUE)
-```
-
-```{r}
-MWU_BP_UpOralEpi %>% dplyr::filter(p.adj<0.05) %>% 
-  mutate(log10padj = -log10(p.adj)) %>%
-  tidyplot(y = name, x = nseqs, fill = log10padj) %>%
-  adjust_size(height = NA, width=NA) %>%
-  theme_minimal_x() %>%
-  add_sum_bar() %>% #adjust_colors(new_colors = colors_continuous_mako) %>%
-  sort_y_axis_labels(nseqs) %>%
-  adjust_padding(right = 0.1) %>%
-  add_data_labels(nseqs, label_position = c("right")) %>%
-  adjust_legend_title("$-log10~(Adjusted~p-value)$") %>%
-  add_title("Enriched GO terms by GO_MWU, Up in Aboral Tissue, padj < 0.05") %>%
-  save_plot("../output_RNA/differential_expression/enrichment/GO_MWU_UpOralEpi_Fisher_05.png",
-            width = 8, height = 5, units="in",bg = "transparent") 
-```
-
 ### continuous by LFC
 
 ```{r}
@@ -625,6 +329,25 @@ MWU_BP_DE_LFC %>% dplyr::filter(p.adj<0.05) %>%
   add_title("Enriched GO terms by GO_MWU, padj < 0.05") %>%
   save_plot("../output_RNA/differential_expression/enrichment/GO_MWU_dots.png",
             width = 8, height = 6, units="in",bg = "transparent")
+
+MWU_BP_DE_LFC %>% dplyr::filter(p.adj<0.05) %>% 
+  mutate(log10padj = -log10(p.adj)) %>%
+  tidyplot(y = name, x = delta.rank) %>%
+  adjust_size(height = NA, width=NA) %>%
+  theme_minimal_x(fontsize=8) %>%
+  add_sum_bar(width=0.2, data = filter_rows(delta.rank < 0), fill = "palegreen4") %>%
+  add_sum_bar(width=0.2, data = filter_rows(delta.rank > 0), fill = "mediumpurple") %>%
+  add(ggplot2::stat_summary(data = filter_rows(delta.rank < 0),fun = identity,geom = "point",
+                            aes(size = nseqs), color="palegreen4", alpha=0.5)) %>%
+  add(ggplot2::stat_summary(data = filter_rows(delta.rank > 0),fun = identity,geom = "point",
+                            aes(size = nseqs), color="mediumpurple", alpha=0.5)) %>%
+  sort_y_axis_labels(delta.rank) %>%
+  adjust_padding(right = 0.1, left = 0.1) %>%
+  #add(ggplot2::scale_size_continuous(name = "$-log10~(Adjusted~p-value)$", range=c(0,6))) %>%
+  adjust_legend_title("Number of sequences") %>%
+  add_title("Enriched GO terms by GO_MWU, padj < 0.05") %>%
+  save_plot("../output_RNA/differential_expression/enrichment/GO_MWU_dots_nseq.png",
+            width = 8, height = 6, units="in",bg = "transparent")
 ```
 
 ```{r}
@@ -636,7 +359,8 @@ MWU_BP_DE_LFC %>% dplyr::filter(p.adj<0.05) %>%
   add_sum_bar(width=0.2, fill="gray") %>% 
   add(ggplot2::stat_summary(fun = identity,geom = "point",
                             aes(size = nseqs), alpha=0.8)) %>%
-  adjust_colors(new_colors = c("#0000FF", "#CA0088", "#FF0000")) %>%
+  #adjust_colors(new_colors = c("#0000FF", "#CA0088", "#FF0000")) %>%
+  adjust_colors(rev(colors_continuous_mako)) %>%
   sort_y_axis_labels(delta.rank) %>%
   adjust_padding(right = 0.1, left = 0.1) %>%
   adjust_legend_title("$-log10~(Adjusted~p-value)$") %>%
@@ -645,3 +369,281 @@ MWU_BP_DE_LFC %>% dplyr::filter(p.adj<0.05) %>%
             width = 8, height = 6, units="in",bg = "transparent")
 ```
 
+
+## MF and CC: Run GO_MWU 
+
+```{r}
+setwd("go_mwu")
+
+goAnnotations="gene_to_go.tab" # two-column, tab-delimited, one line per gene, multiple GO terms separated by semicolon.
+goDatabase="go.obo" # download from http://www.geneontology.org/GO.downloads.ontology.shtml
+source("gomwu.functions.R")
+```
+
+### MF 
+
+```{r, eval=FALSE}
+setwd("go_mwu")
+goDivision="MF" 
+input="DE_LFC.csv"
+
+gomwuStats(input, goDatabase, goAnnotations, goDivision,
+	perlPath="perl", # replace with full path to perl executable if it is not in your system's PATH already
+	largest=0.1,  # a GO category will not be considered if it contains more than this fraction of the total number of genes
+	smallest=5,   # a GO category should contain at least this many genes to be considered
+	clusterCutHeight=0.25 # threshold for merging similar (gene-sharing) terms. See README for details.
+#	,Alternative="g" # by default the MWU test is two-tailed; specify "g" or "l" of you want to test for "greater" or "less" instead.
+)
+```
+
+```
+go.obo gene_to_go.tab DE_LFC.csv MF largest=0.1 smallest=5 cutHeight=0.25
+
+Run parameters:
+
+largest GO category as fraction of all genes (largest)  : 0.1
+         smallest GO category as # of genes (smallest)  : 5
+                clustering threshold (clusterCutHeight) : 0.25
+
+-----------------
+retrieving GO hierarchy, reformatting data...
+
+-------------
+go_reformat:
+Genes with GO annotations, but not listed in measure table: 1
+
+Terms without defined level (old ontology?..): 65
+-------------
+-------------
+go_nrify:
+4016 categories, 9065 genes; size range 5-906.5
+	29 too broad
+	2553 too small
+	1434 remaining
+	
+	removing redundancy:
+
+calculating GO term similarities based on shared genes...
+1136 non-redundant GO categories of good size
+-------------
+
+Secondary clustering:
+calculating similarities....
+Continuous measure of interest: will perform MWU test
+58 GO terms at 10% FDR
+```
+
+#### Plotting
+
+```{r}
+setwd("go_mwu")
+goDivision="MF" 
+input="DE_LFC.csv"
+
+png(filename = paste0(input, "_", goDivision, "_plot.png"), width = 2000, height = 1600)
+results=gomwuPlot(input,goAnnotations,goDivision,
+ 	absValue=1, # un-remark this if you are using log2-fold changes
+ 	level1=0.05, # FDR threshold for plotting. Specify level1=1 to plot all GO categories containing genes exceeding the absValue.
+ 	level2=0.01, # FDR cutoff to print in regular (not italic) font.
+ 	level3=0.001, # FDR cutoff to print in large bold font.
+ 	txtsize=4.5,    # decrease to fit more on one page
+ 	treeHeight=.5, # height of the hierarchical clustering tree
+ 	# colors=c("dodgerblue2","firebrick1","skyblue2","lightcoral") 
+ 	colors = c("forestgreen", "purple", "seagreen3", "orchid")
+ )
+dev.off()
+ 
+# text representation of results, with actual adjusted p-values
+head(results[[1]])
+```
+
+### CC
+	
+```{r, eval=FALSE}
+setwd("go_mwu")
+goDivision="CC"
+input="DE_LFC.csv"
+
+gomwuStats(input, goDatabase, goAnnotations, goDivision,
+	perlPath="perl", # replace with full path to perl executable if it is not in your system's PATH already
+	largest=0.1,  # a GO category will not be considered if it contains more than this fraction of the total number of genes
+	smallest=5,   # a GO category should contain at least this many genes to be considered
+	clusterCutHeight=0.25 # threshold for merging similar (gene-sharing) terms. See README for details.
+#	,Alternative="g" # by default the MWU test is two-tailed; specify "g" or "l" of you want to test for "greater" or "less" instead.
+)
+```
+
+```
+go.obo gene_to_go.tab DE_LFC.csv CC largest=0.1 smallest=5 cutHeight=0.25
+
+Run parameters:
+
+largest GO category as fraction of all genes (largest)  : 0.1
+         smallest GO category as # of genes (smallest)  : 5
+                clustering threshold (clusterCutHeight) : 0.25
+
+-----------------
+retrieving GO hierarchy, reformatting data...
+
+-------------
+go_reformat:
+Genes with GO annotations, but not listed in measure table: 1
+
+Terms without defined level (old ontology?..): 17
+-------------
+-------------
+go_nrify:
+1735 categories, 10061 genes; size range 5-1006.1
+	21 too broad
+	817 too small
+	897 remaining
+
+removing redundancy:
+
+calculating GO term similarities based on shared genes...
+766 non-redundant GO categories of good size
+-------------
+
+Secondary clustering:
+calculating similarities....
+Continuous measure of interest: will perform MWU test
+52 GO terms at 10% FDR
+```
+
+#### Plotting
+
+```{r}
+setwd("go_mwu")
+goDivision="CC"
+input="DE_LFC.csv"
+
+png(filename = paste0(input, "_", goDivision, "_plot.png"), width = 1800, height = 1600)
+results=gomwuPlot(input,goAnnotations,goDivision,
+ 	absValue=1, # un-remark this if you are using log2-fold changes
+ 	level1=0.05, # FDR threshold for plotting. Specify level1=1 to plot all GO categories containing genes exceeding the absValue.
+ 	level2=0.01, # FDR cutoff to print in regular (not italic) font.
+ 	level3=0.001, # FDR cutoff to print in large bold font.
+ 	txtsize=4.5,    # decrease to fit more on one page
+ 	treeHeight=.5, # height of the hierarchical clustering tree
+ 	# colors=c("dodgerblue2","firebrick1","skyblue2","lightcoral") 
+ 	colors = c("forestgreen", "purple", "seagreen3", "orchid")
+ )
+dev.off()
+ 
+# text representation of results, with actual adjusted p-values
+head(results[[1]])
+```
+
+## Custom plots
+
+### continuous by LFC
+
+```{r}
+MWU_MF_DE_LFC <- read.table("go_mwu/MWU_MF_DE_LFC.csv", header = TRUE)
+MF_DE_LFC <- read.table("go_mwu/MF_DE_LFC.csv", header = TRUE)
+```
+
+```{r}
+MWU_MF_DE_LFC %>% dplyr::filter(p.adj<0.05 & delta.rank > 0) %>% 
+  mutate(log10padj = -log10(p.adj)) %>%
+  tidyplot(y = name, x = nseqs, fill = log10padj) %>%
+  adjust_size(height = NA, width=NA) %>%
+  theme_minimal_x(fontsize=9) %>%
+  add_sum_bar() %>% adjust_colors(new_colors = colors_continuous_turbo) %>%
+  sort_y_axis_labels(delta.rank) %>%
+  adjust_padding(right = 0.1) %>%
+  add_data_labels(delta.rank, label_position = c("right")) %>%
+  adjust_legend_title("$-log10~(Adjusted~p-value)$") %>%
+  add_title("Enriched GO terms by GO_MWU, Up in Aboral Tissue, padj < 0.05") %>%
+  save_plot("../output_RNA/differential_expression/enrichment/GO_MWU_MF_UpAboral.png",
+            width = 8, height = 6, units="in",bg = "transparent") 
+
+MWU_MF_DE_LFC %>% dplyr::filter(p.adj<0.05 & delta.rank < 0) %>% 
+  mutate(log10padj = -log10(p.adj)) %>%
+  tidyplot(y = name, x = nseqs, fill = log10padj) %>%
+  adjust_size(height = NA, width=NA) %>%
+  theme_minimal_x(fontsize=9) %>%
+  add_sum_bar() %>% adjust_colors(new_colors = colors_continuous_turbo) %>%
+  sort_y_axis_labels(-delta.rank) %>%
+  adjust_padding(right = 0.1) %>%
+  add_data_labels(delta.rank, label_position = c("right")) %>%
+  adjust_legend_title("$-log10~(Adjusted~p-value)$") %>%
+  add_title("Enriched GO terms by GO_MWU, Up in Oral Epidermis Tissue, padj < 0.05")  %>%
+  save_plot("../output_RNA/differential_expression/enrichment/GO_MWU_MF_UpOralEpi.png",
+            width = 8, height = 4, units="in",bg = "transparent")
+```
+
+```{r}
+MWU_MF_DE_LFC %>% dplyr::filter(p.adj<0.05) %>% 
+  mutate(log10padj = -log10(p.adj)) %>%
+  tidyplot(y = name, x = delta.rank, color = log10padj) %>%
+  adjust_size(height = NA, width=NA) %>%
+  theme_minimal_x(fontsize=8) %>%
+  add_sum_bar() %>% #add_sum_dot() %>% 
+  adjust_colors(new_colors = colors_continuous_turbo) %>%
+  sort_y_axis_labels(delta.rank) %>%
+  adjust_padding(right = 0.1, left = 0.1) %>%
+  #add_data_labels(delta.rank, label_position = c("right")) %>%
+  adjust_legend_title("$-log10~(Adjusted~p-value)$") %>%
+  add_title("Enriched GO terms by GO_MWU, padj < 0.05") %>%
+  save_plot("../output_RNA/differential_expression/enrichment/GO_MWU.png",
+            width = 8, height = 6, units="in",bg = "transparent")
+            
+            
+MWU_MF_DE_LFC %>% dplyr::filter(p.adj<0.05) %>% 
+  mutate(log10padj = -log10(p.adj)) %>%
+  tidyplot(y = name, x = delta.rank) %>%
+  adjust_size(height = NA, width=NA) %>%
+  theme_minimal_x(fontsize=8) %>%
+  add_sum_bar(width=0.2, data = filter_rows(delta.rank < 0), fill = "palegreen4") %>%
+  add_sum_bar(width=0.2, data = filter_rows(delta.rank > 0), fill = "mediumpurple") %>%
+  add(ggplot2::stat_summary(data = filter_rows(delta.rank < 0),fun = identity,geom = "point",
+                            aes(size = log10padj), color="palegreen4", alpha=0.5)) %>%
+  add(ggplot2::stat_summary(data = filter_rows(delta.rank > 0),fun = identity,geom = "point",
+                            aes(size = log10padj), color="mediumpurple", alpha=0.5)) %>%
+  sort_y_axis_labels(delta.rank) %>%
+  adjust_padding(right = 0.1, left = 0.1) %>%
+  #add(ggplot2::scale_size_continuous(name = "$-log10~(Adjusted~p-value)$", range=c(0,6))) %>%
+  adjust_legend_title("$-log10~(Adjusted~p-value)$") %>%
+  add_title("Enriched GO terms by GO_MWU, padj < 0.05") %>%
+  save_plot("../output_RNA/differential_expression/enrichment/GO_MWU_MF_dots.png",
+            width = 8, height = 6, units="in",bg = "transparent")
+
+MWU_MF_DE_LFC %>% dplyr::filter(p.adj<0.05) %>% 
+  mutate(log10padj = -log10(p.adj)) %>%
+  tidyplot(y = name, x = delta.rank) %>%
+  adjust_size(height = NA, width=NA) %>%
+  theme_minimal_x(fontsize=8) %>%
+  add_sum_bar(width=0.2, data = filter_rows(delta.rank < 0), fill = "palegreen4") %>%
+  add_sum_bar(width=0.2, data = filter_rows(delta.rank > 0), fill = "mediumpurple") %>%
+  add(ggplot2::stat_summary(data = filter_rows(delta.rank < 0),fun = identity,geom = "point",
+                            aes(size = nseqs), color="palegreen4", alpha=0.5)) %>%
+  add(ggplot2::stat_summary(data = filter_rows(delta.rank > 0),fun = identity,geom = "point",
+                            aes(size = nseqs), color="mediumpurple", alpha=0.5)) %>%
+  sort_y_axis_labels(delta.rank) %>%
+  adjust_padding(right = 0.1, left = 0.1) %>%
+  #add(ggplot2::scale_size_continuous(name = "$-log10~(Adjusted~p-value)$", range=c(0,6))) %>%
+  adjust_legend_title("Number of sequences") %>%
+  add_title("Enriched GO terms by GO_MWU, padj < 0.05") %>%
+  save_plot("../output_RNA/differential_expression/enrichment/GO_MWU_MF_dots_nseq.png",
+            width = 8, height = 6, units="in",bg = "transparent")
+```
+
+```{r}
+MWU_MF_DE_LFC %>% dplyr::filter(p.adj<0.05) %>% 
+  mutate(log10padj = -log10(p.adj)) %>%
+  tidyplot(y = name, x = delta.rank, color = log10padj) %>%
+  adjust_size(height = NA, width=NA) %>%
+  theme_minimal_x(fontsize=8) %>%
+  add_sum_bar(width=0.2, fill="gray") %>% 
+  add(ggplot2::stat_summary(fun = identity,geom = "point",
+                            aes(size = nseqs), alpha=0.8)) %>%
+  #adjust_colors(new_colors = c("#0000FF", "#CA0088", "#FF0000")) %>%
+  adjust_colors(rev(colors_continuous_mako)) %>%
+  sort_y_axis_labels(delta.rank) %>%
+  adjust_padding(right = 0.1, left = 0.1) %>%
+  adjust_legend_title("$-log10~(Adjusted~p-value)$") %>%
+  add_title("Enriched GO terms by GO_MWU, padj < 0.05") %>%
+  save_plot("../output_RNA/differential_expression/enrichment/GO_MWU_MF_bubble.png",
+            width = 8, height = 6, units="in",bg = "transparent")
+```
