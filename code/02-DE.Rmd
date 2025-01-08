@@ -125,6 +125,7 @@ resLFC <- lfcShrink(dds, coef="Tissue_Aboral_vs_OralEpi", res=res, type = "apegl
 res <- resLFC
 
 resOrdered <- res[order(res$pvalue),]# save differentially expressed genes
+resOrdered$query <- rownames(resOrdered)
 
 DE_05 <- as.data.frame(resOrdered) %>% filter(padj < 0.05)
 DE_05_Up <- DE_05 %>% filter(log2FoldChange > 0) #Higher in Aboral, Lower in OralEpi
@@ -341,7 +342,7 @@ save_ggplot(up_OralEpi, "../output_RNA/differential_expression/up_OralEpi")
 ## Genes of Interest
 
 ```{r}
-MarkerGenes <- read.csv("../references/Pacuta_MarkerGenes_Levy2021.csv") %>% dplyr::rename("query" = 1, "List" = 2, "definition" = 3)
+MarkerGenes <- read.csv("../references/Pacuta_MarkerGenes_Levy2021.csv") %>% dplyr::rename("query" = 1, "List" = 2, "definition" = 3) %>% filter(List !="Toolkit")
 
 MarkerGenes$def_short <- ifelse(nchar(MarkerGenes$definition) > 20, 
                             paste0(substr(MarkerGenes$definition, 1, 17), "..."), 
@@ -363,6 +364,7 @@ Biomin$def_short <- ifelse(nchar(Biomin$definition) > 40,
 ```{r}
 DE_05$query <- rownames(DE_05)
 DE_05_biomin <- DE_05 %>% left_join(Biomin) %>% select(query,everything()) %>% drop_na()
+DESeq_biomin <- as.data.frame(resOrdered) %>% left_join(Biomin) %>% select(query,everything()) %>% drop_na()
 DE_05_marker <- DE_05 %>% left_join(MarkerGenes) %>% select(query,everything())  %>% drop_na()
 
 write.csv(as.data.frame(DE_05_biomin), 
@@ -966,8 +968,7 @@ gene_labels <- Manual %>%
   select(query,Heatmap_Label) %>%
   mutate_all(~ ifelse(is.na(.), "", .)) #replace NAs with "" for labelling purposes
 
-
-TRP <- DE_05_SwissProt %>% filter(grepl("transient", ProteinNames, ignore.case = TRUE))
+TRP <- Manual %>% filter(grepl("transient", ProteinNames, ignore.case = TRUE)) 
 select <- TRP$query
 
 z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
@@ -976,58 +977,6 @@ top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, na
          labels_row = gene_labels[match(select,(gene_labels$query)),2], fontsize_row = 12)
 top50_DE
 save_ggplot(top50_DE, "../output_RNA/differential_expression/TRP_DE_SwissProt", width = 6.43, height = 4.25, units = "in", dpi = 300)
-
-select <- DE_05_biomin$query
-z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
-DE_biomin <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
-         cluster_cols=TRUE, cutree_cols = 2,annotation_col=(df%>% select(Tissue)), annotation_colors = ann_colors,
-         labels_row = gene_labels[match(select,(gene_labels$query)),2], fontsize_row = 8, cutree_rows = 2)
-DE_biomin
-save_ggplot(DE_biomin, "../output_RNA/differential_expression/DE_biomin")
-
-
-mucin <- Manual %>% filter(grepl("mucin", ProteinNames, ignore.case = TRUE)|grepl("toll-", ProteinNames, ignore.case = TRUE)|grepl("ZP", ProteinNames, ignore.case = TRUE)|grepl("lectin", ProteinNames, ignore.case = TRUE)|grepl("nitric", Heatmap_Label, ignore.case = TRUE))
-select <- mucin$query
-
-z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
-top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
-         cluster_cols=TRUE, cutree_cols = 2,annotation_col=(df%>% select(Tissue)), annotation_colors = ann_colors,
-         labels_row = gene_labels[match(select,(gene_labels$query)),2], fontsize_row = 8, cutree_rows = 2)
-top50_DE
-save_ggplot(top50_DE, "../output_RNA/differential_expression/bacteria_DE_SwissProt")
-
-mucin <- Manual %>% filter(grepl("mucin", ProteinNames, ignore.case = TRUE)|grepl("toll-", ProteinNames, ignore.case = TRUE)|grepl("ZP", ProteinNames, ignore.case = TRUE)|grepl("lectin", ProteinNames, ignore.case = TRUE)|grepl("nitric", Heatmap_Label, ignore.case = TRUE))  %>% arrange(Heatmap_Label) %>% filter(log2FoldChange<0)
-select <- mucin$query 
-
-z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
-top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=FALSE, show_rownames=TRUE,
-         cluster_cols=TRUE, cutree_cols = 2,annotation_col=(df%>% select(Tissue)), labels_col = NA, annotation_colors = ann_colors,
-         labels_row = gene_labels[match(select,(gene_labels$query)),2], fontsize_row = 8, cutree_rows = 2)
-top50_DE
-save_ggplot(top50_DE, "../output_RNA/differential_expression/bacteria_upOral_DE_SwissProt")
-
-
-mucin <- Manual %>% filter(grepl("wnt", Heatmap_Label, ignore.case = TRUE)|grepl("frizzle", Heatmap_Label, ignore.case = TRUE)|grepl("homeobox", Heatmap_Label, ignore.case = TRUE)|grepl("hox", Heatmap_Label, ignore.case = TRUE))#|grepl("wnt", BiologicalProcess, ignore.case = TRUE))
-select <- mucin$query
-
-z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
-top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
-         cluster_cols=TRUE, cutree_cols = 2,annotation_col=(df%>% select(Tissue)), annotation_colors = ann_colors,
-         labels_row = gene_labels[match(select,(gene_labels$query)),2], fontsize_row = 8, cutree_rows = 2)
-top50_DE
-save_ggplot(top50_DE, "../output_RNA/differential_expression/WNT_Hox_DE_SwissProt")
-
-mucin <- Manual %>% filter(grepl("transport", Heatmap_Label, ignore.case = TRUE))
-select <- mucin$query
-
-z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
-top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
-         cluster_cols=TRUE, cutree_cols = 2,annotation_col=(df%>% select(Tissue)), annotation_colors = ann_colors,
-         labels_row = gene_labels[match(select,(gene_labels$query)),2], fontsize_row = 8, cutree_rows = 2)
-top50_DE
-save_ggplot(top50_DE, "../output_RNA/differential_expression/transport_DE_SwissProt")
-
-###---
 
 annot_tab$short_name <- ifelse(nchar(annot_tab$ProteinNames) > 80, 
                             paste0(substr(annot_tab$ProteinNames, 1, 77), "..."), 
@@ -1050,6 +999,289 @@ top50_DE
 save_ggplot(top50_DE, "../output_RNA/differential_expression/TRP_SwissProt")
 ```
 
+### biomin de heatmap nice
+```{r}
+
+gene_labels <- Manual %>% 
+  select(query,Heatmap_Label) %>%
+  mutate_all(~ ifelse(is.na(.), "", .)) #replace NAs with "" for labelling purposes
+
+
+DE_05_biomin_filtered <- DE_05_biomin %>% left_join(Manual,by="query" ) %>% filter(!(Heatmap_Label %in% c("Myosin-9", "Actin, cytoplasmic")))
+  
+select <- DE_05_biomin_filtered$query
+z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
+DE_biomin <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=(df%>% select(Tissue)), annotation_colors = ann_colors,
+         labels_row = gene_labels[match(select,(gene_labels$query)),2], fontsize_row = 8, cutree_rows = 2)
+DE_biomin
+save_ggplot(DE_biomin, "../output_RNA/differential_expression/DE_biomin")
+
+# Perform clustering
+row_clusters <- hclust(dist(z_scores))
+cluster_assignments <- cutree(row_clusters, k = 2) # Adjust k as needed
+
+# Create a dataframe to manage clusters and reordering
+clustered_data <- data.frame(
+  query = select,
+  Heatmap_Label = gene_labels[match(select, gene_labels$query), 2],
+  cluster = cluster_assignments
+)
+
+# Reorder rows within each cluster alphabetically by their labels
+clustered_data <- clustered_data %>%
+  arrange(cluster, Heatmap_Label)
+
+# Reorder the z_scores matrix and labels based on the new order
+z_scores <- z_scores[match(clustered_data$query, rownames(z_scores)), ]
+ordered_labels <- clustered_data$Heatmap_Label
+
+# Generate heatmap with reordered rows and labels
+DE_biomin <- pheatmap(
+  z_scores,
+  color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200),
+  cluster_rows = FALSE,  # Disable clustering since rows are pre-ordered
+  cluster_cols = TRUE,
+  show_rownames = TRUE,
+  cutree_cols = 2,
+  annotation_col = (df %>% select(Tissue)),
+  annotation_colors = ann_colors,
+  labels_row = ordered_labels,
+  fontsize_row = 8
+)
+save_ggplot(DE_biomin, "../output_RNA/differential_expression/DE_biomin_manual")
+```
+###wnt and hox
+
+```{r}
+##
+WNT <- Manual %>% filter(grepl("wnt", Heatmap_Label, ignore.case = TRUE)|grepl("frizzle", Heatmap_Label, ignore.case = TRUE)|grepl("homeobox", Heatmap_Label, ignore.case = TRUE)|grepl("hox", Heatmap_Label, ignore.case = TRUE))#|grepl("wnt", BiologicalProcess, ignore.case = TRUE))
+select <- WNT$query
+
+z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
+top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=(df%>% select(Tissue)), annotation_colors = ann_colors,
+         labels_row = gene_labels[match(select,(gene_labels$query)),2], fontsize_row = 8, cutree_rows = 2)
+top50_DE
+save_ggplot(top50_DE, "../output_RNA/differential_expression/WNT_Hox_DE_SwissProt")
+
+# Perform clustering
+# Perform clustering
+row_clusters <- hclust(dist(z_scores))
+cluster_assignments <- cutree(row_clusters, k = 2) # Adjust k for the number of clusters
+
+# Create a dataframe for clustering and label management
+clustered_data <- data.frame(
+  query = select,
+  Heatmap_Label = gene_labels[match(select, gene_labels$query), 2],
+  cluster = cluster_assignments
+)
+
+# Reorder rows within each cluster alphabetically by their labels
+clustered_data <- clustered_data %>%
+  arrange(cluster, Heatmap_Label)
+
+# Reorder the z_scores matrix and labels based on the new order
+z_scores <- z_scores[match(clustered_data$query, rownames(z_scores)), ]
+ordered_labels <- clustered_data$Heatmap_Label
+
+# Ensure there is only 1 gap between clusters
+#row_breaks <- which(cluster_assignments != cluster_assignments[1])  # Only where cluster switches
+
+# Generate the heatmap with reordered rows and labels
+top50_DE <- pheatmap(
+  z_scores,
+  color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200),
+  cluster_rows = FALSE,  # Disable clustering since rows are pre-ordered
+  cluster_cols = TRUE,
+  cutree_cols = 2,
+  annotation_col = (df %>% select(Tissue)),
+  annotation_colors = ann_colors,
+  labels_row = ordered_labels,
+  fontsize_row = 8,
+  borders_color = "white",  # Optional border around clusters
+  cutree_rows = 2,  # Keep row clustering if desired
+  gaps_row = 24  # Add breaks only between clusters
+)
+
+
+# Save the heatmap
+save_ggplot(top50_DE, "../output_RNA/differential_expression/WNT_Hox_DE_SwissProt2")
+
+```
+
+### bacteria genes
+
+```{r}
+mucin <- Manual %>% filter(grepl("mucin", ProteinNames, ignore.case = TRUE)|grepl("toll-", ProteinNames, ignore.case = TRUE)|grepl("ZP", ProteinNames, ignore.case = TRUE)|grepl("lectin", ProteinNames, ignore.case = TRUE)|grepl("nitric", Heatmap_Label, ignore.case = TRUE)) %>% filter(Heatmap_Label !="Cnidocyte marker protein (Collectin-11)")
+select <- mucin$query
+
+z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
+top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=(df%>% select(Tissue)), annotation_colors = ann_colors,
+         labels_row = gene_labels[match(select,(gene_labels$query)),2], fontsize_row = 8, cutree_rows = 2)
+top50_DE
+save_ggplot(top50_DE, "../output_RNA/differential_expression/bacteria_DE_SwissProt")
+
+
+# Perform clustering
+row_clusters <- hclust(dist(z_scores))
+cluster_assignments <- cutree(row_clusters, k = 2) # Adjust k for the number of clusters
+
+# Create a dataframe for clustering and label management
+clustered_data <- data.frame(
+  query = select,
+  Heatmap_Label = gene_labels[match(select, gene_labels$query), 2],
+  cluster = cluster_assignments
+)
+
+# Reorder rows within each cluster alphabetically by their labels
+clustered_data <- clustered_data %>%
+  arrange(cluster, Heatmap_Label)
+
+# Reorder the z_scores matrix and labels based on the new order
+z_scores <- z_scores[match(clustered_data$query, rownames(z_scores)), ]
+ordered_labels <- clustered_data$Heatmap_Label
+
+# Generate the heatmap with reordered rows and labels
+mucins <- pheatmap(
+  z_scores,
+  color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200),
+  cluster_rows = FALSE,  # Disable clustering since rows are pre-ordered
+  cluster_cols = TRUE,
+  cutree_cols = 2,
+  annotation_col = (df %>% select(Tissue)),
+  annotation_colors = ann_colors,
+  labels_row = ordered_labels,
+  fontsize_row = 8,
+  borders_color = "white",  # Optional border around clusters
+  cutree_rows = 2,  # Keep row clustering if desired
+  gaps_row = c(24,38)  # Add breaks only between clusters
+)
+
+# Save the heatmap
+save_ggplot(mucins, "../output_RNA/differential_expression/bacteria_DE_SwissProt2")
+```
+
+
+
+### Symbiont related transporters
+
+```{r}
+transport <- Manual %>% filter(grepl("amino acid transport", BiologicalProcess, ignore.case = TRUE)|grepl("ammonium transmembrane transport", BiologicalProcess, ignore.case = TRUE))
+select <- transport$query
+
+z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
+top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=(df%>% select(Tissue)), annotation_colors = ann_colors,
+         labels_row = gene_labels[match(select,(gene_labels$query)),2], fontsize_row = 8, cutree_rows = 2)
+top50_DE
+save_ggplot(top50_DE, "../output_RNA/differential_expression/transport_DE_SwissProt")
+
+# Perform clustering
+row_clusters <- hclust(dist(z_scores))
+cluster_assignments <- cutree(row_clusters, k = 2) # Adjust k for the number of clusters
+
+# Create a dataframe for clustering and label management
+clustered_data <- data.frame(
+  query = select,
+  Heatmap_Label = gene_labels[match(select, gene_labels$query), 2],
+  cluster = cluster_assignments
+)
+
+# Reorder rows within each cluster alphabetically by their labels
+clustered_data <- clustered_data %>%
+  arrange(cluster, Heatmap_Label)
+
+# Reorder the z_scores matrix and labels based on the new order
+z_scores <- z_scores[match(clustered_data$query, rownames(z_scores)), ]
+ordered_labels <- clustered_data$Heatmap_Label
+
+# Generate the heatmap with reordered rows and labels
+transporters_heat <- pheatmap(
+  z_scores,
+  color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200),
+  cluster_rows = FALSE,  # Disable clustering since rows are pre-ordered
+  cluster_cols = TRUE,
+  cutree_cols = 2,
+  annotation_col = (df %>% select(Tissue)),
+  annotation_colors = ann_colors,
+  labels_row = ordered_labels,
+  fontsize_row = 8,
+  borders_color = "white",  # Optional border around clusters
+  cutree_rows = 2,  # Keep row clustering if desired
+  gaps_row = c(16)  # Add breaks only between clusters
+)
+
+# Save the heatmap
+save_ggplot(transporters_heat, "../output_RNA/differential_expression/transport_DE_SwissProt2")
+
+
+```
+
+### temp and light sensing
+
+```{r}
+Manual <- read.csv("../output_RNA/differential_expression/DE_05_Manual_annotation.csv") %>% dplyr::rename("query" = 2, "definition" = 3) %>% arrange(X) 
+
+gene_labels <- Manual %>% 
+  select(query,Heatmap_Label) %>%
+  mutate_all(~ ifelse(is.na(.), "", .)) #replace NAs with "" for labelling purposes
+
+sensors <- Manual %>% filter(grepl("TRP", Heatmap_Label, ignore.case = TRUE)|grepl("cellular response to light stimulus", BiologicalProcess, ignore.case = TRUE)|grepl("detection of mechanical stimulus involved in sensory perception", BiologicalProcess, ignore.case = TRUE))
+
+
+select <- sensors$query
+
+z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
+top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=(df%>% select(Tissue)), annotation_colors = ann_colors,
+         labels_row = gene_labels[match(select,(gene_labels$query)),2], fontsize_row = 8, cutree_rows = 3)
+top50_DE
+save_ggplot(top50_DE, "../output_RNA/differential_expression/sensors_DE_SwissProt")
+
+# Perform clustering
+row_clusters <- hclust(dist(z_scores))
+cluster_assignments <- cutree(row_clusters, k = 3) # Adjust k for the number of clusters
+
+# Create a dataframe for clustering and label management
+clustered_data <- data.frame(
+  query = select,
+  Heatmap_Label = gene_labels[match(select, gene_labels$query), 2],
+  cluster = cluster_assignments
+)
+
+# Reorder rows within each cluster alphabetically by their labels
+clustered_data <- clustered_data %>%
+  mutate(cluster = factor(cluster, levels = c(1, 3, 2))) %>%
+  arrange(cluster, Heatmap_Label)
+
+# Reorder the z_scores matrix and labels based on the new order
+z_scores <- z_scores[match(clustered_data$query, rownames(z_scores)), ]
+ordered_labels <- clustered_data$Heatmap_Label
+
+# Generate the heatmap with reordered rows and labels
+transporters_heat <- pheatmap(
+  z_scores,
+  color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200),
+  cluster_rows = FALSE,  # Disable clustering since rows are pre-ordered
+  cluster_cols = TRUE,
+  cutree_cols = 2,
+  annotation_col = (df %>% select(Tissue)),
+  annotation_colors = ann_colors,
+  labels_row = ordered_labels,
+  fontsize_row = 8,
+  borders_color = "white",  # Optional border around clusters
+  cutree_rows = 2,  # Keep row clustering if desired
+  gaps_row = c(10,18)  # Add breaks only between clusters
+)
+
+# Save the heatmap
+save_ggplot(transporters_heat, "../output_RNA/differential_expression/sensors_DE_SwissProt2")
+
+```
+
+### random
 ```{r}
 # Create annotation data frame
 df <- as.data.frame(colData(dds)[, c("Tissue", "Fragment")])
@@ -1057,8 +1289,8 @@ df <- as.data.frame(colData(dds)[, c("Tissue", "Fragment")])
 # Function to generate short names for proteins
 generate_short_name <- function(data) {
   data %>%
-    mutate(short_name = ifelse(nchar(ProteinNames) > 80, 
-                               paste0(substr(ProteinNames, 1, 77), "..."), 
+    mutate(short_name = ifelse(nchar(ProteinNames) > 60, 
+                               paste0(substr(ProteinNames, 1, 57), "..."), 
                                ProteinNames))
 }
 
@@ -1107,14 +1339,38 @@ create_heatmap(z_scores,
 annot_tab <- generate_short_name(annot_tab)
 gene_labels <- create_gene_labels(annot_tab)
 TRP <- annot_tab %>% filter(grepl("transient", ProteinNames, ignore.case = TRUE))
+TRP <- left_join(TRP, as.data.frame(resOrdered)) %>% filter(!is.na(log2FoldChange))
 select1 <- TRP$query
 z_scores <- calculate_z_scores(annot_tab, select1, vsd)
 create_heatmap(z_scores, 
-               labels_row = gene_labels[match(select1, gene_labels$query), 2], 
+               labels_row = TRP$short_name, 
                annotation_col = df %>% select(Tissue), 
                annotation_colors = ann_colors, 
+               fontsize_row = 14,
                output_path = "../output_RNA/differential_expression/TRP_SwissProt")
 
+
+significant <- ifelse(row.names(z_scores) %in% DE_05$query, "Significant", "Not Significant")
+
+# Add this as a new annotation
+row_annotation <- data.frame(Significance = significant)
+rownames(row_annotation) <- rownames(z_scores)
+row_annotation_colors <- list(Significance = c("Significant" = "red", "Not Significant" = "grey"))
+
+heatmap <- pheatmap(z_scores,  color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200),
+                      cluster_rows = TRUE, 
+                      show_rownames = TRUE,
+                      cluster_cols = TRUE, 
+                      cutree_cols = 2,
+                    cutree_rows = 5,
+                      annotation_col = df %>% select(Tissue),
+                      annotation_colors = ann_colors,
+                    annotation_row = row_annotation,
+          annotation_row_colors = row_annotation_colors,
+                      labels_row = TRP$short_name, 
+                      fontsize_row = 12)
+  save_ggplot(heatmap, "../output_RNA/differential_expression/TRP_SwissProt")
+  
 # Process DE_05_SwissProt
 DE_05_SwissProt <- generate_short_name(DE_05_SwissProt)
 gene_labels <- create_gene_labels(DE_05_SwissProt)
@@ -1140,6 +1396,97 @@ create_heatmap(z_scores,
                output_path = "../output_RNA/differential_expression/GFP_SwissProt")
 
 ```
+
+```{r}
+#write.csv(TRP, file="../output_RNA/differential_expression/TRPs.csv")
+#manually shorted names in short_name column
+TRP <- read.csv("../output_RNA/differential_expression/TRPs.csv") %>% select(-X)
+
+
+DE_05_SwissProt <- generate_short_name(DE_05_SwissProt)
+gene_labels <- create_gene_labels(DE_05_SwissProt)
+TRP_05 <- TRP %>% filter(padj<0.05) %>% arrange(short_name)
+select <- TRP_05$query
+z_scores <- calculate_z_scores(DE_05_SwissProt, select, vsd)
+heatmap <- pheatmap(z_scores,  color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200),
+                      cluster_rows = FALSE, 
+                      show_rownames = TRUE,
+                      cluster_cols = TRUE, 
+                      cutree_cols = 2,
+                    cutree_rows = 2,
+                      annotation_col = df %>% select(Tissue),
+                      annotation_colors = ann_colors,
+                      labels_row = TRP_05$short_name, 
+                      fontsize_row = 12)
+
+  save_ggplot(heatmap, "../output_RNA/differential_expression/TRP_DE_SwissProt", width = 6.43, height = 4.25, units = "in", dpi = 300)
+  
+
+summary_data <- TRP %>%
+  mutate(
+    direction = ifelse(log2FoldChange > 0, "Positive", "Negative"),
+    significance = ifelse(padj < 0.05, "Significant", "Not Significant")
+  ) %>%
+  group_by(short_name, direction, significance) %>%
+  summarize(count = n(), .groups = "drop")
+
+# Reshape for visualization
+summary_wide <- summary_data %>%
+  tidyr::pivot_wider(names_from = c(direction, significance), values_from = count, values_fill = 0)
+
+heatmap_data <- summary_wide %>%
+  column_to_rownames("short_name") %>%
+  as.matrix()
+
+pheatmap(
+  heatmap_data,
+  cluster_rows = FALSE,
+  cluster_cols = FALSE,
+  color = colorRampPalette(c("white", "blue", "red"))(50),
+  main = "Gene Counts by Category"
+)
+
+```
+
+
+### Aboral Oral Larvae Paper - Pdam genome
+
+#### Join our data to Pdam annotations
+
+```{r load_annotation}
+Annot_Pdam <- read.csv("../references/annotation/blastp_Pdam_out.tab", sep = '\t', header = FALSE) %>% select(c(1,2)) %>% dplyr::rename("protein_id" = "V2", "query" = "V1")
+```
+
+```{r}
+Manual_Pdam <- left_join(Manual, Annot_Pdam) 
+```
+
+```{r}
+library(readxl)
+larval_aboral_enriched <- read_excel("~/Downloads/media-2.xlsx", sheet = "pocillopora_aboral_enriched_05_")
+
+Manual_Pdam_upaboral <- Manual_Pdam %>% filter(log2FoldChange > 0)
+inner_join(larval_aboral_enriched, Manual_Pdam_upaboral, by=c("gene ID"="protein_id")) %>% dim()
+
+#18 genes overlap from the 126 in the paper
+
+larval_oral_enriched <- read_excel("~/Downloads/media-2.xlsx", sheet = "pocillopora_oral_enriched_05_lf")
+
+Manual_Pdam_uporal <- Manual_Pdam %>% filter(log2FoldChange < 0)
+inner_join(larval_oral_enriched, Manual_Pdam_uporal, by=c("gene ID"="protein_id")) %>% dim()
+
+inner_join(larval_oral_enriched, Manual_Pdam_uporal, by=c("gene ID"="protein_id")) %>% View()
+
+#only 6/83 genes overlap
+
+
+larval_aboral_clusters <- read_excel("~/Downloads/media-4.xlsx") %>% filter(!is.na(pocillopora))
+
+larval_aboral_clusters_Pacuta <- inner_join(larval_aboral_clusters, Manual_Pdam, by=c("pocillopora"="protein_id"))
+
+#my genes upregulated in oral tissue are high in mucous cells, cool
+```
+
 
 
 
