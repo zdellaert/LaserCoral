@@ -842,7 +842,7 @@ up_Aboral <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, n
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=(df%>% select(Tissue)), labels_col = NA, annotation_colors = ann_colors,
          labels_row =gene_labels[match(rownames(res)[select],(gene_labels$query)),2], fontsize_row = 8.5)
 up_Aboral
-save_ggplot(up_Aboral, "../output_RNA/differential_expression/up_Aboral_Manual10")
+save_ggplot(up_Aboral, "../output_RNA/differential_expression/up_Aboral_Manual")
 
 #view genes Lower in Aboral, Higher in OralEpi, ordered by log2FoldChange
 select <- order(res$log2FoldChange)[1:50]
@@ -852,7 +852,7 @@ up_OralEpi <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, 
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=(df%>% select(Tissue)), labels_col = NA, annotation_colors = ann_colors,
          labels_row =gene_labels[match(rownames(res)[select],(gene_labels$query)),2], fontsize_row = 8.5)
 up_OralEpi
-save_ggplot(up_OralEpi, "../output_RNA/differential_expression/up_OralEpi_Manual10")
+save_ggplot(up_OralEpi, "../output_RNA/differential_expression/up_OralEpi_Manual")
 ```
 
 ## Expression of certain genes of interest: blast against P. acuta genome
@@ -1049,7 +1049,7 @@ DE_biomin <- pheatmap(
   labels_row = ordered_labels,
   fontsize_row = 8
 )
-save_ggplot(DE_biomin, "../output_RNA/differential_expression/DE_biomin_manual")
+save_ggplot(DE_biomin, "../output_RNA/differential_expression/clusters_clean/DE_biomin")
 ```
 ###wnt and hox
 
@@ -1106,7 +1106,7 @@ top50_DE <- pheatmap(
 
 
 # Save the heatmap
-save_ggplot(top50_DE, "../output_RNA/differential_expression/WNT_Hox_DE_SwissProt2")
+save_ggplot(top50_DE, "../output_RNA/differential_expression/clusters_clean/WNT_Hox_DE_SwissProt")
 
 ```
 
@@ -1160,7 +1160,7 @@ mucins <- pheatmap(
 )
 
 # Save the heatmap
-save_ggplot(mucins, "../output_RNA/differential_expression/bacteria_DE_SwissProt2")
+save_ggplot(mucins, "../output_RNA/differential_expression/clusters_clean/bacteria_DE_SwissProt")
 ```
 
 
@@ -1214,7 +1214,7 @@ transporters_heat <- pheatmap(
 )
 
 # Save the heatmap
-save_ggplot(transporters_heat, "../output_RNA/differential_expression/transport_DE_SwissProt2")
+save_ggplot(transporters_heat, "../output_RNA/differential_expression/clusters_clean/transport_DE_SwissProt")
 
 
 ```
@@ -1277,7 +1277,7 @@ transporters_heat <- pheatmap(
 )
 
 # Save the heatmap
-save_ggplot(transporters_heat, "../output_RNA/differential_expression/sensors_DE_SwissProt2")
+save_ggplot(transporters_heat, "../output_RNA/differential_expression/clusters_clean/sensors_DE_SwissProt")
 
 ```
 
@@ -1346,7 +1346,6 @@ create_heatmap(z_scores,
                labels_row = TRP$short_name, 
                annotation_col = df %>% select(Tissue), 
                annotation_colors = ann_colors, 
-               fontsize_row = 14,
                output_path = "../output_RNA/differential_expression/TRP_SwissProt")
 
 
@@ -1394,57 +1393,6 @@ create_heatmap(z_scores,
                annotation_col = df %>% select(Tissue), 
                annotation_colors = ann_colors, 
                output_path = "../output_RNA/differential_expression/GFP_SwissProt")
-
-```
-
-```{r}
-#write.csv(TRP, file="../output_RNA/differential_expression/TRPs.csv")
-#manually shorted names in short_name column
-TRP <- read.csv("../output_RNA/differential_expression/TRPs.csv") %>% select(-X)
-
-
-DE_05_SwissProt <- generate_short_name(DE_05_SwissProt)
-gene_labels <- create_gene_labels(DE_05_SwissProt)
-TRP_05 <- TRP %>% filter(padj<0.05) %>% arrange(short_name)
-select <- TRP_05$query
-z_scores <- calculate_z_scores(DE_05_SwissProt, select, vsd)
-heatmap <- pheatmap(z_scores,  color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200),
-                      cluster_rows = FALSE, 
-                      show_rownames = TRUE,
-                      cluster_cols = TRUE, 
-                      cutree_cols = 2,
-                    cutree_rows = 2,
-                      annotation_col = df %>% select(Tissue),
-                      annotation_colors = ann_colors,
-                      labels_row = TRP_05$short_name, 
-                      fontsize_row = 12)
-
-  save_ggplot(heatmap, "../output_RNA/differential_expression/TRP_DE_SwissProt", width = 6.43, height = 4.25, units = "in", dpi = 300)
-  
-
-summary_data <- TRP %>%
-  mutate(
-    direction = ifelse(log2FoldChange > 0, "Positive", "Negative"),
-    significance = ifelse(padj < 0.05, "Significant", "Not Significant")
-  ) %>%
-  group_by(short_name, direction, significance) %>%
-  summarize(count = n(), .groups = "drop")
-
-# Reshape for visualization
-summary_wide <- summary_data %>%
-  tidyr::pivot_wider(names_from = c(direction, significance), values_from = count, values_fill = 0)
-
-heatmap_data <- summary_wide %>%
-  column_to_rownames("short_name") %>%
-  as.matrix()
-
-pheatmap(
-  heatmap_data,
-  cluster_rows = FALSE,
-  cluster_cols = FALSE,
-  color = colorRampPalette(c("white", "blue", "red"))(50),
-  main = "Gene Counts by Category"
-)
 
 ```
 
