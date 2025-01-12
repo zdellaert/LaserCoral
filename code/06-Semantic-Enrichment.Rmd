@@ -3,6 +3,7 @@ title: "Semantic Enrichment"
 author: "Zoe Dellaert"
 date: "2025-01-11"
 output:
+  html_document: default
   github_document:
     toc: true
     toc_depth: 3
@@ -295,6 +296,12 @@ ViSEAGO::show_heatmap(
     Wang_clusters_wardD2,
     "GOterms"
 )
+
+# ViSEAGO::show_heatmap(
+#     Wang_clusters_wardD2,
+#     "GOterms",
+#     "../output_RNA/differential_expression/semantic-enrichment/cluster_heatmap_Wang_wardD2.png"
+# )
 ```
 
 
