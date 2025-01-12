@@ -125,7 +125,6 @@ resLFC <- lfcShrink(dds, coef="Tissue_Aboral_vs_OralEpi", res=res, type = "apegl
 res <- resLFC
 
 resOrdered <- res[order(res$pvalue),]# save differentially expressed genes
-resOrdered$query <- rownames(resOrdered)
 
 DE_05 <- as.data.frame(resOrdered) %>% filter(padj < 0.05)
 DE_05_Up <- DE_05 %>% filter(log2FoldChange > 0) #Higher in Aboral, Lower in OralEpi
@@ -361,8 +360,13 @@ Biomin$def_short <- ifelse(nchar(Biomin$definition) > 40,
                             Biomin$definition)
 ```
 
+
+
 ```{r}
 DE_05$query <- rownames(DE_05)
+resOrdered$query <- rownames(resOrdered)
+
+
 DE_05_biomin <- DE_05 %>% left_join(Biomin) %>% select(query,everything()) %>% drop_na()
 DESeq_biomin <- as.data.frame(resOrdered) %>% left_join(Biomin) %>% select(query,everything()) %>% drop_na()
 DE_05_marker <- DE_05 %>% left_join(MarkerGenes) %>% select(query,everything())  %>% drop_na()
