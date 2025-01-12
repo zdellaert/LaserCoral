@@ -217,7 +217,7 @@ BP_sResults <- ViSEAGO::merge_enrich_terms(
 
 ```{r}
 # display the merged table
-ViSEAGO::show_table(BP_sResults)
+#ViSEAGO::show_table(BP_sResults)
 
 # print the merged table in a file
 ViSEAGO::show_table(
