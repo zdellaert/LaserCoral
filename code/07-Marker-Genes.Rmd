@@ -1,0 +1,69 @@
+---
+title: "07-Marker-Genes"
+author: "Zoe Dellaert"
+date: "2025-01-13"
+output:
+  github_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    html_preview: true
+always_allow_html: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Gene Ontology Analysis analysis of LCM RNA Data
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Managing Packages Using Renv
+
+To run this code in my project using the renv environment, run the following lines of code
+
+```{r, eval=FALSE}
+install.packages("renv") #install the package on the new computer (may not be necessary if renv bootstraps itself as expected)
+renv::restore() #reinstall all the package versions in the renv lockfile
+```
+
+## Load packages
+
+```{r}
+
+```
+
+
+## Gathering marker genes of cell types from cnidarian single cell atlases
+
+- [ ] Levy et al 2021
+- [ ] Hydra single cell atlas
+- [ ] Nematostella single cell atlas
+- [ ] Hydractinia
+- [ ] Orbicella
+- [ ] Aiptasia Cui et al 
+  - [ ] also look at their LCM
+
+### What did I do in the past:
+
+- take Spis marker genes from Levy et al 2021
+- manually download fasta files from shiny app
+- BLAST against all my genomes of interest --> could probably skip this!
+- Run orthofinder across genomes of interest
+- Get orthogroup for each Spis marker gene
+- Determine presensce of each OG in each species
+- Did not acutally use OGs to get the final marker gene list for each species
+
+### To do now:
+
+- [ ] combine marker gene lists from all species
+- [ ] run orthofinder with all these species and P acuta (maybe also Pcomp and Mcap while we're at it)
+  - [ ] or Broccoli?
+      - [ ] "O.faveolata cell clusters were identied using matching cnidarian cell type marker orthologs between our dataset and the scRNAseq datasets for Hydra vulgaris7, Nematostella vectensis 6, Stylophora  pistillata 11, and Xenia sp. 8 using Broccoli 85."
+- [ ] For each species with source marker genes map the marker gene OG to OG in target species
+- [ ] ID all genes in the OG of each species of interest as belonging to that marker gene w/ species source
+
+
