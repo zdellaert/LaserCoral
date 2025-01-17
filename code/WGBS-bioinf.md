@@ -126,21 +126,27 @@ cutadapt \
 ```
 
 ```
-nano scripts/cutadapt.sh #write script for first trimming pass and QC, enter text in next code chunk
+nano scripts/wgbs_cutadapt.sh #write script for first trimming pass and QC, enter text in next code chunk
 ```
 
 ```
-#!/bin/bash
-#SBATCH -t 24:00:00
-#SBATCH --nodes=1 --ntasks-per-node=20
-#SBATCH --mem=200GB
+#!/usr/bin/env bash
 #SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=20
+#SBATCH --signal=2
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH -t 48:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
 #SBATCH --error=../scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
 #SBATCH --output=../scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
-#SBATCH -D /data/putnamlab/zdellaert/LaserCoral/data_RNA
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/data_WGBS
+
 
 # load modules needed
-module load cutadapt/4.2-GCCcore-11.3.0
+
+module load uri/main
+module load cutadapt/3.5-GCCcore-11.2.0
 
 #make arrays of R1 and R2 reads
 R1_raw=($('ls' *R1*.fastq.gz))
@@ -148,7 +154,7 @@ R2_raw=($('ls' *R2*.fastq.gz))
 
 for i in ${!R1_raw[@]}; do
     cutadapt \
-    -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC \
+    -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA \
     -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT \
     -o trimmed_${R1_raw[$i]} -p trimmed_${R2_raw[$i]} \
     ${R1_raw[$i]} ${R2_raw[$i]} \
@@ -158,30 +164,29 @@ for i in ${!R1_raw[@]}; do
 done
 
 # unload conflicting modules with modules needed below
-module unload cutadapt/4.2-GCCcore-11.3.0
-module unload GCCcore/11.3.0 Python/3.10.4-GCCcore-11.3.0 libffi/3.4.2-GCCcore-11.3.0
+module unload cutadapt/3.5-GCCcore-11.2.0
 
 # load modules needed
-module load FastQC/0.11.9-Java-11
-module load MultiQC/1.9-intel-2020a-Python-3.8.2
+module load parallel/20240822
+module load fastqc/0.12.1
+module load all/MultiQC/1.12-foss-2021b
 
 #make trimmed_qc output folder
-mkdir trimmed_qc/
+mkdir ../output_WGBS/trimmed_qc/
 
-# Make an array of fastq files to trim
-array_trim=($('ls' trimmed*)) 
+# Create an array of fastq files to process
+files=($('ls' *.fastq.gz)) 
 
-#run fastqc on trimmed data
-for i in ${array_trim[@]}; do
-    fastqc ${i} -o trimmed_qc/
-    echo "fastqc ${i} done"
-done
+# Run fastqc in parallel
+echo "Starting fastqc..." $(date)
+parallel -j 20 "fastqc {} -o ../output_WGBS/trimmed_qc/ && echo 'Processed {}'" ::: "${files[@]}"
+echo "fastQC done." $(date)
 
 #Compile MultiQC report from FastQC files
-multiqc trimmed_qc/  #Compile MultiQC report from FastQC files 
+multiqc ../output_WGBS/trimmed_qc/  #Compile MultiQC report from FastQC files 
 
-mv multiqc_report.html trimmed_qc/trimmed_qc_multiqc_report.html
-mv multiqc_data trimmed_qc/trimmed_multiqc_data
+mv multiqc_report.html ../output_WGBS/trimmed_qc/trimmed_qc_multiqc_report.html
+mv multiqc_data ../output_WGBS/trimmed_qc/trimmed_multiqc_data
 
 echo "QC of trimmed data complete." $(date)
 ```
