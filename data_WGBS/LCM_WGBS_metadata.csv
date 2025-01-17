@@ -1,0 +1,11 @@
+﻿Sample,Species,Fragment,Tissue,Section_Date,LCM_Date
+LCM_1,Pocillopora_acuta,A,Aboral,20240904,20240904
+LCM_3,Pocillopora_acuta,A,OralEpi,20240904,20240904
+LCM_11,Pocillopora_acuta,B,OralEpi,20240905,20240906
+LCM_12,Pocillopora_acuta,B,Aboral,20240905,20240906
+LCM_17,Pocillopora_acuta,C,OralEpi,20240905,20240906
+LCM_18,Pocillopora_acuta,C,Aboral,20240905,20240906
+LCM_24,Pocillopora_acuta,D,OralEpi,20240910,20240911
+LCM_25,Pocillopora_acuta,D,Aboral,20240910,20240911
+LCM_32,Pocillopora_acuta,E,OralEpi,20240910,20240911
+LCM_33,Pocillopora_acuta,E,Aboral,20240910,20240911
