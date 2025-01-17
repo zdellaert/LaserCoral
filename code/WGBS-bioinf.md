@@ -92,10 +92,13 @@ echo "Initial QC of Seq data complete." $(date)
 
 ### Interpretation of QC data
 
-[View results here](https://github.com/zdellaert/LaserCoral/tree/main/output_RNA/raw_qc), [MultiQC report](https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/raw_qc/raw_qc_multiqc_report.html)
+[View results here](https://github.com/zdellaert/LaserCoral/tree/main/output_WGBS/raw_qc_WGBS), [MultiQC report](https://github.com/zdellaert/LaserCoral/blob/main/output_WGBS/raw_qc_WGBS/raw_qc_multiqc_report.html)
 
 Okay! So there is definitely data! Yay!
 
 And a lot of it!
 
 And it isn't horrible quality! Yay!
+
+But there is a lot of adapter content, duplication, and the GC content is wacky.
+
