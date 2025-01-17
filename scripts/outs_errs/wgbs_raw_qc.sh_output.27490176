@@ -1,0 +1,70 @@
+Starting fastqc... Thu Jan 16 22:54:59 UTC 2025
+application/gzip
+Analysis complete for LCM_33_S10_R1_001.fastq.gz
+Processed LCM_33_S10_R1_001.fastq.gz
+application/gzip
+Analysis complete for LCM_33_S10_R2_001.fastq.gz
+Processed LCM_33_S10_R2_001.fastq.gz
+application/gzip
+Analysis complete for LCM_18_S8_R1_001.fastq.gz
+Processed LCM_18_S8_R1_001.fastq.gz
+application/gzip
+Analysis complete for LCM_32_S9_R2_001.fastq.gz
+Processed LCM_32_S9_R2_001.fastq.gz
+application/gzip
+Analysis complete for LCM_11_S3_R1_001.fastq.gz
+Processed LCM_11_S3_R1_001.fastq.gz
+application/gzip
+Analysis complete for LCM_3_S2_R1_001.fastq.gz
+Processed LCM_3_S2_R1_001.fastq.gz
+application/gzip
+Analysis complete for LCM_3_S2_R2_001.fastq.gz
+Processed LCM_3_S2_R2_001.fastq.gz
+application/gzip
+Analysis complete for LCM_32_S9_R1_001.fastq.gz
+Processed LCM_32_S9_R1_001.fastq.gz
+application/gzip
+Analysis complete for LCM_17_S7_R1_001.fastq.gz
+Processed LCM_17_S7_R1_001.fastq.gz
+application/gzip
+Analysis complete for LCM_17_S7_R2_001.fastq.gz
+Processed LCM_17_S7_R2_001.fastq.gz
+application/gzip
+Analysis complete for LCM_1_S1_R1_001.fastq.gz
+Processed LCM_1_S1_R1_001.fastq.gz
+application/gzip
+Analysis complete for LCM_18_S8_R2_001.fastq.gz
+Processed LCM_18_S8_R2_001.fastq.gz
+application/gzip
+Analysis complete for LCM_11_S3_R2_001.fastq.gz
+Processed LCM_11_S3_R2_001.fastq.gz
+application/gzip
+Analysis complete for LCM_1_S1_R2_001.fastq.gz
+Processed LCM_1_S1_R2_001.fastq.gz
+application/gzip
+Analysis complete for LCM_12_S4_R1_001.fastq.gz
+Processed LCM_12_S4_R1_001.fastq.gz
+application/gzip
+Analysis complete for LCM_24_S5_R2_001.fastq.gz
+Processed LCM_24_S5_R2_001.fastq.gz
+application/gzip
+Analysis complete for LCM_12_S4_R2_001.fastq.gz
+Processed LCM_12_S4_R2_001.fastq.gz
+application/gzip
+Analysis complete for LCM_25_S6_R1_001.fastq.gz
+Processed LCM_25_S6_R1_001.fastq.gz
+application/gzip
+Analysis complete for LCM_25_S6_R2_001.fastq.gz
+Processed LCM_25_S6_R2_001.fastq.gz
+application/gzip
+Analysis complete for LCM_24_S5_R1_001.fastq.gz
+Processed LCM_24_S5_R1_001.fastq.gz
+application/gzip
+Analysis complete for Undetermined_S0_R1_001.fastq.gz
+Processed Undetermined_S0_R1_001.fastq.gz
+application/gzip
+Analysis complete for Undetermined_S0_R2_001.fastq.gz
+Processed Undetermined_S0_R2_001.fastq.gz
+fastQC done. Thu Jan 16 23:56:23 UTC 2025
+|         searching | ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 44/44  
+Initial QC of Seq data complete. Thu Jan 16 23:56:40 UTC 2025
