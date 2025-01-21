@@ -1,0 +1,26 @@
+---
+title: "compare-bismark-parameters"
+output: html_document
+date: "2025-01-20"
+---
+
+From https://github.com/sr320/ceasmallr/blob/92cf9be13679dce017df317673a597004690ddfa/code/04.2b-param-comparison.Rmd
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+
+# Load the data
+data <- read.csv("../output_WGBS/align/parameter_comparison_summary.csv", sep = ",", header = TRUE)
+
+data <- data %>% mutate(Alignment_Percent = str_remove(str_remove(Alignment_Rate,"%"), "mapping efficiency  ")) %>%
+  mutate(Alignment_Percent = as.numeric(Alignment_Percent))
+
+# Plot alignment rate
+ggplot(data, aes(x = Score_Min, y = Alignment_Percent, group = Sample, color=Sample)) +
+    geom_line() +
+    theme_minimal() +
+    labs(title = "Alignment Rate vs. Score_Min",
+         x = "Score_Min Parameter",
+         y = "Alignment Rate (%)")
+```
