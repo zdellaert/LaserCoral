@@ -169,24 +169,330 @@ module unload cutadapt/3.5-GCCcore-11.2.0
 # load modules needed
 module load parallel/20240822
 module load fastqc/0.12.1
+module load uri/main
 module load all/MultiQC/1.12-foss-2021b
 
 #make trimmed_qc output folder
 mkdir ../output_WGBS/trimmed_qc/
 
 # Create an array of fastq files to process
-files=($('ls' *.fastq.gz)) 
+files=($('ls' trimmed*.fastq.gz)) 
 
 # Run fastqc in parallel
 echo "Starting fastqc..." $(date)
 parallel -j 20 "fastqc {} -o ../output_WGBS/trimmed_qc/ && echo 'Processed {}'" ::: "${files[@]}"
 echo "fastQC done." $(date)
 
-#Compile MultiQC report from FastQC files
-multiqc ../output_WGBS/trimmed_qc/  #Compile MultiQC report from FastQC files 
+cd ../output_WGBS/trimmed_qc/
 
-mv multiqc_report.html ../output_WGBS/trimmed_qc/trimmed_qc_multiqc_report.html
-mv multiqc_data ../output_WGBS/trimmed_qc/trimmed_multiqc_data
+#Compile MultiQC report from FastQC files
+multiqc *  #Compile MultiQC report from FastQC files 
 
 echo "QC of trimmed data complete." $(date)
 ```
+
+### Trimming done, QC looks good!
+
+Will add screenshots soon.
+
+## Trying to run nf-core methylseq on unity:
+
+https://nf-co.re/methylseq/3.0.0/
+
+"ANNOUNCEMENTS 📢
+💡 Unity profile is now available for Nextflow nf-core pipelines
+An institutional Unity profile is now available for Nextflow nf-core pipelines (docs, config)!
+
+To use it, add the -profile unity option to any nf-core pipeline. This allows for each process to be submitted as a slurm job and use apptainer for dependency management."
+
+```
+nano scripts/methylseq.sh 
+```
+
+test script:
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=20
+#SBATCH --signal=2
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 24:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
+
+## Load Nextflow and Apptainer environment modules
+module purge
+module load nextflow/24.04.3
+module load apptainer/latest
+
+nextflow run nf-core/methylseq \
+  --input samplesheet.csv \
+  --outdir output_WGBS/methylseq_results \
+  --genome GRCh38 \
+  -profile test,unity
+
+
+nf-core pipelines launch nf-core/methylseq -r 3.0.0
+```
+
+## Bismark Alignment to P. acuta genome
+
+https://felixkrueger.github.io/Bismark/
+
+So, the version of nextcore that methylseq wants is >24.10, and unity only has 24.04. Going to run Bismark without the methylseq pipeline.
+
+### Prepare Genome
+
+See: https://marineomics.github.io/FUN_02_DNA_methylation.html and https://felixkrueger.github.io/Bismark/bismark/genome_preparation/
+
+See RNA seq bioniformatics markdown for genome download info.
+
+```
+nano scripts/bismark_genome.sh 
+```
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=20
+#SBATCH --signal=2
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH -t 24:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
+
+# load modules needed
+module load uri/main
+module load Bismark/0.23.1-foss-2021b
+module load bowtie2/2.5.2
+
+cd references
+
+bismark_genome_preparation --verbose --parallel 10 ./
+```
+
+### Aligning Reads
+
+Trying an array job based on https://sr320.github.io/tumbling-oysters/posts/33-bismark-array/
+
+I did use different alignment parameters from the above link but used the scripting format. For details about the bismark options see here: https://github.com/FelixKrueger/Bismark/blob/f88314914725242c59289a534271b66cf9d461e3/docs/options/alignment.md
+
+Importantly: I have directional libraries, so I used the default directional setting
+
+#### Testing score min parameters
+
+based on https://sr320.github.io/tumbling-oysters/posts/33-bismark-array/
+
+```
+nano scripts/bismark_align_paramtest.sh 
+```
+
+```
+#!/usr/bin/env bash
+#SBATCH --ntasks=1 --cpus-per-task=30 #split one task over multiple CPU
+#SBATCH --array=0-9 #for 10 samples
+#SBATCH --mem=100GB
+#SBATCH -t 00:30:00
+#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
+#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
+
+# load modules needed
+module load uri/main
+module load Bismark/0.23.1-foss-2021b
+module load bowtie2/2.5.2
+
+# Set directories and files
+reads_dir="data_WGBS/"
+genome_folder="references/"
+
+mkdir -p output_WGBS/align #make output directory if it does not exist
+
+output_dir="output_WGBS/align"
+checkpoint_file="output_WGBS/align/completed_samples.log"
+
+# Create the checkpoint file if it doesn't exist
+touch ${checkpoint_file}
+
+# Get the list of sample files and corresponding sample names
+files=(${reads_dir}trimmed_LCM_*R1_001.fastq.gz)
+file="${files[$SLURM_ARRAY_TASK_ID]}"
+sample_name=$(basename "$file" "_R1_001.fastq.gz")
+
+# Check if the sample has already been processed
+if grep -q "^${sample_name}$" ${checkpoint_file}; then
+    echo "Sample ${sample_name} already processed. Skipping..."
+    exit 0
+fi
+
+# Define log files for stdout and stderr
+stdout_log="${output_dir}/${sample_name}_stdout.log"
+stderr_log="${output_dir}/${sample_name}_stderr.log"
+
+# Define the array of score_min parameters to test
+score_min_params=(
+    "L,0,-0.4"
+    "L,0,-0.6"
+    "L,0,-0.8"
+    "L,0,-1.0"
+    "L,-1,-0.6"
+)
+
+# Loop through each score_min parameter
+for score_min in "${score_min_params[@]}"; do
+    echo "Running Bismark for sample ${sample_name} with score_min ${score_min}"
+    
+    # Create a subdirectory for this parameter
+    param_output_dir="${output_dir}/${sample_name}_score_${score_min//,/}"
+    mkdir -p ${param_output_dir}
+
+    # Run Bismark alignment
+    bismark \
+        -genome ${genome_folder} \
+        -p 8 \
+        -u 10000 \
+        -score_min ${score_min} \
+        -1 ${reads_dir}${sample_name}_R1_001.fastq.gz \
+        -2 ${reads_dir}${sample_name}_R2_001.fastq.gz \
+        -o ${param_output_dir} \
+        --basename ${sample_name}_${score_min//,/} \
+        2> "${param_output_dir}/${sample_name}-bismark_summary.txt"
+
+    # Check if the command was successful
+    if [ $? -eq 0 ]; then
+        echo "Sample ${sample_name} with score_min ${score_min} processed successfully."
+    else
+        echo "Sample ${sample_name} with score_min ${score_min} failed. Check ${stderr_log} for details."
+    fi
+done
+
+# Mark the sample as completed in the checkpoint file
+if [ $? -eq 0 ]; then
+    echo ${sample_name} >> ${checkpoint_file}
+    echo "All tests for sample ${sample_name} completed."
+else
+    echo "Sample ${sample_name} encountered errors. Check logs for details."
+fi
+
+# Define directories
+output_dir="."
+summary_file="${output_dir}/parameter_comparison_summary.csv"
+
+# Initialize summary file
+#echo "Sample,Score_Min,Alignment_Rate,Unique_Alignments,Mismatch_Rate,Bisulfite_Efficiency" > ${summary_file}
+
+# Loop through parameter output directories
+for dir in ${output_dir}/*_score_*; do
+    if [ -d "$dir" ]; then
+        # Extract sample name and score_min parameter from directory name
+        sample_name=$(basename "$dir" | cut -d'_' -f1)
+        score_min=$(basename "$dir" | grep -o "score_.*" | sed 's/score_//; s/_/,/g')
+
+        # Locate the summary file
+        summary_file_path="${dir}/${sample_name}_${score_min}_PE_report.txt"
+
+        # Extract metrics
+        mapping=$(grep "Mapping efficiency:" ${summary_file_path} | awk '{print "mapping efficiency ", $3}')
+        
+
+        # Append to the summary file
+        echo "${sample_name},${score_min},${mapping}" >> ${summary_file}
+    fi
+done
+```
+
+#### final script:
+
+based on https://sr320.github.io/tumbling-oysters/posts/33-bismark-array/
+
+```
+nano scripts/bismark_align.sh 
+```
+
+```
+#!/usr/bin/env bash
+#SBATCH --ntasks=1 --cpus-per-task=30 #split one task over multiple CPU
+#SBATCH --array=0-9 #for 10 samples
+#SBATCH --mem=100GB
+#SBATCH -t 7-24:00:00
+#SBATCH -q long #job lasting over 2 days
+#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
+#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
+
+# load modules needed
+module load uri/main
+module load Bismark/0.23.1-foss-2021b
+module load bowtie2/2.5.2
+
+# Set directories and files
+reads_dir="data_WGBS/" #directory containing trimmed data to align
+genome_folder="references/" #directory containing original unmodified genome fasta and bismark Bisulfite_Genome directory
+
+mkdir -p output_WGBS/align #make output directory if it does not exist
+
+output_dir="output_WGBS/align"
+checkpoint_file="output_WGBS/align/completed_samples.log"
+
+# Create the checkpoint file if it doesn't exist
+touch ${checkpoint_file}
+
+# Get the list of sample files and corresponding sample names
+files=(${reads_dir}trimmed_LCM_*R1_001.fastq.gz)
+file="${files[$SLURM_ARRAY_TASK_ID]}"
+sample_name=$(basename "$file" "_R1_001.fastq.gz")
+
+# Check if the sample has already been processed
+if grep -q "^${sample_name}$" ${checkpoint_file}; then
+    echo "Sample ${sample_name} already processed. Skipping..."
+    exit 0
+fi
+
+# Define log files for stdout and stderr
+stdout_log="${output_dir}${sample_name}_stdout.log"
+stderr_log="${output_dir}${sample_name}_stderr.log"
+
+# Run Bismark align
+bismark \
+    -genome ${genome_folder} \
+    -p 8 \
+    -score_min L,0,-0.6 \
+    -1 ${reads_dir}${sample_name}_R1_001.fastq.gz \
+    -2 ${reads_dir}${sample_name}_R2_001.fastq.gz \
+    -o ${output_dir} \
+    --basename ${sample_name} \
+    2> "${output_dir}/${sample_name}-bismark_summary.txt"
+
+# Check if the command was successful
+if [ $? -eq 0 ]; then
+    # Append the sample name to the checkpoint file
+    echo ${sample_name} >> ${checkpoint_file}
+    echo "Sample ${sample_name} processed successfully."
+else
+    echo "Sample ${sample_name} failed. Check ${stderr_log} for details."
+fi
+```
+
+
+
+### Make a scratch directory
+
+https://docs.unity.uri.edu/documentation/managing-files/hpc-workspace/
+
+```
+ws_allocate -G pi_hputnam_uri_edu -m zdellaert@uri.edu -r 2 shared 30
+```
+
+Info: creating workspace.
+/scratch/workspace/zdellaert_uri_edu-shared
+remaining extensions  : 3
+remaining time in days: 30
