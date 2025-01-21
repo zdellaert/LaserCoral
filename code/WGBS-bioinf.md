@@ -314,10 +314,10 @@ module load bowtie2/2.5.2
 reads_dir="data_WGBS/"
 genome_folder="references/"
 
-mkdir -p output_WGBS/align #make output directory if it does not exist
+mkdir -p output_WGBS/align_paramtest #make output directory if it does not exist
 
-output_dir="output_WGBS/align"
-checkpoint_file="output_WGBS/align/completed_samples.log"
+output_dir="output_WGBS/align_paramtest"
+checkpoint_file="output_WGBS/align_paramtest/completed_samples.log"
 
 # Create the checkpoint file if it doesn't exist
 touch ${checkpoint_file}
@@ -383,17 +383,16 @@ else
 fi
 
 # Define directories
-output_dir="."
 summary_file="${output_dir}/parameter_comparison_summary.csv"
 
 # Initialize summary file
-#echo "Sample,Score_Min,Alignment_Rate,Unique_Alignments,Mismatch_Rate,Bisulfite_Efficiency" > ${summary_file}
+echo "Sample,Score_Min,Alignment_Rate" > ${summary_file}
 
 # Loop through parameter output directories
 for dir in ${output_dir}/*_score_*; do
     if [ -d "$dir" ]; then
         # Extract sample name and score_min parameter from directory name
-        sample_name=$(basename "$dir" | cut -d'_' -f1)
+        sample_name=$(basename "$dir" | cut -d'_' -f1-4)
         score_min=$(basename "$dir" | grep -o "score_.*" | sed 's/score_//; s/_/,/g')
 
         # Locate the summary file
@@ -411,7 +410,11 @@ done
 
 #### final script:
 
-based on https://sr320.github.io/tumbling-oysters/posts/33-bismark-array/
+The best minscore for alignment for all samples was L,0,-1.0 
+
+<img width="800" alt="minscoregraph" src="alignment_bismark_minscore.png?raw=true">
+
+However, the low mapping rates of higher quality samples (based on FastQC) is suspicious. Maybe those higher quality sequences are too long and need to be trimmed further to increase mapping?
 
 ```
 nano scripts/bismark_align.sh 
@@ -465,7 +468,7 @@ stderr_log="${output_dir}${sample_name}_stderr.log"
 bismark \
     -genome ${genome_folder} \
     -p 8 \
-    -score_min L,0,-0.6 \
+    -score_min L,0,-1.0 \
     -1 ${reads_dir}${sample_name}_R1_001.fastq.gz \
     -2 ${reads_dir}${sample_name}_R2_001.fastq.gz \
     -o ${output_dir} \
