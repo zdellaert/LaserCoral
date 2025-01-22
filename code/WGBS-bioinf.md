@@ -411,7 +411,7 @@ done
 
 The best minscore for alignment for all samples was L,0,-1.0 
 
-<img width="800" alt="minscoregraph" src="alignment_bismark_minscore.png?raw=true">
+<img width="800" alt="minscoregraph" src="08-Bismark-Alignment-Assesment-images/alignment_bismark_minscore.png?raw=true">
 
 However, the low mapping rates of higher quality samples (based on FastQC) is suspicious. Maybe those higher quality sequences are too long and need to be trimmed further to increase mapping?
 
@@ -509,20 +509,141 @@ done
 
 Alignment rates are low, and are the lowest for libraries that had the highest initial quality. Could this be because shorter reads are aligning better?
 
-<img src="alignment_bismark_vs_qc_raw_r1.png?raw=true" height="400">
-<img src="alignment_bismark_vs_qc_raw_r2.png?raw=true" height="400">
-<img src="alignment_bismark_vs_qc_trimmed_r1.png?raw=true" height="400">
-<img src="alignment_bismark_vs_qc_trimmed_r2.png?raw=true" height="400">
+<img src="08-Bismark-Alignment-Assesment-images/alignment_bismark_vs_qc_raw_r1.png?raw=true" height="400">
+<img src="08-Bismark-Alignment-Assesment-images/alignment_bismark_vs_qc_raw_r2.png?raw=true" height="400">
+<img src="08-Bismark-Alignment-Assesment-images/alignment_bismark_vs_qc_trimmed_r1.png?raw=true" height="400">
+<img src="08-Bismark-Alignment-Assesment-images/alignment_bismark_vs_qc_trimmed_r2.png?raw=true" height="400">
 
-## For later steps that need a lot of space: Make a scratch directory
+#### how to interpret this:
 
-https://docs.unity.uri.edu/documentation/managing-files/hpc-workspace/
+What does score-min mean?
+
+https://github.com/FelixKrueger/Bismark/blob/f88314914725242c59289a534271b66cf9d461e3/docs/options/alignment.md: 
+
+- "Sets a function governing the minimum alignment score needed for an alignment to be considered "valid" (i.e. good enough to report)."
+- "Specifying L,0,-0.2 sets the minimum-score function f to f(x) = 0 + -0.2 * x, where x is the read length."
+
+So, let's take score_min="L,0,-0.2" and "L,0,-1.0". What are different minimum score values for different read lengths?
+
+- f(x) = 0 + -0.2 * (120) = -24
+- f(x) = 0 + -0.2 * (130) = -26
+- f(x) = 0 + -0.2 * (140) = -28
+
+- f(x) = 0 + -1.0 * (120) = -120
+- f(x) = 0 + -1.0 * (130) = -130
+- f(x) = 0 + -1.0 * (140) = -140
+
+So the longer the read, on average, the lower the minimum score. And by increasing the multiplier of X, we are decreasing the threshold for alignments to be considered valid. But, why would this decrease the mapping rate of samples with longer reads? Longer reads should be held to a lower cutoff given this formula.
+
+## Plan: use --next-seq trimming to account for NovaSeq sequencing parameters:
+
+https://cutadapt.readthedocs.io/en/stable/guide.html#adapter-types
+
+"Quality trimming of reads using two-color chemistry (NextSeq)
+Some Illumina instruments use a two-color chemistry to encode the four bases. This includes the NextSeq and the NovaSeq. In those instruments, a ‘dark cycle’ (with no detected color) **encodes a G**. However, dark cycles also occur when sequencing “falls off” the end of the fragment. **The read then contains a run of high-quality, but incorrect “G” calls at its 3’ end.**
+
+Since the regular quality-trimming algorithm cannot deal with this situation, you need to use the --nextseq-trim option:
+
+**cutadapt --nextseq-trim=20 -o out.fastq input.fastq**
+This works like regular quality trimming (where one would use -q 20 instead), except that the qualities of G bases are ignored."
+
+
+## Trimming V2: Next-Seq trim
+
+From the Zymo trio protocol:
+
+"Libraries should be trimmed to remove any adapter sequence. No other trimming is required. Use the following sequences to trim the adapters:"
+
+Read 1: AGATCGGAAGAGCACACGTCTGAACTCCAGTCA
+Read 2: AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
+
+I am going to use [cutadapt](https://cutadapt.readthedocs.io/en/stable/guide.html) for trimming and quality control
+
+Example code with comments:
 
 ```
-ws_allocate -G pi_hputnam_uri_edu -m zdellaert@uri.edu -r 2 shared 30
+cutadapt \
+    -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA \  # Zymo Adapter Read1 
+    -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT \  # Zymo Adapter Read2
+    -o trimmed_R1.fastq.gz -p trimmed_R2.fastq.gz \ #output files
+    input_R1.fastq.gz input_R2.fastq.gz \ #input files
+    -q 20,20 \ #trims low-quality bases (score < 20) from the 3' end (first 20) and 5' (second 20) of the read
+    --nextseq-trim=20 \ #ignores the quality of G bases for trimming at the end of reads to account for NextSeq methods
+    --minimum-length 20 #after trimming, only keep a sequence if longer than 20 bp
 ```
 
-Info: creating workspace.
-/scratch/workspace/zdellaert_uri_edu-shared
-remaining extensions  : 3
-remaining time in days: 30
+```
+nano scripts/wgbs_cutadapt_V2.sh #write script for first trimming pass and QC, enter text in next code chunk
+```
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=20
+#SBATCH --signal=2
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH -t 48:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH --error=../scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=../scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/data_WGBS
+
+
+# load modules needed
+
+module load uri/main
+module load cutadapt/3.5-GCCcore-11.2.0
+
+#make arrays of R1 and R2 reads
+R1_raw=($('ls' LCM*R1*.fastq.gz))
+R2_raw=($('ls' LCM*R2*.fastq.gz))
+
+for i in ${!R1_raw[@]}; do
+    cutadapt \
+    -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA \
+    -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT \
+    -o trimmed_V2_${R1_raw[$i]} -p trimmed_V2_${R2_raw[$i]} \
+    ${R1_raw[$i]} ${R2_raw[$i]} \
+    -q 20,20 --minimum-length 20 --cores=20
+
+    echo "trimming of ${R1_raw[$i]} and ${R2_raw[$i]} complete"
+done
+
+# unload conflicting modules with modules needed below
+module unload cutadapt/3.5-GCCcore-11.2.0
+
+# load modules needed
+module load parallel/20240822
+module load fastqc/0.12.1
+module load uri/main
+module load all/MultiQC/1.12-foss-2021b
+
+#make trimmed_V2_qc output folder
+mkdir ../output_WGBS/trimmed_V2_qc/
+
+# Create an array of fastq files to process
+files=($('ls' trimmed_V2*.fastq.gz)) 
+
+# Run fastqc in parallel
+echo "Starting fastqc..." $(date)
+parallel -j 20 "fastqc {} -o ../output_WGBS/trimmed_V2_qc/ && echo 'Processed {}'" ::: "${files[@]}"
+echo "fastQC done." $(date)
+
+cd ../output_WGBS/trimmed_V2_qc/
+
+#Compile MultiQC report from FastQC files
+multiqc *  #Compile MultiQC report from FastQC files 
+
+echo "QC of trimmed data complete." $(date)
+```
+
+
+
+### Potential fuirther filtering:
+
+Remove reads that are less than 40 bp long. 
+
+We have a little peak of reads that were < 40 bp post-trimming, and I want to see if removing these helps with alignment at all.
+
+<img src="../output_WGBS/trimmed_qc/multiqc_screenshots/fastqc_sequence_length_distribution_plot.png?raw=true" height="400">
