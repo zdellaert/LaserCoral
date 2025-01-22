@@ -9,9 +9,12 @@ From https://github.com/sr320/ceasmallr/blob/92cf9be13679dce017df317673a59700469
 ```{r}
 library(ggplot2)
 library(tidyverse)
+library(gtools)
 
 # Load the data
-data <- read.csv("../output_WGBS/align/parameter_comparison_summary.csv", sep = ",", header = TRUE)
+data <- read.csv("../output_WGBS/align_paramtest/parameter_comparison_summary.csv", sep = ",", header = TRUE)
+
+data <- data[mixedorder(data$Sample), ]
 
 data <- data %>% mutate(Alignment_Percent = str_remove(str_remove(Alignment_Rate,"%"), "mapping efficiency  ")) %>%
   mutate(Alignment_Percent = as.numeric(Alignment_Percent))
@@ -23,4 +26,148 @@ ggplot(data, aes(x = Score_Min, y = Alignment_Percent, group = Sample, color=Sam
     labs(title = "Alignment Rate vs. Score_Min",
          x = "Score_Min Parameter",
          y = "Alignment Rate (%)")
+
+ggsave("alignment_bismark_minscore.png")
 ```
+
+
+```{r}
+# load in multiqc data
+QC_raw <- read.delim("../output_WGBS/raw_qc_WGBS/raw_multiqc_data/multiqc_general_stats.txt", header = TRUE) %>%
+  filter(!grepl("Undetermined",Sample))
+
+colnames(QC_raw) <- c("Sample", "percent_duplicates", "percent_gc", "avg_sequence_length", "percent_fails", "total_sequences")
+
+#reorder so the samples are in numerical order
+QC <- QC_raw[mixedorder(QC_raw$Sample), ]
+  
+QC_R1 <- QC %>% filter(grepl("R1",Sample)) %>%
+                mutate(Sample = str_extract(Sample, "^LCM_\\d+")) #remove everything but LCM and the number
+
+QC_R2 <- QC %>% filter(grepl("R2",Sample)) %>%
+                mutate(Sample = str_extract(Sample, "^LCM_\\d+")) #remove everything but LCM and the number
+```
+
+```{r}
+# Load the alignment data
+data <- read.csv("../output_WGBS/align/parameter_comparison_summary.csv", sep = ",", header = TRUE)  %>%
+  mutate(Sample = str_extract(Sample, "LCM_\\d+")) #remove everything but LCM and the number
+
+QC_R1 <- QC_R1 %>% left_join(data)
+
+QC_R1_long <- QC_R1 %>%
+  pivot_longer(cols = c("percent_duplicates","percent_gc","avg_sequence_length","percent_fails","total_sequences"), 
+               names_to = "QC_Parameter", 
+               values_to = "Value")
+
+QC_R1_long$Sample <- factor(QC_R1_long$Sample, levels = QC_R1$Sample)
+
+# Plot with faceting
+ggplot(QC_R1_long, aes(x = Value, y = Alignment_Rate)) +
+  geom_point(aes(color=Sample)) +
+  geom_smooth(method = "lm") +
+  theme_minimal() +
+  labs(title = "RAW R1: Alignment Rate vs. QC Parameters, Score Min: L,0,-1.0",
+       x = "QC Parameter Value",
+       y = "Alignment Rate (%)") +
+  facet_wrap(~ QC_Parameter, scales = "free_x")
+
+ggsave("alignment_bismark_vs_qc_raw_r1.png")
+```
+
+```{r}
+QC_R2 <- QC_R2 %>% left_join(data)
+
+QC_R2_long <- QC_R2 %>%
+  pivot_longer(cols = c("percent_duplicates","percent_gc","avg_sequence_length","percent_fails","total_sequences"), 
+               names_to = "QC_Parameter", 
+               values_to = "Value")
+
+QC_R2_long$Sample <- factor(QC_R2_long$Sample, levels = QC_R2$Sample)
+
+# Plot with faceting
+ggplot(QC_R2_long, aes(x = Value, y = Alignment_Rate)) +
+  geom_point(aes(color=Sample)) +
+  geom_smooth(method = "lm") +
+  theme_minimal() +
+  labs(title = "RAW R2: Alignment Rate vs. QC Parameters, Score Min: L,0,-1.0",
+       x = "QC Parameter Value",
+       y = "Alignment Rate (%)") +
+  facet_wrap(~ QC_Parameter, scales = "free_x")
+
+
+ggsave("alignment_bismark_vs_qc_raw_r2.png")
+```
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+
+# load in multiqc data
+QC <- read.delim("../output_WGBS/trimmed_qc/multiqc_data/multiqc_general_stats.txt", header = TRUE) %>%
+  filter(!grepl("Undetermined",Sample)) %>%
+  mutate(Sample = str_remove(Sample,"trimmed_"))
+
+colnames(QC) <- c("Sample", "percent_duplicates", "percent_gc", "avg_sequence_length", "percent_fails", "total_sequences")
+
+#reorder so the samples are in numerical order
+QC <- QC[mixedorder(QC$Sample), ]
+
+QC_R1 <- QC %>% filter(grepl("R1",Sample)) %>%
+                mutate(Sample = str_extract(Sample, "^LCM_\\d+")) #remove everything but LCM and the number
+
+QC_R2 <- QC %>% filter(grepl("R2",Sample)) %>%
+                mutate(Sample = str_extract(Sample, "^LCM_\\d+")) #remove everything but LCM and the number
+```
+
+```{r}
+# Load the alignment data
+data <- read.csv("../output_WGBS/align/parameter_comparison_summary.csv", sep = ",", header = TRUE)  %>%
+  mutate(Sample = str_extract(Sample, "LCM_\\d+")) #remove everything but LCM and the number
+
+QC_R1 <- QC_R1 %>% left_join(data)
+
+QC_R1_long <- QC_R1 %>%
+  pivot_longer(cols = c("percent_duplicates","percent_gc","avg_sequence_length","percent_fails","total_sequences"), 
+               names_to = "QC_Parameter", 
+               values_to = "Value")
+
+QC_R1_long$Sample <- factor(QC_R1_long$Sample, levels = QC_R1$Sample)
+
+# Plot with faceting
+ggplot(QC_R1_long, aes(x = Value, y = Alignment_Rate)) +
+  geom_point(aes(color=Sample)) +
+  geom_smooth(method = "lm") +
+  theme_minimal() +
+  labs(title = "TRIMMED R1: Alignment Rate vs. QC Parameters, Score Min: L,0,-1.0",
+       x = "QC Parameter Value",
+       y = "Alignment Rate (%)") +
+  facet_wrap(~ QC_Parameter, scales = "free_x")
+
+
+ggsave("alignment_bismark_vs_qc_trimmed_r1.png")
+```
+
+```{r}
+QC_R2 <- QC_R2 %>% left_join(data)
+
+QC_R2_long <- QC_R2 %>%
+  pivot_longer(cols = c("percent_duplicates","percent_gc","avg_sequence_length","percent_fails","total_sequences"), 
+               names_to = "QC_Parameter", 
+               values_to = "Value")
+
+QC_R2_long$Sample <- factor(QC_R2_long$Sample, levels = QC_R2$Sample)
+
+# Plot with faceting
+ggplot(QC_R2_long, aes(x = Value, y = Alignment_Rate)) +
+  geom_point(aes(color=Sample)) +
+  geom_smooth(method = "lm") +
+  theme_minimal() +
+  labs(title = "TRIMMED R2: Alignment Rate vs. QC Parameters, Score Min: L,0,-1.0",
+       x = "QC Parameter Value",
+       y = "Alignment Rate (%)") +
+  facet_wrap(~ QC_Parameter, scales = "free_x")
+
+ggsave("alignment_bismark_vs_qc_trimmed_r2.png")
+```
+
