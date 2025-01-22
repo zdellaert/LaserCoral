@@ -401,7 +401,6 @@ for dir in ${output_dir}/*_score_*; do
         # Extract metrics
         mapping=$(grep "Mapping efficiency:" ${summary_file_path} | awk '{print "mapping efficiency ", $3}')
         
-
         # Append to the summary file
         echo "${sample_name},${score_min},${mapping}" >> ${summary_file}
     fi
@@ -483,11 +482,39 @@ if [ $? -eq 0 ]; then
 else
     echo "Sample ${sample_name} failed. Check ${stderr_log} for details."
 fi
+
+# Define directories
+summary_file="${output_dir}/parameter_comparison_summary.csv"
+
+# Initialize summary file
+echo "Sample,Score_Min,Alignment_Rate" > ${summary_file}
+
+for file in ${output_dir}/*_report.txt; do
+    # Extract sample name and from directory name
+    sample_name=$(basename "$file" | cut -d'_' -f1-4)
+    score_min="L0-1.0"
+
+    # Locate the summary file
+    summary_file_path="${output_dir}/${sample_name}_PE_report.txt"
+
+    # Extract metrics
+    mapping=$(grep "Mapping efficiency:" ${summary_file_path} | awk '{gsub("%", "", $3); print $3}')
+
+    # Append to the summary file
+    echo "${sample_name},${score_min},${mapping}" >> ${summary_file}
+done
 ```
 
+### Hmm. Interp of Bismark
 
+Alignment rates are low, and are the lowest for libraries that had the highest initial quality. Could this be because shorter reads are aligning better?
 
-### Make a scratch directory
+<img src="alignment_bismark_vs_qc_raw_r1.png?raw=true" height="400">
+<img src="alignment_bismark_vs_qc_raw_r2.png?raw=true" height="400">
+<img src="alignment_bismark_vs_qc_trimmed_r1.png?raw=true" height="400">
+<img src="alignment_bismark_vs_qc_trimmed_r2.png?raw=true" height="400">
+
+## For later steps that need a lot of space: Make a scratch directory
 
 https://docs.unity.uri.edu/documentation/managing-files/hpc-workspace/
 
