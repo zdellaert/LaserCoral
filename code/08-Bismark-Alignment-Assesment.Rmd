@@ -4,6 +4,9 @@ output: html_document
 date: "2025-01-20"
 ---
 
+
+## Compare alignment rate of different score_min
+
 From https://github.com/sr320/ceasmallr/blob/92cf9be13679dce017df317673a597004690ddfa/code/04.2b-param-comparison.Rmd
 
 ```{r}
@@ -28,9 +31,10 @@ ggplot(parameter_comparison, aes(x = Score_Min, y = Alignment_Percent, group = S
          x = "Score_Min Parameter",
          y = "Alignment Rate (%)")
 
-ggsave("alignment_bismark_minscore.png")
+ggsave("08-Bismark-Alignment-Assesment-images/alignment_bismark_minscore.png")
 ```
 
+## Raw QC
 
 ```{r}
 # load in multiqc data
@@ -73,7 +77,7 @@ ggplot(QC_R1_long, aes(x = Value, y = Alignment_Rate)) +
        y = "Alignment Rate (%)") +
   facet_wrap(~ QC_Parameter, scales = "free_x")
 
-ggsave("alignment_bismark_vs_qc_raw_r1.png")
+ggsave("08-Bismark-Alignment-Assesment-images/alignment_bismark_vs_qc_raw_r1.png")
 ```
 
 ```{r}
@@ -97,8 +101,10 @@ ggplot(QC_R2_long, aes(x = Value, y = Alignment_Rate)) +
   facet_wrap(~ QC_Parameter, scales = "free_x")
 
 
-ggsave("alignment_bismark_vs_qc_raw_r2.png")
+ggsave("08-Bismark-Alignment-Assesment-images/alignment_bismark_vs_qc_raw_r2.png")
 ```
+
+## Trimmed QC
 
 ```{r}
 library(ggplot2)
@@ -146,7 +152,7 @@ ggplot(QC_R1_long, aes(x = Value, y = Alignment_Rate)) +
   facet_wrap(~ QC_Parameter, scales = "free_x")
 
 
-ggsave("alignment_bismark_vs_qc_trimmed_r1.png")
+ggsave("08-Bismark-Alignment-Assesment-images/alignment_bismark_vs_qc_trimmed_r1.png")
 ```
 
 ```{r}
@@ -169,9 +175,10 @@ ggplot(QC_R2_long, aes(x = Value, y = Alignment_Rate)) +
        y = "Alignment Rate (%)") +
   facet_wrap(~ QC_Parameter, scales = "free_x")
 
-ggsave("alignment_bismark_vs_qc_trimmed_r2.png")
+ggsave("08-Bismark-Alignment-Assesment-images/alignment_bismark_vs_qc_trimmed_r2.png")
 ```
 
+## Facet QC against different score_min values
 
 ```{r}
 QC_R1 <- QC %>% filter(grepl("R1",Sample)) %>%
@@ -199,7 +206,7 @@ ggplot(QC_R1_long, aes(x = Value, y = Alignment_Percent)) +
        y = "Alignment Rate (%)") +
   facet_wrap(~ QC_Parameter + Score_Min, scales = "free_x")
 
-ggsave("alignment_bismark_vs_qc_trimmed_r1_test_scoremin.png")
+ggsave("08-Bismark-Alignment-Assesment-images/alignment_bismark_vs_qc_trimmed_r1_test_scoremin.png")
 
 QC_R2_joined <- QC_R2 %>% left_join(parameter_comparison)
 
@@ -220,5 +227,119 @@ ggplot(QC_R2_long, aes(x = Value, y = Alignment_Percent)) +
        y = "Alignment Rate (%)") +
   facet_wrap(~ QC_Parameter + Score_Min, scales = "free_x")
 
-ggsave("alignment_bismark_vs_qc_trimmed_r2_test_scoremin.png")
+ggsave("08-Bismark-Alignment-Assesment-images/alignment_bismark_vs_qc_trimmed_r2_test_scoremin.png")
 ```
+
+
+## Trimming V3 QC vs Alignment 
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+
+# load in multiqc data
+QC <- read.delim("../output_WGBS/trimmed_V3_qc/multiqc_data/multiqc_general_stats.txt", header = TRUE) %>%
+  filter(!grepl("Undetermined",Sample)) %>%
+  mutate(Sample = str_remove(Sample,"trimmed_V3_"))
+
+colnames(QC) <- c("Sample", "percent_duplicates", "percent_gc", "avg_sequence_length", "percent_fails", "total_sequences")
+
+#reorder so the samples are in numerical order
+QC <- QC[mixedorder(QC$Sample), ]
+
+QC_R1 <- QC %>% filter(grepl("R1",Sample)) %>%
+                mutate(Sample = str_extract(Sample, "^LCM_\\d+")) #remove everything but LCM and the number
+
+QC_R2 <- QC %>% filter(grepl("R2",Sample)) %>%
+                mutate(Sample = str_extract(Sample, "^LCM_\\d+")) #remove everything but LCM and the number
+```
+
+```{r}
+# Load the alignment data
+data <- read.csv("../output_WGBS/align_V3/parameter_comparison_summary.csv", sep = ",", header = TRUE)  %>%
+  mutate(Sample = str_extract(Sample, "LCM_\\d+")) #remove everything but LCM and the number
+
+QC_R1 <- QC_R1 %>% left_join(data)
+
+QC_R1_long <- QC_R1 %>%
+  pivot_longer(cols = c("percent_duplicates","percent_gc","avg_sequence_length","percent_fails","total_sequences"), 
+               names_to = "QC_Parameter", 
+               values_to = "Value")
+
+QC_R1_long$Sample <- factor(QC_R1_long$Sample, levels = QC_R1$Sample)
+
+# Plot with faceting
+ggplot(QC_R1_long, aes(x = Value, y = Alignment_Rate)) +
+  geom_point(aes(color=Sample)) +
+  geom_smooth(method = "lm") +
+  theme_minimal() +
+  labs(title = "TRIMMED_V3 R1: Alignment Rate (V3) vs. QC Parameters, Score Min: L,0,-1.0",
+       x = "QC Parameter Value",
+       y = "Alignment Rate (%)") +
+  facet_wrap(~ QC_Parameter, scales = "free_x")
+
+ggsave("08-Bismark-Alignment-Assesment-images/alignment_bismark_vs_qc_trimmed_v3_r1.png")
+```
+
+```{r}
+QC_R2 <- QC_R2 %>% left_join(data)
+
+QC_R2_long <- QC_R2 %>%
+  pivot_longer(cols = c("percent_duplicates","percent_gc","avg_sequence_length","percent_fails","total_sequences"), 
+               names_to = "QC_Parameter", 
+               values_to = "Value")
+
+QC_R2_long$Sample <- factor(QC_R2_long$Sample, levels = QC_R2$Sample)
+
+# Plot with faceting
+ggplot(QC_R2_long, aes(x = Value, y = Alignment_Rate)) +
+  geom_point(aes(color=Sample)) +
+  geom_smooth(method = "lm") +
+  theme_minimal() +
+  labs(title = "TRIMMED_V3 R2: Alignment Rate (V3) vs. QC Parameters, Score Min: L,0,-1.0",
+       x = "QC Parameter Value",
+       y = "Alignment Rate (%)") +
+  facet_wrap(~ QC_Parameter, scales = "free_x")
+
+ggsave("08-Bismark-Alignment-Assesment-images/alignment_bismark_vs_qc_trimmed_v3_r2.png")
+```
+
+## batch effects?
+
+```{r}
+meta <- read.csv("../data_WGBS/LCM_WGBS_metadata.csv", sep = ",", header = TRUE) %>%
+  mutate(Section_Date = as.character(Section_Date), LCM_Date = as.character(LCM_Date),DNA_Extraction_Date = as.character(DNA_Extraction_Date))
+
+meta_v3 <- meta %>% left_join(data)
+
+meta_v3_long <- meta_v3 %>%
+  pivot_longer(cols = c("Fragment", "Tissue","Final_Library_Dimer_Content", "Section_Date","LCM_Date","DNA_Extraction_Date"), 
+               names_to = "Batch_Effect", 
+               values_to = "Value_Chr")
+
+meta_v3_long <- meta_v3_long %>% pivot_longer(cols = 3:11, 
+               names_to = "Integer_Batch_Effect", 
+               values_to = "Value_Num")
+
+meta_v3_long$Sample <- factor(meta_v3_long$Sample, levels = QC_R1$Sample)
+
+# Plot with faceting
+ggplot(meta_v3_long, aes(x= Value_Chr, y = Alignment_Rate)) +
+    geom_boxplot() +
+  geom_point(aes(color=Sample)) +
+  theme_bw(base_size = 8) +
+  labs(title = "Alignment Rate vs. Batch Effects",
+       x = "Batch Effect",
+       y = "Alignment Rate (%)") +
+  facet_wrap(~ Batch_Effect, scales = "free_x")
+
+ggplot(meta_v3_long, aes(x= Value_Num, y = Alignment_Rate)) +
+  geom_point(aes(color=Sample)) +
+  geom_smooth(method = "lm") +
+  theme_bw(base_size = 8) +
+  labs(title = "Alignment Rate vs. Batch Effects",
+       x = "Batch Effect",
+       y = "Alignment Rate (%)") +
+  facet_wrap(~ Integer_Batch_Effect, scales = "free_x")
+```
+

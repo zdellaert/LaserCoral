@@ -842,3 +842,11 @@ for file in ${output_dir}/*_report.txt; do
     echo "${sample_name},${score_min},${mapping}" >> ${summary_file}
 done
 ```
+
+### Interp of Bismark
+
+<img src="08-Bismark-Alignment-Assesment-images/alignment_bismark_vs_qc_trimmed_v3_r1.png?raw=true" height="400">
+<img src="08-Bismark-Alignment-Assesment-images/alignment_bismark_vs_qc_trimmed_v3_r2.png?raw=true" height="400">
+
+<img src="08-Bismark-Alignment-Assesment-images/alignment_bismark_trimmed_v3_batch1.png?raw=true" height="400">
+<img src="08-Bismark-Alignment-Assesment-images/alignment_bismark_trimmed_v3_batch2.png?raw=true" height="400">
