@@ -638,8 +638,9 @@ echo "QC of trimmed data complete." $(date)
 
 Okay, this made tiny improvements to the adapter content in the R2 reads, but did not have a major impact on QC otherwise.
 
+[View results here](https://github.com/zdellaert/LaserCoral/tree/main/output_WGBS/trimmed_V2_qc), [MultiQC report](https://github.com/zdellaert/LaserCoral/blob/72ae2716b6de1e90b76d4e522721a445dd47c04c/output_WGBS/trimmed_V2_qc/multiqc_report.html)
 
-### Trimming V3: Next-Seq and increase minimum post-trim length
+## Trimming V3: Next-Seq and increase minimum post-trim length
 
 Remove reads that are less than 40 bp long. 
 
@@ -730,4 +731,114 @@ cd ../output_WGBS/trimmed_V3_qc/
 multiqc *  #Compile MultiQC report from FastQC files 
 
 echo "QC of trimmed data complete." $(date)
+```
+
+### Trimming version 3 interpretation
+
+- Trimming V2 (adding Next-Seq parameter) made basically no difference except slightly decreased adapter content. 
+  - Interestingly, for both V2 and V3 when I added this parameter there is something funky going on at the end of the reads where the G content drops super low and it causes the per base sequence content to fail. 
+  - Original Trimming:
+    - <img src="../output_WGBS/trimmed_qc/multiqc_screenshots/PerBaseSeqContent_NextSeqEX.png?raw=true" height="400">
+  - NextSeq Trimming:
+    - <img src="../output_WGBS/trimmed_V3_qc/multiqc_screenshots/PerBaseSeqContent_NextSeqEX.png?raw=true" height="400">
+  - **We'll go with it for now, because the V3 trimming worked so well. If there is an issue, I will keep going without the nextSeq trim and just increase the min_length filter to 40 as in V3 trim**
+- Trimming V3, with the Next-Seq trimming and increased min-length filter worked really well. Basically no adapter content left. Going to align these now.
+
+[View results here](https://github.com/zdellaert/LaserCoral/tree/main/output_WGBS/trimmed_V3_qc), [MultiQC report](https://github.com/zdellaert/LaserCoral/blob/72ae2716b6de1e90b76d4e522721a445dd47c04c/output_WGBS/trimmed_V3_qc/multiqc_report.html)
+
+<img src="../output_WGBS/trimmed_V3_qc/multiqc_screenshots/fastqc_adapter_content_plot.png?raw=true" height="400">
+<img src="../output_WGBS/trimmed_V3_qc/multiqc_screenshots/fastqc_sequence_length_distribution_plot.png?raw=true" height="400">
+<img src="../output_WGBS/trimmed_V3_qc/multiqc_screenshots/fastqc-status-check-heatmap.png?raw=true" height="400">
+<img src="../output_WGBS/trimmed_V3_qc/multiqc_screenshots/overrep_seq.png?raw=true">
+
+
+## Bismark Alignment of V3 Trimmed Reads
+
+```
+nano scripts/bismark_align_V3.sh 
+```
+
+```
+#!/usr/bin/env bash
+#SBATCH --ntasks=1 --cpus-per-task=30 #split one task over multiple CPU
+#SBATCH --array=0-9 #for 10 samples
+#SBATCH --mem=100GB
+#SBATCH -t 48:00:00
+#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
+#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
+
+# load modules needed
+module load uri/main
+module load Bismark/0.23.1-foss-2021b
+module load bowtie2/2.5.2
+
+# Set directories and files
+reads_dir="data_WGBS/" #directory containing trimmed data to align
+genome_folder="references/" #directory containing original unmodified genome fasta and bismark Bisulfite_Genome directory
+
+mkdir -p output_WGBS/align_V3 #make output directory if it does not exist
+
+output_dir="output_WGBS/align_V3"
+checkpoint_file="output_WGBS/align_V3/completed_samples.log"
+
+# Create the checkpoint file if it doesn't exist
+touch ${checkpoint_file}
+
+# Get the list of sample files and corresponding sample names
+files=(${reads_dir}trimmed_V3_LCM_*R1_001.fastq.gz)
+file="${files[$SLURM_ARRAY_TASK_ID]}"
+sample_name=$(basename "$file" "_R1_001.fastq.gz")
+
+# Check if the sample has already been processed
+if grep -q "^${sample_name}$" ${checkpoint_file}; then
+    echo "Sample ${sample_name} already processed. Skipping..."
+    exit 0
+fi
+
+# Define log files for stdout and stderr
+stdout_log="${output_dir}${sample_name}_stdout.log"
+stderr_log="${output_dir}${sample_name}_stderr.log"
+
+# Run Bismark align
+bismark \
+    -genome ${genome_folder} \
+    -p 8 \
+    -score_min L,0,-1.0 \
+    -1 ${reads_dir}${sample_name}_R1_001.fastq.gz \
+    -2 ${reads_dir}${sample_name}_R2_001.fastq.gz \
+    -o ${output_dir} \
+    --basename ${sample_name} \
+    2> "${output_dir}/${sample_name}-bismark_summary.txt"
+
+# Check if the command was successful
+if [ $? -eq 0 ]; then
+    # Append the sample name to the checkpoint file
+    echo ${sample_name} >> ${checkpoint_file}
+    echo "Sample ${sample_name} processed successfully."
+else
+    echo "Sample ${sample_name} failed. Check ${stderr_log} for details."
+fi
+
+# Define directories
+summary_file="${output_dir}/parameter_comparison_summary.csv"
+
+# Initialize summary file
+echo "Sample,Score_Min,Alignment_Rate" > ${summary_file}
+
+for file in ${output_dir}/*_report.txt; do
+    # Extract sample name and from directory name
+    sample_name=$(basename "$file" | cut -d'_' -f1-4)
+    score_min="L0-1.0"
+
+    # Locate the summary file
+    summary_file_path="${output_dir}/${sample_name}_PE_report.txt"
+
+    # Extract metrics
+    mapping=$(grep "Mapping efficiency:" ${summary_file_path} | awk '{gsub("%", "", $3); print $3}')
+
+    # Append to the summary file
+    echo "${sample_name},${score_min},${mapping}" >> ${summary_file}
+done
 ```
