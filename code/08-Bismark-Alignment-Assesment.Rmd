@@ -256,10 +256,10 @@ QC_R2 <- QC %>% filter(grepl("R2",Sample)) %>%
 
 ```{r}
 # Load the alignment data
-data <- read.csv("../output_WGBS/align_V3/parameter_comparison_summary.csv", sep = ",", header = TRUE)  %>%
+data_V3 <- read.csv("../output_WGBS/align_V3/parameter_comparison_summary.csv", sep = ",", header = TRUE)  %>%
   mutate(Sample = str_extract(Sample, "LCM_\\d+")) #remove everything but LCM and the number
 
-QC_R1 <- QC_R1 %>% left_join(data)
+QC_R1 <- QC_R1 %>% left_join(data_V3)
 
 QC_R1_long <- QC_R1 %>%
   pivot_longer(cols = c("percent_duplicates","percent_gc","avg_sequence_length","percent_fails","total_sequences"), 
@@ -282,7 +282,7 @@ ggsave("08-Bismark-Alignment-Assesment-images/alignment_bismark_vs_qc_trimmed_v3
 ```
 
 ```{r}
-QC_R2 <- QC_R2 %>% left_join(data)
+QC_R2 <- QC_R2 %>% left_join(data_V3)
 
 QC_R2_long <- QC_R2 %>%
   pivot_longer(cols = c("percent_duplicates","percent_gc","avg_sequence_length","percent_fails","total_sequences"), 
@@ -310,7 +310,7 @@ ggsave("08-Bismark-Alignment-Assesment-images/alignment_bismark_vs_qc_trimmed_v3
 meta <- read.csv("../data_WGBS/LCM_WGBS_metadata.csv", sep = ",", header = TRUE) %>%
   mutate(Section_Date = as.character(Section_Date), LCM_Date = as.character(LCM_Date),DNA_Extraction_Date = as.character(DNA_Extraction_Date))
 
-meta_v3 <- meta %>% left_join(data)
+meta_v3 <- meta %>% left_join(data_V3)
 
 meta_v3_long <- meta_v3 %>%
   pivot_longer(cols = c("Fragment", "Tissue","Final_Library_Dimer_Content", "Section_Date","LCM_Date","DNA_Extraction_Date"), 
@@ -333,6 +333,8 @@ ggplot(meta_v3_long, aes(x= Value_Chr, y = Alignment_Rate)) +
        y = "Alignment Rate (%)") +
   facet_wrap(~ Batch_Effect, scales = "free_x")
 
+ggsave("08-Bismark-Alignment-Assesment-images/alignment_bismark_trimmed_v3_batch1.png")
+
 ggplot(meta_v3_long, aes(x= Value_Num, y = Alignment_Rate)) +
   geom_point(aes(color=Sample)) +
   geom_smooth(method = "lm") +
@@ -341,5 +343,35 @@ ggplot(meta_v3_long, aes(x= Value_Num, y = Alignment_Rate)) +
        x = "Batch Effect",
        y = "Alignment Rate (%)") +
   facet_wrap(~ Integer_Batch_Effect, scales = "free_x")
+
+ggsave("08-Bismark-Alignment-Assesment-images/alignment_bismark_trimmed_v3_batch2.png")
+```
+
+
+## how much did alignment improve from v2 to v3?
+
+```{r}
+compare_align <- merge(data,data_V3, by = c("Sample","Score_Min")) %>% rename("initial"= Alignment_Rate.x) %>% rename("v3_trim"=Alignment_Rate.y)
+
+compare_align <- compare_align %>% pivot_longer(cols=c("initial","v3_trim"), names_to="iteration",values_to = "Rate")
+compare_align$Sample <- factor(compare_align$Sample, levels = QC_R1$Sample)
+
+ggplot(compare_align, aes(x= iteration, y = Rate, group=Sample, color=Sample)) +
+  geom_line() +
+  geom_point() +
+  theme_bw(base_size = 8) +
+  labs(title = "Alignment Rate After Trimming V3",
+       x = "Iteration",
+       y = "Alignment Rate (%)") 
+
+compare_align <- left_join(compare_align, meta)
+
+ggplot(compare_align, aes(x= iteration, y = Rate, group=Sample, color=Fragment)) +
+  geom_line() +
+  geom_point() +
+  theme_bw(base_size = 8) +
+  labs(title = "Alignment Rate After Trimming V3",
+       x = "Iteration",
+       y = "Alignment Rate (%)") 
 ```
 
