@@ -853,6 +853,8 @@ done
 
 Okay , so an improvement but nothing super substantial. I am considering trimming all reads to length 100bp to try to get rid of any potential length biasing in the alignment? I could also try bwa-meth or hisat2 as alternative aligners.
 
+<img src="08-Bismark-Alignment-Assesment-images/alignment_bismark_orig_vs_v3.png?raw=true" height="400">
+
 But, what I did not realize was that the next step in the Bismark pipeline, deduplication, can increase the effective alignment rate. Since I have high rates of duplication, I will try this before looking into alternative mapping or more aggressive trimming strategies.
 
 ## Deduplication
