@@ -364,6 +364,9 @@ ggplot(compare_align, aes(x= iteration, y = Rate, group=Sample, color=Sample)) +
        x = "Iteration",
        y = "Alignment Rate (%)") 
 
+
+ggsave("08-Bismark-Alignment-Assesment-images/alignment_bismark_orig_vs_v3.png")
+
 compare_align <- left_join(compare_align, meta)
 
 ggplot(compare_align, aes(x= iteration, y = Rate, group=Sample, color=Fragment)) +
@@ -373,5 +376,7 @@ ggplot(compare_align, aes(x= iteration, y = Rate, group=Sample, color=Fragment))
   labs(title = "Alignment Rate After Trimming V3",
        x = "Iteration",
        y = "Alignment Rate (%)") 
+
+
 ```
 

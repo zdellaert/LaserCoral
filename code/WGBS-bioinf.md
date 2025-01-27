@@ -889,3 +889,95 @@ parallel -j 8 deduplicate_bismark \
 --output_dir output_WGBS/dedup_V3 \
 output_WGBS/align_V3/{}.bam
 ```
+
+Oh no! About 87-95% of alignments were removed for each sample in this step, which decreased the alignment rate even furhter!
+
+Let's just do the methylation extraction to see:
+
+### Extract
+
+```
+nano scripts/bismark_extract.sh 
+```
+
+```
+#!/usr/bin/env bash
+#SBATCH --ntasks=1 --cpus-per-task=30 #split one task over multiple CPU
+#SBATCH --mem=100GB
+#SBATCH -t 24:00:00
+#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
+#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
+
+# load modules needed
+module load uri/main
+module load Bismark/0.23.1-foss-2021b
+
+cd output_WGBS/dedup_V3
+
+bismark_methylation_extractor \
+--bedGraph \
+--counts \
+--comprehensive \
+--merge_non_CpG \
+--multicore 28 \
+--buffer_size 75% \
+*deduplicated.bam
+```
+
+## Methylation call
+
+```
+nano scripts/bismark_call.sh 
+```
+
+```
+#!/usr/bin/env bash
+#SBATCH --ntasks=1 --cpus-per-task=20 #split one task over multiple CPU
+#SBATCH --mem=50GB
+#SBATCH -t 48:00:00
+#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
+#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
+
+# load modules needed
+module load parallel/20240822
+module load uri/main
+module load Bismark/0.23.1-foss-2021b
+
+cd output_WGBS/dedup_V3
+
+find *deduplicated.bismark.cov.gz | \
+xargs -n 1 basename -s _pe.deduplicated.bismark.cov.gz | \
+parallel -j 10 coverage2cytosine \
+--genome_folder ../../references/ \
+-o {} \
+--merge_CpG \
+--zero_based \
+{}_pe.deduplicated.bismark.cov.gz
+```
+
+### Reports
+
+Turns out everything has to be in the same folder:
+
+```
+salloc
+module load uri/main
+module load Bismark/0.23.1-foss-2021b
+
+cd output_WGBS
+mv output_WGBS/align_V3/* output_WGBS/dedup_V3/
+
+cd output_WGBS/dedup_V3
+bismark2report
+bismark2summary *pe.bam
+
+#bam2nuc --genome_folder ../../references/ *_pe.deduplicated.bam
+```
+
+
+<img src="../output_WGBS/dedup_V3/report_screenshots/Summary_1.png?raw=true" height="400">
+<img src="../output_WGBS/dedup_V3/report_screenshots/Summary_2.png?raw=true" height="400">
