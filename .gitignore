@@ -44,9 +44,12 @@ output_RNA/stringtie-GeneExt/*tab
 output_RNA/stringtie-GeneExt/LCM_*.gtf
 output_RNA/stringtie-GeneExt/merged
 output_RNA/stringtie-GeneExt/transcript_count_matrix.csv
+output_WGBS/*/*gz
+output_WGBS/*/*CpG_report.txt
 
 #temporary file directories
 tmp*/
+scripts/outs_errs/bismark_align*
 
 #blast databases
 references/blast_dbs/*
@@ -55,3 +58,4 @@ references/blast_dbs/*
 output_RNA/differential_expression/blast/DEG_05_blast_results_full.txt
 code/go_mwu/dissim*
 references/Bisulfite_Genome/
+
