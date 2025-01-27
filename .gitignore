@@ -45,6 +45,9 @@ output_RNA/stringtie-GeneExt/LCM_*.gtf
 output_RNA/stringtie-GeneExt/merged
 output_RNA/stringtie-GeneExt/transcript_count_matrix.csv
 output_WGBS/*/*gz
+output_WGBS/*/*cov
+output_WGBS/*/Non_CpG_context*
+output_WGBS/*/CpG_context*
 output_WGBS/*/*CpG_report.txt
 
 #temporary file directories

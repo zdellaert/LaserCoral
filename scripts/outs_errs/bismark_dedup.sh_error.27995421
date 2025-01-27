@@ -1,0 +1,237 @@
+Loading perl version 5.38.2
+Loading parallel version 20240822
+Loading uri version main
+NOTE: The modules under this branch will not run on the login node. Use
+--constraint=avx512 for sbatch or srun sessions. 
+Loading libpciaccess version 0.17
+Loading libiconv version 1.17
+Loading xz version 5.4.6
+Loading zlib-ng version 2.1.6
+Loading libxml2 version 2.10.3
+Loading ncurses version 6.5
+Loading hwloc version 2.9.1
+Loading intel-tbb version 2021.9.0
+Loading bzip2 version 1.0.8
+Loading libmd version 1.0.4
+Loading libbsd version 0.12.1
+Loading expat version 2.6.2
+Loading readline version 8.2
+Loading gdbm version 1.23
+Loading gettext version 0.21
+Loading libffi version 8.1.4
+Loading libxcrypt version 4.4.35
+Loading openssl version 3.0.13
+Loading sqlite version 3.43.2
+Loading util-linux-uuid version 2.38.1
+Loading python version 3.11.7
+Loading bowtie2 version 2.5.2
+
+The following have been reloaded with a version change:
+  1) bzip2/.1.0.8-GCCcore-11.2.0 => bzip2/1.0.8-apafqct
+  2) expat/2.4.1-GCCcore-11.2.0 => expat/2.6.2-zqnlur6
+  3) hwloc/.2.5.0-GCCcore-11.2.0 => hwloc/2.9.1-mw5we3l
+  4) libffi/3.4.2-GCCcore-11.2.0 => libffi/8.1.4-qoyquij
+  5) libpciaccess/0.16-GCCcore-11.2.0 => libpciaccess/0.17-5bn3tiw
+  6) libxml2/.2.9.10-GCCcore-11.2.0 => libxml2/2.10.3-22imjql
+  7) ncurses/.6.2-GCCcore-11.2.0 => ncurses/6.5-keggpxg
+
+Output will be written into the directory: /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/output_WGBS/dedup_V3/
+Processing paired-end Bismark output file(s) (SAM format):
+output_WGBS/align_V3/trimmed_V3_LCM_12_S4_pe.bam
+
+
+If there are several alignments to a single position in the genome the first alignment will be chosen. Since the input files are not in any way sorted this is a near-enough random selection of reads.
+
+Checking file >>output_WGBS/align_V3/trimmed_V3_LCM_12_S4_pe.bam<< for signs of file truncation...
+
+
+...passed!
+Output file is: trimmed_V3_LCM_12_S4_pe.deduplicated.bam
+
+
+Total number of alignments analysed in output_WGBS/align_V3/trimmed_V3_LCM_12_S4_pe.bam:	40845550
+Total number duplicated alignments removed:	37162811 (90.98%)
+Duplicated alignments were found at:	2054871 different position(s)
+
+Total count of deduplicated leftover sequences: 3682739 (9.02% of total)
+
+Output will be written into the directory: /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/output_WGBS/dedup_V3/
+Processing paired-end Bismark output file(s) (SAM format):
+output_WGBS/align_V3/trimmed_V3_LCM_11_S3_pe.bam
+
+
+If there are several alignments to a single position in the genome the first alignment will be chosen. Since the input files are not in any way sorted this is a near-enough random selection of reads.
+
+Checking file >>output_WGBS/align_V3/trimmed_V3_LCM_11_S3_pe.bam<< for signs of file truncation...
+
+
+...passed!
+Output file is: trimmed_V3_LCM_11_S3_pe.deduplicated.bam
+
+
+Total number of alignments analysed in output_WGBS/align_V3/trimmed_V3_LCM_11_S3_pe.bam:	42125183
+Total number duplicated alignments removed:	39110216 (92.84%)
+Duplicated alignments were found at:	1672113 different position(s)
+
+Total count of deduplicated leftover sequences: 3014967 (7.16% of total)
+
+Output will be written into the directory: /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/output_WGBS/dedup_V3/
+Processing paired-end Bismark output file(s) (SAM format):
+output_WGBS/align_V3/trimmed_V3_LCM_1_S1_pe.bam
+
+
+If there are several alignments to a single position in the genome the first alignment will be chosen. Since the input files are not in any way sorted this is a near-enough random selection of reads.
+
+Checking file >>output_WGBS/align_V3/trimmed_V3_LCM_1_S1_pe.bam<< for signs of file truncation...
+
+
+...passed!
+Output file is: trimmed_V3_LCM_1_S1_pe.deduplicated.bam
+
+
+Total number of alignments analysed in output_WGBS/align_V3/trimmed_V3_LCM_1_S1_pe.bam:	49065059
+Total number duplicated alignments removed:	45263981 (92.25%)
+Duplicated alignments were found at:	2192793 different position(s)
+
+Total count of deduplicated leftover sequences: 3801078 (7.75% of total)
+
+Output will be written into the directory: /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/output_WGBS/dedup_V3/
+Processing paired-end Bismark output file(s) (SAM format):
+output_WGBS/align_V3/trimmed_V3_LCM_17_S7_pe.bam
+
+
+If there are several alignments to a single position in the genome the first alignment will be chosen. Since the input files are not in any way sorted this is a near-enough random selection of reads.
+
+Checking file >>output_WGBS/align_V3/trimmed_V3_LCM_17_S7_pe.bam<< for signs of file truncation...
+
+
+...passed!
+Output file is: trimmed_V3_LCM_17_S7_pe.deduplicated.bam
+
+
+Total number of alignments analysed in output_WGBS/align_V3/trimmed_V3_LCM_17_S7_pe.bam:	55851943
+Total number duplicated alignments removed:	51740391 (92.64%)
+Duplicated alignments were found at:	2362600 different position(s)
+
+Total count of deduplicated leftover sequences: 4111552 (7.36% of total)
+
+Output will be written into the directory: /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/output_WGBS/dedup_V3/
+Processing paired-end Bismark output file(s) (SAM format):
+output_WGBS/align_V3/trimmed_V3_LCM_32_S9_pe.bam
+
+
+If there are several alignments to a single position in the genome the first alignment will be chosen. Since the input files are not in any way sorted this is a near-enough random selection of reads.
+
+Checking file >>output_WGBS/align_V3/trimmed_V3_LCM_32_S9_pe.bam<< for signs of file truncation...
+
+
+...passed!
+Output file is: trimmed_V3_LCM_32_S9_pe.deduplicated.bam
+
+
+Total number of alignments analysed in output_WGBS/align_V3/trimmed_V3_LCM_32_S9_pe.bam:	57396337
+Total number duplicated alignments removed:	54122662 (94.30%)
+Duplicated alignments were found at:	1721043 different position(s)
+
+Total count of deduplicated leftover sequences: 3273675 (5.70% of total)
+
+Output will be written into the directory: /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/output_WGBS/dedup_V3/
+Processing paired-end Bismark output file(s) (SAM format):
+output_WGBS/align_V3/trimmed_V3_LCM_33_S10_pe.bam
+
+
+If there are several alignments to a single position in the genome the first alignment will be chosen. Since the input files are not in any way sorted this is a near-enough random selection of reads.
+
+Checking file >>output_WGBS/align_V3/trimmed_V3_LCM_33_S10_pe.bam<< for signs of file truncation...
+
+
+...passed!
+Output file is: trimmed_V3_LCM_33_S10_pe.deduplicated.bam
+
+
+Total number of alignments analysed in output_WGBS/align_V3/trimmed_V3_LCM_33_S10_pe.bam:	25611038
+Total number duplicated alignments removed:	23821578 (93.01%)
+Duplicated alignments were found at:	707228 different position(s)
+
+Total count of deduplicated leftover sequences: 1789460 (6.99% of total)
+
+Output will be written into the directory: /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/output_WGBS/dedup_V3/
+Processing paired-end Bismark output file(s) (SAM format):
+output_WGBS/align_V3/trimmed_V3_LCM_25_S6_pe.bam
+
+
+If there are several alignments to a single position in the genome the first alignment will be chosen. Since the input files are not in any way sorted this is a near-enough random selection of reads.
+
+Checking file >>output_WGBS/align_V3/trimmed_V3_LCM_25_S6_pe.bam<< for signs of file truncation...
+
+
+...passed!
+Output file is: trimmed_V3_LCM_25_S6_pe.deduplicated.bam
+
+
+Total number of alignments analysed in output_WGBS/align_V3/trimmed_V3_LCM_25_S6_pe.bam:	72681599
+Total number duplicated alignments removed:	65729429 (90.43%)
+Duplicated alignments were found at:	4101958 different position(s)
+
+Total count of deduplicated leftover sequences: 6952170 (9.57% of total)
+
+Output will be written into the directory: /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/output_WGBS/dedup_V3/
+Processing paired-end Bismark output file(s) (SAM format):
+output_WGBS/align_V3/trimmed_V3_LCM_18_S8_pe.bam
+
+
+If there are several alignments to a single position in the genome the first alignment will be chosen. Since the input files are not in any way sorted this is a near-enough random selection of reads.
+
+Checking file >>output_WGBS/align_V3/trimmed_V3_LCM_18_S8_pe.bam<< for signs of file truncation...
+
+
+...passed!
+Output file is: trimmed_V3_LCM_18_S8_pe.deduplicated.bam
+
+
+Total number of alignments analysed in output_WGBS/align_V3/trimmed_V3_LCM_18_S8_pe.bam:	76904391
+Total number duplicated alignments removed:	70860323 (92.14%)
+Duplicated alignments were found at:	3530544 different position(s)
+
+Total count of deduplicated leftover sequences: 6044068 (7.86% of total)
+
+Output will be written into the directory: /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/output_WGBS/dedup_V3/
+Processing paired-end Bismark output file(s) (SAM format):
+output_WGBS/align_V3/trimmed_V3_LCM_3_S2_pe.bam
+
+
+If there are several alignments to a single position in the genome the first alignment will be chosen. Since the input files are not in any way sorted this is a near-enough random selection of reads.
+
+Checking file >>output_WGBS/align_V3/trimmed_V3_LCM_3_S2_pe.bam<< for signs of file truncation...
+
+
+...passed!
+Output file is: trimmed_V3_LCM_3_S2_pe.deduplicated.bam
+
+
+Total number of alignments analysed in output_WGBS/align_V3/trimmed_V3_LCM_3_S2_pe.bam:	41317458
+Total number duplicated alignments removed:	38020272 (92.02%)
+Duplicated alignments were found at:	1847138 different position(s)
+
+Total count of deduplicated leftover sequences: 3297186 (7.98% of total)
+
+Output will be written into the directory: /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/output_WGBS/dedup_V3/
+Processing paired-end Bismark output file(s) (SAM format):
+output_WGBS/align_V3/trimmed_V3_LCM_24_S5_pe.bam
+
+
+If there are several alignments to a single position in the genome the first alignment will be chosen. Since the input files are not in any way sorted this is a near-enough random selection of reads.
+
+Checking file >>output_WGBS/align_V3/trimmed_V3_LCM_24_S5_pe.bam<< for signs of file truncation...
+
+
+...passed!
+Output file is: trimmed_V3_LCM_24_S5_pe.deduplicated.bam
+
+
+Total number of alignments analysed in output_WGBS/align_V3/trimmed_V3_LCM_24_S5_pe.bam:	104600443
+Total number duplicated alignments removed:	91405247 (87.39%)
+Duplicated alignments were found at:	8104255 different position(s)
+
+Total count of deduplicated leftover sequences: 13195196 (12.61% of total)
+

@@ -1,0 +1,7 @@
+
+Total number of alignments analysed in output_WGBS/align_V3/trimmed_V3_LCM_17_S7_pe.bam:	55851943
+Total number duplicated alignments removed:	51740391 (92.64%)
+Duplicated alignments were found at:	2362600 different position(s)
+
+Total count of deduplicated leftover sequences: 4111552 (7.36% of total)
+
