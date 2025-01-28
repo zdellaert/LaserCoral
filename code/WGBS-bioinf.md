@@ -195,50 +195,6 @@ echo "QC of trimmed data complete." $(date)
 
 Will add screenshots soon.
 
-## Trying to run nf-core methylseq on unity:
-
-https://nf-co.re/methylseq/3.0.0/
-
-"ANNOUNCEMENTS 📢
-💡 Unity profile is now available for Nextflow nf-core pipelines
-An institutional Unity profile is now available for Nextflow nf-core pipelines (docs, config)!
-
-To use it, add the -profile unity option to any nf-core pipeline. This allows for each process to be submitted as a slurm job and use apptainer for dependency management."
-
-```
-nano scripts/methylseq.sh 
-```
-
-test script:
-
-```
-#!/usr/bin/env bash
-#SBATCH --export=NONE
-#SBATCH --nodes=1 --ntasks-per-node=20
-#SBATCH --signal=2
-#SBATCH --no-requeue
-#SBATCH --mem=100GB
-#SBATCH -t 24:00:00
-#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
-#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
-#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
-#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
-
-## Load Nextflow and Apptainer environment modules
-module purge
-module load nextflow/24.04.3
-module load apptainer/latest
-
-nextflow run nf-core/methylseq \
-  --input samplesheet.csv \
-  --outdir output_WGBS/methylseq_results \
-  --genome GRCh38 \
-  -profile test,unity
-
-
-nf-core pipelines launch nf-core/methylseq -r 3.0.0
-```
-
 ## Bismark Alignment to P. acuta genome
 
 https://felixkrueger.github.io/Bismark/
@@ -967,6 +923,7 @@ Turns out everything has to be in the same folder:
 salloc
 module load uri/main
 module load Bismark/0.23.1-foss-2021b
+module load all/MultiQC/1.12-foss-2021b
 
 cd output_WGBS
 mv output_WGBS/align_V3/* output_WGBS/dedup_V3/
@@ -975,9 +932,189 @@ cd output_WGBS/dedup_V3
 bismark2report
 bismark2summary *pe.bam
 
-#bam2nuc --genome_folder ../../references/ *_pe.deduplicated.bam
+bam2nuc --genome_folder ../../references/ *_pe.deduplicated.bam
+
+multiqc .
 ```
+
 
 
 <img src="../output_WGBS/dedup_V3/report_screenshots/Summary_1.png?raw=true" height="400">
 <img src="../output_WGBS/dedup_V3/report_screenshots/Summary_2.png?raw=true" height="400">
+
+## Thoughts and next steps. 
+
+Okay, the alignment is not great. And I don't like how the best looking libraries (32, 33) are aligning the worst. I am going to hard trim all reads to 100 bp and try to align these and see if this reduces possible length bias.
+
+**Something weird is happening with the GC content.**
+
+
+## I am running out of space. 
+
+### Make a scratch directory
+
+https://docs.unity.uri.edu/documentation/managing-files/hpc-workspace/
+
+```
+ws_allocate -G pi_hputnam_uri_edu -m zdellaert@uri.edu -r 2 shared 30
+```
+
+Info: creating workspace.
+/scratch3/workspace/zdellaert_uri_edu-shared
+remaining extensions  : 3
+remaining time in days: 30
+
+
+## Hard trim reads to 100 bp and see if this reduces length dependence
+
+```
+nano scripts/wgbs_trim_V4.sh #write script for first trimming pass and QC, enter text in next code chunk
+```
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --ntasks=1 --cpus-per-task=20 #split one task over multiple CPU
+#SBATCH --mem=200GB
+#SBATCH -t 6:00:00
+#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
+#SBATCH --error=../scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=../scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/data_WGBS
+
+# load modules needed
+module load uri/main
+module load pigz/2.7-GCCcore-11.3.0
+module load trimgalore/0.6.10
+
+#make arrays of R1 and R2 reads trimmed above
+to_trim=($('ls' trimmed_V3_LCM*.fastq.gz))
+
+#make trimmed_V4_qc output folder
+mkdir -p ../output_WGBS/trimmed_V4_qc/
+mkdir -p /scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V4
+
+for i in ${!to_trim[@]}; do
+    trim_galore ${to_trim[$i]} \
+    --hardtrim5 100 \
+    --cores 4 \
+    --output_dir /scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V4 \
+    --fastqc_args "--outdir ../output_WGBS/trimmed_V4_qc/"
+
+    echo "trimming of ${to_trim[$i]} complete"
+done
+
+# load modules needed
+module purge
+module load uri/main
+module load all/MultiQC/1.12-foss-2021b
+
+cd ../output_WGBS/trimmed_V4_qc/
+
+#Compile MultiQC report from FastQC files
+multiqc *  #Compile MultiQC report from FastQC files 
+
+echo "QC of trimmed data complete." $(date)
+```
+
+
+
+## Side project: get methylseq to work:
+
+https://nf-co.re/methylseq/3.0.0/
+
+"ANNOUNCEMENTS 📢
+💡 Unity profile is now available for Nextflow nf-core pipelines
+An institutional Unity profile is now available for Nextflow nf-core pipelines (docs, config)!
+
+To use it, add the -profile unity option to any nf-core pipeline. This allows for each process to be submitted as a slurm job and use apptainer for dependency management."
+
+```
+nano samplesheet.csv
+```
+
+paste this:
+
+sample,fastq_1,fastq_2,genome
+SRR389222_sub1,https://github.com/nf-core/test-datasets/raw/methylseq/testdata/SRR389222_sub1.fastq.gz,,
+SRR389222_sub2,https://github.com/nf-core/test-datasets/raw/methylseq/testdata/SRR389222_sub2.fastq.gz,,
+SRR389222_sub3,https://github.com/nf-core/test-datasets/raw/methylseq/testdata/SRR389222_sub3.fastq.gz,,
+
+```
+nano scripts/methylseq_test.sh 
+```
+
+test script:
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=20
+#SBATCH --signal=2
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 24:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
+
+## Load Nextflow and Apptainer environment modules
+module purge
+module load nextflow/24.10.3
+module load apptainer/latest
+
+nextflow run nf-core/methylseq \
+  --input samplesheet.csv \
+  --genome GRCh38 \
+  -profile test,unity
+```
+
+### Run with default parameters
+
+```
+nano scripts/methylseq.sh 
+```
+
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=20
+#SBATCH --signal=2
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 48:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
+
+## Load Nextflow and Apptainer environment modules
+module purge
+module load nextflow/24.10.3
+module load apptainer/latest
+
+## Set Nextflow directories to use scratch
+export NXF_WORK=/scratch3/workspace/zdellaert_uri_edu-shared/nextflow_work
+export NXF_TEMP=/scratch3/workspace/zdellaert_uri_edu-shared/nextflow_temp
+export NXF_LAUNCHER=/scratch3/workspace/zdellaert_uri_edu-shared/nextflow_launcher
+
+nextflow run nf-core/methylseq \
+  --input ./data_WGBS/LCM_methylseq_input.csv \
+  --outdir /scratch3/workspace/zdellaert_uri_edu-shared/methylseq_default_test \
+  --igenomes_ignore \
+  --fasta ./references/Pocillopora_acuta_HIv2.assembly.fasta \
+  --relax_mismatches \
+  -profile unity -name methylseq_default_test
+```
+
+
+Emma additional params:
+
+--clip_r1 10 \
+--clip_r2 10 \
+--three_prime_clip_r1 10 --three_prime_clip_r2 10 \
+--non_directional \
+--cytosine_report \
+--unmapped \
