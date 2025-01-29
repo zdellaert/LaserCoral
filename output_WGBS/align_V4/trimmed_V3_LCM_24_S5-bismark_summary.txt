@@ -1,0 +1,28 @@
+Bowtie 2 seems to be working fine (tested command 'bowtie2 --version' [2.5.2])
+Output format is BAM (default)
+Alignments will be written out in BAM format. Samtools found here: '/modules/uri_apps/software/SAMtools/1.14-GCC-11.2.0/bin/samtools'
+Reference genome folder provided is references/	(absolute path is '/project/pi_hputnam_uri_edu/zdellaert/LaserCoral/references/)'
+FastQ format assumed (by default)
+Attention: using more than 4 cores per alignment thread has been reported to have diminishing returns. If possible try to limit -p to a value of 4
+Each Bowtie 2 instance is going to be run with 8 threads. Please monitor performance closely and tune down if necessary!
+
+Input files to be analysed (in current folder '/project/pi_hputnam_uri_edu/zdellaert/LaserCoral'):
+/scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V4/trimmed_V3_LCM_24_S5_R1_001.100bp_5prime.fq.gz
+/scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V4/trimmed_V3_LCM_24_S5_R2_001.100bp_5prime.fq.gz
+Library is assumed to be strand-specific (directional), alignments to strands complementary to the original top or bottom strands will be ignored (i.e. not performed!)
+Output will be written into the directory: /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/output_WGBS/align_V4/
+Setting parallelization to single-threaded (default)
+
+Summary of all aligner options:	-q --score-min L,0,-1.0 -p 8 --reorder --ignore-quals --no-mixed --no-discordant --dovetail --maxins 500
+Current working directory is: /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
+
+Now reading in and storing sequence information of the genome specified in: /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/references/
+
+Single-core mode: setting pid to 1
+
+Paired-end alignments will be performed
+=======================================
+
+The provided filenames for paired-end alignments are /scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V4/trimmed_V3_LCM_24_S5_R1_001.100bp_5prime.fq.gz and /scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V4/trimmed_V3_LCM_24_S5_R2_001.100bp_5prime.fq.gz
+Input files are in FastQ format
+Writing a C -> T converted version of the input file trimmed_V3_LCM_24_S5_R1_001.100bp_5prime.fq.gz to trimmed_V3_LCM_24_S5_R1_001.100bp_5prime.fq.gz_C_to_T.fastq
