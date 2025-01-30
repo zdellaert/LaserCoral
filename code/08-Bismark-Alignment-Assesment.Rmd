@@ -256,7 +256,7 @@ QC_R2 <- QC %>% filter(grepl("R2",Sample)) %>%
 
 ```{r}
 # Load the alignment data
-data_V3 <- read.csv("../output_WGBS/align_V3/parameter_comparison_summary.csv", sep = ",", header = TRUE)  %>%
+data_V3 <- read.csv("../output_WGBS/dedup_V3/parameter_comparison_summary.csv", sep = ",", header = TRUE)  %>%
   mutate(Sample = str_extract(Sample, "LCM_\\d+")) #remove everything but LCM and the number
 
 QC_R1 <- QC_R1 %>% left_join(data_V3)
@@ -380,3 +380,153 @@ ggplot(compare_align, aes(x= iteration, y = Rate, group=Sample, color=Fragment))
 
 ```
 
+## Trimming V4 QC vs Alignment 
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+
+# load in multiqc data
+QC <- read.delim("../output_WGBS/trimmed_V4_qc/multiqc_data/multiqc_general_stats.txt", header = TRUE) %>%
+  filter(!grepl("Undetermined",Sample)) %>%
+  mutate(Sample = str_remove(Sample,"trimmed_V3_"))
+
+colnames(QC) <- c("Sample", "percent_duplicates", "percent_gc", "avg_sequence_length", "percent_fails", "total_sequences")
+
+#reorder so the samples are in numerical order
+QC <- QC[mixedorder(QC$Sample), ]
+
+QC_R1 <- QC %>% filter(grepl("R1",Sample)) %>%
+                mutate(Sample = str_extract(Sample, "^LCM_\\d+")) #remove everything but LCM and the number
+
+QC_R2 <- QC %>% filter(grepl("R2",Sample)) %>%
+                mutate(Sample = str_extract(Sample, "^LCM_\\d+")) #remove everything but LCM and the number
+```
+
+```{r}
+# Load the alignment data
+data_V4 <- read.csv("../output_WGBS/align_V4/parameter_comparison_summary.csv", sep = ",", header = TRUE)  %>%
+  mutate(Sample = str_extract(Sample, "LCM_\\d+")) #remove everything but LCM and the number
+
+QC_R1 <- QC_R1 %>% left_join(data_V4)
+
+QC_R1_long <- QC_R1 %>%
+  pivot_longer(cols = c("percent_duplicates","percent_gc","avg_sequence_length","percent_fails","total_sequences"), 
+               names_to = "QC_Parameter", 
+               values_to = "Value")
+
+QC_R1_long$Sample <- factor(QC_R1_long$Sample, levels = QC_R1$Sample)
+
+# Plot with faceting
+ggplot(QC_R1_long, aes(x = Value, y = Alignment_Rate)) +
+  geom_point(aes(color=Sample)) +
+  geom_smooth(method = "lm") +
+  theme_minimal() +
+  labs(title = "TRIMMED_V4 R1: Alignment Rate (V4) vs. QC Parameters, Score Min: L,0,-1.0",
+       x = "QC Parameter Value",
+       y = "Alignment Rate (%)") +
+  facet_wrap(~ QC_Parameter, scales = "free_x")
+
+ggsave("08-Bismark-Alignment-Assesment-images/alignment_bismark_vs_qc_trimmed_v4_r1.png")
+```
+
+```{r}
+QC_R2 <- QC_R2 %>% left_join(data_V4)
+
+QC_R2_long <- QC_R2 %>%
+  pivot_longer(cols = c("percent_duplicates","percent_gc","avg_sequence_length","percent_fails","total_sequences"), 
+               names_to = "QC_Parameter", 
+               values_to = "Value")
+
+QC_R2_long$Sample <- factor(QC_R2_long$Sample, levels = QC_R2$Sample)
+
+# Plot with faceting
+ggplot(QC_R2_long, aes(x = Value, y = Alignment_Rate)) +
+  geom_point(aes(color=Sample)) +
+  geom_smooth(method = "lm") +
+  theme_minimal() +
+  labs(title = "TRIMMED_V4 R2: Alignment Rate (V4) vs. QC Parameters, Score Min: L,0,-1.0",
+       x = "QC Parameter Value",
+       y = "Alignment Rate (%)") +
+  facet_wrap(~ QC_Parameter, scales = "free_x")
+
+ggsave("08-Bismark-Alignment-Assesment-images/alignment_bismark_vs_qc_trimmed_v4_r2.png")
+```
+
+## batch effects?
+
+```{r}
+meta <- read.csv("../data_WGBS/LCM_WGBS_metadata.csv", sep = ",", header = TRUE) %>%
+  mutate(Section_Date = as.character(Section_Date), LCM_Date = as.character(LCM_Date),DNA_Extraction_Date = as.character(DNA_Extraction_Date))
+
+meta_v4 <- meta %>% left_join(data_V4)
+
+meta_v4_long <- meta_v4 %>%
+  pivot_longer(cols = c("Fragment", "Tissue","Final_Library_Dimer_Content", "Section_Date","LCM_Date","DNA_Extraction_Date"), 
+               names_to = "Batch_Effect", 
+               values_to = "Value_Chr")
+
+meta_v4_long <- meta_v4_long %>% pivot_longer(cols = 3:11, 
+               names_to = "Integer_Batch_Effect", 
+               values_to = "Value_Num")
+
+meta_v4_long$Sample <- factor(meta_v4_long$Sample, levels = QC_R1$Sample)
+
+# Plot with faceting
+ggplot(meta_v4_long, aes(x= Value_Chr, y = Alignment_Rate)) +
+    geom_boxplot() +
+  geom_point(aes(color=Sample)) +
+  theme_bw(base_size = 8) +
+  labs(title = "Alignment Rate vs. Batch Effects",
+       x = "Batch Effect",
+       y = "Alignment Rate (%)") +
+  facet_wrap(~ Batch_Effect, scales = "free_x")
+
+ggsave("08-Bismark-Alignment-Assesment-images/alignment_bismark_trimmed_v4_batch1.png")
+
+ggplot(meta_v4_long, aes(x= Value_Num, y = Alignment_Rate)) +
+  geom_point(aes(color=Sample)) +
+  geom_smooth(method = "lm") +
+  theme_bw(base_size = 8) +
+  labs(title = "Alignment Rate vs. Batch Effects",
+       x = "Batch Effect",
+       y = "Alignment Rate (%)") +
+  facet_wrap(~ Integer_Batch_Effect, scales = "free_x")
+
+ggsave("08-Bismark-Alignment-Assesment-images/alignment_bismark_trimmed_v4_batch2.png")
+```
+
+
+## how much did alignment improve from v2 to v4?
+
+```{r}
+compare_align <- merge(data,data_V3, by = c("Sample","Score_Min")) %>% rename("initial"= Alignment_Rate.x) %>% rename("v3_trim"=Alignment_Rate.y)
+
+compare_align <- merge(compare_align,data_V4, by = c("Sample","Score_Min"))  %>% rename("v4_trim"=Alignment_Rate)
+
+compare_align <- compare_align %>% pivot_longer(cols=c("initial","v3_trim","v4_trim"), names_to="iteration",values_to = "Rate")
+compare_align$Sample <- factor(compare_align$Sample, levels = QC_R1$Sample)
+
+ggplot(compare_align, aes(x= iteration, y = Rate, group=Sample, color=Sample)) +
+  geom_line() +
+  geom_point() +
+  theme_bw(base_size = 8) +
+  labs(title = "Alignment Rate After Trimming V3 and V4",
+       x = "Iteration",
+       y = "Alignment Rate (%)") 
+
+
+ggsave("08-Bismark-Alignment-Assesment-images/alignment_bismark_orig_vs_v4.png")
+
+compare_align <- left_join(compare_align, meta)
+
+ggplot(compare_align, aes(x= iteration, y = Rate, group=Sample, color=Fragment)) +
+  geom_line() +
+  geom_point() +
+  theme_bw(base_size = 8) +
+  labs(title = "Alignment Rate After Trimming V3 and V4",
+       x = "Iteration",
+       y = "Alignment Rate (%)") 
+
+
+```
