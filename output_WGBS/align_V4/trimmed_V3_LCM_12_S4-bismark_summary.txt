@@ -26,3 +26,388 @@ Paired-end alignments will be performed
 The provided filenames for paired-end alignments are /scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V4/trimmed_V3_LCM_12_S4_R1_001.100bp_5prime.fq.gz and /scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V4/trimmed_V3_LCM_12_S4_R2_001.100bp_5prime.fq.gz
 Input files are in FastQ format
 Writing a C -> T converted version of the input file trimmed_V3_LCM_12_S4_R1_001.100bp_5prime.fq.gz to trimmed_V3_LCM_12_S4_R1_001.100bp_5prime.fq.gz_C_to_T.fastq
+
+Created C -> T converted version of the FastQ file trimmed_V3_LCM_12_S4_R1_001.100bp_5prime.fq.gz (132759959 sequences in total)
+
+Writing a G -> A converted version of the input file trimmed_V3_LCM_12_S4_R2_001.100bp_5prime.fq.gz to trimmed_V3_LCM_12_S4_R2_001.100bp_5prime.fq.gz_G_to_A.fastq
+
+Created G -> A converted version of the FastQ file trimmed_V3_LCM_12_S4_R2_001.100bp_5prime.fq.gz (132759959 sequences in total)
+
+Input files are trimmed_V3_LCM_12_S4_R1_001.100bp_5prime.fq.gz_C_to_T.fastq and trimmed_V3_LCM_12_S4_R2_001.100bp_5prime.fq.gz_G_to_A.fastq (FastQ)
+Now running 2 instances of Bowtie 2 against the bisulfite genome of /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/references/ with the specified options: -q --score-min L,0,-1.0 -p 8 --reorder --ignore-quals --no-mixed --no-discordant --dovetail --maxins 500
+
+Now starting a Bowtie 2 paired-end alignment for CTread1GAread2CTgenome (reading in sequences from trimmed_V3_LCM_12_S4_R1_001.100bp_5prime.fq.gz_C_to_T.fastq and trimmed_V3_LCM_12_S4_R2_001.100bp_5prime.fq.gz_G_to_A.fastq, with the options: -q --score-min L,0,-1.0 -p 8 --reorder --ignore-quals --no-mixed --no-discordant --dovetail --maxins 500 --norc))
+Found first alignment:
+LH00260:133:22MCWTLT4:4:1101:2440:1028_1:N:0:TCTCTACT+GNACCGCG/1	77	*	0	0	*	*	0	0	TATTTTGTTTAGTAGATTTTGAGAAGAATGTAATGAGAGAGGATAAGAGGAGAGAGGATAAGAGGAGAGAGGATAAGAGGGGAGAGGATATGAGGAGAGG	9IIIIIIIII999IIII9IIIIIIII-IIIIIIII-I99II9II-II9I9I9II999II-I-9--99--999-99999-I-999-9-I9---99I--99-	YT:Z:UP
+LH00260:133:22MCWTLT4:4:1101:2440:1028_2:N:0:TCTCTACT+GNACCGCG/2	141	*	0	0	*	*	0	0	CCTCTTATCCACTCTCCTCTTATCCTCTCCTCTTATCCTCTCTCCTCTTATCCTCTCTCCTCTTATCATCTCTCCTCTTATCCTCTCTCATTACATTCTT	IIII9III-I999II--IIIII9I9I-II9I-I-IIII9I9I-I9I-99I99-9II99-I9-III99-9-99I-II9I999I99IIIII--9--9999I9	YT:Z:UP
+Now starting a Bowtie 2 paired-end alignment for CTread1GAread2GAgenome (reading in sequences from trimmed_V3_LCM_12_S4_R1_001.100bp_5prime.fq.gz_C_to_T.fastq and trimmed_V3_LCM_12_S4_R2_001.100bp_5prime.fq.gz_G_to_A.fastq, with the options: -q --score-min L,0,-1.0 -p 8 --reorder --ignore-quals --no-mixed --no-discordant --dovetail --maxins 500 --nofw))
+Found first alignment:
+LH00260:133:22MCWTLT4:4:1101:2440:1028_1:N:0:TCTCTACT+GNACCGCG/1	77	*	0	0	*	*	0	0	TATTTTGTTTAGTAGATTTTGAGAAGAATGTAATGAGAGAGGATAAGAGGAGAGAGGATAAGAGGAGAGAGGATAAGAGGGGAGAGGATATGAGGAGAGG	9IIIIIIIII999IIII9IIIIIIII-IIIIIIII-I99II9II-II9I9I9II999II-I-9--99--999-99999-I-999-9-I9---99I--99-	YT:Z:UP
+LH00260:133:22MCWTLT4:4:1101:2440:1028_2:N:0:TCTCTACT+GNACCGCG/2	141	*	0	0	*	*	0	0	CCTCTTATCCACTCTCCTCTTATCCTCTCCTCTTATCCTCTCTCCTCTTATCCTCTCTCCTCTTATCATCTCTCCTCTTATCCTCTCTCATTACATTCTT	IIII9III-I999II--IIIII9I9I-II9I-I-IIII9I9I-I9I-99I99-9II99-I9-III99-9-99I-II9I999I99IIIII--9--9999I9	YT:Z:UP
+
+>>> Writing bisulfite mapping results to trimmed_V3_LCM_12_S4_pe.bam <<<
+
+
+Reading in the sequence files /scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V4/trimmed_V3_LCM_12_S4_R1_001.100bp_5prime.fq.gz and /scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V4/trimmed_V3_LCM_12_S4_R2_001.100bp_5prime.fq.gz
+Processed 1000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1110:36169:22068_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000001	13657492
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1113:22007:24953_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 2000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1114:49416:25920_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000042	624938
+Processed 3000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1124:22938:1714_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 4000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1127:18220:5034_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000379	3834
+Processed 5000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1134:14271:2849_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 6000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1141:10120:9447_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 7000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1145:51965:21535_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000000	1
+Processed 8000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1153:9893:24603_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 9000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1155:33555:4544_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000014	2
+Processed 10000000 sequence pairs so far
+Processed 11000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1165:48437:21087_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1168:18091:16184_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000317	3
+Processed 12000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1174:22889:18047_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 13000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1178:46106:29072_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000045	558343
+Processed 14000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1184:39891:17697_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000004	10346254
+Processed 15000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1187:50096:26256_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000000	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1189:7603:8760_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000001	13657495
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1190:32414:6043_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 16000000 sequence pairs so far
+Processed 17000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1197:31710:3647_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000028	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1197:40676:25332_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000001	13657496
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1198:41769:22432_1:N:0:TCTCTAAT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000004	10346254
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1202:30334:12136_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000287	27155
+Processed 18000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1208:11763:16240_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000042	624938
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1208:40199:18818_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000023	2
+Processed 19000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1214:45313:5735_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000004	10346254
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1215:35740:20933_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000004	10346254
+Processed 20000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1221:7280:23665_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000023	2
+Processed 21000000 sequence pairs so far
+Processed 22000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1228:25172:23286_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000000	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1233:21781:9293_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000001	13657497
+Processed 23000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1239:16958:15876_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1239:40296:29296_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 24000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1240:29088:25584_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000000	2
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1245:6317:10904_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000001	13657493
+Processed 25000000 sequence pairs so far
+Processed 26000000 sequence pairs so far
+Processed 27000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1260:23763:23791_1:N:0:TCTCTACT+GAACCGTG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 28000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1265:28910:8746_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000042	624938
+Processed 29000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1266:50840:20457_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000004	10346254
+Processed 30000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1275:48445:15834_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000000	2
+Processed 31000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1277:23998:2821_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000014	2
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1277:30998:13537_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1278:50290:16311_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1280:41882:17529_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000000	1
+Processed 32000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1284:23553:28217_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000004	10346254
+Processed 33000000 sequence pairs so far
+Processed 34000000 sequence pairs so far
+Processed 35000000 sequence pairs so far
+Processed 36000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1308:35044:1518_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1309:18406:8886_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000004	10346254
+Processed 37000000 sequence pairs so far
+Processed 38000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1318:39511:13453_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000051	3
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1320:12418:28077_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1323:32098:6897_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 39000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1328:51536:19560_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000051	2
+Processed 40000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1330:48113:10889_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1332:51415:8228_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000001	13657492
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1332:26062:9839_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000014	2
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1332:35174:15722_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000051	2
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1332:45167:26466_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000001	13657504
+Processed 41000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1336:35853:10567_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000051	2
+Processed 42000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1341:51576:24197_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000000	2
+Processed 43000000 sequence pairs so far
+Processed 44000000 sequence pairs so far
+Processed 45000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1359:45944:11394_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000045	558343
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1359:45936:11408_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000045	558343
+Processed 46000000 sequence pairs so far
+Processed 47000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1368:44949:15050_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1371:31467:10035_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000004	10346254
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1371:13535:19112_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000023	1
+Processed 48000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1374:6041:8438_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000051	2
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1375:41218:13551_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000023	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1376:1995:24323_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000051	2
+Processed 49000000 sequence pairs so far
+Processed 50000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1383:28133:15078_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000061	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1386:42287:23861_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 51000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1393:31419:8270_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000020	2
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1393:10225:11394_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000114	56582
+Processed 52000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1393:42230:27881_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000045	558344
+Processed 53000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1403:4811:6505_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000042	624938
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1405:36768:2905_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000051	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1407:49165:27335_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000045	558343
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1408:10694:15932_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000000	1
+Processed 54000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1410:37601:8886_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000242	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1410:25010:21073_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000004	10346254
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1414:26207:12865_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 55000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1418:46940:5496_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000004	10346254
+Processed 56000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1421:28263:18440_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 57000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1430:31500:3395_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000004	10346254
+Processed 58000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1434:27445:5174_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1435:1736:23735_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000045	558342
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1437:22283:27559_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 59000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1438:16853:28357_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000042	624938
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1440:29112:9096_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000014	2
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1441:38370:4054_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1442:10856:27167_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 60000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1444:33426:4152_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 61000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1449:43444:29058_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 62000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1457:41324:12108_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 63000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1464:30164:24645_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000061	1
+Processed 64000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1465:33199:17263_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 65000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1474:13195:9363_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000001	13657496
+Processed 66000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1478:31969:21045_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000051	2
+Processed 67000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1483:9950:26410_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 68000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1487:39527:22670_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000014	2
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1488:40433:7738_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000317	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1488:14409:23595_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000045	558342
+Processed 69000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1494:28230:6113_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 70000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:1497:48299:27601_1:N:0:TCCCTACT+GAATCGCG	Pocillopora_acuta_HIv2___xfSc0000051	1
+Processed 71000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2104:6713:28904_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 72000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2112:32891:3115_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000001	13657493
+Processed 73000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2123:19159:4754_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000287	27172
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2124:51892:10371_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000001	13657486
+Processed 74000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2126:14053:7121_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000051	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2128:19766:1546_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2131:16667:18678_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000000	1
+Processed 75000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2132:16124:4992_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2134:18285:23833_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000001	10927330
+Processed 76000000 sequence pairs so far
+Processed 77000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2148:23828:23426_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000051	2
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2150:34186:8774_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000061	1
+Processed 78000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2151:26215:3325_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2153:37909:11156_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000051	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2156:33895:14237_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 79000000 sequence pairs so far
+Processed 80000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2162:36250:23132_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000051	2
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2165:47126:20695_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000001	13657516
+Processed 81000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2169:29072:6365_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000045	558343
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2169:31055:9237_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 82000000 sequence pairs so far
+Processed 83000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2181:6584:2485_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000001	13657491
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2181:22711:20345_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000023	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2183:22736:25318_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000042	624938
+Processed 84000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2189:37310:2611_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000000	2
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2189:17646:11856_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2189:17662:11856_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 85000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2192:28408:25808_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000287	27184
+Processed 86000000 sequence pairs so far
+Processed 87000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2206:36217:4250_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2208:45920:13369_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000051	2
+Processed 88000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2213:24103:15974_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000004	10346254
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2218:8849:8032_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000045	558343
+Processed 89000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2220:27769:29576_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000051	2
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2225:48688:28469_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000004	10346254
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2226:31516:14209_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 90000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2226:37099:25836_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 91000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2236:24467:4474_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000051	2
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2236:9570:12164_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2237:34032:9377_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 92000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2240:24581:19714_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2241:17759:4124_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000327	21905
+Processed 93000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2249:11657:9167_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 94000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2252:42667:14938_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000001	13657509
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2257:26369:13173_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000001	13657496
+Processed 95000000 sequence pairs so far
+Processed 96000000 sequence pairs so far
+Processed 97000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2270:13446:13579_1:N:0:TCTCTACT+CAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2272:34105:21241_1:N:0:TCTCTACT+GAAGCGCG	Pocillopora_acuta_HIv2___Sc0000061	1
+Processed 98000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2278:16432:7990_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 99000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2286:12718:7976_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000004	10346254
+Processed 100000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2287:19240:9601_1:N:0:TCTCTACT+GAATCGCG	Pocillopora_acuta_HIv2___Sc0000014	2
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2290:42513:9068_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 101000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2292:38451:23861_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000051	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2294:47409:7430_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000051	2
+Processed 102000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2298:22177:6393_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000000	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2303:21465:18608_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2307:29825:13411_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 103000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2313:29622:21549_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000023	2
+Processed 104000000 sequence pairs so far
+Processed 105000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2324:19944:23286_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000045	558343
+Processed 106000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2332:21668:18846_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 107000000 sequence pairs so far
+132759959 reads; of these:
+  132759959 (100.00%) were paired; of these:
+    101446080 (76.41%) aligned concordantly 0 times
+    13926028 (10.49%) aligned concordantly exactly 1 time
+    17387851 (13.10%) aligned concordantly >1 times
+23.59% overall alignment rate
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2342:41429:28960_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000001	10927299
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2343:18795:19028_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 108000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2348:17120:24309_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000004	10346254
+Processed 109000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2351:6551:20471_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000061	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2351:6567:20471_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000061	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2355:42780:20849_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 110000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2357:11916:20625_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2359:27704:27279_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000004	10346254
+Processed 111000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2361:4965:28875_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 112000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2368:7450:10539_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000045	558344
+Processed 113000000 sequence pairs so far
+Processed 114000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2381:46041:4530_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000020	2
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2383:40733:20247_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000023	1
+Processed 115000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2384:28700:27349_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000061	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2384:31427:27475_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 116000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2391:31006:15680_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000020	2
+Processed 117000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2401:41979:16268_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000014	2
+Processed 118000000 sequence pairs so far
+Processed 119000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2415:26207:21661_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 120000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2422:35586:16465_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 121000000 sequence pairs so far
+132759959 reads; of these:
+  132759959 (100.00%) were paired; of these:
+    101395273 (76.37%) aligned concordantly 0 times
+    13944469 (10.50%) aligned concordantly exactly 1 time
+    17420217 (13.12%) aligned concordantly >1 times
+23.63% overall alignment rate
+Processed 122000000 sequence pairs so far
+Processed 123000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2446:42392:10175_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2447:3306:16226_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000045	558343
+Processed 124000000 sequence pairs so far
+Processed 125000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2455:43978:25360_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000014	2
+Processed 126000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2463:8154:14111_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000051	1
+Processed 127000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2471:14312:25107_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000311	1
+Processed 128000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2475:12337:16815_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000004	10346254
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2477:46074:26074_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Processed 129000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2481:31864:21367_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000020	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2483:21894:21900_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000001	10927324
+Processed 130000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2483:20429:29114_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000000	2
+Processed 131000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2489:38880:19616_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000011	1
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2491:4771:4558_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___Sc0000001	13657491
+Processed 132000000 sequence pairs so far
+Chromosomal sequence could not be extracted for	LH00260:133:22MCWTLT4:4:2495:31014:4852_1:N:0:TCTCTACT+GAACCGCG	Pocillopora_acuta_HIv2___xfSc0000023	1
+Processed 132759959 sequences in total
+
+
+Successfully deleted the temporary files trimmed_V3_LCM_12_S4_R1_001.100bp_5prime.fq.gz_C_to_T.fastq and trimmed_V3_LCM_12_S4_R2_001.100bp_5prime.fq.gz_G_to_A.fastq
+
+Final Alignment report
+======================
+Sequence pairs analysed in total:	132759959
+Final Cytosine Methylation Report
+=================================
+Total number of C's analysed:	1426337506
+
+Total methylated C's in CpG context:	34453234
+Total methylated C's in CHG context:	38508989
+Total methylated C's in CHH context:	160279394
+Total methylated C's in Unknown context:	1108912
+
+Total unmethylated C's in CpG context:	179459677
+Total unmethylated C's in CHG context:	211929168
+Total unmethylated C's in CHH context:	801707044
+Total unmethylated C's in Unknown context:	3329359
+
+C methylated in CpG context:	16.1%
+C methylated in CHG context:	15.4%
+C methylated in CHH context:	16.7%
+C methylated in unknown context (CN or CHN):	25.0%
+
+
+Bismark completed in 0d 6h 44m 46s
+
+====================
+Bismark run complete
+====================
+

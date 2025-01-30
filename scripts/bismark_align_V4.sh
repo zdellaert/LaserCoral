@@ -68,7 +68,8 @@ echo "Sample,Score_Min,Alignment_Rate" > ${summary_file}
 
 for file in ${output_dir}/*_report.txt; do
     # Extract sample name and from directory name
-    sample_name=$(basename "$file" | cut -d'_' -f1-4)
+    sample_name=$(basename "$file" | cut -d'_' -f1-5)
+    short_name=$(basename "$file" | cut -d'_' -f3-4)
     score_min="L0-1.0"
 
     # Locate the summary file
@@ -78,5 +79,5 @@ for file in ${output_dir}/*_report.txt; do
     mapping=$(grep "Mapping efficiency:" ${summary_file_path} | awk '{gsub("%", "", $3); print $3}')
 
     # Append to the summary file
-    echo "${sample_name},${score_min},${mapping}" >> ${summary_file}
+    echo "${short_name},${score_min},${mapping}" >> ${summary_file}
 done
