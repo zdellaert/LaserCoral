@@ -1,0 +1,42 @@
+Bismark report for: data_WGBS/trimmed_V3_LCM_11_S3_R1_001.fastq.gz and data_WGBS/trimmed_V3_LCM_11_S3_R2_001.fastq.gz (version: v0.23.1)
+Bismark was run with HISAT2 against the bisulfite genome of /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/references/Bisulfite_Genome_hisat2/ with the specified options: -q --score-min L,0,-0.2 -p 4 --reorder --ignore-quals --no-mixed --no-discordant --maxins 500 --no-softclip --omit-sec-seq
+Option '--directional' specified (default mode): alignments to complementary strands (CTOT, CTOB) were ignored (i.e. not performed)
+
+Final Alignment report
+======================
+Sequence pairs analysed in total:	148474696
+Number of paired-end alignments with a unique best hit:	26305367
+Mapping efficiency:	17.7% 
+Sequence pairs with no alignments under any condition:	115709607
+Sequence pairs did not map uniquely:	6459722
+Sequence pairs which were discarded because genomic sequence could not be extracted:	59
+
+Number of sequence pairs with unique best (first) alignment came from the bowtie output:
+CT/GA/CT:	13130825	((converted) top strand)
+GA/CT/CT:	0	(complementary to (converted) top strand)
+GA/CT/GA:	0	(complementary to (converted) bottom strand)
+CT/GA/GA:	13174483	((converted) bottom strand)
+
+Number of alignments to (merely theoretical) complementary strands being rejected in total:	0
+
+Final Cytosine Methylation Report
+=================================
+Total number of C's analysed:	1436241624
+
+Total methylated C's in CpG context:	31745588
+Total methylated C's in CHG context:	33837924
+Total methylated C's in CHH context:	135120384
+Total methylated C's in Unknown context:	71927
+
+Total unmethylated C's in CpG context:	187302218
+Total unmethylated C's in CHG context:	221729995
+Total unmethylated C's in CHH context:	826505515
+Total unmethylated C's in Unknown context:	688603
+
+C methylated in CpG context:	14.5%
+C methylated in CHG context:	13.2%
+C methylated in CHH context:	14.1%
+C methylated in unknown context (CN or CHN):	9.5%
+
+
+Bismark completed in 0d 4h 24m 34s
