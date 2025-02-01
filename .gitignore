@@ -53,6 +53,9 @@ output_WGBS/*/*CpG_report.txt
 #temporary file directories
 tmp*/
 scripts/outs_errs/bismark_align*
+scripts/outs_errs/methylseq*
+scripts/outs_errs/.nextflow*
+scripts/methylseq*
 
 #blast databases
 references/blast_dbs/*
@@ -60,5 +63,5 @@ references/blast_dbs/*
 #large unzipped output files
 output_RNA/differential_expression/blast/DEG_05_blast_results_full.txt
 code/go_mwu/dissim*
-references/Bisulfite_Genome/
-
+references/Bisulfite_Genome*
+.nextflow/*

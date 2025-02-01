@@ -1,0 +1,52 @@
+Detecting adapter sequence for read1...
+>Illumina TruSeq Adapter Read 1
+AGATCGGAAGAGCACACGTCTGAACTCCAGTCA
+
+Detecting adapter sequence for read2...
+>Illumina TruSeq Adapter Read 2
+AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
+
+WARNING: fastp uses up to 16 threads although you specified 20
+Read1 before filtering:
+total reads: 311337108
+total bases: 47011903308
+Q20 bases: 44125027857(93.8593%)
+Q30 bases: 39898625759(84.8692%)
+
+Read2 before filtering:
+total reads: 311337108
+total bases: 47011903308
+Q20 bases: 43827550416(93.2265%)
+Q30 bases: 39474546475(83.9671%)
+
+Read1 after filtering:
+total reads: 271926837
+total bases: 18649546100
+Q20 bases: 17885930509(95.9054%)
+Q30 bases: 16658769365(89.3253%)
+
+Read2 after filtering:
+total reads: 271926837
+total bases: 22335853887
+Q20 bases: 20937760076(93.7406%)
+Q30 bases: 18810788102(84.2179%)
+
+Filtering result:
+reads passed filter: 543853674
+reads failed due to low quality: 34683806
+reads failed due to too many N: 20918
+reads failed due to too short: 44115818
+reads with adapter trimmed: 102428961
+bases trimmed due to adapters: 4234363414
+reads with polyX in 3' end: 37107340
+bases trimmed in polyX tail: 433929514
+
+Duplication rate: 53.9034%
+
+Insert size peak (evaluated by paired-end reads): 50
+
+JSON report: /home/zdellaert_uri_edu/LaserCoral/output_WGBS/trimmed_V6_qc/LCM_3.fastp-trim.report.json
+HTML report: /home/zdellaert_uri_edu/LaserCoral/output_WGBS/trimmed_V6_qc/LCM_3.fastp-trim.report.html
+
+fastp --in1 LCM_3_S2_R1_001.fastq.gz --in2 LCM_3_S2_R2_001.fastq.gz --detect_adapter_for_pe --trim_poly_g --trim_poly_x --thread 20 --trim_front1 25 --trim_front2 25 --html /home/zdellaert_uri_edu/LaserCoral/output_WGBS/trimmed_V6_qc/LCM_3.fastp-trim.report.html --json /home/zdellaert_uri_edu/LaserCoral/output_WGBS/trimmed_V6_qc/LCM_3.fastp-trim.report.json --out1 /scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V6//LCM_3_S2_R1_001.fastq.gz.fastp-trim.fq.gz --out2 /scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V6//LCM_3_S2_R2_001.fastq.gz.fastp-trim.fq.gz 
+fastp v0.23.2, time used: 655 seconds
