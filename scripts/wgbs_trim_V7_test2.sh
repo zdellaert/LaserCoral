@@ -12,7 +12,7 @@
 R1_raw=($(ls LCM_1_*R1*.fastq.gz))
 R2_raw=($(ls LCM_1_*R2*.fastq.gz))
 
-for i in ${!R1_raw[@]}; do
+#for i in ${!R1_raw[@]}; do
 
 # base_name=${R1_raw[$i]%%_R1*.fastq.gz}
 
@@ -37,6 +37,51 @@ for i in ${!R1_raw[@]}; do
 
 # for i in ${!R1_raw[@]}; do
 
+# base_name=${R1_raw[$i]%%_R1*.fastq.gz}
+
+#     flexbar \
+#     -r ${R1_raw[$i]} \
+#     -p ${R2_raw[$i]} \
+#     -a adapters.fasta \
+#     --adapter-min-overlap 3 \
+#     --adapter-error-rate 0.1 \
+#     --adapter-trim-end ANY \
+#     --qtrim TAIL --qtrim-threshold 20 \
+#     --qtrim-format sanger \
+#     --min-read-length 40 \
+#     --htrim-right G \
+#     --zip-output GZ \
+#     --threads 120 \
+#     -t ${base_name}_fbtrim_test_ANY
+
+#     echo "Trimming of ${R1_raw[$i]} and ${R2_raw[$i]} complete"
+# done
+
+# for i in ${!R1_raw[@]}; do
+
+# base_name=${R1_raw[$i]%%_R1*.fastq.gz}
+
+#     flexbar \
+#     -r ${R1_raw[$i]} \
+#     -p ${R2_raw[$i]} \
+#     -a adapters.fasta \
+#     --adapter-min-overlap 3 \
+#     --adapter-error-rate 0.1 \
+#     --adapter-trim-end ANY \
+#     --qtrim TAIL --qtrim-threshold 20 \
+#     --qtrim-format sanger \
+#     --min-read-length 40 \
+#     --htrim-right G \
+#     --htrim-left G \
+#     --zip-output GZ \
+#     --threads 120 \
+#     -t ${base_name}_fbtrim_test_RLG
+
+#    echo "Trimming of ${R1_raw[$i]} and ${R2_raw[$i]} complete"
+#done
+
+for i in ${!R1_raw[@]}; do
+
 base_name=${R1_raw[$i]%%_R1*.fastq.gz}
 
     flexbar \
@@ -45,14 +90,15 @@ base_name=${R1_raw[$i]%%_R1*.fastq.gz}
     -a adapters.fasta \
     --adapter-min-overlap 3 \
     --adapter-error-rate 0.1 \
-    --adapter-trim-end ANY \
+    --adapter-trim-end RIGHT \
+    --adapter-pair-overlap ON \
     --qtrim TAIL --qtrim-threshold 20 \
     --qtrim-format sanger \
     --min-read-length 40 \
     --htrim-right G \
     --zip-output GZ \
     --threads 120 \
-    -t ${base_name}_fbtrim_test_ANY
+    -t ${base_name}_fbtrim_test_polyAdapt
 
     echo "Trimming of ${R1_raw[$i]} and ${R2_raw[$i]} complete"
 done
@@ -67,15 +113,38 @@ base_name=${R1_raw[$i]%%_R1*.fastq.gz}
     -a adapters.fasta \
     --adapter-min-overlap 3 \
     --adapter-error-rate 0.1 \
-    --adapter-trim-end ANY \
+    --adapter-trim-end RIGHT \
+    --adapter-pair-overlap ON \
     --qtrim TAIL --qtrim-threshold 20 \
     --qtrim-format sanger \
     --min-read-length 40 \
-    --htrim-right G \
-    --htrim-left G \
+    --htrim-left AG --htrim-right AG \
     --zip-output GZ \
     --threads 120 \
-    -t ${base_name}_fbtrim_test_RLG
+    -t ${base_name}_fbtrim_test_polyAdaptTrim
+
+    echo "Trimming of ${R1_raw[$i]} and ${R2_raw[$i]} complete"
+done
+
+for i in ${!R1_raw[@]}; do
+
+base_name=${R1_raw[$i]%%_R1*.fastq.gz}
+
+    flexbar \
+    -r ${R1_raw[$i]} \
+    -p ${R2_raw[$i]} \
+    --adapter-preset TruSeq \
+    --adapter-min-overlap 3 \
+    --adapter-error-rate 0.1 \
+    --adapter-trim-end RIGHT \
+    --adapter-pair-overlap ON \
+    --qtrim WIN --qtrim-threshold 20 \
+    --qtrim-format sanger \
+    --min-read-length 40 \
+    --htrim-right G \
+    --zip-output GZ \
+    --threads 120 \
+    -t ${base_name}_fbtrim_test_WIN
 
     echo "Trimming of ${R1_raw[$i]} and ${R2_raw[$i]} complete"
 done
@@ -84,8 +153,6 @@ done
 module purge
 module load parallel/20240822
 module load fastqc/0.12.1
-module load uri/main
-module load all/MultiQC/1.12-foss-2021b
 
 # Create an array of fastq files to process
 files=($('ls' *fbtrim_test*gz)) 
@@ -94,5 +161,3 @@ files=($('ls' *fbtrim_test*gz))
 echo "Starting fastqc..." $(date)
 parallel -j 20 "fastqc {} -o ${qc_dir} && echo 'Processed {}'" ::: "${files[@]}"
 echo "fastQC done." $(date)
-
-multiqc *  #Compile MultiQC report from FastQC files 
