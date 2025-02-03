@@ -380,6 +380,96 @@ ggplot(compare_align, aes(x= iteration, y = Rate, group=Sample, color=Fragment))
 
 ```
 
+## Hisat alignment with V3 trimming, default params
+
+```{r}
+QC_R1 <- QC %>% filter(grepl("R1",Sample)) %>%
+                mutate(Sample = str_extract(Sample, "^LCM_\\d+")) #remove everything but LCM and the number
+
+QC_R2 <- QC %>% filter(grepl("R2",Sample)) %>%
+                mutate(Sample = str_extract(Sample, "^LCM_\\d+")) #remove everything but LCM and the number
+
+# Load the alignment data
+data_V3_hisat <- read.csv("../output_WGBS/align_hisat_V3/parameter_comparison_summary.csv", sep = ",", header = TRUE)  %>%
+  mutate(Sample = str_extract(Sample, "LCM_\\d+")) #remove everything but LCM and the number
+
+QC_R1 <- QC_R1 %>% left_join(data_V3_hisat)
+
+QC_R1_long <- QC_R1 %>%
+  pivot_longer(cols = c("percent_duplicates","percent_gc","avg_sequence_length","percent_fails","total_sequences"), 
+               names_to = "QC_Parameter", 
+               values_to = "Value")
+
+QC_R1_long$Sample <- factor(QC_R1_long$Sample, levels = QC_R1$Sample)
+
+# Plot with faceting
+ggplot(QC_R1_long, aes(x = Value, y = Alignment_Rate)) +
+  geom_point(aes(color=Sample)) +
+  geom_smooth(method = "lm") +
+  theme_minimal() +
+  labs(title = "Hisat2 Alignment Rate (R1) vs. QC Parameters",
+       x = "QC Parameter Value",
+       y = "Alignment Rate (%)") +
+  facet_wrap(~ QC_Parameter, scales = "free_x")
+
+ggsave("08-Bismark-Alignment-Assesment-images/alignment_bismark_vs_qc_trimmed_hisat_v3_r1.png")
+```
+
+```{r}
+QC_R2 <- QC_R2 %>% left_join(data_V3_hisat)
+
+QC_R2_long <- QC_R2 %>%
+  pivot_longer(cols = c("percent_duplicates","percent_gc","avg_sequence_length","percent_fails","total_sequences"), 
+               names_to = "QC_Parameter", 
+               values_to = "Value")
+
+QC_R2_long$Sample <- factor(QC_R2_long$Sample, levels = QC_R2$Sample)
+
+# Plot with faceting
+ggplot(QC_R2_long, aes(x = Value, y = Alignment_Rate)) +
+  geom_point(aes(color=Sample)) +
+  geom_smooth(method = "lm") +
+  theme_minimal() +
+  labs(title = "Hisat2 Alignment Rate (R2) vs. QC Parameters",,
+       x = "QC Parameter Value",
+       y = "Alignment Rate (%)") +
+  facet_wrap(~ QC_Parameter, scales = "free_x")
+
+ggsave("08-Bismark-Alignment-Assesment-images/alignment_bismark_vs_qc_trimmed_hisat_v3_r2.png")
+```
+
+## how much did alignment improve from bowtie to hisat?
+
+```{r}
+compare_align <- merge(data_V3,data_V3_hisat, by = c("Sample")) %>% rename("bowtie"= Alignment_Rate.x) %>% rename("hisat"=Alignment_Rate.y) %>% select(-c(Score_Min.x,Score_Min.y))
+
+compare_align <- compare_align %>% pivot_longer(cols=c("bowtie","hisat"), names_to="aligner",values_to = "Rate")
+compare_align$Sample <- factor(compare_align$Sample, levels = QC_R1$Sample)
+
+ggplot(compare_align, aes(x= aligner, y = Rate, group=Sample, color=Sample)) +
+  geom_line() +
+  geom_point() +
+  theme_bw(base_size = 8) +
+  labs(title = "Alignment Rate After Trimming V3",
+       x = "Iteration",
+       y = "Alignment Rate (%)") 
+
+
+ggsave("08-Bismark-Alignment-Assesment-images/alignment_bismark_bowtie_vs_hisat.png")
+
+compare_align <- left_join(compare_align, meta)
+
+ggplot(compare_align, aes(x= aligner, y = Rate, group=Sample, color=Fragment)) +
+  geom_line() +
+  geom_point() +
+  theme_bw(base_size = 8) +
+  labs(title = "Alignment Rate After Trimming V3",
+       x = "Iteration",
+       y = "Alignment Rate (%)") 
+
+
+```
+
 ## Trimming V4 QC vs Alignment 
 
 ```{r}

@@ -1187,6 +1187,24 @@ nextflow run nf-core/methylseq \
 ### Run with default parameters
 
 ```
+nano data_WGBS/LCM_methylseq_input.csv
+```
+
+```
+sample,fastq_1,fastq_2,genome
+LCM_1,data_WGBS/LCM_1_S1_R1_001.fastq.gz,data_WGBS/LCM_1_S1_R2_001.fastq.gz,
+LCM_3,data_WGBS/LCM_3_S2_R1_001.fastq.gz,data_WGBS/LCM_3_S2_R2_001.fastq.gz,
+LCM_11,data_WGBS/LCM_11_S3_R1_001.fastq.gz,data_WGBS/LCM_11_S3_R2_001.fastq.gz,
+LCM_12,data_WGBS/LCM_12_S4_R1_001.fastq.gz,data_WGBS/LCM_12_S4_R2_001.fastq.gz,
+LCM_17,data_WGBS/LCM_17_S7_R1_001.fastq.gz,data_WGBS/LCM_17_S7_R2_001.fastq.gz,
+LCM_18,data_WGBS/LCM_18_S8_R1_001.fastq.gz,data_WGBS/LCM_18_S8_R2_001.fastq.gz,
+LCM_24,data_WGBS/LCM_24_S5_R1_001.fastq.gz,data_WGBS/LCM_24_S5_R2_001.fastq.gz,
+LCM_25,data_WGBS/LCM_25_S6_R1_001.fastq.gz,data_WGBS/LCM_25_S6_R2_001.fastq.gz,
+LCM_32,data_WGBS/LCM_32_S9_R1_001.fastq.gz,data_WGBS/LCM_32_S9_R2_001.fastq.gz,
+LCM_33,data_WGBS/LCM_33_S10_R1_001.fastq.gz,data_WGBS/LCM_33_S10_R2_001.fastq.gz,
+```
+
+```
 nano scripts/methylseq.sh 
 ```
 
@@ -1372,7 +1390,10 @@ done
 
 ### hisat interpretation
 
-this is not working well. getting 0% alignment for most samples. Really not sure why.
+Hisat with default parameters had decreased alignment rates. Could try making the hisat parameters less stringent but there is less documentation on this. 
+
+<img src="08-Bismark-Alignment-Assesment-images/alignment_bismark_bowtie_vs_hisat.png?raw=true" height="400">
+
 
 ## Trimming V5: Poly A
 
@@ -1401,10 +1422,10 @@ R1_raw=($('ls' trimmed_V3_LCM*R1*.fastq.gz))
 R2_raw=($('ls' trimmed_V3_LCM*R2*.fastq.gz))
 
 #make trimmed_V5_qc output folder
-mkdir -p ../output_WGBS/trimmed_V5_qc/
+mkdir -p /home/zdellaert_uri_edu/LaserCoral/output_WGBS/trimmed_V5_qc
 mkdir -p /scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V5/
 output_dir="/scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V5/"
-qc_dir="../output_WGBS/trimmed_V5_qc/"
+qc_dir="/home/zdellaert_uri_edu/LaserCoral/output_WGBS/trimmed_V5_qc"
 
 for i in ${!R1_raw[@]}; do
     cutadapt \
@@ -1445,3 +1466,319 @@ echo "QC of trimmed data complete." $(date)
 ```
 
 ### Trimming version 5 interpretation
+
+This got rid of poly-A but the GC content graphs are still double-peaked enough to the point where I'm not going to try aligning these yet at this stage.
+
+## Trimming V6: FastP
+
+Inspired by Sam White's work here:
+https://robertslab.github.io/sams-notebook/posts/2025/2025-01-02-Trimming---A.pulchra-WGBS-with-fastp-FastQC-and-MultiQC-on-Raven/
+
+```
+nano scripts/wgbs_trim_V6.sh #write script for first trimming pass and QC, enter text in next code chunk
+```
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --ntasks=1 --cpus-per-task=20 #split one task over multiple CPU
+#SBATCH --mem=200GB
+#SBATCH -t 12:00:00
+#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
+#SBATCH --error=../scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=../scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/data_WGBS
+
+# load modules needed
+
+module load uri/main
+module load fastp/0.23.2-GCC-11.2.0
+
+#make arrays of R1 and R2 reads
+R1_raw=($('ls' LCM*R1*.fastq.gz))
+R2_raw=($('ls' LCM*R2*.fastq.gz))
+
+sample_name=$(basename $R1_raw | cut -d'_' -f1-2)
+
+#make trimmed_V6_qc output folder
+mkdir -p /home/zdellaert_uri_edu/LaserCoral/output_WGBS/trimmed_V6_qc
+mkdir -p /scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V6/
+output_dir="/scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V6/"
+qc_dir="/home/zdellaert_uri_edu/LaserCoral/output_WGBS/trimmed_V6_qc"
+
+for i in ${!R1_raw[@]}; do
+
+sample_name=$(basename ${R1_raw[$i]} | cut -d'_' -f1-2)
+
+  fastp \
+  --in1 ${R1_raw[$i]} \
+  --in2 ${R2_raw[$i]} \
+  --detect_adapter_for_pe \
+  --trim_poly_g \
+  --trim_poly_x \
+  --thread 16 \
+  --trim_front1 25 \
+  --trim_front2 25 \
+  --html ${qc_dir}/"$sample_name".fastp-trim.report.html \
+  --json ${qc_dir}/"$sample_name".fastp-trim.report.json \
+  --out1 ${output_dir}/"${R1_raw[$i]}".fastp-trim.fq.gz \
+  --out2 ${output_dir}/"${R2_raw[$i]}".fastp-trim.fq.gz \
+  2> ../scripts/outs_errs/"$sample_name".fastp-trim.stderr
+
+    echo "trimming of $sample_name: ${R1_raw[$i]} and ${R2_raw[$i]} complete"
+done
+
+# load modules needed
+module purge
+module load parallel/20240822
+module load fastqc/0.12.1
+module load uri/main
+module load all/MultiQC/1.12-foss-2021b
+
+# go to directory with trimmed files
+
+cd /scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V6
+
+# Create an array of fastq files to process
+files=($('ls' trimmed_V6*.fastq.gz)) 
+
+# Run fastqc in parallel
+echo "Starting fastqc..." $(date)
+parallel -j 20 "fastqc {} -o ${qc_dir} && echo 'Processed {}'" ::: "${files[@]}"
+echo "fastQC done." $(date)
+
+cd ${qc_dir}
+
+#Compile MultiQC report from FastQC files
+multiqc *  #Compile MultiQC report from FastQC files 
+
+echo "QC of trimmed data complete." $(date)
+```
+
+
+## Trimming V7: Flexbar
+
+Install:
+
+```
+cd work/pi_hputnam_uri_edu/pgrams
+
+wget https://github.com/seqan/flexbar/releases/download/v3.5.0/flexbar-3.5.0-linux.tar.gz
+tar xzf flexbar-3.5.0-linux.tar.gz
+
+echo 'export PATH=/work/pi_hputnam_uri_edu/pgrams/flexbar-3.5.0-linux:$PATH' >> ~/.bash_profile
+echo 'export LD_LIBRARY_PATH=/work/pi_hputnam_uri_edu/pgrams/flexbar-3.5.0-linux:$LD_LIBRARY_PATH' >> ~/.bash_profile
+
+source ~/.bash_profile
+
+flexbar -h
+```
+
+```
+nano scripts/wgbs_trim_V7_test2.sh
+```
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --ntasks=1 --cpus-per-task=128
+#SBATCH --mem=500GB
+#SBATCH -t 24:00:00
+#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80
+#SBATCH --error=../scripts/outs_errs/"%x_error.%j"
+#SBATCH --output=../scripts/outs_errs/"%x_output.%j"
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/data_WGBS
+
+# Make arrays of R1 and R2 reads
+R1_raw=($(ls LCM_1_*R1*.fastq.gz))
+R2_raw=($(ls LCM_1_*R2*.fastq.gz))
+
+for i in ${!R1_raw[@]}; do
+
+base_name=${R1_raw[$i]%%_R1*.fastq.gz}
+
+    flexbar \
+    -r ${R1_raw[$i]} \
+    -p ${R2_raw[$i]} \
+    --adapter-preset TruSeq \
+    --adapter-min-overlap 3 \
+    --adapter-error-rate 0.1 \
+    --adapter-trim-end RIGHT \
+    --adapter-pair-overlap ON \
+    --qtrim TAIL --qtrim-threshold 20 \
+    --qtrim-format sanger \
+    --min-read-length 40 \
+    --htrim-right G \
+    --zip-output GZ \
+    --threads 120 \
+    -t ${base_name}_fbtrim
+
+    echo "Trimming of ${R1_raw[$i]} and ${R2_raw[$i]} complete"
+done
+
+for i in ${!R1_raw[@]}; do
+
+base_name=${R1_raw[$i]%%_R1*.fastq.gz}
+
+    flexbar \
+    -r ${R1_raw[$i]} \
+    -p ${R2_raw[$i]} \
+    --adapter-preset TruSeq \
+    --adapter-min-overlap 3 \
+    --adapter-error-rate 0.1 \
+    --adapter-trim-end ANY \
+    --adapter-pair-overlap ON \
+    --qtrim TAIL --qtrim-threshold 20 \
+    --qtrim-format sanger \
+    --min-read-length 40 \
+    --htrim-right G \
+    --zip-output GZ \
+    --threads 120 \
+    -t ${base_name}_fbtrim_ALL
+
+    echo "Trimming of ${R1_raw[$i]} and ${R2_raw[$i]} complete"
+done
+
+for i in ${!R1_raw[@]}; do
+
+base_name=${R1_raw[$i]%%_R1*.fastq.gz}
+
+    flexbar \
+    -r ${R1_raw[$i]} \
+    -p ${R2_raw[$i]} \
+    --adapter-preset TruSeq \
+    --adapter-min-overlap 3 \
+    --adapter-error-rate 0.1 \
+    --adapter-trim-end ANY \
+    --adapter-pair-overlap ON \
+    --qtrim TAIL --qtrim-threshold 20 \
+    --qtrim-format sanger \
+    --min-read-length 40 \
+    --htrim-right G \
+    --htrim-left G \
+    --zip-output GZ \
+    --threads 120 \
+    -t ${base_name}_fbtrim_RLG
+
+    echo "Trimming of ${R1_raw[$i]} and ${R2_raw[$i]} complete"
+done
+
+# load modules needed
+module purge
+module load parallel/20240822
+module load fastqc/0.12.1
+module load uri/main
+module load all/MultiQC/1.12-foss-2021b
+
+# Create an array of fastq files to process
+files=($('ls' *fbtrim*)) 
+
+# Run fastqc in parallel
+echo "Starting fastqc..." $(date)
+parallel -j 20 "fastqc {} -o ${qc_dir} && echo 'Processed {}'" ::: "${files[@]}"
+echo "fastQC done." $(date)
+
+multiqc *  #Compile MultiQC report from FastQC files 
+```
+
+
+Example commented code:
+
+```
+    flexbar \
+    -r ${R1_raw[$i]} \
+    -p ${R2_raw[$i]} \
+    --adapter-preset TruSeq \
+    --adapter-min-overlap 3 \ #could decrease this
+    --adapter-error-rate 0.1 \ #could increase this
+    --adapter-trim-end RIGHT \ #could change to ANY
+    --adapter-pair-overlap ON \ #default is off, but recommended to be on
+    --qtrim TAIL --qtrim-threshold 20 \
+    --qtrim-format sanger \
+    --min-read-length 40 \
+    --htrim-right G \ #trim poly-G
+    --zip-output GZ \
+    --threads 20 \
+    -t ${base_name}_fbtrim
+```
+
+### run this on LCM_1 with a few different params to look through fastQC
+
+
+### eventually:
+
+
+```
+nano scripts/wgbs_trim_V7.sh
+```
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --ntasks=1 --cpus-per-task=40
+#SBATCH --mem=500GB
+#SBATCH -t 48:00:00
+#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80
+#SBATCH --error=../scripts/outs_errs/"%x_error.%j"
+#SBATCH --output=../scripts/outs_errs/"%x_output.%j"
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/data_WGBS
+
+#make arrays of R1 and R2 reads
+R1_raw=($('ls' LCM*R1*.fastq.gz))
+R2_raw=($('ls' LCM*R2*.fastq.gz))
+
+#make trimmed_V6_qc output folder
+mkdir -p /home/zdellaert_uri_edu/LaserCoral/output_WGBS/trimmed_V7_qc
+mkdir -p /scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V7/
+output_dir="/scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V7/"
+qc_dir="/home/zdellaert_uri_edu/LaserCoral/output_WGBS/trimmed_V7_qc"
+
+for i in ${!R1_raw[@]}; do
+
+sample_name=$(basename ${R1_raw[$i]} | cut -d'_' -f1-2)
+
+    flexbar \
+    -r ${R1_raw[$i]} \
+    -p ${R2_raw[$i]} \
+    --adapter-preset TruSeq \
+    --adapter-min-overlap 3 \
+    --adapter-error-rate 0.1 \
+    --adapter-trim-end RIGHT \
+    --adapter-pair-overlap ON \
+    --qtrim TAIL --qtrim-threshold 20 \
+    --qtrim-format sanger \
+    --min-read-length 40 \
+    --htrim-right G \
+    --zip-output GZ \
+    --threads 40 \
+    -t ${output_dir}/"${sample_name}"_fbtrim
+
+    echo "Trimming of ${R1_raw[$i]} and ${R2_raw[$i]} complete"
+done
+
+# load modules needed
+module purge
+module load parallel/20240822
+module load fastqc/0.12.1
+module load uri/main
+module load all/MultiQC/1.12-foss-2021b
+
+# go to directory with trimmed files
+
+cd ${output_dir}
+
+# Create an array of fastq files to process
+files=($('ls' *.fastq.gz)) 
+
+# Run fastqc in parallel
+echo "Starting fastqc..." $(date)
+parallel -j 20 "fastqc {} -o ${qc_dir} && echo 'Processed {}'" ::: "${files[@]}"
+echo "fastQC done." $(date)
+
+cd ${qc_dir}
+
+#Compile MultiQC report from FastQC files
+multiqc *  #Compile MultiQC report from FastQC files 
+
+echo "QC of trimmed data complete." $(date)
+```
