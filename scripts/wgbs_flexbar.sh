@@ -31,13 +31,14 @@ flexbar \
     -t "${sample_name}_flexbar"
 
 # load modules needed
+module load parallel/20240822
 module load fastqc/0.12.1
 
 #make trimmed_flexbar_qc output folder
-mkdir ../output_WGBS/trimmed_flexbar_qc/
+mkdir -p ../output_WGBS/trimmed_flexbar_qc/
 
 # Create an array of fastq files to process
-files=($('ls' ${sample_name}_flexbar*)) 
+files=($('ls' ${sample_name}_flexbar*gz)) 
 
 # Run fastqc in parallel
 echo "Starting fastqc..." $(date)

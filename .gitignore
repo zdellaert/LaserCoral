@@ -68,3 +68,5 @@ code/go_mwu/dissim*
 references/Bisulfite_Genome*
 .nextflow/*
 references/Pocillopora_acuta_HIv2.assembly.fasta.fai
+output_WGBS/*/*gz
+output_WGBS/*/*/*gz

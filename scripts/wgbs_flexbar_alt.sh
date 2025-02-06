@@ -33,10 +33,11 @@ flexbar \
     -t "${output_dir}/${sample_name}_flexbar_alt"
 
 # load modules needed
+module load parallel/20240822
 module load fastqc/0.12.1
 
 #make trimmed_flexbar_qc output folder
-mkdir ../output_WGBS/trimmed_flexbar_alt_qc/
+mkdir -p ../output_WGBS/trimmed_flexbar_alt_qc/
 
 # Create an array of fastq files to process
 files=($('ls' ${output_dir}/${sample_name}_flexbar*gz)) 

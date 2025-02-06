@@ -1,0 +1,99 @@
+
+               ________          __              
+              / ____/ /__  _  __/ /_  ____ ______
+             / /_  / / _ \| |/ / __ \/ __ `/ ___/
+            / __/ / /  __/>  </ /_/ / /_/ / /    
+           /_/   /_/\___/_/|_/_.___/\__._/_/     
+
+Flexbar - flexible barcode and adapter removal, version 3.5.0
+Developed with SeqAn, the library for sequence analysis
+
+Available on github.com/seqan/flexbar
+
+
+Local time:            Thu Feb  6 02:34:12 2025
+
+Number of threads:     20
+Bundled fragments:     256
+
+Target name:           LCM_12_S4_flexbar
+File type:             fastq
+Reads file:            LCM_12_S4_R1_001.fastq.gz
+Reads file 2:          LCM_12_S4_R2_001.fastq.gz   (paired run)
+Adapter preset:        TruSeq
+
+max-uncalled:          2
+min-read-length:       40
+qtrim:                 TAIL
+qtrim-format:          sanger
+qtrim-threshold:       20  (53)
+htrim-left:            GCTA
+htrim-right:           GCTA
+htrim-min-length:      5
+htrim-min-length2:     10
+htrim-error-rate:      0.2
+
+adapter-pair-overlap:  ON
+adapter-trim-end:      RIGHT
+adapter-min-overlap:   3
+adapter-min-poverlap:  40
+adapter-error-rate:    0.1
+adapter-match:         1
+adapter-mismatch:     -1
+adapter-gap:          -6
+
+Adapter:               Sequence:
+TruSeq                 AGATCGGAAGAGCACACGTCTGAACTCCAGTCA
+
+Adapter2:              Sequence:
+TruSeq                 AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
+
+
+Processing reads ...done.
+
+Elapsed time:       2 h 19 min 7 sec
+Processing speed:   86830 reads/s
+
+
+Min, max, mean and median overlap of paired reads: 40 / 154 / 99 / 101
+
+Adapter removal statistics
+==========================
+Adapter:            Overlap removal:    Full length:
+TruSeq              246662347           235532841
+
+Min, max, mean and median overlap: 1 / 36 / 32 / 33
+
+Adapter2:           Overlap removal:    Full length:
+TruSeq              239760475           229967835
+
+Min, max, mean and median overlap: 1 / 36 / 32 / 33
+
+
+Output file statistics
+======================
+Read file:               LCM_12_S4_flexbar_1.fastq.gz
+  written reads          133864288
+  short reads            225203907
+Read file 2:             LCM_12_S4_flexbar_2.fastq.gz
+  written reads          133864288
+  short reads            223314494
+
+
+Filtering statistics
+====================
+Processed reads                   724776002
+  skipped due to uncalled bases      222376   (169560 uncalled in 111188 pairs)
+  trimmed due to low quality       40993500
+  short prior to adapter removal          0
+  finally skipped short reads     448518401
+  skipped paired single reads       8306649
+Discarded reads overall           457047426
+Remaining reads                   267728576   (36%)
+
+Processed bases   109441176302
+Remaining bases    37838609610   (34% of input)
+
+
+Flexbar completed adapter removal.
+

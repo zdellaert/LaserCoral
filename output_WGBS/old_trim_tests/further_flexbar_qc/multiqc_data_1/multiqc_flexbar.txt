@@ -1,0 +1,2 @@
+Sample	processed_reads	skipped_due_to_uncalled_bases	short_prior_to_adapter_removal	finally_skipped_short_reads	discarded_reads_overall	remaining_reads	processed_bases	remaining_bases	removed_bases	removed_bases_pct
+trim_all_plus_lenient_max10_1	556345966	159748	0	260023209	264098584	292247382	84008240866	42197157678	41811083188	49.770216299008204

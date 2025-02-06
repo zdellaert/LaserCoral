@@ -1,0 +1,99 @@
+
+               ________          __              
+              / ____/ /__  _  __/ /_  ____ ______
+             / /_  / / _ \| |/ / __ \/ __ `/ ___/
+            / __/ / /  __/>  </ /_/ / /_/ / /    
+           /_/   /_/\___/_/|_/_.___/\__._/_/     
+
+Flexbar - flexible barcode and adapter removal, version 3.5.0
+Developed with SeqAn, the library for sequence analysis
+
+Available on github.com/seqan/flexbar
+
+
+Local time:            Wed Feb  5 01:16:15 2025
+
+Number of threads:     16
+Bundled fragments:     256
+
+Target name:           /scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/further_flexbar/trim_all_plus_lenient_pretrim
+File type:             fastq
+Reads file:            LCM_1_S1_R1_001.fastq.gz
+Reads file 2:          LCM_1_S1_R2_001.fastq.gz   (paired run)
+Adapter preset:        TruSeq
+
+max-uncalled:          2
+pre-trim-left:         10
+min-read-length:       40
+qtrim:                 TAIL
+qtrim-format:          sanger
+qtrim-threshold:       20  (53)
+htrim-left:            GCTA
+htrim-right:           GCTA
+htrim-min-length:      5
+htrim-error-rate:      0.2
+
+adapter-pair-overlap:  ON
+adapter-trim-end:      RIGHT
+adapter-min-overlap:   3
+adapter-min-poverlap:  40
+adapter-error-rate:    0.1
+adapter-match:         1
+adapter-mismatch:     -1
+adapter-gap:          -6
+
+Adapter:               Sequence:
+TruSeq                 AGATCGGAAGAGCACACGTCTGAACTCCAGTCA
+
+Adapter2:              Sequence:
+TruSeq                 AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
+
+
+Processing reads ...done.
+
+Elapsed time:       1 h 39 min 52 sec
+Processing speed:   92848 reads/s
+
+
+Min, max, mean and median overlap of paired reads: 40 / 144 / 100 / 108
+
+Adapter removal statistics
+==========================
+Adapter:            Overlap removal:    Full length:
+TruSeq              48241335            36741946
+
+Min, max, mean and median overlap: 1 / 36 / 27 / 33
+
+Adapter2:           Overlap removal:    Full length:
+TruSeq              44663180            34604590
+
+Min, max, mean and median overlap: 1 / 36 / 27 / 33
+
+
+Output file statistics
+======================
+Read file:               /scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/further_flexbar/trim_all_plus_lenient_pretrim_1.fastq.gz
+  written reads          145199531
+  short reads            131308604
+Read file 2:             /scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/further_flexbar/trim_all_plus_lenient_pretrim_2.fastq.gz
+  written reads          145199531
+  short reads            31519667
+
+
+Filtering statistics
+====================
+Processed reads                   556345966
+  skipped due to uncalled bases      159748   (121517 uncalled in 79874 pairs)
+  trimmed due to low quality       40072516
+  short prior to adapter removal          0
+  finally skipped short reads     162828271
+  skipped paired single reads     102958885
+Discarded reads overall           265946904
+Remaining reads                   290399062   (52%)
+
+Processed bases   84008240866
+Remaining bases   38776958602   (46% of input)
+
+
+Flexbar completed adapter removal.
+

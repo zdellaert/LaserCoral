@@ -1,0 +1,95 @@
+
+               ________          __              
+              / ____/ /__  _  __/ /_  ____ ______
+             / /_  / / _ \| |/ / __ \/ __ `/ ___/
+            / __/ / /  __/>  </ /_/ / /_/ / /    
+           /_/   /_/\___/_/|_/_.___/\__._/_/     
+
+Flexbar - flexible barcode and adapter removal, version 3.5.0
+Developed with SeqAn, the library for sequence analysis
+
+Available on github.com/seqan/flexbar
+
+
+Local time:            Mon Feb  3 01:32:51 2025
+
+Number of threads:     120
+Bundled fragments:     256
+
+Target name:           LCM_1_S1_fbtrim_test_polyAdapt
+File type:             fastq
+Reads file:            LCM_1_S1_R1_001.fastq.gz
+Reads file 2:          LCM_1_S1_R2_001.fastq.gz   (paired run)
+Adapter file:          adapters.fasta
+
+max-uncalled:          0
+min-read-length:       40
+qtrim:                 TAIL
+qtrim-format:          sanger
+qtrim-threshold:       20  (53)
+htrim-right:           G
+htrim-min-length:      3
+htrim-error-rate:      0.1
+
+adapter-pair-overlap:  ON
+adapter-trim-end:      RIGHT
+adapter-min-overlap:   3
+adapter-min-poverlap:  40
+adapter-error-rate:    0.1
+adapter-match:         1
+adapter-mismatch:     -1
+adapter-gap:          -6
+
+Adapter:               Sequence:
+adapter1               AGATCGGAAGAGCACACGTCTGAACTCCAGTCA
+adapter2               AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
+polyA                  AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+polyG                  GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
+
+
+Processing reads ...done.
+
+Elapsed time:       1 h 43 min 50 sec
+Processing speed:   89301 reads/s
+
+
+Min, max, mean and median overlap of paired reads: 40 / 154 / 105 / 112
+
+Adapter removal statistics
+==========================
+Adapter:            Overlap removal:    Full length:
+adapter1            145094835           128813196
+adapter2            117483044           113567423
+polyA               6493219             374574
+polyG               39962383            35630332
+
+Min, max, mean and median overlap: 1 / 36 / 30 / 33
+
+
+Output file statistics
+======================
+Read file:               LCM_1_S1_fbtrim_test_polyAdapt_1.fastq.gz
+  written reads          147836739
+  short reads            120361254
+Read file 2:             LCM_1_S1_fbtrim_test_polyAdapt_2.fastq.gz
+  written reads          147836739
+  short reads            108994009
+
+
+Filtering statistics
+====================
+Processed reads                   556345966
+  skipped due to uncalled bases     3553902   (1926631 uncalled in 1776951 pairs)
+  trimmed due to low quality       40072516
+  short prior to adapter removal          0
+  finally skipped short reads     229355263
+  skipped paired single reads      27763323
+Discarded reads overall           260672488
+Remaining reads                   295673478   (53%)
+
+Processed bases   84008240866
+Remaining bases   42788899058   (50% of input)
+
+
+Flexbar completed adapter removal.
+
