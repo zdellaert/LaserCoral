@@ -56,6 +56,8 @@ scripts/outs_errs/bismark_align*
 scripts/outs_errs/methylseq*
 scripts/outs_errs/.nextflow*
 scripts/methylseq*
+scripts/old/*
+scripts/*/old/*
 
 #blast databases
 references/blast_dbs/*
