@@ -124,3 +124,68 @@ Emma additional params:
 --non_directional \
 --cytosine_report \
 --unmapped \
+
+
+## Run with bwa-meth pipeline
+
+Start with flexbar-trimmed data.
+
+```
+nano data_WGBS/LCM_methylseq_input_fb.csv
+```
+
+```
+sample,fastq_1,fastq_2,genome
+LCM_1,data_WGBS/LCM_1_S1_flexbar_1.fastq.gz,data_WGBS/LCM_1_S1_flexbar_2.fastq.gz,
+LCM_3,data_WGBS/LCM_3_S2_flexbar_1.fastq.gz,data_WGBS/LCM_3_S2_flexbar_2.fastq.gz,
+LCM_11,data_WGBS/LCM_11_S3_flexbar_1.fastq.gz,data_WGBS/LCM_11_S3_flexbar_2.fastq.gz,
+LCM_12,data_WGBS/LCM_12_S4_flexbar_1.fastq.gz,data_WGBS/LCM_12_S4_flexbar_2.fastq.gz,
+LCM_17,data_WGBS/LCM_17_S7_flexbar_1.fastq.gz,data_WGBS/LCM_17_S7_flexbar_2.fastq.gz,
+LCM_18,data_WGBS/LCM_18_S8_flexbar_1.fastq.gz,data_WGBS/LCM_18_S8_flexbar_2.fastq.gz,
+LCM_24,data_WGBS/LCM_24_S5_flexbar_1.fastq.gz,data_WGBS/LCM_24_S5_flexbar_2.fastq.gz,
+LCM_25,data_WGBS/LCM_25_S6_flexbar_1.fastq.gz,data_WGBS/LCM_25_S6_flexbar_2.fastq.gz,
+LCM_32,data_WGBS/LCM_32_S9_flexbar_1.fastq.gz,data_WGBS/LCM_32_S9_flexbar_2.fastq.gz,
+LCM_33,data_WGBS/LCM_33_S10_flexbar_1.fastq.gz,data_WGBS/LCM_33_S10_flexbar_2.fastq.gz,
+```
+
+```
+nano scripts/methylseq_fb.sh 
+```
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=30
+#SBATCH --signal=2
+#SBATCH --no-requeue
+#SBATCH --mem=500GB
+#SBATCH -t 48:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
+
+## Load Nextflow and Apptainer environment modules
+module purge
+module load nextflow/24.10.3
+module load apptainer/latest
+
+## Set Nextflow directories to use scratch
+export NXF_WORK=/scratch3/workspace/zdellaert_uri_edu-shared/nextflow_work
+export NXF_TEMP=/scratch3/workspace/zdellaert_uri_edu-shared/nextflow_temp
+export NXF_LAUNCHER=/scratch3/workspace/zdellaert_uri_edu-shared/nextflow_launcher
+
+nextflow run nf-core/methylseq \
+  --input ./data_WGBS/LCM_methylseq_input_fb.csv \
+  --outdir /scratch3/workspace/zdellaert_uri_edu-shared/methylseq_bwa_test \
+  --aligner bwameth \
+  --methyl_kit \
+  --igenomes_ignore \
+  --fasta ./references/Pocillopora_acuta_HIv2.assembly.fasta \
+  --relax_mismatches \
+  --save_align_intermeds \
+  --skip_trimming \
+  --email zdellaert@uri.edu \
+  -profile unity \
+  -name methylseq_bwa_test
+```

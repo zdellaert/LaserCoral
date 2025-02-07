@@ -937,8 +937,6 @@ bam2nuc --genome_folder ../../references/ *_pe.deduplicated.bam
 multiqc .
 ```
 
-
-
 <img src="../output_WGBS/dedup_V3/report_screenshots/Summary_1.png?raw=true" height="400">
 <img src="../output_WGBS/dedup_V3/report_screenshots/Summary_2.png?raw=true" height="400">
 
@@ -947,154 +945,6 @@ multiqc .
 Okay, the alignment is not great. And I don't like how the best looking libraries (32, 33) are aligning the worst. I am going to hard trim all reads to 100 bp and try to align these and see if this reduces possible length bias.
 
 **Something weird is happening with the GC content.**
-
-## I am running out of space. 
-
-### Make a scratch directory
-
-https://docs.unity.uri.edu/documentation/managing-files/hpc-workspace/
-
-```
-ws_allocate -G pi_hputnam_uri_edu -m zdellaert@uri.edu -r 2 shared 30
-```
-
-Info: creating workspace.
-/scratch3/workspace/zdellaert_uri_edu-shared
-remaining extensions  : 3
-remaining time in days: 30
-
-## Hisat2-Bismark Alignment of V3 Trimmed Reads
-
-**I had to delete the bowtie Bisulfite_Genome folder because the command wouldn't make a hisat version, it just kept copying the original one**
-
-### Prepare Genome
-
-```
-nano scripts/bismark_genome_hisat.sh 
-```
-
-```
-#!/usr/bin/env bash
-#SBATCH --ntasks=1 --cpus-per-task=20 #split one task over multiple CPU
-#SBATCH --mem=100GB
-#SBATCH -t 2:00:00
-#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
-#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
-#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
-#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
-
-# load modules needed
-module load uri/main
-module load Bismark/0.23.1-foss-2021b
-module load HISAT2/2.2.1-gompi-2022a
-
-### Prepare Genome
-
-mkdir -p references/Bisulfite_Genome_hisat2
-cd references/Bisulfite_Genome_hisat2
-cp ../Pocillopora_acuta_HIv2.assembly.fasta .
-
-bismark_genome_preparation --hisat2 --verbose --parallel 10 ./
-```
-
-### align
-
-```
-nano scripts/bismark_align_hisat_V3.sh 
-```
-
-```
-#!/usr/bin/env bash
-#SBATCH --ntasks=1 --cpus-per-task=30 #split one task over multiple CPU
-#SBATCH --array=0-9 #for 10 samples
-#SBATCH --mem=150GB
-#SBATCH -t 48:00:00
-#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
-#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
-#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
-#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
-
-# load modules needed
-module load uri/main
-module load Bismark/0.23.1-foss-2021b
-module load HISAT2/2.2.1-gompi-2021b
-
-# Set directories and files
-reads_dir="data_WGBS/" #directory containing trimmed data to align
-genome_folder="references/Bisulfite_Genome_hisat2/" #directory containing original unmodified genome fasta and bismark Bisulfite_Genome directory
-
-mkdir -p /scratch3/workspace/zdellaert_uri_edu-shared/output_WGBS/align_hisat_V3 #make output directory if it does not exist
-
-output_dir="/scratch3/workspace/zdellaert_uri_edu-shared/output_WGBS/align_hisat_V3"
-checkpoint_file="/scratch3/workspace/zdellaert_uri_edu-shared/output_WGBS/align_hisat_V3/completed_samples.log"
-
-# Create the checkpoint file if it doesn't exist
-touch ${checkpoint_file}
-
-# Get the list of sample files and corresponding sample names
-files=(${reads_dir}trimmed_V3_LCM_*R1_001.fastq.gz)
-file="${files[$SLURM_ARRAY_TASK_ID]}"
-sample_name=$(basename "$file" "_R1_001.fastq.gz")
-
-# Check if the sample has already been processed
-if grep -q "^${sample_name}$" ${checkpoint_file}; then
-    echo "Sample ${sample_name} already processed. Skipping..."
-    exit 0
-fi
-
-# Define log files for stdout and stderr
-stdout_log="${output_dir}${sample_name}_stdout.log"
-stderr_log="${output_dir}${sample_name}_stderr.log"
-
-# Run Bismark align
-bismark \
-    --hisat2 \
-    -genome ${genome_folder} \
-    -p 4 \
-    -1 ${reads_dir}${sample_name}_R1_001.fastq.gz \
-    -2 ${reads_dir}${sample_name}_R2_001.fastq.gz \
-    -o ${output_dir} \
-    --temp_dir ${output_dir} \
-    --basename ${sample_name} \
-    2> "${output_dir}/${sample_name}-bismark_summary.txt"
-
-# Check if the command was successful
-if [ $? -eq 0 ]; then
-    # Append the sample name to the checkpoint file
-    echo ${sample_name} >> ${checkpoint_file}
-    echo "Sample ${sample_name} processed successfully."
-else
-    echo "Sample ${sample_name} failed. Check ${stderr_log} for details."
-fi
-
-# Define directories
-summary_file="${output_dir}/parameter_comparison_summary.csv"
-
-# Initialize summary file
-echo "Sample,Score_Min,Alignment_Rate" > ${summary_file}
-
-for file in ${output_dir}/*_report.txt; do
-    # Extract sample name and from directory name
-    sample_name=$(basename "$file" | cut -d'_' -f1-5)
-    short_name=$(basename "$file" | cut -d'_' -f3-4)
-    score_min="hisat"
-
-    # Locate the summary file
-    summary_file_path="${output_dir}/${sample_name}_PE_report.txt"
-
-    # Extract metrics
-    mapping=$(grep "Mapping efficiency:" ${summary_file_path} | awk '{gsub("%", "", $3); print $3}')
-
-    # Append to the summary file
-    echo "${short_name},${score_min},${mapping}" >> ${summary_file}
-done
-```
-
-### hisat interpretation
-
-Hisat with default parameters had decreased alignment rates. Could try making the hisat parameters less stringent but there is less documentation on this. 
-
-<img src="08-Bismark-Alignment-Assesment-images/alignment_bismark_bowtie_vs_hisat.png?raw=true" height="400">
 
 ## Final Trimming: Flexbar
 
@@ -1110,10 +960,10 @@ nano scripts/wgbs_flexbar.sh #write script for first trimming pass and QC, enter
 #SBATCH --ntasks=1 --cpus-per-task=20 #split one task over multiple CPU
 #SBATCH --array=0-9 #for 10 samples
 #SBATCH --mem=150GB
-#SBATCH -t 48:00:00
+#SBATCH -t 18:00:00
 #SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
-#SBATCH --error=../scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
-#SBATCH --output=../scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
 #SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/data_WGBS
 
 # Get the list of sample files and corresponding sample names
@@ -1139,13 +989,14 @@ flexbar \
     -t "${sample_name}_flexbar"
 
 # load modules needed
+module load parallel/20240822
 module load fastqc/0.12.1
 
 #make trimmed_flexbar_qc output folder
-mkdir ../output_WGBS/trimmed_flexbar_qc/
+mkdir -p ../output_WGBS/trimmed_flexbar_qc/
 
 # Create an array of fastq files to process
-files=($('ls' ${sample_name}_flexbar*)) 
+files=($('ls' ${sample_name}_flexbar*gz)) 
 
 # Run fastqc in parallel
 echo "Starting fastqc..." $(date)
@@ -1153,56 +1004,128 @@ parallel -j 20 "fastqc {} -o ../output_WGBS/trimmed_flexbar_qc/ && echo 'Process
 echo "fastQC done." $(date)
 ```
 
+## Bismark Alignment of Flexbar Trimmed Reads
+
 ```
-nano scripts/wgbs_flexbar_alt.sh #write script for first trimming pass and QC, enter text in next code chunk
+nano scripts/bismark_align_flexbar.sh 
 ```
 
 ```
 #!/usr/bin/env bash
-#SBATCH --ntasks=1 --cpus-per-task=20 #split one task over multiple CPU
+#SBATCH --ntasks=1 --cpus-per-task=24 #split one task over multiple CPU
 #SBATCH --array=0-9 #for 10 samples
-#SBATCH --mem=150GB
+#SBATCH --mem=200GB
 #SBATCH -t 48:00:00
 #SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
-#SBATCH --error=../scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
-#SBATCH --output=../scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
-#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/data_WGBS
-
-# Get the list of sample files and corresponding sample names
-files=($(ls LCM*R1*.fastq.gz))
-file="${files[$SLURM_ARRAY_TASK_ID]}"
-sample_name=$(basename "$file" "_R1_001.fastq.gz")
-output_dir="/scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/flexbar"
-mkdir -p ${output_dir}
-
-flexbar \
-    -r ${sample_name}_R1_001.fastq.gz \
-    -p ${sample_name}_R2_001.fastq.gz \
-    --adapter-preset TruSeq \
-    --adapter-min-overlap 3 \
-    --adapter-error-rate 0.1 \
-    --adapter-trim-end RIGHT \
-    --adapter-pair-overlap ON \
-    --qtrim TAIL --qtrim-threshold 20 \
-    --qtrim-format sanger \
-    --min-read-length 40 \
-    --htrim-right G --htrim-left G --htrim-min-length 5 \
-    --max-uncalled 2 --htrim-error-rate 0.2 \
-    --zip-output GZ \
-    --threads 20 \
-    -t "${output_dir}/${sample_name}_flexbar_alt"
+#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
 
 # load modules needed
-module load fastqc/0.12.1
+module load uri/main
+module load Bismark/0.23.1-foss-2021b
+module load bowtie2/2.5.2
 
-#make trimmed_flexbar_qc output folder
-mkdir ../output_WGBS/trimmed_flexbar_alt_qc/
+# Set directories and files
+reads_dir="data_WGBS/" #directory containing trimmed data to align
+genome_folder="references/" #directory containing original unmodified genome fasta and bismark Bisulfite_Genome directory
 
-# Create an array of fastq files to process
-files=($('ls' ${output_dir}/${sample_name}_flexbar*gz)) 
+output_dir="/scratch3/workspace/zdellaert_uri_edu-shared/output_WGBS/align_flexbar"
+mkdir -p $output_dir
 
-# Run fastqc in parallel
-echo "Starting fastqc..." $(date)
-parallel -j 20 "fastqc {} -o ../output_WGBS/trimmed_flexbar_alt_qc/ && echo 'Processed {}'" ::: "${files[@]}"
-echo "fastQC done." $(date)
+# Get the list of sample files and corresponding sample names
+files=(${reads_dir}LCM_*_flexbar_1.fastq.gz)
+file="${files[$SLURM_ARRAY_TASK_ID]}"
+sample_name=$(basename "$file" "_flexbar_1.fastq.gz")
+
+# Define log files for stdout and stderr
+stdout_log="${output_dir}${sample_name}_stdout.log"
+stderr_log="${output_dir}${sample_name}_stderr.log"
+
+# Run Bismark align
+bismark \
+    -genome ${genome_folder} \
+    -p 4 \
+    -score_min L,0,-1.0 \
+    -1 ${reads_dir}${sample_name}_flexbar_1.fastq.gz \
+    -2 ${reads_dir}${sample_name}_flexbar_2.fastq.gz \
+    -o ${output_dir} \
+    --temp_dir ${output_dir} \
+    --basename ${sample_name} \
+    2> "${output_dir}/${sample_name}-bismark_summary.txt"
+
+# Define directories
+summary_file="${output_dir}/parameter_comparison_summary.csv"
+
+# Initialize summary file
+echo "Sample,Score_Min,Alignment_Rate" > ${summary_file}
+
+for file in ${output_dir}/*_report.txt; do
+    # Extract sample name and from directory name
+    sample_name=$(basename "$file" | cut -d'_' -f1-3)
+    score_min="L0-1.0"
+
+    # Locate the summary file
+    summary_file_path="${output_dir}/${sample_name}_PE_report.txt"
+
+    # Extract metrics
+    mapping=$(grep "Mapping efficiency:" ${summary_file_path} | awk '{gsub("%", "", $3); print $3}')
+
+    # Append to the summary file
+    echo "${sample_name},${score_min},${mapping}" >> ${summary_file}
+done
+```
+
+## Deduplication and methylation extraction
+
+```
+nano scripts/bismark_flexbar_dedup_call.sh 
+```
+
+```
+#!/usr/bin/env bash
+#SBATCH --ntasks=1 --cpus-per-task=30 #split one task over multiple CPU
+#SBATCH --mem=100GB
+#SBATCH -t 24:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
+#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
+
+# load modules needed
+module load parallel/20240822
+module load uri/main
+module load Bismark/0.23.1-foss-2021b
+module load bowtie2/2.5.2
+
+output_dir="/scratch3/workspace/zdellaert_uri_edu-shared/output_WGBS/align_flexbar"
+ref_dir="/project/pi_hputnam_uri_edu/zdellaert/LaserCoral/references"
+
+find ${output_dir}/*.bam | \
+xargs -n 1 basename -s .bam | \
+parallel -j 10 deduplicate_bismark \
+--bam \
+--paired \
+--output_dir ${output_dir} \
+${output_dir}/{}.bam
+
+cd ${output_dir}
+
+bismark_methylation_extractor \
+--bedGraph \
+--counts \
+--comprehensive \
+--merge_non_CpG \
+--multicore 28 \
+--buffer_size 75% \
+*deduplicated.bam
+
+module load all/MultiQC/1.12-foss-2021b
+
+bismark2report
+bismark2summary *pe.bam
+
+bam2nuc --genome_folder ${ref_dir} *_pe.deduplicated.bam
+
+multiqc .
 ```
