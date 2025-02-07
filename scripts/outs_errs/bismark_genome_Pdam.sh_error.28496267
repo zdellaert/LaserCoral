@@ -1,0 +1,65 @@
+Loading uri version main
+NOTE: The modules under this branch will not run on the login node. Use
+--constraint=avx512 for sbatch or srun sessions. 
+Loading libpciaccess version 0.17
+Loading libiconv version 1.17
+Loading xz version 5.4.6
+Loading zlib-ng version 2.1.6
+Loading libxml2 version 2.10.3
+Loading ncurses version 6.5
+Loading hwloc version 2.9.1
+Loading intel-tbb version 2021.9.0
+Loading perl version 5.38.2
+Loading bzip2 version 1.0.8
+Loading libmd version 1.0.4
+Loading libbsd version 0.12.1
+Loading expat version 2.6.2
+Loading readline version 8.2
+Loading gdbm version 1.23
+Loading gettext version 0.21
+Loading libffi version 8.1.4
+Loading libxcrypt version 4.4.35
+Loading openssl version 3.0.13
+Loading sqlite version 3.43.2
+Loading util-linux-uuid version 2.38.1
+Loading python version 3.11.7
+Loading bowtie2 version 2.5.2
+
+The following have been reloaded with a version change:
+  1) bzip2/.1.0.8-GCCcore-11.2.0 => bzip2/1.0.8-apafqct
+  2) expat/2.4.1-GCCcore-11.2.0 => expat/2.6.2-zqnlur6
+  3) hwloc/.2.5.0-GCCcore-11.2.0 => hwloc/2.9.1-mw5we3l
+  4) libffi/3.4.2-GCCcore-11.2.0 => libffi/8.1.4-qoyquij
+  5) libpciaccess/0.16-GCCcore-11.2.0 => libpciaccess/0.17-5bn3tiw
+  6) libxml2/.2.9.10-GCCcore-11.2.0 => libxml2/2.10.3-22imjql
+  7) ncurses/.6.2-GCCcore-11.2.0 => ncurses/6.5-keggpxg
+
+Using 10 threads for the top and bottom strand indexing processes each, so using 20 cores in total
+Writing bisulfite genomes out into a single MFA (multi FastA) file
+
+Bisulfite Genome Indexer version v0.23.1 (last modified: 27 Jan 2021)
+
+Step I - Prepare genome folders - completed
+
+
+
+Step II - Genome bisulfite conversions - completed
+
+
+Bismark Genome Preparation - Step III: Launching the Bowtie 2 indexer
+Preparing indexing of CT converted genome in /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/references_Pdam/Bisulfite_Genome/CT_conversion/
+Building a SMALL index
+Preparing indexing of GA converted genome in /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/references_Pdam/Bisulfite_Genome/GA_conversion/
+Building a SMALL index
+Renaming BS_GA.3.bt2.tmp to BS_GA.3.bt2
+Renaming BS_GA.4.bt2.tmp to BS_GA.4.bt2
+Renaming BS_GA.1.bt2.tmp to BS_GA.1.bt2
+Renaming BS_GA.2.bt2.tmp to BS_GA.2.bt2
+Renaming BS_GA.rev.1.bt2.tmp to BS_GA.rev.1.bt2
+Renaming BS_GA.rev.2.bt2.tmp to BS_GA.rev.2.bt2
+Renaming BS_CT.3.bt2.tmp to BS_CT.3.bt2
+Renaming BS_CT.4.bt2.tmp to BS_CT.4.bt2
+Renaming BS_CT.1.bt2.tmp to BS_CT.1.bt2
+Renaming BS_CT.2.bt2.tmp to BS_CT.2.bt2
+Renaming BS_CT.rev.1.bt2.tmp to BS_CT.rev.1.bt2
+Renaming BS_CT.rev.2.bt2.tmp to BS_CT.rev.2.bt2

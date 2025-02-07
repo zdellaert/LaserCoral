@@ -66,6 +66,7 @@ references/blast_dbs/*
 output_RNA/differential_expression/blast/DEG_05_blast_results_full.txt
 code/go_mwu/dissim*
 references/Bisulfite_Genome*
+references_Pdam/*
 .nextflow/*
 references/Pocillopora_acuta_HIv2.assembly.fasta.fai
 output_WGBS/*/*gz
