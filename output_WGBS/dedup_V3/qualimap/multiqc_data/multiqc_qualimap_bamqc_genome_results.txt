@@ -1,0 +1,11 @@
+Sample	bam_file	total_reads	mapped_reads	mapped_bases	sequenced_bases	mean_insert_size	median_insert_size	mean_mapping_quality	general_error_rate	mean_coverage	percentage_aligned
+trimmed_V3_LCM_11_S3_pe	trimmed_V3_LCM_11_S3_pe.deduplicated.sorted.bam	6029934.0	6029934.0	834764757.0	831295049.0	264.7987	258.0	17.0748	0.2179	2.0446	100.0
+trimmed_V3_LCM_12_S4_pe	trimmed_V3_LCM_12_S4_pe.deduplicated.sorted.bam	7365478.0	7365478.0	1001728301.0	997772199.0	249.4876	241.0	17.3854	0.2114	2.4535	100.0
+trimmed_V3_LCM_17_S7_pe	trimmed_V3_LCM_17_S7_pe.deduplicated.sorted.bam	8223104.0	8223104.0	1167967865.0	1163355591.0	265.4817	256.0	17.8351	0.1978	2.8607	100.0
+trimmed_V3_LCM_18_S8_pe	trimmed_V3_LCM_18_S8_pe.deduplicated.sorted.bam	12088136.0	12088136.0	1729823285.0	1723334386.0	267.6028	259.0	18.3356	0.19	4.2368	100.0
+trimmed_V3_LCM_1_S1_pe	trimmed_V3_LCM_1_S1_pe.deduplicated.sorted.bam	7602156.0	7602156.0	1068742270.0	1064699284.0	270.6882	265.0	17.6396	0.2205	2.6176	100.0
+trimmed_V3_LCM_24_S5_pe	trimmed_V3_LCM_24_S5_pe.deduplicated.sorted.bam	26390392.0	26390392.0	3720921671.0	3708158155.0	268.6806	264.0	19.179	0.2084	9.1135	100.0
+trimmed_V3_LCM_25_S6_pe	trimmed_V3_LCM_25_S6_pe.deduplicated.sorted.bam	13904340.0	13904340.0	1951878305.0	1944894531.0	267.8228	263.0	18.4972	0.2112	4.7806	100.0
+trimmed_V3_LCM_32_S9_pe	trimmed_V3_LCM_32_S9_pe.deduplicated.sorted.bam	6547350.0	6547350.0	910306473.0	906273577.0	255.7307	235.0	15.8736	0.2296	2.2296	100.0
+trimmed_V3_LCM_33_S10_pe	trimmed_V3_LCM_33_S10_pe.deduplicated.sorted.bam	3578920.0	3578920.0	470865242.0	468183140.0	229.0323	194.0	12.9756	0.2776	1.1533	100.0
+trimmed_V3_LCM_3_S2_pe	trimmed_V3_LCM_3_S2_pe.deduplicated.sorted.bam	6594372.0	6594372.0	894576845.0	890983284.0	238.9484	227.0	17.4589	0.1888	2.191	100.0

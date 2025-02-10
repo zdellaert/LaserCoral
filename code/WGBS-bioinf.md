@@ -940,6 +940,108 @@ multiqc .
 <img src="../output_WGBS/dedup_V3/report_screenshots/Summary_1.png?raw=true" height="400">
 <img src="../output_WGBS/dedup_V3/report_screenshots/Summary_2.png?raw=true" height="400">
 
+
+### Sort deduplicated bams
+
+```
+nano scripts/bismark_sort_dedup.sh 
+```
+
+```
+#!/usr/bin/env bash
+#SBATCH --ntasks=1 --cpus-per-task=48 #split one task over multiple CPU
+#SBATCH --mem=250GB
+#SBATCH -t 48:00:00
+#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
+#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
+
+# load modules needed
+module load samtools/1.19.2
+
+cd output_WGBS/dedup_V3
+
+for bamFile in *deduplicated.bam; do
+	prefix=$(basename $bamFile .bam)
+
+	samtools cat ${bamFile} | samtools sort --threads 48 -o ${prefix}.sorted.bam
+done
+```
+
+### Run qualimap on sorted deduplicated bams
+
+```
+nano scripts/bismark_qualimap.sh 
+```
+
+```
+#!/usr/bin/env bash
+#SBATCH --ntasks=1 --cpus-per-task=1 #split one task over multiple CPU
+#SBATCH --mem=32GB
+#SBATCH -t 02:00:00
+#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
+#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
+
+# load modules needed
+module load qualimap/2.2.1
+
+cd output_WGBS/dedup_V3
+
+mkdir -p qualimap/bamqc
+
+for bamFile in *deduplicated.sorted.bam; do
+	prefix=$(basename $bamFile .bam)
+
+	qualimap \
+    --java-mem-size=29491M \
+    bamqc \
+     \
+    -bam ${bamFile}  \
+     \
+    -p non-strand-specific \
+    --collect-overlap-pairs \
+    -outdir qualimap/bamqc/${prefix} \
+    -nt 6
+done
+```
+
+### subset bams for viewing
+
+```
+nano scripts/bismark_subset.sh 
+```
+
+```
+#!/usr/bin/env bash
+#SBATCH --ntasks=1 --cpus-per-task=1 #split one task over multiple CPU
+#SBATCH --mem=32GB
+#SBATCH -t 02:00:00
+#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
+#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
+
+# load modules needed
+module load samtools/1.19.2
+
+cd output_WGBS/dedup_V3
+
+mkdir -p dedup_bam_subsets
+
+for bamFile in *deduplicated.sorted.bam; do
+        prefix=$(basename $bamFile .bam .bam | cut -d'_' -f1-4)
+
+        samtools view -b $bamFile Pocillopora_acuta_HIv2___Sc0000000:1-1000000 > ${prefix}.deduplicated.sorted.sub.bam
+        samtools index "${prefix}.deduplicated.sorted.sub.bam" "${prefix}.deduplicated.sorted.sub.bam.bai"
+done
+
+mv *sub.bam* subsets/
+```
+
+
 ## Thoughts and next steps. 
 
 Okay, the alignment is not great. And I don't like how the best looking libraries (32, 33) are aligning the worst. I am going to hard trim all reads to 100 bp and try to align these and see if this reduces possible length bias.
@@ -1129,3 +1231,5 @@ bam2nuc --genome_folder ${ref_dir} *_pe.deduplicated.bam
 
 multiqc .
 ```
+
+There was very little difference between the final results of cutadapt vs. flexbar-trimmed reads.

@@ -1,0 +1,13 @@
+[2025-02-10 16:46:26,790] multiqc.config                                     [INFO   ]  Loading config settings from: multiqc_config.yml
+[2025-02-10 16:46:27,172] multiqc.core.version_check                         [WARNING]  MultiQC Version v1.27 now available!
+[2025-02-10 16:46:27,172] multiqc.core.file_search                           [INFO   ]  Search path: /scratch3/workspace/zdellaert_uri_edu-shared/nextflow_work/60/4f4b44df35698d8bd6a91cb887b99c
+[2025-02-10 16:46:29,738] multiqc.modules.custom_content.custom_content      [WARNING]  HTML plot type found with more than one dataset in nf-core-methylseq-summary
+[2025-02-10 16:46:29,738] multiqc.modules.custom_content.custom_content      [INFO   ]  nf-core-methylseq-summary: Found 1 sample (html)
+[2025-02-10 16:46:29,738] multiqc.modules.custom_content.custom_content      [WARNING]  HTML plot type found with more than one dataset in nf-core-methylseq-methods-description
+[2025-02-10 16:46:29,739] multiqc.modules.custom_content.custom_content      [INFO   ]  nf-core-methylseq-methods-description: Found 1 sample (html)
+[2025-02-10 16:46:30,370] multiqc.modules.qualimap.qualimap                  [INFO   ]  Found 10 BamQC reports
+[2025-02-10 16:46:30,482] multiqc.modules.picard.picard                      [INFO   ]  Found 10 MarkDuplicates reports
+[2025-02-10 16:46:30,552] multiqc.modules.samtools.samtools                  [INFO   ]  Found 10 stats reports
+[2025-02-10 16:46:30,578] multiqc.modules.samtools.samtools                  [INFO   ]  Found 10 flagstat reports
+[2025-02-10 16:46:30,899] multiqc.modules.fastqc.fastqc                      [INFO   ]  Found 20 reports
+[2025-02-10 16:46:31,058] multiqc.core.write_results                         [INFO   ]  Rendering plots. Export plots to formats png, svg, pdf is requested, so it might take a while. To disable plot export, set `export_plots: false` in config, or remove the `--export-plots` command line flag

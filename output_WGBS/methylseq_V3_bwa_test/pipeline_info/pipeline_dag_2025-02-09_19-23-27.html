@@ -1,0 +1,170 @@
+<!--
+  ~ Copyright 2013-2024, Seqera Labs
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<html>
+<head>
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+</head>
+<body>
+<pre class="mermaid" style="text-align: center;">
+flowchart TB
+    subgraph " "
+    v2["Channel.fromList"]
+    v45["ch_fasta_index"]
+    v67["ch_fasta"]
+    v68["ch_bwameth_index"]
+    v70[" "]
+    v84[" "]
+    v117["gff"]
+    v124["Channel.of"]
+    v127["Channel.fromPath"]
+    v130["ch_workflow_summary"]
+    v134["ch_methods_description"]
+    v149["replace_names"]
+    v150["sample_names"]
+    end
+    subgraph NFCORE_METHYLSEQ
+    subgraph METHYLSEQ
+    v35([CAT_FASTQ])
+    v39([FASTQC])
+    subgraph FASTQ_ALIGN_DEDUP_BWAMETH
+    v69([BWAMETH_ALIGN])
+    v71([SAMTOOLS_SORT])
+    v76([SAMTOOLS_INDEX_ALIGNMENTS])
+    v81([SAMTOOLS_FLAGSTAT])
+    v85([SAMTOOLS_STATS])
+    v87([PICARD_MARKDUPLICATES])
+    v90([SAMTOOLS_INDEX_DEDUPLICATED])
+    v98([METHYLDACKEL_EXTRACT])
+    v104([METHYLDACKEL_MBIAS])
+    v46(( ))
+    v80(( ))
+    v83(( ))
+    v95(( ))
+    v96(( ))
+    v101(( ))
+    v102(( ))
+    end
+    v118([QUALIMAP_BAMQC])
+    v151([MULTIQC])
+    v3(( ))
+    v16(( ))
+    v146(( ))
+    v147(( ))
+    v148(( ))
+    v155(( ))
+    end
+    end
+    subgraph " "
+    v40["ch_fastqc_html"]
+    v72[" "]
+    v73[" "]
+    v74[" "]
+    v77[" "]
+    v78[" "]
+    v88[" "]
+    v89[" "]
+    v91[" "]
+    v92[" "]
+    v99["methydackel_extract_methylkit"]
+    v152[" "]
+    v153[" "]
+    v154[" "]
+    v157["versions"]
+    v159[" "]
+    end
+    v2 --> v3
+    v3 --> v35
+    v35 --> v3
+    v35 --> v16
+    v3 --> v39
+    v39 --> v40
+    v39 --> v16
+    v45 --> v46
+    v67 --> v69
+    v67 --> v87
+    v67 --> v96
+    v67 --> v102
+    v68 --> v69
+    v3 --> v69
+    v69 --> v71
+    v69 --> v16
+    v70 --> v71
+    v71 --> v76
+    v71 --> v74
+    v71 --> v73
+    v71 --> v72
+    v71 --> v87
+    v71 --> v16
+    v71 --> v80
+    v71 --> v83
+    v76 --> v78
+    v76 --> v77
+    v76 --> v16
+    v76 --> v80
+    v76 --> v83
+    v80 --> v81
+    v81 --> v16
+    v84 --> v85
+    v83 --> v85
+    v85 --> v16
+    v46 --> v87
+    v87 --> v90
+    v87 --> v89
+    v87 --> v88
+    v87 --> v118
+    v87 --> v16
+    v87 --> v95
+    v87 --> v101
+    v90 --> v92
+    v90 --> v91
+    v90 --> v16
+    v90 --> v95
+    v90 --> v101
+    v46 --> v98
+    v95 --> v98
+    v96 --> v98
+    v98 --> v99
+    v98 --> v16
+    v46 --> v104
+    v101 --> v104
+    v102 --> v104
+    v104 --> v16
+    v117 --> v118
+    v118 --> v16
+    v124 --> v16
+    v127 --> v146
+    v130 --> v16
+    v134 --> v16
+    v149 --> v151
+    v150 --> v151
+    v16 --> v151
+    v146 --> v151
+    v147 --> v151
+    v148 --> v151
+    v151 --> v154
+    v151 --> v153
+    v151 --> v152
+    v151 --> v155
+    v16 --> v157
+    v155 --> v159
+
+</pre>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true, maxTextSize: Number.MAX_SAFE_INTEGER, maxEdges: Number.MAX_SAFE_INTEGER });
+</script>
+</body>
+</html>

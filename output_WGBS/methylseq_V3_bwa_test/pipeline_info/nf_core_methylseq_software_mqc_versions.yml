@@ -1,0 +1,9 @@
+BWAMETH_ALIGN:
+  bam_source: pre-existing
+FASTQC:
+  fastqc: 0.12.1
+QUALIMAP_BAMQC:
+  qualimap: 2.3
+Workflow:
+    nf-core/methylseq: v3.0.0-g4415e90
+    Nextflow: 24.10.3

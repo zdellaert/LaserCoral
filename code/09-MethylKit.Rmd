@@ -1,0 +1,188 @@
+---
+title: "09-MethylKit"
+author: "Zoe Dellaert"
+date: "2025-02-09"
+output:
+  github_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    html_preview: true
+always_allow_html: true
+---
+
+## MethylKit
+
+I am identifying differentially methylated loci using methylkit based on [Yaamini Venkataraman's code](https://osf.io/u46xj)
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Managing Packages Using Renv
+
+To run this code in my project using the renv environment, run the following lines of code
+
+```{r, eval=FALSE}
+install.packages("renv") #install the package on the new computer (may not be necessary if renv bootstraps itself as expected)
+renv::restore() #reinstall all the package versions in the renv lockfile
+```
+
+## Load packages
+
+```{r packages}
+require("methylKit")
+require("tidyverse")
+require("vegan")
+require("gplots")
+require("ggplot2")
+require("dichromat")
+require("readr")
+
+sessionInfo() #provides list of loaded packages and version of R.
+```
+
+
+```{r}
+meta <- read.csv("../data_WGBS/LCM_WGBS_metadata.csv", sep = ",", header = TRUE) %>%
+  mutate(Section_Date = as.character(Section_Date), LCM_Date = as.character(LCM_Date),DNA_Extraction_Date = as.character(DNA_Extraction_Date))
+
+meta <- meta %>% arrange(Sample)
+```
+
+```{r}
+file_list <- list.files("../output_WGBS/methylseq_V3_bwa_test/methyldackel", pattern = "*methylKit", full.names = TRUE, include.dirs = FALSE)
+
+sample <- gsub(".markdup.sorted_CpG.methylKit", "", basename(file_list) )
+
+sample == meta$Sample #the files and metadata are in the same order
+
+tissue <- meta$Tissue
+tissue_binary <- gsub("Aboral", "1", tissue)
+tissue_binary <- gsub("OralEpi", "0", tissue_binary)
+tissue_binary <- as.numeric(tissue_binary)
+fragment <- meta$Fragment
+
+methylObj_methylseq=methRead(as.list(file_list),
+           sample.id = as.list(sample),
+           assembly = "Pacuta",
+           treatment = tissue_binary,
+           context = "CpG",
+           mincov = 10
+           )
+#   
+# save(methylObj, file = "../output_WGBS/MethylKit.RData") 
+```
+
+
+```{r}
+load("../output_WGBS/MethylKit.RData")
+
+getMethylationStats(methylObj[[2]],plot=FALSE,both.strands=FALSE)
+getMethylationStats(methylObj[[2]],plot=TRUE,both.strands=FALSE)
+getCoverageStats(methylObj[[2]],plot=TRUE,both.strands=FALSE)
+```
+
+```{r}
+filtered_methylObj=filterByCoverage(methylObj,lo.count=10,lo.perc=NULL,
+                                      hi.count=NULL,hi.perc=99.9)
+filtered_methylObj_cov5=filterByCoverage(methylObj,lo.count=5,lo.perc=NULL,
+                                      hi.count=NULL,hi.perc=99.9)
+
+filtered_methylObj_norm <- filtered_methylObj %>% methylKit::normalizeCoverage(.)
+filtered_methylObj_cov5_norm <- filtered_methylObj_cov5 %>% methylKit::normalizeCoverage(.)
+```
+
+
+```{r}
+meth_filter=methylKit::unite(filtered_methylObj_norm)
+meth_filter_destrand=methylKit::unite(filtered_methylObj_norm,destrand = TRUE)
+ 
+clusterSamples(meth_filter, dist="correlation", method="ward", plot=TRUE)
+clusterSamples(meth_filter_destrand, dist="correlation", method="ward", plot=TRUE)
+
+PCASamples(meth_filter)
+PCASamples(meth_filter_destrand)
+```
+
+```{r}
+getCorrelation(meth_filter_destrand,plot=TRUE)
+```
+### batch effects 
+
+```{r}
+as=assocComp(mBase=meth_filter_destrand,select(meta,c("PCR_ReAmp_Cycles", "Fragment")))
+as
+```
+
+
+
+
+### Identify DML
+
+```{r}
+DMLStats_Tissue <- methylKit::calculateDiffMeth(meth_filter_destrand, overdispersion = "MN", test = "Chisq", mc.cores = 8) #Calculate differential methylation statistics and include covariate information.
+
+head(DMLStats_Tissue) #Look at differential methylation output
+```
+
+```{r}
+# Filter DMRs with q-value < 0.05
+significant_dmg <- getData(DMLStats_Tissue[DMLStats_Tissue$qvalue < 0.1, ])
+
+# Create a data frame for plotting
+plot_data <- data.frame(
+  chr = significant_dmg$chr,
+  start = significant_dmg$start,
+  meth.diff = significant_dmg$meth.diff
+)
+
+# Count the number of positive and negative methylation differences
+positive_count <- sum(significant_dmg$meth.diff > 0)
+negative_count <- sum(significant_dmg$meth.diff < 0)
+
+# Plot with counts added to the quadrants
+ggplot(plot_data, aes(x = start, y = meth.diff)) +
+  geom_point(alpha = 0.5) +  # Set alpha to reduce point transparency
+  theme_minimal() +
+  labs(title = "Significant Differentially Methylated Regions (q-value < 0.05)",
+       x = "Genomic Position (start)",
+       y = "Methylation Difference (%)") +
+  theme(legend.position = "none") +  # Remove the legend
+  # Add the count of positive and negative methylation differences as text annotations
+  annotate("text", x = Inf, y = Inf, label = paste("Positive:", positive_count), 
+           hjust = 1.1, vjust = 1.1, size = 4, color = "blue") +
+  annotate("text", x = Inf, y = -Inf, label = paste("Negative:", negative_count), 
+           hjust = 1.1, vjust = -0.1, size = 4, color = "red")
+
+
+dml_df <- as.data.frame(DMLStats_Tissue)
+
+# Volcano plot
+ggplot(dml_df, aes(x = meth.diff, y = -log10(qvalue))) +
+  geom_point(alpha = 0.5) +
+  geom_vline(xintercept = c(-5, 5), linetype = "dashed", color = "red") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "blue") +
+  labs(title = "Differentially Methylated Loci (DMLs)",
+       x = "Methylation Difference (%)",
+       y = "-log10(q-value)") +
+  theme_minimal()
+```
+
+
+```{r}
+DMLStats_Tissue5 <- methylKit::getMethylDiff(DMLStats_Tissue, difference = 5, qvalue = 0.05) #Identify DML based on difference threshold
+
+length(DMLStats_Tissue5$chr) #DML
+
+head(DMLStats_Tissue5)
+```
+
+
+
+
+
+
+
+
+
