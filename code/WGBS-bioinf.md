@@ -1043,9 +1043,18 @@ multiqc .
 <img src="../output_WGBS/dedup_V3/report_screenshots/Summary_1.png?raw=true" height="400">
 <img src="../output_WGBS/dedup_V3/report_screenshots/Summary_2.png?raw=true" height="400">
 
-<img src="../output_WGBS/dedup_V3/report_screenshots/multiqc_1.png?raw=true" height="400">
-<img src="../output_WGBS/dedup_V3/report_screenshots/multiqc_2.png?raw=true" height="400">
+<img src="../output_WGBS/dedup_V3/report_screenshots/multiqc_1.png?raw=true" height="400"><img src="../output_WGBS/dedup_V3/report_screenshots/multiqc_2.png?raw=true" height="400">
 
+<img src="../output_WGBS/dedup_V3/report_screenshots/qualimap_coverage_histogram.png?raw=true" height="400">
+<img src="../output_WGBS/dedup_V3/report_screenshots/qualimap_coverage_histogram_2.png?raw=true" height="400">
+
+<img src="../output_WGBS/dedup_V3/report_screenshots/qualimap_coverage_cumulative.png?raw=true" height="400">
+<img src="../output_WGBS/dedup_V3/report_screenshots/qualimap_insert_size.png?raw=true" height="400">
+
+<img src="../output_WGBS/dedup_V3/report_screenshots/qualimap_gc_content.png?raw=true" height="400">
+
+<img src="../output_WGBS/dedup_V3/report_screenshots/bismark_alignment.png?raw=true" height="400">
+<img src="../output_WGBS/dedup_V3/report_screenshots/bismark_deduplication.png?raw=true" height="400">
 
 ## Thoughts and next steps. 
 
@@ -1172,7 +1181,7 @@ Wow, I had a lot of issues. It was a saga. Methylseq kept quitting right after t
       2) "Note: bwameth/align module still needs fixing for not resuming from cache. So, its cache has been made lenient (Minimal input file metadata (name and size only) are included in the cache keys) in its config. This strategy provides a workaround for caching invalidation by current bwameth/align module requirement to touch the index files before alignment. An issue we hope to have fixed in a release soon."
 
 
-## Methylseq BWA-post processing script (if methylseq doesn't want to work)
+### Methylseq BWA-post processing script (if methylseq doesn't want to work)
 
 ```
 #!/usr/bin/env bash
@@ -1238,7 +1247,19 @@ echo "Generating MultiQC report..."
 multiqc *
 ```
 
-MULTIQC REPORT: 
+## "Final" (as of now) BWA-Meth aligned MultiQC Report: 
+
+<img src="../output_WGBS/methylseq_V3_bwa_test/multiqc/bwameth/report_screenshots/multiqc_1.png?raw=true" height="400">
+
+<img src="../output_WGBS/methylseq_V3_bwa_test/multiqc/bwameth/report_screenshots/qualimap_coverage_histogram.png?raw=true" height="400">
+<img src="../output_WGBS/methylseq_V3_bwa_test/multiqc/bwameth/report_screenshots/qualimap_coverage_histogram_2.png?raw=true" height="400">
+<img src="../output_WGBS/methylseq_V3_bwa_test/multiqc/bwameth/report_screenshots/qualimap_coverage_histogram_3.png?raw=true" height="400">
+
+<img src="../output_WGBS/methylseq_V3_bwa_test/multiqc/bwameth/report_screenshots/qualimap_coverage_cumulative.png?raw=true" height="400">
+<img src="../output_WGBS/methylseq_V3_bwa_test/multiqc/bwameth/report_screenshots/qualimap_insert_size.png?raw=true" height="400">
+<img src="../output_WGBS/methylseq_V3_bwa_test/multiqc/bwameth/report_screenshots/qualimap_gc_content.png?raw=true" height="400">
+
+<img src="../output_WGBS/methylseq_V3_bwa_test/multiqc/bwameth/report_screenshots/picard_deduplication.png?raw=true" height="400">
 
 ## Analyzing methylation calls in methylkit
 
