@@ -74,3 +74,4 @@ references/Pocillopora_acuta_HIv2.assembly.fasta.fai
 output_WGBS/*/*gz
 output_WGBS/*/*/*gz
 *.methylKit
+output_WGBS/MethylKit.RData

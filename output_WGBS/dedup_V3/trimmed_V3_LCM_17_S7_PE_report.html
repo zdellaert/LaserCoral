@@ -150,7 +150,7 @@
 	
 			<div class="subtitle">
 				<h3>data_WGBS/trimmed_V3_LCM_17_S7_R1_001.fastq.gz and data_WGBS/trimmed_V3_LCM_17_S7_R2_001.fastq.gz</h3>
-				<p>Data processed at 19:29:32 on 2025-01-25</p>
+				<p>Data processed at 19:10:53 on 2025-02-11</p>
 			</div>
 			
 		</div>
@@ -430,6 +430,50 @@
 	
 		
 	<!-- This section is optional -->
+	
+	<h2>Nucleotide Coverage</h2>
+	
+	<table>
+		<tbody>
+			<tr>
+				<td>
+					<table class="data" id="nucleotide_coverage_table">
+						<thead>
+							<tr><th>Nucleotide Class</th> <th>Counts Sample</th> <th>Counts Genome</th><th>% in Sample</th> <th>% in Genome</th> <th>fold coverage</th></thead>
+						<tbody>
+							<tr><th>A</th>	<td>239946555</td> <td>126259161</td> <td>30.88</td>  <td>30.92</td>	<td>1.900</td></tr>
+							<tr><th>T</th>	<td>237625699</td> <td>126437200</td> <td>30.58</td>  <td>30.97</td>  <td>1.879</td></tr>
+							<tr><th>C</th>	<td>147642030</td> <td>77797826</td> <td>19.00</td>  <td>19.05</td>  <td>1.898</td></tr>
+							<tr><th>G</th>	<td>151858260</td> <td>77793347</td> <td>19.54</td>  <td>19.05</td>	<td>1.952</td></tr>
+						</tbody>
+						<tbody>
+							<tr><th>AC</th>	<td>42949552</td> <td>22612398</td> <td>5.57</td> <td>5.54</td> <td>1.899</tr>
+							<tr><th>CA</th>	<td>50927940</td> <td>27041619</td> <td>6.60</td> <td>6.62</td> <td>1.883</tr>
+							<tr><th>TC</th>	<td>46513859</td> <td>24815561</td> <td>6.03</td> <td>6.08</td> <td>1.874</tr>
+							<tr><th>CT</th>	<td>45824537</td> <td>24313227</td> <td>5.94</td> <td>5.95</td> <td>1.885</tr>
+							<tr><th>CC</th>	<td>27911846</td> <td>15061460</td> <td>3.62</td> <td>3.69</td> <td>1.853</tr>
+							<tr><th>CG</th>	<td>21859695</td> <td>11381400</td> <td>2.83</td> <td>2.79</td> <td>1.921</tr>
+							<tr><th>GC</th>	<td>29254687</td> <td>15308284</td> <td>3.79</td> <td>3.75</td> <td>1.911</tr>
+							<tr><th>GG</th>	<td>29183791</td> <td>15047819</td> <td>3.78</td> <td>3.69</td> <td>1.939</tr>
+							<tr><th>AG</th>	<td>47564276</td> <td>24271378</td> <td>6.16</td> <td>5.94</td> <td>1.960</tr>
+							<tr><th>GA</th>	<td>48630461</td> <td>24790024</td> <td>6.30</td> <td>6.07</td> <td>1.962</tr>
+							<tr><th>TG</th>	<td>52096193</td> <td>27092644</td> <td>6.75</td> <td>6.64</td> <td>1.923</tr>
+							<tr><th>GT</th>	<td>44121335</td> <td>22647104</td> <td>5.72</td> <td>5.55</td> <td>1.948</tr>
+							<tr><th>TT</th>	<td>83885857</td> <td>46179182</td> <td>10.87</td> <td>11.31</td> <td>1.817</tr>	
+							<tr><th>TA</th>	<td>53291139</td> <td>28349680</td> <td>6.91</td> <td>6.94</td> <td>1.880</tr>
+							<tr><th>AT</th>	<td>62195451</td> <td>33297584</td> <td>8.06</td> <td>8.16</td> <td>1.868</tr>
+							<tr><th>AA</th>	<td>85451022</td> <td>46077696</td> <td>11.07</td> <td>11.29</td> <td>1.854</tr>
+						</tbody>
+					</table>			
+				</td>
+				<td>
+					<div id="nucleo_plot" class="bargraph"> <!--Plotly chart will be drawn inside this DIV --> </div>	
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	
+	<hr>
 	
 	
 	
@@ -723,8 +767,8 @@
 	<!-- Nucleotide Stats Plot-->
 	<script>
 	  	var trace1 = {
-	  		x: [{{nucleo_sample_x}}], 
-	  		y: [{{nucleo_sample_y}}],
+	  		x: [30.88 , 30.58 , 19.00 , 19.54 , 5.57 , 6.60 , 6.03 , 5.94 , 3.62 , 2.83 , 3.79 , 3.78 , 6.16 , 6.30 , 6.75 , 5.72 , 10.87 , 6.91 , 8.06 , 11.07], 
+	  		y: ['A','T','C','G','AC','CA','TC','CT','CC','CG','GC','GG','AG','GA','TG','GT','TT','TA','AT','AA'],
 	  
 	  		name: 'Percent Sample', 
 			marker: {
@@ -742,8 +786,8 @@
 		var trace2 = {
 	  		<!-- x: [20, 14, 23, 7], testing -->
 	  		<!-- y: ['A', 'T', 'C', 'G'], testing -->
-	 		x: [{{nucleo_genomic_x}}], 
-	  		y: [{{nucleo_genomic_y}}],
+	 		x: [30.92 , 30.97 , 19.05 , 19.05 , 5.54 , 6.62 , 6.08 , 5.95 , 3.69 , 2.79 , 3.75 , 3.69 , 5.94 , 6.07 , 6.64 , 5.55 , 11.31 , 6.94 , 8.16 , 11.29], 
+	  		y: ['A','T','C','G','AC','CA','TC','CT','CC','CG','GC','GG','AG','GA','TG','GT','TT','TA','AT','AA'],
 
 	  		name: 'Percent Genomic', 
 	  		marker: {
