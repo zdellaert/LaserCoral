@@ -195,7 +195,7 @@ echo "QC of trimmed data complete." $(date)
 
 Will add screenshots soon.
 
-## Bismark Alignment to P. acuta genome
+## Bismark Alignment to P. acuta genome: Attempt 1
 
 https://felixkrueger.github.io/Bismark/
 
@@ -491,7 +491,10 @@ So, let's take score_min="L,0,-0.2" and "L,0,-1.0". What are different minimum s
 
 So the longer the read, on average, the lower the minimum score. And by increasing the multiplier of X, we are decreasing the threshold for alignments to be considered valid. But, why would this decrease the mapping rate of samples with longer reads? Longer reads should be held to a lower cutoff given this formula.
 
-## Plan: use --next-seq trimming to account for NovaSeq sequencing parameters:
+
+## Trimming V2: Next-Seq trim
+
+To try to improve alignment results, I am going to try alternative trimming parameters. I will use --next-seq trimming to account for NovaSeq sequencing parameters:
 
 https://cutadapt.readthedocs.io/en/stable/guide.html#adapter-types
 
@@ -502,9 +505,6 @@ Since the regular quality-trimming algorithm cannot deal with this situation, yo
 
 **cutadapt --nextseq-trim=20 -o out.fastq input.fastq**
 This works like regular quality trimming (where one would use -q 20 instead), except that the qualities of G bases are ignored."
-
-
-## Trimming V2: Next-Seq trim
 
 From the Zymo trio protocol:
 
@@ -708,7 +708,9 @@ echo "QC of trimmed data complete." $(date)
 <img src="../output_WGBS/trimmed_V3_qc/multiqc_screenshots/overrep_seq.png?raw=true">
 
 
-## Bismark Alignment of V3 Trimmed Reads
+## Bismark Alignment: Attempt 2
+
+I will now use bismark to align the V3-trimmed reads to the *P. acuta* genome.
 
 ```
 nano scripts/bismark_align_V3.sh 
@@ -808,12 +810,13 @@ done
 <img src="08-Bismark-Alignment-Assesment-images/alignment_bismark_trimmed_v3_batch2.png?raw=true" height="400">
 
 Okay , so an improvement but nothing super substantial. I am considering trimming all reads to length 100bp to try to get rid of any potential length biasing in the alignment? I could also try bwa-meth or hisat2 as alternative aligners.
+- note, I tried the 100 bp test and it decreased alignment rates. same for testing hisat as an aligner. see `code/notes` for more info and code used.
 
 <img src="08-Bismark-Alignment-Assesment-images/alignment_bismark_orig_vs_v3.png?raw=true" height="400">
 
 But, what I did not realize was that the next step in the Bismark pipeline, deduplication, can increase the effective alignment rate. Since I have high rates of duplication, I will try this before looking into alternative mapping or more aggressive trimming strategies.
 
-## Deduplication
+### Deduplication
 
 ```
 nano scripts/bismark_dedup.sh 
@@ -846,7 +849,7 @@ parallel -j 8 deduplicate_bismark \
 output_WGBS/align_V3/{}.bam
 ```
 
-Oh no! About 87-95% of alignments were removed for each sample in this step, which decreased the alignment rate even furhter!
+Oh no! About 87-95% of alignments were removed for each sample in this step, which decreased the alignment rate even further!
 
 Let's just do the methylation extraction to see:
 
@@ -882,7 +885,7 @@ bismark_methylation_extractor \
 *deduplicated.bam
 ```
 
-## Methylation call
+### Methylation call
 
 ```
 nano scripts/bismark_call.sh 
@@ -914,32 +917,6 @@ parallel -j 10 coverage2cytosine \
 --zero_based \
 {}_pe.deduplicated.bismark.cov.gz
 ```
-
-### Reports
-
-Turns out everything has to be in the same folder:
-
-```
-salloc
-module load uri/main
-module load Bismark/0.23.1-foss-2021b
-module load all/MultiQC/1.12-foss-2021b
-
-cd output_WGBS
-mv output_WGBS/align_V3/* output_WGBS/dedup_V3/
-
-cd output_WGBS/dedup_V3
-bismark2report
-bismark2summary *pe.bam
-
-bam2nuc --genome_folder ../../references/ *_pe.deduplicated.bam
-
-multiqc .
-```
-
-<img src="../output_WGBS/dedup_V3/report_screenshots/Summary_1.png?raw=true" height="400">
-<img src="../output_WGBS/dedup_V3/report_screenshots/Summary_2.png?raw=true" height="400">
-
 
 ### Sort deduplicated bams
 
@@ -1008,7 +985,7 @@ for bamFile in *deduplicated.sorted.bam; do
 done
 ```
 
-### subset bams for viewing
+### Subset bams for viewing in IGV
 
 ```
 nano scripts/bismark_subset.sh 
@@ -1040,6 +1017,35 @@ done
 
 mv *sub.bam* subsets/
 ```
+
+### Reports
+
+Turns out everything has to be in the same folder:
+
+```
+salloc
+module load uri/main
+module load Bismark/0.23.1-foss-2021b
+module load all/MultiQC/1.12-foss-2021b
+
+cd output_WGBS
+mv output_WGBS/align_V3/* output_WGBS/dedup_V3/
+
+cd output_WGBS/dedup_V3
+bismark2report
+bismark2summary *pe.bam
+
+bam2nuc --genome_folder ../../references/ *_pe.deduplicated.bam
+
+multiqc .
+```
+
+<img src="../output_WGBS/dedup_V3/report_screenshots/Summary_1.png?raw=true" height="400">
+<img src="../output_WGBS/dedup_V3/report_screenshots/Summary_2.png?raw=true" height="400">
+
+<img src="../output_WGBS/dedup_V3/report_screenshots/multiqc_1.png?raw=true" height="400">
+<img src="../output_WGBS/dedup_V3/report_screenshots/multiqc_2.png?raw=true" height="400">
+
 
 ## Thoughts and next steps. 
 
