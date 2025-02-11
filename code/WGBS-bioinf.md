@@ -1041,195 +1041,199 @@ done
 mv *sub.bam* subsets/
 ```
 
-
 ## Thoughts and next steps. 
 
-Okay, the alignment is not great. And I don't like how the best looking libraries (32, 33) are aligning the worst. I am going to hard trim all reads to 100 bp and try to align these and see if this reduces possible length bias.
+Okay, the alignment is not great. And I don't like how the best looking libraries (32, 33) are aligning the worst. The aligner is maybe having trouble with repetitive regions? high-GC content sequences are aligning very poorly.
 
-**Something weird is happening with the GC content.**
 
-## Final Trimming: Flexbar
+## BWAmeth Alignment using Methylseq
 
-I tested a lot of tools to minimize adapter and polyG content. See [here](https://github.com/zdellaert/LaserCoral/tree/main/code/notes/Trim_Saga.md) 
+I tested a lot of tools to minimize adapter and polyG content. See [here](https://github.com/zdellaert/LaserCoral/tree/main/code/notes/Trim_Saga.md). In the end, none of them improved parameters enough beyond the cutadapt trimming to justify using extra tools and steps.
+
+I also tested hisat-2 as an alternative aligner, which showed no improvements from bowtie2 (both used with bismark). Finally, I tried BWA-meth, wrapped by [methylseq](https://nf-co.re/methylseq/3.0.0/). This greatly improved coverage for all samples, even though there was still discrepancy across samples.
+
+> "ANNOUNCEMENTS 📢
+💡 Unity profile is now available for Nextflow nf-core pipelines
+An institutional Unity profile is now available for Nextflow nf-core pipelines (docs, config)!
+
+> To use it, add the -profile unity option to any nf-core pipeline. This allows for each process to be submitted as a slurm job and use apptainer for dependency management."
+
+
+
+```
+nano data_WGBS/LCM_methylseq_input_V3bwa.csv
+```
+
+```
+sample,fastq_1,fastq_2,genome
+LCM_1,/scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V3/trimmed_V3_LCM_1_S1_R1_001.fastq.gz,/scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V3/trimmed_V3_LCM_1_S1_R2_001.fastq.gz,
+LCM_3,/scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V3/trimmed_V3_LCM_3_S2_R1_001.fastq.gz,/scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V3/trimmed_V3_LCM_3_S2_R2_001.fastq.gz,
+LCM_11,/scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V3/trimmed_V3_LCM_11_S3_R1_001.fastq.gz,/scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V3/trimmed_V3_LCM_11_S3_R2_001.fastq.gz,
+LCM_12,/scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V3/trimmed_V3_LCM_12_S4_R1_001.fastq.gz,/scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V3/trimmed_V3_LCM_12_S4_R2_001.fastq.gz,
+LCM_17,/scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V3/trimmed_V3_LCM_17_S7_R1_001.fastq.gz,/scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V3/trimmed_V3_LCM_17_S7_R2_001.fastq.gz,
+LCM_18,/scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V3/trimmed_V3_LCM_18_S8_R1_001.fastq.gz,/scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V3/trimmed_V3_LCM_18_S8_R2_001.fastq.gz,
+LCM_24,/scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V3/trimmed_V3_LCM_24_S5_R1_001.fastq.gz,/scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V3/trimmed_V3_LCM_24_S5_R2_001.fastq.gz,
+LCM_25,/scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V3/trimmed_V3_LCM_25_S6_R1_001.fastq.gz,/scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V3/trimmed_V3_LCM_25_S6_R2_001.fastq.gz,
+LCM_32,/scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V3/trimmed_V3_LCM_32_S9_R1_001.fastq.gz,/scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V3/trimmed_V3_LCM_32_S9_R2_001.fastq.gz,
+LCM_33,/scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V3/trimmed_V3_LCM_33_S10_R1_001.fastq.gz,/scratch3/workspace/zdellaert_uri_edu-shared/data_WGBS/trimmed_V3/trimmed_V3_LCM_33_S10_R2_001.fastq.gz,
+```
 
 
 ```
-nano scripts/wgbs_flexbar.sh #write script for first trimming pass and QC, enter text in next code chunk
-```
-
-```
-#!/usr/bin/env bash
-#SBATCH --ntasks=1 --cpus-per-task=20 #split one task over multiple CPU
-#SBATCH --array=0-9 #for 10 samples
-#SBATCH --mem=150GB
-#SBATCH -t 18:00:00
-#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
-#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
-#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
-#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/data_WGBS
-
-# Get the list of sample files and corresponding sample names
-files=($(ls LCM*R1*.fastq.gz))
-file="${files[$SLURM_ARRAY_TASK_ID]}"
-sample_name=$(basename "$file" "_R1_001.fastq.gz")
-
-flexbar \
-    -r ${sample_name}_R1_001.fastq.gz \
-    -p ${sample_name}_R2_001.fastq.gz \
-    --adapter-preset TruSeq \
-    --adapter-min-overlap 3 \
-    --adapter-error-rate 0.1 \
-    --adapter-trim-end RIGHT \
-    --adapter-pair-overlap ON \
-    --qtrim TAIL --qtrim-threshold 20 \
-    --qtrim-format sanger \
-    --min-read-length 40 \
-    --htrim-right GCTA --htrim-left GCTA --htrim-min-length 5 \
-    --max-uncalled 2 --htrim-error-rate 0.2 -htrim-min-length2 10 \
-    --zip-output GZ \
-    --threads 20 \
-    -t "${sample_name}_flexbar"
-
-# load modules needed
-module load parallel/20240822
-module load fastqc/0.12.1
-
-#make trimmed_flexbar_qc output folder
-mkdir -p ../output_WGBS/trimmed_flexbar_qc/
-
-# Create an array of fastq files to process
-files=($('ls' ${sample_name}_flexbar*gz)) 
-
-# Run fastqc in parallel
-echo "Starting fastqc..." $(date)
-parallel -j 20 "fastqc {} -o ../output_WGBS/trimmed_flexbar_qc/ && echo 'Processed {}'" ::: "${files[@]}"
-echo "fastQC done." $(date)
-```
-
-## Bismark Alignment of Flexbar Trimmed Reads
-
-```
-nano scripts/bismark_align_flexbar.sh 
+nano scripts/methylseq_V3_bwa.sh 
 ```
 
 ```
 #!/usr/bin/env bash
-#SBATCH --ntasks=1 --cpus-per-task=24 #split one task over multiple CPU
-#SBATCH --array=0-9 #for 10 samples
-#SBATCH --mem=200GB
-#SBATCH -t 48:00:00
-#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
-#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
-#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
-#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
-
-# load modules needed
-module load uri/main
-module load Bismark/0.23.1-foss-2021b
-module load bowtie2/2.5.2
-
-# Set directories and files
-reads_dir="data_WGBS/" #directory containing trimmed data to align
-genome_folder="references/" #directory containing original unmodified genome fasta and bismark Bisulfite_Genome directory
-
-output_dir="/scratch3/workspace/zdellaert_uri_edu-shared/output_WGBS/align_flexbar"
-mkdir -p $output_dir
-
-# Get the list of sample files and corresponding sample names
-files=(${reads_dir}LCM_*_flexbar_1.fastq.gz)
-file="${files[$SLURM_ARRAY_TASK_ID]}"
-sample_name=$(basename "$file" "_flexbar_1.fastq.gz")
-
-# Define log files for stdout and stderr
-stdout_log="${output_dir}${sample_name}_stdout.log"
-stderr_log="${output_dir}${sample_name}_stderr.log"
-
-# Run Bismark align
-bismark \
-    -genome ${genome_folder} \
-    -p 4 \
-    -score_min L,0,-1.0 \
-    -1 ${reads_dir}${sample_name}_flexbar_1.fastq.gz \
-    -2 ${reads_dir}${sample_name}_flexbar_2.fastq.gz \
-    -o ${output_dir} \
-    --temp_dir ${output_dir} \
-    --basename ${sample_name} \
-    2> "${output_dir}/${sample_name}-bismark_summary.txt"
-
-# Define directories
-summary_file="${output_dir}/parameter_comparison_summary.csv"
-
-# Initialize summary file
-echo "Sample,Score_Min,Alignment_Rate" > ${summary_file}
-
-for file in ${output_dir}/*_report.txt; do
-    # Extract sample name and from directory name
-    sample_name=$(basename "$file" | cut -d'_' -f1-3)
-    score_min="L0-1.0"
-
-    # Locate the summary file
-    summary_file_path="${output_dir}/${sample_name}_PE_report.txt"
-
-    # Extract metrics
-    mapping=$(grep "Mapping efficiency:" ${summary_file_path} | awk '{gsub("%", "", $3); print $3}')
-
-    # Append to the summary file
-    echo "${sample_name},${score_min},${mapping}" >> ${summary_file}
-done
-```
-
-## Deduplication and methylation extraction
-
-```
-nano scripts/bismark_flexbar_dedup_call.sh 
-```
-
-```
-#!/usr/bin/env bash
-#SBATCH --ntasks=1 --cpus-per-task=30 #split one task over multiple CPU
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=24
 #SBATCH --mem=100GB
 #SBATCH -t 24:00:00
-#SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
+#SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT_80 #email you when job starts, stops and/or fails
 #SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
 #SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
 #SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
 
-# load modules needed
-module load parallel/20240822
-module load uri/main
-module load Bismark/0.23.1-foss-2021b
-module load bowtie2/2.5.2
+## Load Nextflow and Apptainer environment modules
+module purge
+module load nextflow/24.10.3
+module load apptainer/latest
 
-output_dir="/scratch3/workspace/zdellaert_uri_edu-shared/output_WGBS/align_flexbar"
-ref_dir="/project/pi_hputnam_uri_edu/zdellaert/LaserCoral/references"
+## Set Nextflow directories to use scratch
+export NXF_WORK=/scratch3/workspace/zdellaert_uri_edu-shared/nextflow_work
+export NXF_TEMP=/scratch3/workspace/zdellaert_uri_edu-shared/nextflow_temp
+export NXF_LAUNCHER=/scratch3/workspace/zdellaert_uri_edu-shared/nextflow_launcher
 
-find ${output_dir}/*.bam | \
-xargs -n 1 basename -s .bam | \
-parallel -j 10 deduplicate_bismark \
---bam \
---paired \
---output_dir ${output_dir} \
-${output_dir}/{}.bam
-
-cd ${output_dir}
-
-bismark_methylation_extractor \
---bedGraph \
---counts \
---comprehensive \
---merge_non_CpG \
---multicore 28 \
---buffer_size 75% \
-*deduplicated.bam
-
-module load all/MultiQC/1.12-foss-2021b
-
-bismark2report
-bismark2summary *pe.bam
-
-bam2nuc --genome_folder ${ref_dir} *_pe.deduplicated.bam
-
-multiqc .
+ nextflow run nf-core/methylseq \
+   --input ./data_WGBS/LCM_methylseq_input_V3bwa.csv \
+   --outdir /scratch3/workspace/zdellaert_uri_edu-shared/methylseq_V3_bwa_test \
+   --aligner bwameth \
+   --methyl_kit \
+   --igenomes_ignore \
+   --fasta ./references/Pocillopora_acuta_HIv2.assembly.fasta \
+   --relax_mismatches \
+   --save_align_intermeds \
+   --skip_trimming \
+   --email zdellaert@uri.edu \
+   -profile unity \
+   -name methylseq_V3_bwa_test
 ```
 
-There was very little difference between the final results of cutadapt vs. flexbar-trimmed reads.
+### Additional parameters to consider
+
+parameters I did not use which Putnam lab people have used in the past:
+
+--clip_r1 10 \
+--clip_r2 10 \
+--three_prime_clip_r1 10 --three_prime_clip_r2 10 \
+--non_directional \
+--cytosine_report \
+--unmapped \
+
+### Reflections
+
+Wow, I had a lot of issues. It was a saga. Methylseq kept quitting right after the bwa alignments, which took ~24 hours. I kept trying different ways of resuming the pipeline, but it would always start the alignments over. *This is a known issue: see [here, v3.0.0 - [2024-12-16]](https://github.com/nf-core/methylseq/blob/master/CHANGELOG.md)*. I tried many ways to try to skip the alignment step, but all with no luck. I was able to find 2 solutions, which thankfully produced identical results:
+
+1) Run all post-bwameth alignment steps **Manually**. This was a pain! But looked through methylseq source code and was able to write code to run samtools, picard, methyldackel, and multiqc with the same parameters that methylseq uses 
+   1) NOTE: I did this before figuring out how to trick methylseq into skipping the alignment, and after confirming the results were the same, I removed the results files from this version of the analysis from this repository to avoid confusion. However, I am saving the script just in case (see below). 
+
+2) Trick methylseq! After a run where it has successfully completed the alignments and then given up (why, methylseq, why?), you can trick methylseq into using the bam files it already made by changing the following line of code in wherever your nextflow directory is:
+   1) For me, the full path is: **`/home/zdellaert_uri_edu/.nextflow/assets/nf-core/methylseq/modules/nf-core/bwameth/align/main.nf`**
+   2) You need to replace from "script" to "stub" with the following code, making adjustments so the path points to the output path of your methylseq run you are trying to resume. For me, that was **`/scratch3/workspace/zdellaert_uri_edu-shared/methylseq_V3_bwa_test/bwameth/alignments/`**
+
+  ```
+    script:
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    def bam_file = "${prefix}.bam"
+    
+    """
+    ln -sf "/scratch3/workspace/zdellaert_uri_edu-shared/methylseq_V3_bwa_test/bwameth/alignments/${prefix}.bam" .
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        bam_source: "pre-existing"
+    END_VERSIONS
+    """
+
+    stub:
+    def prefix = task.ext.prefix ?: "${meta.id}"
+  ```
+
+
+   2) Then, rerun your methylseq run with the `-resume` flag at the end of the code (i replace the `-name XXX` flag with `-resume`)
+   3) NOTE: this is a known bug. If they fix the bug in future versions of methylseq, you should be able to resume the pipeline when it crashes without issue.
+      1) *This is a known issue: see [here, v3.0.0 - [2024-12-16]](https://github.com/nf-core/methylseq/blob/master/CHANGELOG.md)*
+      2) "Note: bwameth/align module still needs fixing for not resuming from cache. So, its cache has been made lenient (Minimal input file metadata (name and size only) are included in the cache keys) in its config. This strategy provides a workaround for caching invalidation by current bwameth/align module requirement to touch the index files before alignment. An issue we hope to have fixed in a release soon."
+
+
+## Methylseq BWA-post processing script (if methylseq doesn't want to work)
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --ntasks=1 --cpus-per-task=48
+#SBATCH --mem=300GB
+#SBATCH -t 24:00:00
+#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80
+#SBATCH --error=outs_errs/"%x_error.%j"
+#SBATCH --output=outs_errs/"%x_output.%j"
+#SBATCH -D /home/zdellaert_uri_edu/zdellaert_uri_edu-shared/methylseq_V3_bwa_test_back/bwameth/alignments
+
+## This is an alternative script to run the bwa-meth post processing manually if methylseq quits after the alignment and doesn't want to resume....
+
+module load samtools/1.19.2
+reference="Pocillopora_acuta_HIv2.assembly.fasta"
+
+for bamFile in *.bam; do
+	prefix=$(basename $bamFile .bam)
+
+	samtools cat ${bamFile} | samtools sort --threads 48 ${reference} -o ${prefix}.sorted.bam
+done
+
+for bamFile in *sorted.bam; do
+	prefix=$(basename $bamFile .bam)
+
+	samtools index --threads 1 $bamFile
+    samtools flagstat --threads 48 $bamFile > ${prefix}.flagstat
+	samtools stats --threads 48    $bamFile > ${prefix}.stats
+
+	singularity exec https://depot.galaxyproject.org/singularity/picard:3.3.0--hdfd78af_0 picard MarkDuplicates \
+	    --ASSUME_SORTED true --REMOVE_DUPLICATES false --VALIDATION_STRINGENCY LENIENT \
+		--INPUT $bamFile \
+    	--OUTPUT $bamFile.dedup.bam \
+		--REFERENCE_SEQUENCE $reference \
+    	--METRICS_FILE $prefix.MarkDuplicates.metrics.txt
+
+	samtools index --threads 1 $bamFile.dedup.bam
+
+	singularity exec https://depot.galaxyproject.org/singularity/methyldackel:0.6.1--he4a0461_7 MethylDackel extract $reference --methylKit $bamFile.dedup.bam
+
+	singularity exec https://depot.galaxyproject.org/singularity/methyldackel:0.6.1--he4a0461_7 MethylDackel mbias $reference $bamFile.dedup.bam mbias/$prefix --txt > ${prefix}.mbias.txt
+done
+
+echo "Collecting MultiQC input files..."
+
+multiqc_input_files=(
+	*.MarkDuplicates.metrics.txt
+	*.flagstat
+	*.stats
+	*.bam.bai
+	*.bedGraph
+	*.mbias.txt
+)
+
+module load uri/main
+module load all/MultiQC/1.12-foss-2021b
+
+
+# Generate MultiQC report
+echo "Generating MultiQC report..."
+#multiqc ${multiqc_input_files[@]} -o multiqc_report
+multiqc *
+```
+
+MULTIQC REPORT: 
+
+## Analyzing methylation calls in methylkit
+
+See 'code/09-MethylKit.Rmd'

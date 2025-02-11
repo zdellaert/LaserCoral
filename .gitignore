@@ -23,6 +23,7 @@
 # Data directory with raw and trimmed fastq files
 data_RNA/*.gz
 data_WGBS/*.gz
+data_WGBS/*/*.gz
 
 # large unzipped reference files
 references/*txt

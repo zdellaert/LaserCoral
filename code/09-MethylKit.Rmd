@@ -63,13 +63,13 @@ tissue_binary <- gsub("OralEpi", "0", tissue_binary)
 tissue_binary <- as.numeric(tissue_binary)
 fragment <- meta$Fragment
 
-methylObj_methylseq=methRead(as.list(file_list),
-           sample.id = as.list(sample),
-           assembly = "Pacuta",
-           treatment = tissue_binary,
-           context = "CpG",
-           mincov = 10
-           )
+# methylObj=methRead(as.list(file_list),
+#            sample.id = as.list(sample),
+#            assembly = "Pacuta",
+#            treatment = tissue_binary,
+#            context = "CpG",
+#            mincov = 10
+#            )
 #   
 # save(methylObj, file = "../output_WGBS/MethylKit.RData") 
 ```
