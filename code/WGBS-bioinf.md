@@ -1043,7 +1043,7 @@ multiqc .
 <img src="../output_WGBS/dedup_V3/report_screenshots/Summary_1.png?raw=true" height="400">
 <img src="../output_WGBS/dedup_V3/report_screenshots/Summary_2.png?raw=true" height="400">
 
-<img src="../output_WGBS/dedup_V3/report_screenshots/multiqc_1.png?raw=true" height="702"><img src="../output_WGBS/dedup_V3/report_screenshots/multiqc_2.png?raw=true" height="702">
+<img src="../output_WGBS/dedup_V3/report_screenshots/multiqc_1.png?raw=true"><img src="../output_WGBS/dedup_V3/report_screenshots/multiqc_2.png?raw=true">
 
 <img src="../output_WGBS/dedup_V3/report_screenshots/qualimap_coverage_histogram.png?raw=true" height="400">
 <img src="../output_WGBS/dedup_V3/report_screenshots/qualimap_coverage_histogram_2.png?raw=true" height="400">
