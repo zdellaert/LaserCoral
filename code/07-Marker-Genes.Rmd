@@ -67,3 +67,190 @@ renv::restore() #reinstall all the package versions in the renv lockfile
 - [ ] ID all genes in the OG of each species of interest as belonging to that marker gene w/ species source
 
 
+## Custom P. acuta BLASTP database:
+
+```{bash, eval=FALSE}
+cd ../references
+
+#download the genome protein fasta if you have not already
+wget http://cyanophora.rutgers.edu/Pocillopora_acuta/Pocillopora_acuta_HIv2.genes.pep.faa.gz
+
+#unzip file
+gunzip Pocillopora_acuta_HIv2.genes.pep.faa.gz
+
+#request interactive computing node
+salloc -p cpu -c 8 --mem 32G
+
+#load BLAST module
+module load uri/main
+module load BLAST+/2.15.0-gompi-2023a
+
+#make blast_dbs directory if you haven't done so above
+mkdir blast_dbs
+cd blast_dbs
+
+makeblastdb -in ../Pocillopora_acuta_HIv2.genes.pep.faa -out Pacuta_prot -dbtype prot
+```
+
+## HOX genes 
+
+```{bash eval=FALSE}
+cd ../output_RNA/differential_expression/
+
+#make blast output directory if you haven't done so above
+mkdir blast
+cd blast
+
+nano Nematostella_Hox.txt
+```
+
+add accession numbers of interest (based on https://doi.org/10.1016/j.cub.2023.05.044):
+
+Alx4	    Homeobox protein aristaless-like 4	             NV2g017442000.1
+Anthox1	  Homeobox protein Anthox1	                       NV2g017961000.1
+Anthox1a	Homeobox protein Anthox1a	                       NV2g012279000.1
+Anthox6a	Homeobox protein Anthox6a	                       NV2g011327000.1
+Anthox7	  Homeobox protein Anthox7	                       NV2g012004000.1
+Anthox8a	Homeobox protein Anthox8a	                       NV2g012007000.1
+Anthox8b	Homeobox protein Anthox8b	                       NV2g012008000.1
+B-H1	    Homeobox protein B-H1                            NV2g025278000.1
+Dlx	      Homeobox protein Dlx                             NV2g014640000.1
+Dmbx1	    Diencephalon/mesencephalon homeobox protein 1	   NV2g003591000.1
+Dmbx4   	Diencephalon/mesencephalon homeobox protein 1-B	 NV2g003592000.1
+Dmbx5	    Diencephalon/mesencephalon homeobox protein 1-B	 NV2g003593000.1
+Emx	      Homeobox protein EMX1	                           NV2g018403000.1
+Gbx	      Gastrulation brain homeodomain                   NV2g011380000.1
+Gsc	      Homeobox protein goosecoid	                     NV2g010922000.1
+MoxB    	Homeobox protein Mox1	                           NV2g012940000.1
+MoxC      Homeobox protein Mox1	                           NV2g012942000.1
+MoxD    	Homeobox protein Mox1	                           NV2g012943000.1
+Msx1	    Homeobox protein MSX-1                           NV2g012247000.1
+Nkx2.2a1	Homeobox protein Nkx-2.2a                   	   NV2g011134000.1
+Nkx2.2a2	Homeobox protein Nkx-2.2a	                       NV2g011262000.1
+Nkx2.8    Homeobox protein Nkx-2.8                    	   NV2g011132000.1
+Nkx3.2    Homeobox protein Nkx-3.2                         NV2g018723000.1
+OtxA	    Homeobox protein OTX1	                           NV2g012793000.1
+OtxB	    Homeobox protein OTX1 B                          NV2g012795000.1
+OtxC	    Homeobox protein OTX1	                           NV2g012799000.1
+Six4/5	  Homeobox protein SIX4/5	                         NV2g010728000.1
+Tlx	      T-cell leukemia homeobox protein 2	             NV2g011935000.1
+Uncx	    Homeobox protein unc-4 homolog                   NV2g006849000.1
+Cdx	      HoxB3-like                                	     NV2g030001000.1
+Lbx	      Transcription factor LBX2                   	   NV2g017667000.1
+
+```{bash, eval = FALSE}
+NV2g017442000.1
+NV2g017961000.1
+NV2g012279000.1
+NV2g011327000.1
+NV2g012004000.1
+NV2g012007000.1
+NV2g012008000.1
+NV2g025278000.1
+NV2g014640000.1
+NV2g003591000.1
+NV2g003592000.1
+NV2g003593000.1
+NV2g018403000.1
+NV2g011380000.1
+NV2g010922000.1
+NV2g012940000.1
+NV2g012942000.1
+NV2g012943000.1
+NV2g012247000.1
+NV2g011134000.1
+NV2g011262000.1
+NV2g011132000.1
+NV2g018723000.1
+NV2g012793000.1
+NV2g012795000.1
+NV2g012799000.1
+NV2g010728000.1
+NV2g011935000.1
+NV2g006849000.1
+NV2g030001000.1
+NV2g017667000.1
+```
+
+```{bash, eval = FALSE}
+wget  https://genomes.stowers.org/files/pub/nematostella/Nvec/genomes/Nvec200/aligned/tcs_v2/20240221/NV2g.20240221.transcripts.fa
+
+#grep each header with the protein sequence after (seqkit allows for flexibility wiht multi-line FASTAs) and save to a new file
+seqkit grep --id-regexp "gene=([^ ]+)" -f Nematostella_Hox.txt NV2g.20240221.transcripts.fa -o Nematostella_Hox_seqs.txt
+```
+
+
+```{bash, eval = FALSE}
+#request interactive computing node
+salloc -p cpu -c 8 --mem 32G
+
+#load BLAST module
+module load uri/main
+module load BLAST+/2.15.0-gompi-2023a
+
+# These are nucleotide sequences, so will be blastx
+# run blast with human-readable output
+blastx -query Nematostella_Hox_seqs.txt -db ../../../references/blast_dbs/Pacuta_prot -out Nematostella_Hox_blast_results.txt -outfmt 0
+
+#looks like there are a lot of matches for each gene! I am going to do a tab search with a very low e-value cutoff:
+
+# run blast with tabular output
+blastx -query Nematostella_Hox_seqs.txt -db ../../../references/blast_dbs/Pacuta_prot -out Nematostella_Hox_blast_results_tab_top3.txt -outfmt 6 -evalue 1e-20 -max_target_seqs 3
+
+# reciprocal blast against Nematostella fasta to find best hit 
+
+cut -f2 Nematostella_Hox_blast_results_tab_top3.txt | sort | uniq > Nematostella_Hox_blast_results.names
+grep -A 1 -f Nematostella_Hox_blast_results.names ../../../references/Pocillopora_acuta_HIv2.genes.pep.faa > Nematostella_Hox_blast_results_Pacutaprot.txt
+```
+
+### Blast against Custom Nematostella BLASTP database:
+
+```{bash, eval=FALSE}
+#request interactive computing node
+salloc -p cpu -c 8 --mem 32G
+
+#load BLAST module
+module load uri/main
+module load BLAST+/2.15.0-gompi-2023a
+
+cd ../references/blast_dbs
+mkdir model_genomes
+cd model_genomes
+
+#download the genome protein fasta if you have not already
+wget https://genomes.stowers.org/files/pub/nematostella/Nvec/genomes/Nvec200/aligned/tcs_v2/20240221/NV2g.20240221.protein.fa
+
+cd ..
+
+makeblastdb -in model_genomes/NV2g.20240221.protein.fa -out NVec_prot -dbtype prot
+
+cd ../output_RNA/differential_expression/
+
+# run blast with tabular output
+blastp -query Nematostella_Hox_blast_results_Pacutaprot.txt -db ../../../references/blast_dbs/NVec_prot -out Nematostella_Hox_reciprocal_blast_results_tab_top1.txt -outfmt 6 -evalue 1e-20 -max_target_seqs 1
+cut -f2 Nematostella_Hox_reciprocal_blast_results_tab_top1.txt | sort | uniq > Nematostella_Hox_reciprocal_blast_results_tab_top1_names.txt
+grep -f  Nematostella_Hox_reciprocal_blast_results_tab_top1_names.txt NV2g.20240221.transcripts.fa > Nematostella_Hox_Pacuta_matches.txt
+```
+
+In R:
+
+```{r}
+
+```
+
+
+
+## Code for accessing NCBI
+
+```{bash, eval = FALSE}
+# Read the input file line by line and fetch FASTA sequences
+while read -r accession; do
+  if [[ -n "$accession" ]]; then
+    echo "Fetching $accession..."
+    curl -s "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=${accession}&rettype=fasta&retmode=text" >> "YinYang.fasta"
+    echo >> "YinYang.fasta"  # Add a newline between sequences
+    sleep 1  # Avoid hitting rate limits
+  fi
+done < "YinYang.txt"
+```
+
