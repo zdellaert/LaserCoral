@@ -33,7 +33,7 @@ renv::restore() #reinstall all the package versions in the renv lockfile
 ## Load packages
 
 ```{r}
-
+require("tidyverse")
 ```
 
 
@@ -235,7 +235,38 @@ grep -f  Nematostella_Hox_reciprocal_blast_results_tab_top1_names.txt NV2g.20240
 In R:
 
 ```{r}
+Hox_genes <- read.csv("../output_RNA/differential_expression/blast/NV_Hox.csv", header = FALSE)
+Hox_blast <- read.delim("../output_RNA/differential_expression/blast/Nematostella_Hox_reciprocal_blast_results_tab_top1.txt", header = FALSE)
+Hox_transcripttogene <- read.delim("../output_RNA/differential_expression/blast/Nematostella_Hox_Pacuta_matches.txt", header = FALSE, sep=" ")
 
+colnames(Hox_transcripttogene) <- c("transcript", "gene","CDs")
+colnames(Hox_blast) <- c("Pocillopora_ID", "Nematostella_Transcript", "Perc_Identity", "Align_Length", "Mismatch", "Gap_Open",
+                          "Q_start", "Q_end", "S_start", "S_end", "E_value", "Bit_score")
+colnames(Hox_genes) <- c("Gene_Name", "Description", "NV2_ID", "UVienna_ID")
+
+Hox_transcripttogene <- Hox_transcripttogene %>%
+  mutate(transcript = gsub(">", "",transcript)) %>%
+  mutate(gene = gsub("gene=", "",gene))
+
+results = data.frame(Pacuta_gene = character(), 
+                      Gene_Name = character(), 
+                      Description = character(), 
+                      NV2_ID = character(), 
+                      UVienna_ID = character(), 
+                      stringsAsFactors = FALSE)
+
+for (i in 1:nrow(Hox_blast)){
+  P_acuta = Hox_blast$Pocillopora_ID[i]
+  Nt <- Hox_blast$Nematostella_Transcript[i]
+  
+  Ng <- Hox_transcripttogene$gene[Hox_transcripttogene$transcript == Nt]
+  
+  info <- Hox_genes[Hox_genes$NV2_ID==Ng,]
+  info <- info %>% mutate(Pacuta_gene = P_acuta) %>% select(Pacuta_gene,everything())
+  results <- rbind(results, info)
+}
+
+write.csv(results, file="../output_RNA/marker_genes/Hox_nematostella.csv")
 ```
 
 

@@ -4,12 +4,16 @@ Script Written By:  Dellaert
 Last Updated: 1/16/2025
 
 - Sample prep: https://zdellaert.github.io/ZD_Putnam_Lab_Notebook/LCM-Exp-Sample-Prep/
--  extractions: 
--  library prep: 
+- DNA extractions: 
+- WGBS library prep: 
 
 ## Sequencing information
 
 - Sequenced through Genohub Service Provider: Oklahoma Medical Research Foundation NGS Core
+- Instrument: Illumina NovaSeq X Plus - 25B - PE 150 Cycle
+- Read length: 2 x 150bp (Paired End)
+- Number of samples: 10
+- Guaranteed number of pass filter PE reads/sample: 400M (200M in each direction)
 
 ## Make directory structure on Unity within LaserCoral repo folder
 
@@ -1126,10 +1130,10 @@ export NXF_LAUNCHER=/scratch3/workspace/zdellaert_uri_edu-shared/nextflow_launch
    --methyl_kit \
    --igenomes_ignore \
    --fasta ./references/Pocillopora_acuta_HIv2.assembly.fasta \
-   --relax_mismatches \
+   --save_reference \
+   --run_qualimap \
    --save_align_intermeds \
    --skip_trimming \
-   --email zdellaert@uri.edu \
    -profile unity \
    -name methylseq_V3_bwa_test
 ```
@@ -1141,7 +1145,6 @@ parameters I did not use which Putnam lab people have used in the past:
 --clip_r1 10 \
 --clip_r2 10 \
 --three_prime_clip_r1 10 --three_prime_clip_r2 10 \
---non_directional \
 --cytosine_report \
 --unmapped \
 

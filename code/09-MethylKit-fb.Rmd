@@ -53,7 +53,7 @@ meta <- meta %>% arrange(Sample)
 ```
 
 ```{r}
-file_list <- list.files("../output_WGBS/methylseq_V3_bwa_test/methyldackel", pattern = "*methylKit", full.names = TRUE, include.dirs = FALSE)
+file_list <- list.files("~/zdellaert_uri_edu-shared/methylseq_bwa_fb/methyldackel", pattern = "*methylKit", full.names = TRUE, include.dirs = FALSE)
 
 sample <- gsub(".markdup.sorted_CpG.methylKit", "", basename(file_list) )
 
@@ -72,13 +72,13 @@ fragment <- meta$Fragment
 #            context = "CpG",
 #            mincov = 10
 #            )
-#   
-# save(methylObj, file = "../output_WGBS/MethylKit.RData") 
+#    
+#  save(methylObj, file = "../output_WGBS/MethylKit-flexbar.RData") 
 ```
 
 
 ```{r}
-load("../output_WGBS/MethylKit.RData")
+load("../output_WGBS/MethylKit-flexbar.RData")
 
 getMethylationStats(methylObj[[2]],plot=FALSE,both.strands=FALSE)
 getMethylationStats(methylObj[[2]],plot=TRUE,both.strands=FALSE)
@@ -251,6 +251,7 @@ DML_transcript_annot <- data.frame(
 head(DML_transcript_annot)
 ```
 
+
 ## Are any DMGs DMLs?
 
 ```{r}
@@ -266,3 +267,5 @@ DML_transcript_annot[DML_transcript_annot$transcript_id %in% DE_05$query,]
 
 DE_05[DE_05$query %in% DML_transcript_annot$transcript_id,]
 ```
+
+
