@@ -1047,7 +1047,7 @@ multiqc .
 <img src="../output_WGBS/dedup_V3/report_screenshots/Summary_1.png?raw=true" height="400">
 <img src="../output_WGBS/dedup_V3/report_screenshots/Summary_2.png?raw=true" height="400">
 
-<img src="../output_WGBS/dedup_V3/report_screenshots/multiqc_1.png?raw=true"><img src="../output_WGBS/dedup_V3/report_screenshots/multiqc_2.png?raw=true">
+<img src="../output_WGBS/dedup_V3/report_screenshots/multiqc_1.png?raw=true"><img src="../output_WGBS/dedup_V3/report_screenshots/multiqc_2.png?raw=true" height="400">
 
 <img src="../output_WGBS/dedup_V3/report_screenshots/qualimap_coverage_histogram.png?raw=true" height="400">
 <img src="../output_WGBS/dedup_V3/report_screenshots/qualimap_coverage_histogram_2.png?raw=true" height="400">
@@ -1200,6 +1200,8 @@ Wow, I had a lot of issues. It was a saga. Methylseq kept quitting right after t
 ## This is an alternative script to run the bwa-meth post processing manually if methylseq quits after the alignment and doesn't want to resume....
 
 module load samtools/1.19.2
+module load apptainer/latest
+
 reference="Pocillopora_acuta_HIv2.assembly.fasta"
 
 for bamFile in *.bam; do
@@ -1224,7 +1226,14 @@ for bamFile in *sorted.bam; do
 
 	samtools index --threads 1 $bamFile.dedup.bam
 
-	singularity exec https://depot.galaxyproject.org/singularity/methyldackel:0.6.1--he4a0461_7 MethylDackel extract $reference --methylKit $bamFile.dedup.bam
+    #output methylkit files
+	singularity exec https://depot.galaxyproject.org/singularity/methyldackel:0.6.1--he4a0461_7 MethylDackel extract -@ 24 --methylKit $reference $bamFile.dedup.bam
+
+    #output bismark-style cytosine report
+    singularity exec https://depot.galaxyproject.org/singularity/methyldackel:0.6.1--he4a0461_7 MethylDackel extract -@ 24 --CHG --CHH --cytosine_report $reference $bamFile.dedup.bam
+
+    #output default bedgraph format
+	singularity exec https://depot.galaxyproject.org/singularity/methyldackel:0.6.1--he4a0461_7 MethylDackel extract -@ 24 $reference $bamFile.dedup.bam
 
 	singularity exec https://depot.galaxyproject.org/singularity/methyldackel:0.6.1--he4a0461_7 MethylDackel mbias $reference $bamFile.dedup.bam mbias/$prefix --txt > ${prefix}.mbias.txt
 done
@@ -1267,3 +1276,88 @@ multiqc *
 ## Analyzing methylation calls in methylkit
 
 See 'code/09-MethylKit.Rmd'
+
+## Analyzing CpGs
+
+### note
+
+If you don't have bedgraph outputs because you used --methylKit for running methylseq, this is the code to make them:
+
+```
+#output bismark-style cytosine report
+singularity exec https://depot.galaxyproject.org/singularity/methyldackel:0.6.1--he4a0461_7 MethylDackel extract -@ 24 --CHG --CHH --cytosine_report $reference $bamFile.dedup.bam
+
+#output default bedgraph format
+singularity exec https://depot.galaxyproject.org/singularity/methyldackel:0.6.1--he4a0461_7 MethylDackel extract -@ 24 --CHG --CHH $reference $bamFile.dedup.bam
+```
+
+### Bedtools intersection of gene bodies (from gtf)
+
+First, convert the gtf into a bed file:
+
+```
+salloc
+
+cd references
+module load gffread/0.12.7
+gffread Pocillopora_acuta_HIv2.gtf --bed -o Pocillopora_acuta_HIv2.gtf.bed
+awk '{OFS="\t"; print $1, $2, $3, $4}' Pocillopora_acuta_HIv2.gtf.bed > Pocillopora_acuta_HIv2.gtf.cleaned.bed
+
+cd /home/zdellaert_uri_edu/zdellaert_uri_edu-shared/methylseq_bwa_fb/methyldackel
+cp /home/zdellaert_uri_edu/LaserCoral/references/Pocillopora_acuta_HIv2.gtf.cleaned.bed .
+```
+
+Then: find the intersection between the CpG, CHG, and CHH sites and the gene bodies
+
+```
+nano scripts/methylation_efficiency.sh
+```
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --ntasks=1 --cpus-per-task=8
+#SBATCH --mem=200GB
+#SBATCH -t 24:00:00
+#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80
+#SBATCH --error=outs_errs/"%x_error.%j"
+#SBATCH --output=outs_errs/"%x_output.%j"
+#SBATCH -D /home/zdellaert_uri_edu/zdellaert_uri_edu-shared/methylseq_bwa_fb/methyldackel
+
+# load modules
+module load bedtools2/2.31.1
+
+# reference file
+Pacuta_gff="Pocillopora_acuta_HIv2.gtf.cleaned.bed"
+
+# loop through all samples - there is only one cytosine_report.txt file per sample
+
+for file in *cytosine_report.txt; do
+
+    sample=$(basename "$file" .markdup.sorted.cytosine_report.txt)
+
+    # set output directory, sample-specific
+    output_dir="${sample}_quant"
+    mkdir -p $output_dir
+    
+    # name variables
+    CpG_bed="${sample}.markdup.sorted_CpG.bedGraph"
+    CHG_bed="${sample}.markdup.sorted_CHG.bedGraph"
+    CHH_bed="${sample}.markdup.sorted_CHH.bedGraph"
+    cytosine_report="${sample}.markdup.sorted.cytosine_report.txt"
+
+    # extract CpG, CHH, and CHG methylation for each gene
+    bedtools map -a $Pacuta_gff -b $CpG_bed -c 4 -o mean > $output_dir/gene_body_CpG_methylation.txt
+    bedtools map -a $Pacuta_gff -b $CHG_bed -c 4 -o mean > $output_dir/gene_body_CHG_methylation.txt
+    bedtools map -a $Pacuta_gff -b $CHH_bed -c 4 -o mean > $output_dir/gene_body_CHH_methylation.txt
+
+    # extract total cytosines from cytosine_report
+    awk '$6 == "CHG"' $cytosine_report > $output_dir/CHG_total.txt
+    awk '$6 == "CHH"' $cytosine_report > $output_dir/CHH_total.txt
+
+    # extract unmethylated cytosines from cytosine_report
+    awk '$6 == "CHG" && $5 == 0' $cytosine_report > $output_dir/CHG_unmethylated.txt
+    awk '$6 == "CHH" && $5 == 0' $cytosine_report > $output_dir/CHH_unmethylated.txt
+
+done
+```
