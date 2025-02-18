@@ -1,5 +1,5 @@
 ---
-title: "10-CpG-Methylation-fb"
+title: "10-CpG-Methylation-V3"
 author: "Zoe Dellaert"
 date: "2025-02-17"
 output:
@@ -14,12 +14,7 @@ always_allow_html: true
 ## CpG Methylation analysis
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(
-  echo = TRUE,
-  fig.width = 8,  
-  fig.height = 6, 
-  dpi = 300   
-)
+knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Managing Packages Using Renv
@@ -46,7 +41,13 @@ sessionInfo() #provides list of loaded packages and version of R.
 meta <- read.csv("../data_WGBS/LCM_WGBS_metadata.csv", sep = ",", header = TRUE) %>%
   mutate(Section_Date = as.character(Section_Date), LCM_Date = as.character(LCM_Date),DNA_Extraction_Date = as.character(DNA_Extraction_Date))
 
-meta_simple <- meta %>% select(Sample, Fragment, Tissue, PCR_ReAmp_Cycles)
+meta <- meta %>% arrange(Sample)
+
+tissue <- meta$Tissue
+tissue_binary <- gsub("Aboral", "1", tissue)
+tissue_binary <- gsub("OralEpi", "0", tissue_binary)
+tissue_binary <- as.numeric(tissue_binary)
+fragment <- meta$Fragment
 ```
 
 
@@ -55,9 +56,9 @@ meta_simple <- meta %>% select(Sample, Fragment, Tissue, PCR_ReAmp_Cycles)
 
 ## All samples
 
-```{r, eval=FALSE}
+```{r}
 #get list of all sample output directories and extract sample names
-sample_directories <- list.files("~/zdellaert_uri_edu-shared/methylseq_bwa_fb/methyldackel", pattern = "_quant", full.names = TRUE, include.dirs = TRUE)
+sample_directories <- list.files("../output_WGBS/methylseq_V3_bwa_test/methyldackel", pattern = "_quant", full.names = TRUE, include.dirs = TRUE)
 samples <- gsub("_quant","",basename(sample_directories))
 
 # make an empty data frame to store methylation data and conversion efficiency data
@@ -65,20 +66,9 @@ all_methylation_data <- data.frame()
 conversion_eff_data <- data.frame()
 
 for (sample in samples) {
-  base_dir <- "~/zdellaert_uri_edu-shared/methylseq_bwa_fb/methyldackel"
-  output_dir <- paste0("~/zdellaert_uri_edu-shared/methylseq_bwa_fb/methyldackel/", sample, "_quant")
+  output_dir <- paste0("/project/pi_hputnam_uri_edu/zdellaert/LaserCoral/output_WGBS/methylseq_V3_bwa_test/methyldackel", sample, "_quant")
 
-  # Read bedgraph files in to calculate coverage
-  CpG_bed <- read.table(file.path(base_dir, paste0(sample, ".markdup.sorted_CpG.bedGraph")), header=FALSE) 
-  CHG_bed <- read.table(file.path(base_dir, paste0(sample, ".markdup.sorted_CHG.bedGraph")), header=FALSE) 
-  CHH_bed <- read.table(file.path(base_dir, paste0(sample, ".markdup.sorted_CHH.bedGraph")), header=FALSE)
-  
-  # calculate coverage
-  CpG_bed <- CpG_bed %>% slice(-1) %>% mutate(coverage = as.numeric(V5)+as.numeric(V6))
-  CHG_bed <- CHG_bed %>% slice(-1) %>% mutate(coverage = as.numeric(V5)+as.numeric(V6))
-  CHH_bed <- CHH_bed %>% slice(-1) %>% mutate(coverage = as.numeric(V5)+as.numeric(V6))
-  
-  # Read percent methylation data for CpG, CHG, and CHH contexts
+  # Read methylation data for CpG, CHG, and CHH contexts
   CpG <- read.table(file.path(output_dir, "gene_body_CpG_methylation.txt"), header=FALSE)
   CHG <- read.table(file.path(output_dir, "gene_body_CHG_methylation.txt"), header=FALSE)
   CHH <- read.table(file.path(output_dir, "gene_body_CHH_methylation.txt"), header=FALSE)
@@ -130,43 +120,26 @@ for (sample in samples) {
   rm(CHH_total)
 }
 
-write.csv(all_methylation_data, "../output_WGBS/methylseq_bwa_fb/gene_body_methylation.csv",row.names = FALSE)
-write.csv(conversion_eff_data, "../output_WGBS/methylseq_bwa_fb/conversion_efficiency.csv",row.names = FALSE)
-```
+write.csv(all_methylation_data, "../output_WGBS/methylseq_V3_bwa_test/gene_body_methylation.csv",row.names = FALSE)
+write.csv(conversion_eff_data, "../output_WGBS/methylseq_V3_bwa_test/conversion_efficiency.csv",row.names = FALSE)
 
-Analyze and plot:
+conversion_eff_data <- read.csv( "../output_WGBS/methylseq_V3_bwa_test/conversion_efficiency.csv", sep = ",", header = TRUE) 
+all_methylation_data <- read.csv( "../output_WGBS/methylseq_V3_bwa_test/gene_body_methylation.csv", sep = ",", header = TRUE) 
 
-```{r}
-conversion_eff_data <- read.csv( "../output_WGBS/methylseq_bwa_fb/conversion_efficiency.csv", sep = ",", header = TRUE) 
-all_methylation_data <- read.csv( "../output_WGBS/methylseq_bwa_fb/gene_body_methylation.csv", sep = ",", header = TRUE) 
+conversion_eff_data <- conversion_eff_data %>% mutate(sample = fct_relevel(sample, conversion_eff_data$sample[mixedorder(conversion_eff_data$sample)])) 
 
-conversion_eff_data <- conversion_eff_data %>%
-  left_join(meta_simple,by = join_by(sample == Sample)) %>%
-  mutate(sample = fct_relevel(sample, conversion_eff_data$sample[mixedorder(conversion_eff_data$sample)])) 
 
-all_methylation_data <- all_methylation_data %>% left_join(meta_simple,by = join_by(sample == Sample)) %>%
-  mutate(sample = fct_relevel(sample, (unique(all_methylation_data$sample)[mixedorder(unique(all_methylation_data$sample))]))) 
+all_methylation_data <- all_methylation_data %>% mutate(sample = fct_relevel(sample, (unique(all_methylation_data$sample)[mixedorder(unique(all_methylation_data$sample))])))
 
 # Plot methylation distributions by context and sample
-ggplot(all_methylation_data, aes(x=sample, y=methylation, fill=Fragment)) +
+ggplot(all_methylation_data, aes(x=context, y=methylation, fill=sample)) +
   geom_boxplot() +
-  facet_grid(~context, scales = "free") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(title="Gene Body Methylation at CpG, CHG, and CHH loci", y="Mean Methylation (%)")
+  labs(title="Gene Body Methylation at CpG, CHG, and CHH Sites by Sample", y="Mean Methylation (%)")
 
-ggplot(conversion_eff_data, aes(x=sample, y=efficiency, fill=Tissue)) +
+ggplot(conversion_eff_data, aes(x=sample, y=efficiency)) +
   geom_bar(stat="identity", color="black") +
   theme_minimal() +
-  facet_grid(~Fragment, scales = "free") +
-  labs(title="Bisulfite Conversion Efficiency per Sample", y="Conversion Efficiency", x="Sample") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  ylim(0, 1) 
-
-ggplot(conversion_eff_data, aes(x=sample, y=efficiency, fill=PCR_ReAmp_Cycles)) +
-  geom_bar(stat="identity", color="black") +
-  theme_minimal() +
-  facet_grid(~Fragment, scales = "free") +
   labs(title="Bisulfite Conversion Efficiency per Sample", y="Conversion Efficiency", x="Sample") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   ylim(0, 1) 

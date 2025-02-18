@@ -95,13 +95,7 @@ sessionInfo() #provides list of loaded packages and version of R.
 meta <- read.csv("../data_WGBS/LCM_WGBS_metadata.csv", sep = ",", header = TRUE) %>%
   mutate(Section_Date = as.character(Section_Date), LCM_Date = as.character(LCM_Date),DNA_Extraction_Date = as.character(DNA_Extraction_Date))
 
-meta <- meta %>% arrange(Sample)
-
-tissue <- meta$Tissue
-tissue_binary <- gsub("Aboral", "1", tissue)
-tissue_binary <- gsub("OralEpi", "0", tissue_binary)
-tissue_binary <- as.numeric(tissue_binary)
-fragment <- meta$Fragment
+meta_simple <- meta %>% select(Sample, Fragment, Tissue, PCR_ReAmp_Cycles)
 ```
 
 “Bisulfite conversion efficiency was also estimated from coral
@@ -174,79 +168,58 @@ for (sample in samples) {
   rm(CHG_total)
   rm(CHH_total)
 }
-```
 
-    ## Warning: NAs introduced by coercion
-
-    ## [1] "LCM_1 Bisulfite Conversion Efficiency:  0.734333115711656"
-
-    ## Warning: NAs introduced by coercion
-
-    ## [1] "LCM_11 Bisulfite Conversion Efficiency:  0.808799547668931"
-
-    ## Warning: NAs introduced by coercion
-
-    ## [1] "LCM_12 Bisulfite Conversion Efficiency:  0.75785852620509"
-
-    ## Warning: NAs introduced by coercion
-
-    ## [1] "LCM_17 Bisulfite Conversion Efficiency:  0.738095813309405"
-
-    ## Warning: NAs introduced by coercion
-
-    ## [1] "LCM_18 Bisulfite Conversion Efficiency:  0.631857954023121"
-
-    ## Warning: NAs introduced by coercion
-
-    ## [1] "LCM_24 Bisulfite Conversion Efficiency:  0.346693593845345"
-
-    ## Warning: NAs introduced by coercion
-
-    ## [1] "LCM_25 Bisulfite Conversion Efficiency:  0.54801046159016"
-
-    ## Warning: NAs introduced by coercion
-
-    ## [1] "LCM_3 Bisulfite Conversion Efficiency:  0.813734208729636"
-
-    ## Warning: NAs introduced by coercion
-
-    ## [1] "LCM_32 Bisulfite Conversion Efficiency:  0.834303225260465"
-
-    ## Warning: NAs introduced by coercion
-
-    ## [1] "LCM_33 Bisulfite Conversion Efficiency:  0.945523642000795"
-
-``` r
 write.csv(all_methylation_data, "../output_WGBS/methylseq_bwa_fb/gene_body_methylation.csv",row.names = FALSE)
 write.csv(conversion_eff_data, "../output_WGBS/methylseq_bwa_fb/conversion_efficiency.csv",row.names = FALSE)
+```
 
+Analyze and plot:
+
+``` r
 conversion_eff_data <- read.csv( "../output_WGBS/methylseq_bwa_fb/conversion_efficiency.csv", sep = ",", header = TRUE) 
 all_methylation_data <- read.csv( "../output_WGBS/methylseq_bwa_fb/gene_body_methylation.csv", sep = ",", header = TRUE) 
 
-conversion_eff_data <- conversion_eff_data %>% mutate(sample = fct_relevel(sample, conversion_eff_data$sample[mixedorder(conversion_eff_data$sample)])) 
+conversion_eff_data <- conversion_eff_data %>%
+  left_join(meta_simple,by = join_by(sample == Sample)) %>%
+  mutate(sample = fct_relevel(sample, conversion_eff_data$sample[mixedorder(conversion_eff_data$sample)])) 
 
-
-all_methylation_data <- all_methylation_data %>% mutate(sample = fct_relevel(sample, (unique(all_methylation_data$sample)[mixedorder(unique(all_methylation_data$sample))])))
+all_methylation_data <- all_methylation_data %>% left_join(meta_simple,by = join_by(sample == Sample)) %>%
+  mutate(sample = fct_relevel(sample, (unique(all_methylation_data$sample)[mixedorder(unique(all_methylation_data$sample))]))) 
 
 # Plot methylation distributions by context and sample
-ggplot(all_methylation_data, aes(x=context, y=methylation, fill=sample)) +
+ggplot(all_methylation_data, aes(x=sample, y=methylation, fill=Fragment)) +
   geom_boxplot() +
+  facet_grid(~context, scales = "free") +
   theme_minimal() +
-  labs(title="Gene Body Methylation at CpG, CHG, and CHH Sites by Sample", y="Mean Methylation (%)")
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title="Gene Body Methylation at CpG, CHG, and CHH loci", y="Mean Methylation (%)")
 ```
 
     ## Warning: Removed 4746 rows containing non-finite outside the scale range
     ## (`stat_boxplot()`).
 
-![](10-CpG-Methylation-fb_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+![](10-CpG-Methylation-fb_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ``` r
-ggplot(conversion_eff_data, aes(x=sample, y=efficiency)) +
+ggplot(conversion_eff_data, aes(x=sample, y=efficiency, fill=Tissue)) +
   geom_bar(stat="identity", color="black") +
   theme_minimal() +
+  facet_grid(~Fragment, scales = "free") +
   labs(title="Bisulfite Conversion Efficiency per Sample", y="Conversion Efficiency", x="Sample") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   ylim(0, 1) 
 ```
 
-![](10-CpG-Methylation-fb_files/figure-gfm/unnamed-chunk-3-2.png)<!-- -->
+![](10-CpG-Methylation-fb_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->
+
+``` r
+ggplot(conversion_eff_data, aes(x=sample, y=efficiency, fill=PCR_ReAmp_Cycles)) +
+  geom_bar(stat="identity", color="black") +
+  theme_minimal() +
+  facet_grid(~Fragment, scales = "free") +
+  labs(title="Bisulfite Conversion Efficiency per Sample", y="Conversion Efficiency", x="Sample") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ylim(0, 1) 
+```
+
+![](10-CpG-Methylation-fb_files/figure-gfm/unnamed-chunk-4-3.png)<!-- -->
