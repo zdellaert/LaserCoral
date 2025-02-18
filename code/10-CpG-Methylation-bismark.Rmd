@@ -55,7 +55,7 @@ meta_simple <- meta %>% select(Sample, Fragment, Tissue, PCR_ReAmp_Cycles)
 
 ## All cytosines - CpG, CHG, and CHH intersection with gene bodies
 
-```{r}
+```{r, eval = FALSE}
 #get list of all sample output directories and extract sample names
 sample_directories <- list.files("~/zdellaert_uri_edu-shared/methylseq_bwa_fb/methyldackel", pattern = "_quant", full.names = TRUE, include.dirs = TRUE)
 samples <- gsub("_quant","",basename(sample_directories))
@@ -170,12 +170,12 @@ ggplot(summary, aes(x=mean_methylation, y=efficiency, color=Fragment, label=samp
   #geom_smooth() +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(y="bisulfite conversion efficiency")
+  labs(title="Gene Body Methylation at CpG, CHG, and CHH loci", y="Mean Methylation (%)")
 ```
 
 ##  5X Coverage Cytosines ONLY
 
-```{r}
+```{r, eval=FALSE}
 #get list of all sample output directories and extract sample names
 sample_directories <- list.files("~/zdellaert_uri_edu-shared/methylseq_bwa_fb/methyldackel", pattern = "_5Xquant", full.names = TRUE, include.dirs = TRUE)
 samples <- gsub("_5Xquant","",basename(sample_directories))
@@ -290,7 +290,7 @@ ggplot(summary, aes(x=mean_methylation, y=efficiency, color=Fragment, label=samp
   #geom_smooth() +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-   labs(title="5X coverage-loci ONLY" , y="bisulfite conversion efficiency")
+  labs(title="5X coverage-loci ONLY - Gene Body Methylation at CpG, CHG, and CHH loci", y="Mean Methylation (%)")
 
 ```
 
@@ -354,7 +354,7 @@ ggplot(summary, aes(x=mean_methylation, y=efficiency, color=Fragment, label=samp
   #geom_smooth() +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(y="bisulfite conversion efficiency")
+  labs(title="Gene Body Methylation at CpG, CHG, and CHH loci", y="Mean Methylation (%)")
 
 summary <- all_methylation_data_5x %>%
   group_by(sample, context) %>%
@@ -366,7 +366,7 @@ ggplot(summary, aes(x=mean_methylation, y=efficiency, color=Fragment, label=samp
   #geom_smooth() +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(title="5X coverage-loci ONLY" , y="bisulfite conversion efficiency")
+  labs(title="5X coverage-loci ONLY - Gene Body Methylation at CpG, CHG, and CHH loci", y="Mean Methylation (%)")
 
 ```
 

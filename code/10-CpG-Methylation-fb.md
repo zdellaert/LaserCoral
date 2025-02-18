@@ -171,7 +171,49 @@ for (sample in samples) {
   rm(CHG_total)
   rm(CHH_total)
 }
+```
 
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_1 Bisulfite Conversion Efficiency:  0.734333115711656"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_11 Bisulfite Conversion Efficiency:  0.808799547668931"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_12 Bisulfite Conversion Efficiency:  0.75785852620509"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_17 Bisulfite Conversion Efficiency:  0.738095813309405"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_18 Bisulfite Conversion Efficiency:  0.631857954023121"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_24 Bisulfite Conversion Efficiency:  0.346693593845345"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_25 Bisulfite Conversion Efficiency:  0.54801046159016"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_3 Bisulfite Conversion Efficiency:  0.813734208729636"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_32 Bisulfite Conversion Efficiency:  0.834303225260465"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_33 Bisulfite Conversion Efficiency:  0.945523642000795"
+
+``` r
 write.csv(all_methylation_data, "../output_WGBS/methylseq_bwa_fb/gene_body_methylation.csv",row.names = FALSE)
 write.csv(conversion_eff_data, "../output_WGBS/methylseq_bwa_fb/conversion_efficiency.csv",row.names = FALSE)
 ```
@@ -244,7 +286,7 @@ ggplot(summary, aes(x=mean_methylation, y=efficiency, color=Fragment, label=samp
   #geom_smooth() +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(title="Gene Body Methylation at CpG, CHG, and CHH loci", y="Mean Methylation (%)")
+    labs(y="bisulfite conversion efficiency")
 ```
 
 ![](10-CpG-Methylation-fb_files/figure-gfm/unnamed-chunk-4-4.png)<!-- -->
@@ -261,7 +303,6 @@ all_methylation_data_5x <- data.frame()
 conversion_eff_data_5x <- data.frame()
 
 for (sample in samples) {
-  base_dir <- "~/zdellaert_uri_edu-shared/methylseq_bwa_fb/methyldackel"
   output_dir <- paste0("~/zdellaert_uri_edu-shared/methylseq_bwa_fb/methyldackel/", sample, "_5Xquant")
   
   # Read percent methylation data for CpG, CHG, and CHH contexts
@@ -315,7 +356,49 @@ for (sample in samples) {
   rm(CHG_total)
   rm(CHH_total)
 }
+```
 
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_1 Bisulfite Conversion Efficiency:  0.028568408509984"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_11 Bisulfite Conversion Efficiency:  0.0533229123119521"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_12 Bisulfite Conversion Efficiency:  0.0401182095488274"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_17 Bisulfite Conversion Efficiency:  0.0393430066492284"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_18 Bisulfite Conversion Efficiency:  0.0203062001512761"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_24 Bisulfite Conversion Efficiency:  0.000944705821167125"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_25 Bisulfite Conversion Efficiency:  0.00687721683536454"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_3 Bisulfite Conversion Efficiency:  0.0630899778555905"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_32 Bisulfite Conversion Efficiency:  0.0827118989139145"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_33 Bisulfite Conversion Efficiency:  0.235553724035754"
+
+``` r
 write.csv(all_methylation_data_5x, "../output_WGBS/methylseq_bwa_fb/gene_body_methylation_5x.csv",row.names = FALSE)
 write.csv(conversion_eff_data_5x, "../output_WGBS/methylseq_bwa_fb/conversion_efficiency_5x.csv",row.names = FALSE)
 ```
@@ -388,7 +471,7 @@ ggplot(summary, aes(x=mean_methylation, y=efficiency, color=Fragment, label=samp
   #geom_smooth() +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(title="5X coverage-loci ONLY - Gene Body Methylation at CpG, CHG, and CHH loci", y="Mean Methylation (%)")
+   labs(title="5X coverage-loci ONLY" , y="bisulfite conversion efficiency")
 ```
 
 ![](10-CpG-Methylation-fb_files/figure-gfm/unnamed-chunk-6-4.png)<!-- -->
@@ -488,7 +571,7 @@ ggplot(summary, aes(x=mean_methylation, y=efficiency, color=Fragment, label=samp
   #geom_smooth() +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(title="Gene Body Methylation at CpG, CHG, and CHH loci", y="Mean Methylation (%)")
+    labs(y="bisulfite conversion efficiency")
 ```
 
 ![](10-CpG-Methylation-fb_files/figure-gfm/unnamed-chunk-7-7.png)<!-- -->
@@ -510,7 +593,7 @@ ggplot(summary, aes(x=mean_methylation, y=efficiency, color=Fragment, label=samp
   #geom_smooth() +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(title="5X coverage-loci ONLY - Gene Body Methylation at CpG, CHG, and CHH loci", y="Mean Methylation (%)")
+    labs(title="5X coverage-loci ONLY" , y="bisulfite conversion efficiency")
 ```
 
 ![](10-CpG-Methylation-fb_files/figure-gfm/unnamed-chunk-7-8.png)<!-- -->

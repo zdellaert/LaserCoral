@@ -74,4 +74,11 @@ references/Pocillopora_acuta_HIv2.assembly.fasta.fai
 output_WGBS/*/*gz
 output_WGBS/*/*/*gz
 *.methylKit
-output_WGBS/MethylKit.RData
+output_WGBS/*.RData
+output_WGBS/methylseq_bwa_fb/gene_body_methylation_5x.csv
+output_WGBS/methylseq_bwa_fb/gene_body_methylation.csv
+output_WGBS/methylseq_V3_bwa_test/gene_body_methylation_5x.csv
+output_WGBS/methylseq_V3_bwa_test/gene_body_methylation.csv
+output_WGBS/*/methyldackel/*quant
+*bedGraph
+*cytosine_report.txt

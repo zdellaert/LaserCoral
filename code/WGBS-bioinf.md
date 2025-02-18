@@ -950,6 +950,240 @@ for bamFile in *deduplicated.bam; do
 done
 ```
 
+### Sort .cov files
+
+from here on this is based on https://github.com/emmastrand/EmmaStrand_Notebook/blob/master/_posts/2021-10-21-KBay-Bleaching-Pairs-WGBS-Analysis-Pipeline.md#filter_cov
+
+```
+nano scripts/bismark_sort_cov.sh 
+```
+
+```
+#!/usr/bin/env bash
+#SBATCH --ntasks=1 --cpus-per-task=48 #split one task over multiple CPU
+#SBATCH --mem=250GB
+#SBATCH -t 48:00:00
+#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
+#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
+
+# load modules needed
+module load bedtools2/2.31.1
+
+cd output_WGBS/dedup_V3
+
+for file in *merged_CpG_evidence.cov
+do
+  sample=$(basename "${file}" .CpG_report.merged_CpG_evidence.cov)
+  bedtools sort -i "${file}" \
+  > "${sample}"_sorted.cov
+done
+```
+
+### Create bedgraph files
+
+```
+nano scripts/bismark_bed.sh 
+```
+
+```
+#!/usr/bin/env bash
+#SBATCH --ntasks=1 --cpus-per-task=48 #split one task over multiple CPU
+#SBATCH --mem=250GB
+#SBATCH -t 48:00:00
+#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
+#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
+
+# Bedgraphs for 5X coverage 
+
+cd output_WGBS/dedup_V3
+
+for file in *_sorted.cov
+do
+  sample=$(basename "${file}" _sorted.cov)
+  cat "${file}" | awk -F $'\t' 'BEGIN {OFS = FS} {if ($5+$6 >= 5) {print $1, $2, $3, $4}}' \
+  > "${sample}"_5x_sorted.bedgraph
+done
+
+# Bedgraphs for 10X coverage 
+
+for file in *_sorted.cov
+do
+  sample=$(basename "${file}" _sorted.cov)
+  cat "${file}" | awk -F $'\t' 'BEGIN {OFS = FS} {if ($5+$6 >= 10) {print $1, $2, $3, $4}}' \
+  > "${sample}"_10x_sorted.bedgraph
+done
+```
+
+### filter for 5x coverage
+
+```
+nano scripts/bismark_5xcov.sh 
+```
+
+```
+#!/usr/bin/env bash
+#SBATCH --ntasks=1 --cpus-per-task=48 #split one task over multiple CPU
+#SBATCH --mem=250GB
+#SBATCH -t 48:00:00
+#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
+#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
+
+cd output_WGBS/dedup_V3
+
+### Filtering for CpG for 5x coverage. To change the coverage, replace X with your desired coverage in ($5+6 >= X)
+
+for file in *_sorted.cov
+do
+  sample=$(basename "${file}" _sorted.cov)
+  cat "${file}" | awk -F $'\t' 'BEGIN {OFS = FS} {if ($5+$6 >= 5) {print $1, $2, $3, $4, $5, $6}}' \
+  > "${sample}"_5x_sorted.tab
+done
+```
+
+```
+# wc -l *5x_sorted.tab
+   1297759 trimmed_V3_LCM_11_S3_5x_sorted.tab
+   1563694 trimmed_V3_LCM_12_S4_5x_sorted.tab
+   1982902 trimmed_V3_LCM_17_S7_5x_sorted.tab
+   3275522 trimmed_V3_LCM_18_S8_5x_sorted.tab
+   1850258 trimmed_V3_LCM_1_S1_5x_sorted.tab
+   6722970 trimmed_V3_LCM_24_S5_5x_sorted.tab
+   3813379 trimmed_V3_LCM_25_S6_5x_sorted.tab
+   1323643 trimmed_V3_LCM_32_S9_5x_sorted.tab
+    414843 trimmed_V3_LCM_33_S10_5x_sorted.tab
+   1296247 trimmed_V3_LCM_3_S2_5x_sorted.tab
+  23541217 total
+```
+
+### intersection of all samples
+
+```
+nano scripts/bismark_intersect.sh 
+```
+
+```
+#!/usr/bin/env bash
+#SBATCH --ntasks=1 --cpus-per-task=48 #split one task over multiple CPU
+#SBATCH --mem=250GB
+#SBATCH -t 48:00:00
+#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
+#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
+
+# load modules needed
+module load bedtools2/2.31.1
+
+cd output_WGBS/dedup_V3
+
+multiIntersectBed -i *_5x_sorted.tab > CpG.all.samps.5x_sorted.bed
+
+#change number after == to your number of samples
+
+cat CpG.all.samps.5x_sorted.bed | awk '$4 ==10' > CpG.filt.all.samps.5x_sorted.bed 
+```
+
+### intersection of all samples with transcripts (Gene bodies - GBM)
+
+```
+nano scripts/bismark_intersect_bed.sh 
+```
+
+```
+#!/usr/bin/env bash
+#SBATCH --ntasks=1 --cpus-per-task=48 #split one task over multiple CPU
+#SBATCH --mem=250GB
+#SBATCH -t 48:00:00
+#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
+#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
+
+# load modules needed
+module load bedtools2/2.31.1
+
+awk '{if ($3 == "transcript") {print}}' references/Pocillopora_acuta_HIv2.gtf  > references/Pocillopora_acuta_HIv2_transcripts.gtf
+
+cd output_WGBS/dedup_V3
+
+for i in *5x_sorted.tab
+do
+  intersectBed \
+  -wb \
+  -a ${i} \
+  -b ../../references/Pocillopora_acuta_HIv2_transcripts.gtf \
+  > ${i}_gene
+done
+```
+
+### keep only loci found in all samples
+
+```
+nano scripts/bismark_intersect_bed_all.sh 
+```
+
+```
+#!/usr/bin/env bash
+#SBATCH --ntasks=1 --cpus-per-task=48 #split one task over multiple CPU
+#SBATCH --mem=250GB
+#SBATCH -t 48:00:00
+#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
+#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
+
+# load modules needed
+module load bedtools2/2.31.1
+
+awk '{if ($3 == "transcript") {print}}' references/Pocillopora_acuta_HIv2.gtf  > references/Pocillopora_acuta_HIv2_transcripts.gtf
+
+cd output_WGBS/dedup_V3
+
+for i in *_5x_sorted.tab_gene
+do
+  intersectBed \
+  -a ${i} \
+  -b CpG.filt.all.samps.5x_sorted.bed \
+  > ${i}_CpG_5x_enrichment.bed
+done
+```
+
+### alternative interesection script, with bedtools map
+
+```
+nano scripts/bismark_intersect_bed2.sh 
+```
+
+
+```
+#!/usr/bin/env bash
+#SBATCH --ntasks=1 --cpus-per-task=48 #split one task over multiple CPU
+#SBATCH --mem=250GB
+#SBATCH -t 48:00:00
+#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
+#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
+
+# load modules needed
+module load bedtools2/2.31.1
+
+cd output_WGBS/dedup_V3
+
+for i in *5x_sorted.bedgraph
+do
+   sample=$(basename ${i} _5x_sorted.bedgraph)
+   bedtools map -a ../../references/Pocillopora_acuta_HIv2.gtf.cleaned.bed -b  ${i} -c 4 -o mean >  ${sample}_gene_body_methylation.txt
+
+done
+```
+
 ### Run qualimap on sorted deduplicated bams
 
 ```
@@ -988,6 +1222,7 @@ for bamFile in *deduplicated.sorted.bam; do
     -nt 6
 done
 ```
+
 
 ### Subset bams for viewing in IGV
 
