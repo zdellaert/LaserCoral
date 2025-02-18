@@ -81,4 +81,8 @@ output_WGBS/methylseq_V3_bwa_test/gene_body_methylation_5x.csv
 output_WGBS/methylseq_V3_bwa_test/gene_body_methylation.csv
 output_WGBS/*/methyldackel/*quant
 *bedGraph
+*bedgraph
+*bed
 *cytosine_report.txt
+*5x_sorted.tab_gene
+*5x_sorted.tab

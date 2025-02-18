@@ -1,0 +1,11 @@
+sample,fastq_1,fastq_2,genome
+LCM_1,data_WGBS/trimmed_V3/trimmed_V3_LCM_1_S1_R1_001.fastq.gz,data_WGBS/trimmed_V3/trimmed_V3_LCM_1_S1_R2_001.fastq.gz,
+LCM_3,data_WGBS/trimmed_V3/trimmed_V3_LCM_3_S2_R1_001.fastq.gz,data_WGBS/trimmed_V3/trimmed_V3_LCM_3_S2_R2_001.fastq.gz,
+LCM_11,data_WGBS/trimmed_V3/trimmed_V3_LCM_11_S3_R1_001.fastq.gz,data_WGBS/trimmed_V3/trimmed_V3_LCM_11_S3_R2_001.fastq.gz,
+LCM_12,data_WGBS/trimmed_V3/trimmed_V3_LCM_12_S4_R1_001.fastq.gz,data_WGBS/trimmed_V3/trimmed_V3_LCM_12_S4_R2_001.fastq.gz,
+LCM_17,data_WGBS/trimmed_V3/trimmed_V3_LCM_17_S7_R1_001.fastq.gz,data_WGBS/trimmed_V3/trimmed_V3_LCM_17_S7_R2_001.fastq.gz,
+LCM_18,data_WGBS/trimmed_V3/trimmed_V3_LCM_18_S8_R1_001.fastq.gz,data_WGBS/trimmed_V3/trimmed_V3_LCM_18_S8_R2_001.fastq.gz,
+LCM_24,data_WGBS/trimmed_V3/trimmed_V3_LCM_24_S5_R1_001.fastq.gz,data_WGBS/trimmed_V3/trimmed_V3_LCM_24_S5_R2_001.fastq.gz,
+LCM_25,data_WGBS/trimmed_V3/trimmed_V3_LCM_25_S6_R1_001.fastq.gz,data_WGBS/trimmed_V3/trimmed_V3_LCM_25_S6_R2_001.fastq.gz,
+LCM_32,data_WGBS/trimmed_V3/trimmed_V3_LCM_32_S9_R1_001.fastq.gz,data_WGBS/trimmed_V3/trimmed_V3_LCM_32_S9_R2_001.fastq.gz,
+LCM_33,data_WGBS/trimmed_V3/trimmed_V3_LCM_33_S10_R1_001.fastq.gz,data_WGBS/trimmed_V3/trimmed_V3_LCM_33_S10_R2_001.fastq.gz,
