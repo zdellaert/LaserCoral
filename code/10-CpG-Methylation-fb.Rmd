@@ -1,0 +1,148 @@
+---
+title: "10-CpG-Methylation-fb"
+author: "Zoe Dellaert"
+date: "2025-02-17"
+output:
+  github_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    html_preview: true
+always_allow_html: true
+---
+
+## CpG Methylation analysis
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Managing Packages Using Renv
+
+To run this code in my project using the renv environment, run the following lines of code
+
+```{r, eval=FALSE}
+install.packages("renv") #install the package on the new computer (may not be necessary if renv bootstraps itself as expected)
+renv::restore() #reinstall all the package versions in the renv lockfile
+```
+
+## Load packages
+
+```{r packages}
+require("tidyverse")
+require("ggplot2")
+require("gtools")
+
+sessionInfo() #provides list of loaded packages and version of R.
+```
+
+
+```{r}
+meta <- read.csv("../data_WGBS/LCM_WGBS_metadata.csv", sep = ",", header = TRUE) %>%
+  mutate(Section_Date = as.character(Section_Date), LCM_Date = as.character(LCM_Date),DNA_Extraction_Date = as.character(DNA_Extraction_Date))
+
+meta <- meta %>% arrange(Sample)
+
+tissue <- meta$Tissue
+tissue_binary <- gsub("Aboral", "1", tissue)
+tissue_binary <- gsub("OralEpi", "0", tissue_binary)
+tissue_binary <- as.numeric(tissue_binary)
+fragment <- meta$Fragment
+```
+
+
+"Bisulfite conversion efficiency was also estimated from coral alignments as the ratio of the sum of unmethylated cytosines in CHG and CHH context to the sum of methylated and unmethyl- ated cytosines in CHG and CHH."
+
+
+## All samples
+
+```{r}
+#get list of all sample output directories and extract sample names
+sample_directories <- list.files("~/zdellaert_uri_edu-shared/methylseq_bwa_fb/methyldackel", pattern = "_quant", full.names = TRUE, include.dirs = TRUE)
+samples <- gsub("_quant","",basename(sample_directories))
+
+# make an empty data frame to store methylation data and conversion efficiency data
+all_methylation_data <- data.frame()
+conversion_eff_data <- data.frame()
+
+for (sample in samples) {
+  output_dir <- paste0("~/zdellaert_uri_edu-shared/methylseq_bwa_fb/methyldackel/", sample, "_quant")
+
+  # Read methylation data for CpG, CHG, and CHH contexts
+  CpG <- read.table(file.path(output_dir, "gene_body_CpG_methylation.txt"), header=FALSE)
+  CHG <- read.table(file.path(output_dir, "gene_body_CHG_methylation.txt"), header=FALSE)
+  CHH <- read.table(file.path(output_dir, "gene_body_CHH_methylation.txt"), header=FALSE)
+
+  # label dataframe with context
+  CpG$context <- "CpG"
+  CHG$context <- "CHG"
+  CHH$context <- "CHH"
+  
+  # combine into one
+  methylation_data <- rbind(CpG, CHG, CHH)
+  colnames(methylation_data) <- c("scaffold", "transcript_start", "transcript_end", "transcript_id", "methylation", "context")
+  methylation_data$methylation <- as.numeric(methylation_data$methylation)
+  methylation_data$sample <- sample
+
+  # Append methylation data for this sample
+  all_methylation_data <- rbind(all_methylation_data, methylation_data)
+
+  # Read unmethylated and total cytosine data for CHG and CHH contexts
+  CHG_unmethylated <- data.table::fread(file.path(output_dir, "CHG_unmethylated.txt"), header=FALSE)
+  CHH_unmethylated <- data.table::fread(file.path(output_dir, "CHH_unmethylated.txt"), header=FALSE)
+
+  CHG_total <- data.table::fread(file.path(output_dir, "CHG_total.txt"), header=FALSE)
+  CHH_total <- data.table::fread(file.path(output_dir, "CHH_total.txt"), header=FALSE)
+
+  # Calculate bisulfite conversion efficiency for CHG and CHH contexts
+  unmethylated_CHG <- nrow(CHG_unmethylated)
+  unmethylated_CHH <- nrow(CHH_unmethylated)
+
+  total_CHG <- nrow(CHG_total)
+  total_CHH <- nrow(CHH_total)
+
+  # Sum of unmethylated cytosines
+  unmethylated_total <- unmethylated_CHG + unmethylated_CHH
+
+  # Sum of total cytosines (methylated + unmethylated)
+  total_cytosines <- total_CHG + total_CHH
+
+  # Bisulfite conversion efficiency calculation
+  conversion_efficiency <- unmethylated_total / total_cytosines
+  print(paste(sample, "Bisulfite Conversion Efficiency: ", conversion_efficiency))
+
+  conversion_eff_data <- rbind(conversion_eff_data, data.frame(sample=sample, efficiency=conversion_efficiency))
+  
+  #remove huge files
+  rm(CHG_unmethylated)
+  rm(CHH_unmethylated)
+  rm(CHG_total)
+  rm(CHH_total)
+}
+
+write.csv(all_methylation_data, "../output_WGBS/methylseq_bwa_fb/gene_body_methylation.csv",row.names = FALSE)
+write.csv(conversion_eff_data, "../output_WGBS/methylseq_bwa_fb/conversion_efficiency.csv",row.names = FALSE)
+
+conversion_eff_data <- read.csv( "../output_WGBS/methylseq_bwa_fb/conversion_efficiency.csv", sep = ",", header = TRUE) 
+all_methylation_data <- read.csv( "../output_WGBS/methylseq_bwa_fb/gene_body_methylation.csv", sep = ",", header = TRUE) 
+
+conversion_eff_data <- conversion_eff_data %>% mutate(sample = fct_relevel(sample, conversion_eff_data$sample[mixedorder(conversion_eff_data$sample)])) 
+
+
+all_methylation_data <- all_methylation_data %>% mutate(sample = fct_relevel(sample, (unique(all_methylation_data$sample)[mixedorder(unique(all_methylation_data$sample))])))
+
+# Plot methylation distributions by context and sample
+ggplot(all_methylation_data, aes(x=context, y=methylation, fill=sample)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(title="Gene Body Methylation at CpG, CHG, and CHH Sites by Sample", y="Mean Methylation (%)")
+
+ggplot(conversion_eff_data, aes(x=sample, y=efficiency)) +
+  geom_bar(stat="identity", color="black") +
+  theme_minimal() +
+  labs(title="Bisulfite Conversion Efficiency per Sample", y="Conversion Efficiency", x="Sample") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ylim(0, 1) 
+```
+
+
