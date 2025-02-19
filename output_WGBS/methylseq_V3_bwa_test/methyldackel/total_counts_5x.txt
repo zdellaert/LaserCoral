@@ -1,0 +1,3 @@
+  1239627 LCM_1_5Xquant/CHG_total_5x.txt
+  4744013 LCM_1_5Xquant/CHH_total_5x.txt
+  5983640 total

@@ -1643,8 +1643,3 @@ for file in *cytosine_report.txt; do
 
 done
 ```
-
-
-## NOTE!
-
-I have correctly done this for the flexbar reads but not yet V3 -- need to redo V3 with the sorted gff bed file

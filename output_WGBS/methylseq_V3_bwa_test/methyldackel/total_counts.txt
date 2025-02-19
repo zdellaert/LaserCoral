@@ -1,0 +1,3 @@
+  27000408 LCM_1_quant/CHG_total.txt
+ 105827965 LCM_1_quant/CHH_total.txt
+ 132828373 total
