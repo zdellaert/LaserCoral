@@ -1519,11 +1519,16 @@ See 'code/09-MethylKit.Rmd'
 If you don't have bedgraph outputs because you used --methylKit for running methylseq, this is the code to make them:
 
 ```
-#output bismark-style cytosine report
-singularity exec https://depot.galaxyproject.org/singularity/methyldackel:0.6.1--he4a0461_7 MethylDackel extract -@ 24 --CHG --CHH --cytosine_report $reference $bamFile.dedup.bam
+for bamFile in *.markdup.sorted.bam; do
+        prefix=$(basename $bamFile .markdup.sorted.bam)
 
-#output default bedgraph format
-singularity exec https://depot.galaxyproject.org/singularity/methyldackel:0.6.1--he4a0461_7 MethylDackel extract -@ 24 --CHG --CHH $reference $bamFile.dedup.bam
+        #output bismark-style cytosine report
+        singularity exec https://depot.galaxyproject.org/singularity/methyldackel:0.6.1--he4a0461_7 MethylDackel extract -@ 24 --CHG --CHH --cytosine_report $reference $bamFile
+
+        #output default bedgraph format (three, one for each context)
+        singularity exec https://depot.galaxyproject.org/singularity/methyldackel:0.6.1--he4a0461_7 MethylDackel extract -@ 24 --CHG --CHH $reference $bamFile
+
+done
 ```
 
 ### Bedtools intersection of gene bodies (from gtf)
@@ -1641,5 +1646,34 @@ for file in *cytosine_report.txt; do
     awk '$6 == "CHG" && $5 == 0 && ($4 + $5) > 5' $cytosine_report > $output_dir/CHG_unmethylated_5x.txt
     awk '$6 == "CHH" && $5 == 0 && ($4 + $5) > 5' $cytosine_report > $output_dir/CHH_unmethylated_5x.txt
 
+done
+```
+
+## Testing what happens if I filter for min-conversion efficeincy during the methylation extraction.
+
+This is recommended against, but I just want to see how it affects the calculations.
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --ntasks=1 --cpus-per-task=48
+#SBATCH --mem=300GB
+#SBATCH -t 24:00:00
+#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80
+#SBATCH --error=outs_errs/"%x_error.%j"
+#SBATCH --output=outs_errs/"%x_output.%j"
+
+module load samtools/1.19.2
+module load apptainer/latest
+reference="Pocillopora_acuta_HIv2.assembly.fasta"
+
+for bamFile in *.markdup.sorted.bam; do
+	prefix=$(basename $bamFile .markdup.sorted.bam)
+
+	singularity exec https://depot.galaxyproject.org/singularity/methyldackel:0.6.1--he4a0461_7 MethylDackel extract -@ 24 --CHG --CHH --cytosine_report --minConversionEfficiency 0.9 -o min_efficiency_test/min_90_${prefix} $reference $bamFile
+	singularity exec https://depot.galaxyproject.org/singularity/methyldackel:0.6.1--he4a0461_7 MethylDackel extract -@ 24 --CHG --CHH --minConversionEfficiency 0.9 -o min_efficiency_test/min_90_${prefix} $reference $bamFile
+
+	singularity exec https://depot.galaxyproject.org/singularity/methyldackel:0.6.1--he4a0461_7 MethylDackel extract -@ 24 --CHG --CHH --cytosine_report --minConversionEfficiency 0.5 -o min_efficiency_test/min_50_${prefix} $reference $bamFile
+        singularity exec https://depot.galaxyproject.org/singularity/methyldackel:0.6.1--he4a0461_7 MethylDackel extract -@ 24 --CHG --CHH --minConversionEfficiency 0.5 -o min_efficiency_test/min_50_${prefix} $reference $bamFile
 done
 ```

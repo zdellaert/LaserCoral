@@ -507,134 +507,6 @@ Average primary mapping rate: **70.55%** (The percentage of reads mapped in thei
 - max 73.58%
 - average 70.55%
 
-### Stranded HISAT2 Alignment
-
-I will use [Hisat2](https://daehwankimlab.github.io/hisat2/manual/) to align the RNA-seq reads to the *P. acuta* genome
-
-The libraries are paired and could porentially be stranded, since they were [prepared](https://zdellaert.github.io/ZD_Putnam_Lab_Notebook/LCM-Low-Input-RNA-Library-Prep/) using a [template switching method](https://www.neb.com/en-us/products/e6420-nebnext-single-cell-low-input-rna-library-prep-kit-for-illumina).
-
-See notes here: [strand-related settings for RNA-seq tools](https://rnabio.org/module-09-appendix/0009/12/01/StrandSettings/)
-
-```
-hisat2 -p 16 \ #use 16 threads
-    --time \ Print the wall-clock time required to load the index files and align the reads to stderr
-    --dta \ #for input into Stringtie transcriptome assembly
-    -q \ #fastq input files
-    **--rna-strandness RF** \
-    -x Pacuta_ref \ #index location 
-    -1 ${read1} -2 ${read2} \ #input files, R1 and R2
-    -S hisat2/${sample_name}.sam #output sam file
-```
-
-```
-nano scripts/stranded_hisat2.sh #write script for alignment, enter text in next code chunk
-```
-
-```
-#!/bin/bash
-#SBATCH -t 120:00:00
-#SBATCH --nodes=1 --ntasks-per-node=20
-#SBATCH --mem=200GB
-#SBATCH --export=NONE
-#SBATCH --error=../scripts/outs_errs/"%x_error.%j" #write out slurm error reports
-#SBATCH --output=../scripts/outs_errs/"%x_output.%j" #write out any program outpus
-#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
-#SBATCH --mail-user=zdellaert@uri.edu #your email to send notifications
-#SBATCH -D /data/putnamlab/zdellaert/LaserCoral/output_RNA #set working directory
-
-# load modules needed
-module load HISAT2/2.2.1-gompi-2022a #Alignment to reference genome: HISAT2
-module load SAMtools/1.16.1-GCC-11.3.0 #Preparation of alignment for assembly: SAMtools
-
-# index the reference genome, will write to a directory called Pacuta_ref
-hisat2-build -f ../references/Pocillopora_acuta_HIv2.assembly.fasta ./Pacuta_ref
-
-echo "Reference genome indexed. Starting alingment" $(date)
-
-# make the output directory if it does not exist (-p checks for this)
-mkdir -p stranded_hisat2
-
-# call the oligo-trimmed sequences into an array
-array=(../data_RNA/trimmed_oligo*_R1_001.fastq.gz)
-
-# align the files to the indexed genome using hisat2
-for read1 in ${array[@]}; do
-    
-    # extract the sample name of R1 files as LCM_##
-    sample_name=$(basename $read1 | sed 's/.*trimmed_\([A-Za-z0-9]*_[0-9]*\).*/\1/')
-    
-    # Define the corresponding reverse read file (R2)
-    read2=${read1/_R1_/_R2_}
-    
-    # perform alignment
-    hisat2 -p 16 --time --dta -q --rna-strandness RF -x Pacuta_ref -1 ${read1} -2 ${read2} -S stranded_hisat2/${sample_name}.sam
-    echo "${sample_name} aligned!"
-
-    # sort the sam file into a bam file
-    samtools sort -@ 8 -o stranded_hisat2/${sample_name}.bam stranded_hisat2/${sample_name}.sam
-    echo "${sample_name} bam-ified!"
-    
-    # index bam file , creating a .bai file which is nice for viewing in IGB
-    samtools index stranded_hisat2/${sample_name}.bam stranded_hisat2/${sample_name}.bai
-    
-    # remove sam file to save disk space
-    rm stranded_hisat2/${sample_name}.sam
-done
-
-# move the reference index files into the stranded_hisat2 directory
-mv Pacuta_ref.* stranded_hisat2/
-
-#  Calculate mapping percentages
-for i in stranded_hisat2/*.bam; do
-    echo "${i}" >> stranded_hisat2/mapped_reads_counts_Pacuta
-    samtools flagstat ${i} | grep "mapped (" >> stranded_hisat2/mapped_reads_counts_Pacuta
-done
-```
-
-### Interpretation of unstranded vs. stranded hisat2 run
-
-- The output and error files are the exact same , so the alignments did not seem to be affected by the stradedness.
-- Upon inspecting the bam files to see if the information about alignments was affected, there do not appear to be any differences between the stranded vs. unstranded runs.
-
-#### RSeQC: infer_experiment.py - infer strandedness
-
-I found [this tool](https://rseqc.sourceforge.net/#infer-experiment-py) to analyse aligned bam files to examine for stradedness information. Running it on both the stranded and unstrandedd hisat2 alignments:
-
-```
-cd strandedness
-pip install RSeQC
-cp stranded_test_trimmed_oligo_trimmed_LCM_15_S40_R1_001/Pocillopora_acuta_HIv2.bed  . #copy bed file made using other tool
-
-infer_experiment.py -r Pocillopora_acuta_HIv2.bed -i ../output_RNA/hisat2/LCM_15.bam
-```
-
-```
-Reading reference gene model Pocillopora_acuta_HIv2.bed ... Done
-Loading SAM/BAM file ...  Total 200000 usable reads were sampled
-
-
-This is PairEnd Data
-Fraction of reads failed to determine: 0.0002
-Fraction of reads explained by "1++,1--,2+-,2-+": 0.5102
-Fraction of reads explained by "1+-,1-+,2++,2--": 0.4897
-```
-```
-infer_experiment.py -r Pocillopora_acuta_HIv2.bed -i ../output_RNA/stranded_hisat2/LCM_15.bam
-```
-
-```
-Reading reference gene model Pocillopora_acuta_HIv2.bed ... Done
-Loading SAM/BAM file ...  Total 200000 usable reads were sampled
-
-
-This is PairEnd Data
-Fraction of reads failed to determine: 0.0002
-Fraction of reads explained by "1++,1--,2+-,2-+": 0.5102
-Fraction of reads explained by "1+-,1-+,2++,2--": 0.4897
-```
-
-For both the bam files, the results were the same. The reads are distributed almost equally across both orientations. This indicates that the library prep method I used is **unstranded**, even though it was using a directional selection (3' poly-A primer) method. This is what I thought, but wanted to double check.
-
 ## Assembly with Stringtie
 
 I will use [Stringtie](https://ccb.jhu.edu/software/stringtie/index.shtml?t=manual) to perform reference-guided assembly of the RNA-seq data. I am using the simplified stringtie protocol with the "stringtie -eB" option:
@@ -946,12 +818,132 @@ echo "Gene count matrix compiled." $(date)
 Woohoo! [GeneExt-ed Gene count matrix complete.](https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/stringtie-GeneExt/LCM_RNA_gene_count_matrix.csv)
 
 
-## Downstream analysis thoughts
+## Notes on strandedness for future reference:
 
-1. What level of filtering do we want pre-DEseq?
-2. Any reason to do WGCNA or glmmseq instead of DEseq?
-   1. glmmseq would allow us to incorporate possible batch effects of LCM date
-3. Want to look into
-   1. Differential expression of biomineralization toolkit
-   2. Differential expression of transcription factors
-   3. Differential expression of single cell marker genes
+### Stranded HISAT2 Alignment
+
+I will use [Hisat2](https://daehwankimlab.github.io/hisat2/manual/) to align the RNA-seq reads to the *P. acuta* genome
+
+The libraries are paired and could porentially be stranded, since they were [prepared](https://zdellaert.github.io/ZD_Putnam_Lab_Notebook/LCM-Low-Input-RNA-Library-Prep/) using a [template switching method](https://www.neb.com/en-us/products/e6420-nebnext-single-cell-low-input-rna-library-prep-kit-for-illumina).
+
+See notes here: [strand-related settings for RNA-seq tools](https://rnabio.org/module-09-appendix/0009/12/01/StrandSettings/)
+
+```
+hisat2 -p 16 \ #use 16 threads
+    --time \ Print the wall-clock time required to load the index files and align the reads to stderr
+    --dta \ #for input into Stringtie transcriptome assembly
+    -q \ #fastq input files
+    **--rna-strandness RF** \
+    -x Pacuta_ref \ #index location 
+    -1 ${read1} -2 ${read2} \ #input files, R1 and R2
+    -S hisat2/${sample_name}.sam #output sam file
+```
+
+```
+nano scripts/stranded_hisat2.sh #write script for alignment, enter text in next code chunk
+```
+
+```
+#!/bin/bash
+#SBATCH -t 120:00:00
+#SBATCH --nodes=1 --ntasks-per-node=20
+#SBATCH --mem=200GB
+#SBATCH --export=NONE
+#SBATCH --error=../scripts/outs_errs/"%x_error.%j" #write out slurm error reports
+#SBATCH --output=../scripts/outs_errs/"%x_output.%j" #write out any program outpus
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH --mail-user=zdellaert@uri.edu #your email to send notifications
+#SBATCH -D /data/putnamlab/zdellaert/LaserCoral/output_RNA #set working directory
+
+# load modules needed
+module load HISAT2/2.2.1-gompi-2022a #Alignment to reference genome: HISAT2
+module load SAMtools/1.16.1-GCC-11.3.0 #Preparation of alignment for assembly: SAMtools
+
+# index the reference genome, will write to a directory called Pacuta_ref
+hisat2-build -f ../references/Pocillopora_acuta_HIv2.assembly.fasta ./Pacuta_ref
+
+echo "Reference genome indexed. Starting alingment" $(date)
+
+# make the output directory if it does not exist (-p checks for this)
+mkdir -p stranded_hisat2
+
+# call the oligo-trimmed sequences into an array
+array=(../data_RNA/trimmed_oligo*_R1_001.fastq.gz)
+
+# align the files to the indexed genome using hisat2
+for read1 in ${array[@]}; do
+    
+    # extract the sample name of R1 files as LCM_##
+    sample_name=$(basename $read1 | sed 's/.*trimmed_\([A-Za-z0-9]*_[0-9]*\).*/\1/')
+    
+    # Define the corresponding reverse read file (R2)
+    read2=${read1/_R1_/_R2_}
+    
+    # perform alignment
+    hisat2 -p 16 --time --dta -q --rna-strandness RF -x Pacuta_ref -1 ${read1} -2 ${read2} -S stranded_hisat2/${sample_name}.sam
+    echo "${sample_name} aligned!"
+
+    # sort the sam file into a bam file
+    samtools sort -@ 8 -o stranded_hisat2/${sample_name}.bam stranded_hisat2/${sample_name}.sam
+    echo "${sample_name} bam-ified!"
+    
+    # index bam file , creating a .bai file which is nice for viewing in IGB
+    samtools index stranded_hisat2/${sample_name}.bam stranded_hisat2/${sample_name}.bai
+    
+    # remove sam file to save disk space
+    rm stranded_hisat2/${sample_name}.sam
+done
+
+# move the reference index files into the stranded_hisat2 directory
+mv Pacuta_ref.* stranded_hisat2/
+
+#  Calculate mapping percentages
+for i in stranded_hisat2/*.bam; do
+    echo "${i}" >> stranded_hisat2/mapped_reads_counts_Pacuta
+    samtools flagstat ${i} | grep "mapped (" >> stranded_hisat2/mapped_reads_counts_Pacuta
+done
+```
+
+### Interpretation of unstranded vs. stranded hisat2 run
+
+- The output and error files are the exact same , so the alignments did not seem to be affected by the stradedness.
+- Upon inspecting the bam files to see if the information about alignments was affected, there do not appear to be any differences between the stranded vs. unstranded runs.
+
+#### RSeQC: infer_experiment.py - infer strandedness
+
+I found [this tool](https://rseqc.sourceforge.net/#infer-experiment-py) to analyse aligned bam files to examine for stradedness information. Running it on both the stranded and unstrandedd hisat2 alignments:
+
+```
+cd strandedness
+pip install RSeQC
+cp stranded_test_trimmed_oligo_trimmed_LCM_15_S40_R1_001/Pocillopora_acuta_HIv2.bed  . #copy bed file made using other tool
+
+infer_experiment.py -r Pocillopora_acuta_HIv2.bed -i ../output_RNA/hisat2/LCM_15.bam
+```
+
+```
+Reading reference gene model Pocillopora_acuta_HIv2.bed ... Done
+Loading SAM/BAM file ...  Total 200000 usable reads were sampled
+
+
+This is PairEnd Data
+Fraction of reads failed to determine: 0.0002
+Fraction of reads explained by "1++,1--,2+-,2-+": 0.5102
+Fraction of reads explained by "1+-,1-+,2++,2--": 0.4897
+```
+```
+infer_experiment.py -r Pocillopora_acuta_HIv2.bed -i ../output_RNA/stranded_hisat2/LCM_15.bam
+```
+
+```
+Reading reference gene model Pocillopora_acuta_HIv2.bed ... Done
+Loading SAM/BAM file ...  Total 200000 usable reads were sampled
+
+
+This is PairEnd Data
+Fraction of reads failed to determine: 0.0002
+Fraction of reads explained by "1++,1--,2+-,2-+": 0.5102
+Fraction of reads explained by "1+-,1-+,2++,2--": 0.4897
+```
+
+For both the bam files, the results were the same. The reads are distributed almost equally across both orientations. This indicates that the library prep method I used is **unstranded**, even though it was using a directional selection (3' poly-A primer) method. This is what I thought, but wanted to double check.
