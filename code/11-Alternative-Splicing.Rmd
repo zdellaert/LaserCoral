@@ -77,7 +77,7 @@ nano scripts/spladder_build.sh
 
 ```
 #!/usr/bin/env bash
-#SBATCH --ntasks=1 --cpus-per-task=48 #split one task over multiple CPU
+#SBATCH --ntasks=1 --cpus-per-task=6 #split one task over multiple CPU
 #SBATCH --mem=250GB
 #SBATCH -t 48:00:00
 #SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
@@ -95,8 +95,101 @@ mkdir -p ${out_dir}
 
 spladder build --bams ${spladder_dir}/alignments.txt \
                --annotation ${spladder_dir}/Pocillopora_acuta_HIv2.gtf \
-               --outdir ${out_dir}
+               --outdir ${out_dir} \
+               --parallel 4 \
+               --verbose
 ```
+
+```
+nano Aboral.txt
+```
+
+Enter the following, one bam file path per line:
+
+```
+output_RNA/hisat2/LCM_4.bam
+output_RNA/hisat2/LCM_9.bam
+output_RNA/hisat2/LCM_16.bam
+output_RNA/hisat2/LCM_21.bam
+output_RNA/hisat2/LCM_27.bam
+```
+
+```
+nano Oral.txt
+```
+
+Enter the following, one bam file path per line:
+
+```
+output_RNA/hisat2/LCM_5.bam
+output_RNA/hisat2/LCM_8.bam
+output_RNA/hisat2/LCM_15.bam
+output_RNA/hisat2/LCM_20.bam
+output_RNA/hisat2/LCM_26.bam
+```
+
+
+```
+nano scripts/spladder_test.sh
+```
+
+```
+#!/usr/bin/env bash
+#SBATCH --ntasks=1 --cpus-per-task=12 #split one task over multiple CPU
+#SBATCH --mem=250GB
+#SBATCH -t 48:00:00
+#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
+#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
+
+module load conda/latest
+conda activate /work/pi_hputnam_uri_edu/conda/envs/spladder
+
+spladder_dir="output_RNA/splicing"
+out_dir="/scratch3/workspace/zdellaert_uri_edu-shared/spladder_out"
+
+spladder test --conditionA ${spladder_dir}/Oral.txt \
+              --conditionB ${spladder_dir}/Aboral.txt \
+              --labelA Oral --labelB Aboral \
+              --diagnose-plots \
+              --parallel 12 \
+              --outdir ${out_dir}
+```
+
+
+Unsure about this next part:
+
+```
+nano scripts/spladder_viz.sh
+```
+
+```
+#!/usr/bin/env bash
+#SBATCH --ntasks=1 --cpus-per-task=12 #split one task over multiple CPU
+#SBATCH --mem=250GB
+#SBATCH -t 48:00:00
+#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
+#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
+
+module load conda/latest
+conda activate /work/pi_hputnam_uri_edu/conda/envs/spladder
+
+spladder_dir="output_RNA/splicing"
+out_dir="/scratch3/workspace/zdellaert_uri_edu-shared/spladder_out"
+
+spladder viz \
+    --track TYPE \
+    --range TYPE SPECS \
+    --test testing_Oral_vs_Aboral any 5 \
+    --outdir ${out_dir}
+```
+
+## Notes about above: 
+
+I think I've done this right, but they also have a workflow for "large cohorts" that runs the build step over multiple iterations. I may want to run that workflow as well to confirm doing it in one step gets the same result.
 
 
 ## R- analyses

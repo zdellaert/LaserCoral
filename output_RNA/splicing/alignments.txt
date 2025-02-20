@@ -1,0 +1,10 @@
+output_RNA/hisat2/LCM_4.bam
+output_RNA/hisat2/LCM_5.bam
+output_RNA/hisat2/LCM_8.bam
+output_RNA/hisat2/LCM_9.bam
+output_RNA/hisat2/LCM_15.bam
+output_RNA/hisat2/LCM_16.bam
+output_RNA/hisat2/LCM_20.bam
+output_RNA/hisat2/LCM_21.bam
+output_RNA/hisat2/LCM_26.bam
+output_RNA/hisat2/LCM_27.bam
