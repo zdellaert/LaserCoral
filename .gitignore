@@ -38,6 +38,7 @@ references/motif_dbs/
 *bam
 *bai
 *sam
+*genozip*
 *ht2
 output_RNA/stringtie/LCM_*.gtf
 output_RNA/stringtie/*tab
@@ -86,4 +87,5 @@ output_WGBS/*/methyldackel/*quant
 *cytosine_report.txt
 *5x_sorted.tab_gene
 *5x_sorted.tab
-output_WGBS/methylseq_V3_bwa_test/bwameth/deduplicated/min_efficiency_test/*
+output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test/*
+output_RNA/splicing/Pocillopora_acuta_HIv2.gtf*

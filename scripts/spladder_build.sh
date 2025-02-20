@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#SBATCH --ntasks=1 --cpus-per-task=48 #split one task over multiple CPU
+#SBATCH --ntasks=1 --cpus-per-task=6 #split one task over multiple CPU
 #SBATCH --mem=250GB
 #SBATCH -t 48:00:00
 #SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
@@ -17,4 +17,6 @@ mkdir -p ${out_dir}
 
 spladder build --bams ${spladder_dir}/alignments.txt \
                --annotation ${spladder_dir}/Pocillopora_acuta_HIv2.gtf \
-               --outdir ${out_dir}
+               --outdir ${out_dir} \
+	       --parallel 4 \
+               --verbose

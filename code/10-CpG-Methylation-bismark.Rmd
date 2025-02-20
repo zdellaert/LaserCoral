@@ -1,5 +1,5 @@
 ---
-title: "10-CpG-Methylation-fb"
+title: "10-CpG-Methylation-Bismark"
 author: "Zoe Dellaert"
 date: "2025-02-17"
 output:
@@ -120,4 +120,6 @@ ggplot(conversion_eff_data, aes(x=percent_cpg_meth, y=conversion_efficiency, col
     labs(y="bisulfite conversion efficiency")
 ```
 
-## VERY IMPORTANT NOTE THIS IS NOT COVERAGE FILTERED AND ALSO THE MAPPING RATE WAS VERY LOW. I would not trust this efficiency estimate.
+## VERY IMPORTANT NOTE:
+
+THIS IS NOT COVERAGE FILTERED AND ALSO THE MAPPING RATE WAS VERY LOW. I would not trust this efficiency estimate.

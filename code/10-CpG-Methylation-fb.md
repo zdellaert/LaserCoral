@@ -9,7 +9,6 @@ Zoe Dellaert
 - [0.4 All cytosines - CpG, CHG, and CHH intersection with gene
   bodies](#04-all-cytosines---cpg-chg-and-chh-intersection-with-gene-bodies)
 - [0.5 5X Coverage Cytosines ONLY](#05-5x-coverage-cytosines-only)
-- [0.6 plots side by side](#06-plots-side-by-side)
 
 ## 0.1 CpG Methylation analysis
 
@@ -158,7 +157,7 @@ for (sample in samples) {
   conversion_efficiency <- unmethylated_total / total_cytosines
   print(paste(sample, "Bisulfite Conversion Efficiency: ", conversion_efficiency))
 
-  conversion_eff_data <- rbind(conversion_eff_data, data.frame(sample=sample, efficiency=conversion_efficiency))
+  conversion_eff_data <- rbind(conversion_eff_data, data.frame(sample=sample, efficiency=conversion_efficiency, total_CHH_CHG=total_cytosines))
 }
 ```
 
@@ -332,7 +331,7 @@ for (sample in samples) {
   conversion_efficiency <- unmethylated_total / total_cytosines
   print(paste(sample, "Bisulfite Conversion Efficiency: ", conversion_efficiency))
 
-  conversion_eff_data_5x <- rbind(conversion_eff_data_5x, data.frame(sample=sample, efficiency=conversion_efficiency))
+  conversion_eff_data_5x <- rbind(conversion_eff_data_5x, data.frame(sample=sample, efficiency=conversion_efficiency, total_CHH_CHG=total_cytosines))
 }
 ```
 
@@ -453,125 +452,53 @@ ggplot(summary, aes(x=mean_methylation, y=efficiency, color=Fragment, label=samp
 ```
 
 ![](10-CpG-Methylation-fb_files/figure-gfm/unnamed-chunk-6-4.png)<!-- -->
-
-## 0.6 plots side by side
+\## Total counts comparisons
 
 ``` r
-ggplot(all_methylation_data, aes(x=sample, y=methylation, fill=Fragment)) +
-  geom_boxplot() +
-  facet_grid(~context, scales = "free") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(title="Gene Body Methylation at CpG, CHG, and CHH loci", y="Mean Methylation (%)")
+efficiency_all <- read.csv( "../output_WGBS/methylseq_bwa_fb/conversion_efficiency.csv", sep = ",", header = TRUE)
+efficiency_5x <- read.csv( "../output_WGBS/methylseq_bwa_fb/conversion_efficiency_5x.csv", sep = ",", header = TRUE) 
+
+efficiency_all$filter <- "none"
+efficiency_5x$filter <- "5x_coverage"
 ```
 
-    ## Warning: Removed 104312 rows containing non-finite outside the scale range
-    ## (`stat_boxplot()`).
-
-![](10-CpG-Methylation-fb_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
-
 ``` r
-ggplot(all_methylation_data_5x, aes(x=sample, y=methylation, fill=Fragment)) +
-  geom_boxplot() +
-  facet_grid(~context, scales = "free") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(title="5X coverage-loci ONLY - Gene Body Methylation at CpG, CHG, and CHH loci", y="Mean Methylation (%)")
-```
+efficiency <- rbind(efficiency_all,efficiency_5x)
+reorder <- unique(efficiency$sample)[mixedorder(unique(efficiency$sample))]
 
-    ## Warning: Removed 578238 rows containing non-finite outside the scale range
-    ## (`stat_boxplot()`).
+efficiency <- efficiency %>%
+  left_join(meta_simple,by = join_by(sample == Sample)) %>%
+  mutate(sample = fct_relevel(sample, reorder)) %>%
+  mutate(filter = fct_relevel(filter, c("none","5x_coverage")))
 
-![](10-CpG-Methylation-fb_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
-
-``` r
-ggplot(conversion_eff_data, aes(x=sample, y=efficiency, fill=Tissue)) +
+ggplot(efficiency, aes(x=sample, y=efficiency, fill=Fragment)) +
   geom_bar(stat="identity", color="black") +
   theme_minimal() +
-  facet_grid(~Fragment, scales = "free") +
-  labs(title="Bisulfite Conversion Efficiency per Sample", y="Conversion Efficiency", x="Sample") +
+  facet_grid(~filter) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   ylim(0, 1) 
 ```
 
-![](10-CpG-Methylation-fb_files/figure-gfm/unnamed-chunk-7-3.png)<!-- -->
+![](10-CpG-Methylation-fb_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 ``` r
-ggplot(conversion_eff_data_5x, aes(x=sample, y=efficiency, fill=Tissue)) +
+ggplot(efficiency, aes(x=sample, y=total_CHH_CHG, fill=Fragment)) +
   geom_bar(stat="identity", color="black") +
   theme_minimal() +
-  facet_grid(~Fragment, scales = "free") +
-  labs(title="5X coverage-loci ONLY - Bisulfite Conversion Efficiency per Sample", y="Conversion Efficiency", x="Sample") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  ylim(0, 1) 
+  facet_grid(~filter) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
 ```
 
-![](10-CpG-Methylation-fb_files/figure-gfm/unnamed-chunk-7-4.png)<!-- -->
+![](10-CpG-Methylation-fb_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
 
 ``` r
-ggplot(conversion_eff_data, aes(x=sample, y=efficiency, fill=PCR_ReAmp_Cycles)) +
-  geom_bar(stat="identity", color="black") +
-  theme_minimal() +
-  facet_grid(~Fragment, scales = "free") +
-  labs(title="Bisulfite Conversion Efficiency per Sample", y="Conversion Efficiency", x="Sample") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  ylim(0, 1) 
-```
-
-![](10-CpG-Methylation-fb_files/figure-gfm/unnamed-chunk-7-5.png)<!-- -->
-
-``` r
-ggplot(conversion_eff_data_5x, aes(x=sample, y=efficiency, fill=PCR_ReAmp_Cycles)) +
-  geom_bar(stat="identity", color="black") +
-  theme_minimal() +
-  facet_grid(~Fragment, scales = "free") +
-  labs(title="5X coverage-loci ONLY - Bisulfite Conversion Efficiency per Sample", y="Conversion Efficiency", x="Sample") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  ylim(0, 1) 
-```
-
-![](10-CpG-Methylation-fb_files/figure-gfm/unnamed-chunk-7-6.png)<!-- -->
-
-``` r
-summary <- all_methylation_data %>%
-  group_by(sample, context) %>%
-  summarize(mean_methylation = mean(methylation, na.rm = TRUE)) %>% filter(context =="CpG") %>% left_join(conversion_eff_data)
-```
-
-    ## `summarise()` has grouped output by 'sample'. You can override using the
-    ## `.groups` argument.
-    ## Joining with `by = join_by(sample)`
-
-``` r
-ggplot(summary, aes(x=mean_methylation, y=efficiency, color=Fragment, label=sample)) +
+ggplot(efficiency, aes(x=total_CHH_CHG, y=efficiency)) +
   geom_point() +
-    geom_text(nudge_x = -2.5) + 
-  #geom_smooth() +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(y="bisulfite conversion efficiency")
+  facet_grid(~filter, scales = "free") +
+  geom_smooth(method="lm") +
+  labs(y="bisulfite conversion efficiency")
 ```
 
-![](10-CpG-Methylation-fb_files/figure-gfm/unnamed-chunk-7-7.png)<!-- -->
+    ## `geom_smooth()` using formula = 'y ~ x'
 
-``` r
-summary <- all_methylation_data_5x %>%
-  group_by(sample, context) %>%
-  summarize(mean_methylation = mean(methylation, na.rm = TRUE)) %>% filter(context =="CpG") %>% left_join(conversion_eff_data_5x)
-```
-
-    ## `summarise()` has grouped output by 'sample'. You can override using the
-    ## `.groups` argument.
-    ## Joining with `by = join_by(sample)`
-
-``` r
-ggplot(summary, aes(x=mean_methylation, y=efficiency, color=Fragment, label=sample)) +
-  geom_point() +
-  geom_text(nudge_x = -2.5) + 
-  #geom_smooth() +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(title="5X coverage-loci ONLY" , y="bisulfite conversion efficiency")
-```
-
-![](10-CpG-Methylation-fb_files/figure-gfm/unnamed-chunk-7-8.png)<!-- -->
+![](10-CpG-Methylation-fb_files/figure-gfm/unnamed-chunk-8-3.png)<!-- -->

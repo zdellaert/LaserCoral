@@ -8,12 +8,11 @@ Zoe Dellaert
 - [0.3 Load packages](#03-load-packages)
 - [0.4 All samples](#04-all-samples)
 - [0.5 5X Coverage Cytosines ONLY](#05-5x-coverage-cytosines-only)
-- [0.6 plots side by side](#06-plots-side-by-side)
-- [0.7 Filtered for conversion
-  efficiency:](#07-filtered-for-conversion-efficiency)
-  - [0.7.1 \> 90% conversion
-    efficiency:](#071--90-conversion-efficiency)
-- [0.8 Total counts comparisons](#08-total-counts-comparisons)
+- [0.6 Filtered for conversion
+  efficiency:](#06-filtered-for-conversion-efficiency)
+  - [0.6.1 \> 90% conversion
+    efficiency:](#061--90-conversion-efficiency)
+- [0.7 Total counts comparisons](#07-total-counts-comparisons)
 
 ## 0.1 CpG Methylation analysis
 
@@ -460,129 +459,7 @@ ggplot(summary, aes(x=mean_methylation, y=efficiency, color=Fragment, label=samp
 
 ![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-6-4.png)<!-- -->
 
-## 0.6 plots side by side
-
-``` r
-ggplot(all_methylation_data, aes(x=sample, y=methylation, fill=Fragment)) +
-  geom_boxplot() +
-  facet_grid(~context, scales = "free") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(title="Gene Body Methylation at CpG, CHG, and CHH loci", y="Mean Methylation (%)")
-```
-
-    ## Warning: Removed 102012 rows containing non-finite outside the scale range
-    ## (`stat_boxplot()`).
-
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
-
-``` r
-ggplot(all_methylation_data_5x, aes(x=sample, y=methylation, fill=Fragment)) +
-  geom_boxplot() +
-  facet_grid(~context, scales = "free") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(title="5X coverage-loci ONLY - Gene Body Methylation at CpG, CHG, and CHH loci", y="Mean Methylation (%)")
-```
-
-    ## Warning: Removed 274652 rows containing non-finite outside the scale range
-    ## (`stat_boxplot()`).
-
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
-
-``` r
-ggplot(conversion_eff_data, aes(x=sample, y=efficiency, fill=Tissue)) +
-  geom_bar(stat="identity", color="black") +
-  theme_minimal() +
-  facet_grid(~Fragment, scales = "free") +
-  labs(title="Bisulfite Conversion Efficiency per Sample", y="Conversion Efficiency", x="Sample") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  ylim(0, 1) 
-```
-
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-7-3.png)<!-- -->
-
-``` r
-ggplot(conversion_eff_data_5x, aes(x=sample, y=efficiency, fill=Tissue)) +
-  geom_bar(stat="identity", color="black") +
-  theme_minimal() +
-  facet_grid(~Fragment, scales = "free") +
-  labs(title="5X coverage-loci ONLY - Bisulfite Conversion Efficiency per Sample", y="Conversion Efficiency", x="Sample") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  ylim(0, 1) 
-```
-
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-7-4.png)<!-- -->
-
-``` r
-ggplot(conversion_eff_data, aes(x=sample, y=efficiency, fill=PCR_ReAmp_Cycles)) +
-  geom_bar(stat="identity", color="black") +
-  theme_minimal() +
-  facet_grid(~Fragment, scales = "free") +
-  labs(title="Bisulfite Conversion Efficiency per Sample", y="Conversion Efficiency", x="Sample") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  ylim(0, 1) 
-```
-
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-7-5.png)<!-- -->
-
-``` r
-ggplot(conversion_eff_data_5x, aes(x=sample, y=efficiency, fill=PCR_ReAmp_Cycles)) +
-  geom_bar(stat="identity", color="black") +
-  theme_minimal() +
-  facet_grid(~Fragment, scales = "free") +
-  labs(title="5X coverage-loci ONLY - Bisulfite Conversion Efficiency per Sample", y="Conversion Efficiency", x="Sample") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  ylim(0, 1) 
-```
-
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-7-6.png)<!-- -->
-
-``` r
-summary <- all_methylation_data %>%
-  group_by(sample, context) %>%
-  summarize(mean_methylation = mean(methylation, na.rm = TRUE)) %>% filter(context =="CpG") %>% left_join(conversion_eff_data)
-```
-
-    ## `summarise()` has grouped output by 'sample'. You can override using the
-    ## `.groups` argument.
-    ## Joining with `by = join_by(sample)`
-
-``` r
-ggplot(summary, aes(x=mean_methylation, y=efficiency, color=Fragment, label=sample)) +
-  geom_point() +
-    geom_text(nudge_x = -2.5) + 
-  #geom_smooth() +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(y="bisulfite conversion efficiency")
-```
-
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-7-7.png)<!-- -->
-
-``` r
-summary <- all_methylation_data_5x %>%
-  group_by(sample, context) %>%
-  summarize(mean_methylation = mean(methylation, na.rm = TRUE)) %>% filter(context =="CpG") %>% left_join(conversion_eff_data_5x)
-```
-
-    ## `summarise()` has grouped output by 'sample'. You can override using the
-    ## `.groups` argument.
-    ## Joining with `by = join_by(sample)`
-
-``` r
-ggplot(summary, aes(x=mean_methylation, y=efficiency, color=Fragment, label=sample)) +
-  geom_point() +
-  geom_text(nudge_x = -2.5) + 
-  #geom_smooth() +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(title="5X coverage-loci ONLY" , y="bisulfite conversion efficiency")
-```
-
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-7-8.png)<!-- -->
-
-## 0.7 Filtered for conversion efficiency:
+## 0.6 Filtered for conversion efficiency:
 
 Methyldackel has a setting where it can only extract methylation counts
 from reads that pass a certain minimum threshold of conversion
@@ -591,7 +468,7 @@ to try it on a few samples and calculate conversion efficiency to
 confirm my caclulations were correct and also to get an idea of the
 results.
 
-### 0.7.1 \> 90% conversion efficiency:
+### 0.6.1 \> 90% conversion efficiency:
 
 ``` r
 #get list of all sample output directories and extract sample names
@@ -701,7 +578,7 @@ ggplot(all_methylation_data, aes(x=sample, y=methylation, fill=Fragment)) +
     ## Warning: Removed 86887 rows containing non-finite outside the scale range
     ## (`stat_boxplot()`).
 
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 ``` r
 ggplot(conversion_eff_data, aes(x=sample, y=efficiency, fill=Tissue)) +
@@ -713,7 +590,7 @@ ggplot(conversion_eff_data, aes(x=sample, y=efficiency, fill=Tissue)) +
   ylim(0, 1) 
 ```
 
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
 
 ``` r
 ggplot(conversion_eff_data, aes(x=sample, y=efficiency, fill=PCR_ReAmp_Cycles)) +
@@ -725,7 +602,7 @@ ggplot(conversion_eff_data, aes(x=sample, y=efficiency, fill=PCR_ReAmp_Cycles)) 
   ylim(0, 1) 
 ```
 
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-9-3.png)<!-- -->
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-8-3.png)<!-- -->
 
 ``` r
 summary <- all_methylation_data %>%
@@ -747,9 +624,9 @@ ggplot(summary, aes(x=mean_methylation, y=efficiency, color=Fragment, label=samp
   labs(y="bisulfite conversion efficiency")
 ```
 
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-9-4.png)<!-- -->
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-8-4.png)<!-- -->
 
-## 0.8 Total counts comparisons
+## 0.7 Total counts comparisons
 
 ``` r
 efficiency_all <- read.csv( "../output_WGBS/methylseq_V3_bwa_test/conversion_efficiency.csv", sep = ",", header = TRUE)
@@ -780,7 +657,7 @@ ggplot(efficiency, aes(x=sample, y=efficiency, fill=Fragment)) +
   ylim(0, 1) 
 ```
 
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ``` r
 ggplot(efficiency, aes(x=sample, y=total_CHH_CHG, fill=Fragment)) +
@@ -790,7 +667,7 @@ ggplot(efficiency, aes(x=sample, y=total_CHH_CHG, fill=Fragment)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
 ```
 
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-11-2.png)<!-- -->
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
 
 ``` r
 ggplot(efficiency, aes(x=total_CHH_CHG, y=efficiency)) +
@@ -802,4 +679,4 @@ ggplot(efficiency, aes(x=total_CHH_CHG, y=efficiency)) +
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-11-3.png)<!-- -->
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-10-3.png)<!-- -->

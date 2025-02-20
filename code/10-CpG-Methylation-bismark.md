@@ -1,4 +1,4 @@
-10-CpG-Methylation-fb
+10-CpG-Methylation-Bismark
 ================
 Zoe Dellaert
 2025-02-17
@@ -8,9 +8,7 @@ Zoe Dellaert
 - [0.3 Load packages](#03-load-packages)
 - [0.4 Calculate based on methylation extraction
   stats](#04-calculate-based-on-methylation-extraction-stats)
-- [0.5 VERY IMPORTANT NOTE THIS IS NOT COVERAGE FILTERED AND ALSO THE
-  MAPPING RATE WAS VERY LOW. I would not trust this efficiency
-  estimate.](#05-very-important-note-this-is-not-coverage-filtered-and-also-the-mapping-rate-was-very-low-i-would-not-trust-this-efficiency-estimate)
+- [0.5 VERY IMPORTANT NOTE:](#05-very-important-note)
 
 ## 0.1 CpG Methylation analysis
 
@@ -209,4 +207,7 @@ ggplot(conversion_eff_data, aes(x=percent_cpg_meth, y=conversion_efficiency, col
 
 ![](10-CpG-Methylation-bismark_files/figure-gfm/unnamed-chunk-4-3.png)<!-- -->
 
-## 0.5 VERY IMPORTANT NOTE THIS IS NOT COVERAGE FILTERED AND ALSO THE MAPPING RATE WAS VERY LOW. I would not trust this efficiency estimate.
+## 0.5 VERY IMPORTANT NOTE:
+
+THIS IS NOT COVERAGE FILTERED AND ALSO THE MAPPING RATE WAS VERY LOW. I
+would not trust this efficiency estimate.
