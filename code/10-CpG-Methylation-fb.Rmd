@@ -55,7 +55,7 @@ meta_simple <- meta %>% select(Sample, Fragment, Tissue, PCR_ReAmp_Cycles)
 
 ## All cytosines - CpG, CHG, and CHH intersection with gene bodies
 
-```{r, eval=FALSE}
+```{r}
 #get list of all sample output directories and extract sample names
 sample_directories <- list.files("~/zdellaert_uri_edu-shared/methylseq_bwa_fb/methyldackel", pattern = "_quant", full.names = TRUE, include.dirs = TRUE)
 samples <- gsub("_quant","",basename(sample_directories))
@@ -86,19 +86,14 @@ for (sample in samples) {
   # Append methylation data for this sample
   all_methylation_data <- rbind(all_methylation_data, methylation_data)
 
-  # Read unmethylated and total cytosine data for CHG and CHH contexts
-  CHG_unmethylated <- data.table::fread(file.path(output_dir, "CHG_unmethylated.txt"), header=FALSE)
-  CHH_unmethylated <- data.table::fread(file.path(output_dir, "CHH_unmethylated.txt"), header=FALSE)
+  # read in file length info for CHH and CHG total counts and unmethyated counts
+  count_table <- read.table(file.path(output_dir, "efficiency.txt"), header=FALSE)
+  counts <- as.numeric(count_table$V1)
 
-  CHG_total <- data.table::fread(file.path(output_dir, "CHG_total.txt"), header=FALSE)
-  CHH_total <- data.table::fread(file.path(output_dir, "CHH_total.txt"), header=FALSE)
-
-  # Calculate bisulfite conversion efficiency for CHG and CHH contexts
-  unmethylated_CHG <- nrow(CHG_unmethylated)
-  unmethylated_CHH <- nrow(CHH_unmethylated)
-
-  total_CHG <- nrow(CHG_total)
-  total_CHH <- nrow(CHH_total)
+  unmethylated_CHG <- counts[1]
+  unmethylated_CHH <- counts[2]
+  total_CHG <- counts[3]
+  total_CHH <- counts[4]
 
   # Sum of unmethylated cytosines
   unmethylated_total <- unmethylated_CHG + unmethylated_CHH
@@ -111,12 +106,6 @@ for (sample in samples) {
   print(paste(sample, "Bisulfite Conversion Efficiency: ", conversion_efficiency))
 
   conversion_eff_data <- rbind(conversion_eff_data, data.frame(sample=sample, efficiency=conversion_efficiency))
-  
-  #remove huge files
-  rm(CHG_unmethylated)
-  rm(CHH_unmethylated)
-  rm(CHG_total)
-  rm(CHH_total)
 }
 
 write.csv(all_methylation_data, "../output_WGBS/methylseq_bwa_fb/gene_body_methylation.csv",row.names = FALSE)
@@ -175,7 +164,7 @@ ggplot(summary, aes(x=mean_methylation, y=efficiency, color=Fragment, label=samp
 
 ##  5X Coverage Cytosines ONLY
 
-```{r,eval=FALSE}
+```{r}
 #get list of all sample output directories and extract sample names
 sample_directories <- list.files("~/zdellaert_uri_edu-shared/methylseq_bwa_fb/methyldackel", pattern = "_5Xquant", full.names = TRUE, include.dirs = TRUE)
 samples <- gsub("_5Xquant","",basename(sample_directories))
@@ -206,19 +195,14 @@ for (sample in samples) {
   # Append methylation data for this sample
   all_methylation_data_5x <- rbind(all_methylation_data_5x, methylation_data)
 
-  # Read unmethylated and total cytosine data for CHG and CHH contexts
-  CHG_unmethylated <- data.table::fread(file.path(output_dir, "CHG_unmethylated_5x.txt"), header=FALSE)
-  CHH_unmethylated <- data.table::fread(file.path(output_dir, "CHH_unmethylated_5x.txt"), header=FALSE)
+  # read in file length info for CHH and CHG total counts and unmethyated counts
+  count_table <- read.table(file.path(output_dir, "efficiency.txt"), header=FALSE)
+  counts <- as.numeric(count_table$V1)
 
-  CHG_total <- data.table::fread(file.path(output_dir, "CHG_total_5x.txt"), header=FALSE)
-  CHH_total <- data.table::fread(file.path(output_dir, "CHH_total_5x.txt"), header=FALSE)
-
-  # Calculate bisulfite conversion efficiency for CHG and CHH contexts
-  unmethylated_CHG <- nrow(CHG_unmethylated)
-  unmethylated_CHH <- nrow(CHH_unmethylated)
-
-  total_CHG <- nrow(CHG_total)
-  total_CHH <- nrow(CHH_total)
+  unmethylated_CHG <- counts[1]
+  unmethylated_CHH <- counts[2]
+  total_CHG <- counts[3]
+  total_CHH <- counts[4]
 
   # Sum of unmethylated cytosines
   unmethylated_total <- unmethylated_CHG + unmethylated_CHH
@@ -231,12 +215,6 @@ for (sample in samples) {
   print(paste(sample, "Bisulfite Conversion Efficiency: ", conversion_efficiency))
 
   conversion_eff_data_5x <- rbind(conversion_eff_data_5x, data.frame(sample=sample, efficiency=conversion_efficiency))
-  
-  #remove huge files
-  rm(CHG_unmethylated)
-  rm(CHH_unmethylated)
-  rm(CHG_total)
-  rm(CHH_total)
 }
 
 write.csv(all_methylation_data_5x, "../output_WGBS/methylseq_bwa_fb/gene_body_methylation_5x.csv",row.names = FALSE)

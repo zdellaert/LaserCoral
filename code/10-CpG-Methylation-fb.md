@@ -139,19 +139,14 @@ for (sample in samples) {
   # Append methylation data for this sample
   all_methylation_data <- rbind(all_methylation_data, methylation_data)
 
-  # Read unmethylated and total cytosine data for CHG and CHH contexts
-  CHG_unmethylated <- data.table::fread(file.path(output_dir, "CHG_unmethylated.txt"), header=FALSE)
-  CHH_unmethylated <- data.table::fread(file.path(output_dir, "CHH_unmethylated.txt"), header=FALSE)
+  # read in file length info for CHH and CHG total counts and unmethyated counts
+  count_table <- read.table(file.path(output_dir, "efficiency.txt"), header=FALSE)
+  counts <- as.numeric(count_table$V1)
 
-  CHG_total <- data.table::fread(file.path(output_dir, "CHG_total.txt"), header=FALSE)
-  CHH_total <- data.table::fread(file.path(output_dir, "CHH_total.txt"), header=FALSE)
-
-  # Calculate bisulfite conversion efficiency for CHG and CHH contexts
-  unmethylated_CHG <- nrow(CHG_unmethylated)
-  unmethylated_CHH <- nrow(CHH_unmethylated)
-
-  total_CHG <- nrow(CHG_total)
-  total_CHH <- nrow(CHH_total)
+  unmethylated_CHG <- counts[1]
+  unmethylated_CHH <- counts[2]
+  total_CHG <- counts[3]
+  total_CHH <- counts[4]
 
   # Sum of unmethylated cytosines
   unmethylated_total <- unmethylated_CHG + unmethylated_CHH
@@ -164,54 +159,48 @@ for (sample in samples) {
   print(paste(sample, "Bisulfite Conversion Efficiency: ", conversion_efficiency))
 
   conversion_eff_data <- rbind(conversion_eff_data, data.frame(sample=sample, efficiency=conversion_efficiency))
-  
-  #remove huge files
-  rm(CHG_unmethylated)
-  rm(CHH_unmethylated)
-  rm(CHG_total)
-  rm(CHH_total)
 }
 ```
 
     ## Warning: NAs introduced by coercion
 
-    ## [1] "LCM_1 Bisulfite Conversion Efficiency:  0.734333115711656"
+    ## [1] "LCM_1 Bisulfite Conversion Efficiency:  0.888883009307192"
 
     ## Warning: NAs introduced by coercion
 
-    ## [1] "LCM_11 Bisulfite Conversion Efficiency:  0.808799547668931"
+    ## [1] "LCM_11 Bisulfite Conversion Efficiency:  0.812049042214985"
 
     ## Warning: NAs introduced by coercion
 
-    ## [1] "LCM_12 Bisulfite Conversion Efficiency:  0.75785852620509"
+    ## [1] "LCM_12 Bisulfite Conversion Efficiency:  0.798932738557227"
 
     ## Warning: NAs introduced by coercion
 
-    ## [1] "LCM_17 Bisulfite Conversion Efficiency:  0.738095813309405"
+    ## [1] "LCM_17 Bisulfite Conversion Efficiency:  0.747953598030206"
 
     ## Warning: NAs introduced by coercion
 
-    ## [1] "LCM_18 Bisulfite Conversion Efficiency:  0.631857954023121"
+    ## [1] "LCM_18 Bisulfite Conversion Efficiency:  0.722733895592278"
 
     ## Warning: NAs introduced by coercion
 
-    ## [1] "LCM_24 Bisulfite Conversion Efficiency:  0.346693593845345"
+    ## [1] "LCM_24 Bisulfite Conversion Efficiency:  0.875543075678573"
 
     ## Warning: NAs introduced by coercion
 
-    ## [1] "LCM_25 Bisulfite Conversion Efficiency:  0.54801046159016"
+    ## [1] "LCM_25 Bisulfite Conversion Efficiency:  0.871591899852285"
 
     ## Warning: NAs introduced by coercion
 
-    ## [1] "LCM_3 Bisulfite Conversion Efficiency:  0.813734208729636"
+    ## [1] "LCM_3 Bisulfite Conversion Efficiency:  0.662540922677014"
 
     ## Warning: NAs introduced by coercion
 
-    ## [1] "LCM_32 Bisulfite Conversion Efficiency:  0.834303225260465"
+    ## [1] "LCM_32 Bisulfite Conversion Efficiency:  0.783288078758729"
 
     ## Warning: NAs introduced by coercion
 
-    ## [1] "LCM_33 Bisulfite Conversion Efficiency:  0.945523642000795"
+    ## [1] "LCM_33 Bisulfite Conversion Efficiency:  0.630805987913647"
 
 ``` r
 write.csv(all_methylation_data, "../output_WGBS/methylseq_bwa_fb/gene_body_methylation.csv",row.names = FALSE)
@@ -324,19 +313,14 @@ for (sample in samples) {
   # Append methylation data for this sample
   all_methylation_data_5x <- rbind(all_methylation_data_5x, methylation_data)
 
-  # Read unmethylated and total cytosine data for CHG and CHH contexts
-  CHG_unmethylated <- data.table::fread(file.path(output_dir, "CHG_unmethylated_5x.txt"), header=FALSE)
-  CHH_unmethylated <- data.table::fread(file.path(output_dir, "CHH_unmethylated_5x.txt"), header=FALSE)
+  # read in file length info for CHH and CHG total counts and unmethyated counts
+  count_table <- read.table(file.path(output_dir, "efficiency.txt"), header=FALSE)
+  counts <- as.numeric(count_table$V1)
 
-  CHG_total <- data.table::fread(file.path(output_dir, "CHG_total_5x.txt"), header=FALSE)
-  CHH_total <- data.table::fread(file.path(output_dir, "CHH_total_5x.txt"), header=FALSE)
-
-  # Calculate bisulfite conversion efficiency for CHG and CHH contexts
-  unmethylated_CHG <- nrow(CHG_unmethylated)
-  unmethylated_CHH <- nrow(CHH_unmethylated)
-
-  total_CHG <- nrow(CHG_total)
-  total_CHH <- nrow(CHH_total)
+  unmethylated_CHG <- counts[1]
+  unmethylated_CHH <- counts[2]
+  total_CHG <- counts[3]
+  total_CHH <- counts[4]
 
   # Sum of unmethylated cytosines
   unmethylated_total <- unmethylated_CHG + unmethylated_CHH
@@ -349,54 +333,48 @@ for (sample in samples) {
   print(paste(sample, "Bisulfite Conversion Efficiency: ", conversion_efficiency))
 
   conversion_eff_data_5x <- rbind(conversion_eff_data_5x, data.frame(sample=sample, efficiency=conversion_efficiency))
-  
-  #remove huge files
-  rm(CHG_unmethylated)
-  rm(CHH_unmethylated)
-  rm(CHG_total)
-  rm(CHH_total)
 }
 ```
 
     ## Warning: NAs introduced by coercion
 
-    ## [1] "LCM_1 Bisulfite Conversion Efficiency:  0.028568408509984"
+    ## [1] "LCM_1 Bisulfite Conversion Efficiency:  0.672431835692683"
 
     ## Warning: NAs introduced by coercion
 
-    ## [1] "LCM_11 Bisulfite Conversion Efficiency:  0.0533229123119521"
+    ## [1] "LCM_11 Bisulfite Conversion Efficiency:  0.549336023787733"
 
     ## Warning: NAs introduced by coercion
 
-    ## [1] "LCM_12 Bisulfite Conversion Efficiency:  0.0401182095488274"
+    ## [1] "LCM_12 Bisulfite Conversion Efficiency:  0.542119221207248"
 
     ## Warning: NAs introduced by coercion
 
-    ## [1] "LCM_17 Bisulfite Conversion Efficiency:  0.0393430066492284"
+    ## [1] "LCM_17 Bisulfite Conversion Efficiency:  0.499965668442295"
 
     ## Warning: NAs introduced by coercion
 
-    ## [1] "LCM_18 Bisulfite Conversion Efficiency:  0.0203062001512761"
+    ## [1] "LCM_18 Bisulfite Conversion Efficiency:  0.504150914126444"
 
     ## Warning: NAs introduced by coercion
 
-    ## [1] "LCM_24 Bisulfite Conversion Efficiency:  0.000944705821167125"
+    ## [1] "LCM_24 Bisulfite Conversion Efficiency:  0.786838261687598"
 
     ## Warning: NAs introduced by coercion
 
-    ## [1] "LCM_25 Bisulfite Conversion Efficiency:  0.00687721683536454"
+    ## [1] "LCM_25 Bisulfite Conversion Efficiency:  0.723331792666875"
 
     ## Warning: NAs introduced by coercion
 
-    ## [1] "LCM_3 Bisulfite Conversion Efficiency:  0.0630899778555905"
+    ## [1] "LCM_3 Bisulfite Conversion Efficiency:  0.392128181443259"
 
     ## Warning: NAs introduced by coercion
 
-    ## [1] "LCM_32 Bisulfite Conversion Efficiency:  0.0827118989139145"
+    ## [1] "LCM_32 Bisulfite Conversion Efficiency:  0.52269982511792"
 
     ## Warning: NAs introduced by coercion
 
-    ## [1] "LCM_33 Bisulfite Conversion Efficiency:  0.235553724035754"
+    ## [1] "LCM_33 Bisulfite Conversion Efficiency:  0.243778313562488"
 
 ``` r
 write.csv(all_methylation_data_5x, "../output_WGBS/methylseq_bwa_fb/gene_body_methylation_5x.csv",row.names = FALSE)

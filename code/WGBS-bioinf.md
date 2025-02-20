@@ -1718,10 +1718,10 @@ for file in *cytosine_report.txt; do
     # extract conversion efficiency info
 
     #count unmethylated CHG
-    awk '$5 != 0' $CHG_bed | wc -l > $output_dir/efficiency.txt
+    awk '$4 != 0' $CHG_bed | wc -l > $output_dir/efficiency.txt
 
     #count unmethylated CHH
-    awk '$5 != 0' $CHH_bed | wc -l >> $output_dir/efficiency.txt
+    awk '$4 != 0' $CHH_bed | wc -l >> $output_dir/efficiency.txt
 
     #count total CHG
     cat $CHG_bed | wc -l >> $output_dir/efficiency.txt

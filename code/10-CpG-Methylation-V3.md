@@ -11,6 +11,9 @@ Zoe Dellaert
 - [0.6 plots side by side](#06-plots-side-by-side)
 - [0.7 Filtered for conversion
   efficiency:](#07-filtered-for-conversion-efficiency)
+  - [0.7.1 \> 90% conversion
+    efficiency:](#071--90-conversion-efficiency)
+- [0.8 Total counts comparisons](#08-total-counts-comparisons)
 
 ## 0.1 CpG Methylation analysis
 
@@ -109,20 +112,6 @@ and CHH.”
 
 ## 0.4 All samples
 
-first, count the lines of all the CHH and CHG files in terminal because
-it takes forever via R. You only need to do the “total” counts for one
-sample since this is the same for all samples (and takes a long time)
-
-``` bash
-cd ../output_WGBS/methylseq_V3_bwa_test/methyldackel
-
-wc -l LCM_1_quant/*_total.txt > total_counts.txt
-
-for dir in *_quant; do
-  wc -l ${dir}/*_unmethylated.txt > ${dir}/${dir}_counts.txt
-done
-```
-
 ``` r
 #get list of all sample output directories and extract sample names
 sample_directories <- list.files("../output_WGBS/methylseq_V3_bwa_test/methyldackel", pattern = "_quant", full.names = TRUE, include.dirs = TRUE)
@@ -156,19 +145,13 @@ for (sample in samples) {
   
   # read in file length info for CHH and CHG total counts and unmethyated counts
   
-  count_table <- read.table(file.path(output_dir, paste0(sample, "_quant_counts.txt")), header=FALSE)
+  count_table <- read.table(file.path(output_dir, "efficiency.txt"), header=FALSE)
   counts <- as.numeric(count_table$V1)
-  names(counts) <- basename(count_table$V2)
 
-  unmethylated_CHG <- counts["CHG_unmethylated.txt"]
-  unmethylated_CHH <- counts["CHH_unmethylated.txt"]
-
-  total_table <- read.table("/project/pi_hputnam_uri_edu/zdellaert/LaserCoral/output_WGBS/methylseq_V3_bwa_test/methyldackel/total_counts.txt", header=FALSE)
-  totals <- as.numeric(total_table$V1)
-  names(totals) <- basename(total_table$V2)
-  
-  total_CHG <- totals["CHG_total.txt"]
-  total_CHH <- totals["CHH_total.txt"]
+  unmethylated_CHG <- counts[1]
+  unmethylated_CHH <- counts[2]
+  total_CHG <- counts[3]
+  total_CHH <- counts[4]
 
   # Sum of unmethylated cytosines
   unmethylated_total <- unmethylated_CHG + unmethylated_CHH
@@ -180,9 +163,51 @@ for (sample in samples) {
   conversion_efficiency <- unmethylated_total / total_cytosines
   print(paste(sample, "Bisulfite Conversion Efficiency: ", conversion_efficiency))
 
-  conversion_eff_data <- rbind(conversion_eff_data, data.frame(sample=sample, efficiency=conversion_efficiency))
+  conversion_eff_data <- rbind(conversion_eff_data, data.frame(sample=sample, efficiency=conversion_efficiency, total_CHH_CHG=total_cytosines))
 }
+```
 
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_1 Bisulfite Conversion Efficiency:  0.890600799505604"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_11 Bisulfite Conversion Efficiency:  0.813884614881023"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_12 Bisulfite Conversion Efficiency:  0.801044016296052"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_17 Bisulfite Conversion Efficiency:  0.750518241110567"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_18 Bisulfite Conversion Efficiency:  0.725736429417941"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_24 Bisulfite Conversion Efficiency:  0.874967725490902"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_25 Bisulfite Conversion Efficiency:  0.873786814056671"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_3 Bisulfite Conversion Efficiency:  0.666685731620454"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_32 Bisulfite Conversion Efficiency:  0.786320790702449"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_33 Bisulfite Conversion Efficiency:  0.635185456548705"
+
+``` r
 write.csv(all_methylation_data, "../output_WGBS/methylseq_V3_bwa_test/gene_body_methylation.csv",row.names = FALSE)
 write.csv(conversion_eff_data, "../output_WGBS/methylseq_V3_bwa_test/conversion_efficiency.csv",row.names = FALSE)
 ```
@@ -212,7 +237,7 @@ ggplot(all_methylation_data, aes(x=sample, y=methylation, fill=Fragment)) +
     ## Warning: Removed 102012 rows containing non-finite outside the scale range
     ## (`stat_boxplot()`).
 
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ``` r
 ggplot(conversion_eff_data, aes(x=sample, y=efficiency, fill=Tissue)) +
@@ -224,7 +249,7 @@ ggplot(conversion_eff_data, aes(x=sample, y=efficiency, fill=Tissue)) +
   ylim(0, 1) 
 ```
 
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-5-2.png)<!-- -->
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->
 
 ``` r
 ggplot(conversion_eff_data, aes(x=sample, y=efficiency, fill=PCR_ReAmp_Cycles)) +
@@ -236,7 +261,7 @@ ggplot(conversion_eff_data, aes(x=sample, y=efficiency, fill=PCR_ReAmp_Cycles)) 
   ylim(0, 1) 
 ```
 
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-5-3.png)<!-- -->
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-4-3.png)<!-- -->
 
 ``` r
 summary <- all_methylation_data %>%
@@ -258,22 +283,9 @@ ggplot(summary, aes(x=mean_methylation, y=efficiency, color=Fragment, label=samp
   labs(y="bisulfite conversion efficiency")
 ```
 
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-5-4.png)<!-- -->
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-4-4.png)<!-- -->
 
 ## 0.5 5X Coverage Cytosines ONLY
-
-first, count the lines of all the CHH and CHG files in terminal because
-it takes forever via R
-
-``` bash
-cd ../output_WGBS/methylseq_V3_bwa_test/methyldackel
-
-wc -l LCM_1_5Xquant/*_total_5x.txt > total_counts_5x.txt
-
-for dir in *_5Xquant; do
-  wc -l ${dir}/*_unmethylated_5x.txt > ${dir}/${dir}_counts.txt
-done
-```
 
 ``` r
 #get list of all sample output directories and extract sample names
@@ -306,19 +318,15 @@ for (sample in samples) {
   # Append methylation data for this sample
   all_methylation_data_5x <- rbind(all_methylation_data_5x, methylation_data)
 
-  count_table <- read.table(file.path(output_dir, paste0(sample, "_5Xquant_counts.txt")), header=FALSE)
-  counts <- as.numeric(count_table$V1)
-  names(counts) <- basename(count_table$V2)
-
-  unmethylated_CHG <- counts["CHG_unmethylated_5x.txt"]
-  unmethylated_CHH <- counts["CHH_unmethylated_5x.txt"]
-
-  total_table <- read.table("/project/pi_hputnam_uri_edu/zdellaert/LaserCoral/output_WGBS/methylseq_V3_bwa_test/methyldackel/total_counts_5x.txt", header=FALSE)
-  totals <- as.numeric(total_table$V1)
-  names(totals) <- basename(total_table$V2)
+  # read in file length info for CHH and CHG total counts and unmethyated counts
   
-  total_CHG <- totals["CHG_total_5x.txt"]
-  total_CHH <- totals["CHH_total_5x.txt"]
+  count_table <- read.table(file.path(output_dir, "efficiency.txt"), header=FALSE)
+  counts <- as.numeric(count_table$V1)
+
+  unmethylated_CHG <- counts[1]
+  unmethylated_CHH <- counts[2]
+  total_CHG <- counts[3]
+  total_CHH <- counts[4]
 
   # Sum of unmethylated cytosines
   unmethylated_total <- unmethylated_CHG + unmethylated_CHH
@@ -330,9 +338,51 @@ for (sample in samples) {
   conversion_efficiency <- unmethylated_total / total_cytosines
   print(paste(sample, "Bisulfite Conversion Efficiency: ", conversion_efficiency))
 
-  conversion_eff_data_5x <- rbind(conversion_eff_data_5x, data.frame(sample=sample, efficiency=conversion_efficiency))
+  conversion_eff_data_5x <- rbind(conversion_eff_data_5x, data.frame(sample=sample, efficiency=conversion_efficiency, total_CHH_CHG=total_cytosines))
 }
+```
 
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_1 Bisulfite Conversion Efficiency:  0.840657342012325"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_11 Bisulfite Conversion Efficiency:  0.750424210758876"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_12 Bisulfite Conversion Efficiency:  0.714339146408392"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_17 Bisulfite Conversion Efficiency:  0.640375986047663"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_18 Bisulfite Conversion Efficiency:  0.608429044631969"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_24 Bisulfite Conversion Efficiency:  0.835452252486402"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_25 Bisulfite Conversion Efficiency:  0.821647003105493"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_3 Bisulfite Conversion Efficiency:  0.532825756045478"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_32 Bisulfite Conversion Efficiency:  0.718054304730599"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_33 Bisulfite Conversion Efficiency:  0.526192887932907"
+
+``` r
 write.csv(all_methylation_data_5x, "../output_WGBS/methylseq_V3_bwa_test/gene_body_methylation_5x.csv",row.names = FALSE)
 write.csv(conversion_eff_data_5x, "../output_WGBS/methylseq_V3_bwa_test/conversion_efficiency_5x.csv",row.names = FALSE)
 ```
@@ -362,7 +412,7 @@ ggplot(all_methylation_data_5x, aes(x=sample, y=methylation, fill=Fragment)) +
     ## Warning: Removed 274652 rows containing non-finite outside the scale range
     ## (`stat_boxplot()`).
 
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
 ggplot(conversion_eff_data_5x, aes(x=sample, y=efficiency, fill=Tissue)) +
@@ -374,7 +424,7 @@ ggplot(conversion_eff_data_5x, aes(x=sample, y=efficiency, fill=Tissue)) +
   ylim(0, 1) 
 ```
 
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
 
 ``` r
 ggplot(conversion_eff_data_5x, aes(x=sample, y=efficiency, fill=PCR_ReAmp_Cycles)) +
@@ -386,7 +436,7 @@ ggplot(conversion_eff_data_5x, aes(x=sample, y=efficiency, fill=PCR_ReAmp_Cycles
   ylim(0, 1) 
 ```
 
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-8-3.png)<!-- -->
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
 
 ``` r
 summary <- all_methylation_data_5x %>%
@@ -408,7 +458,7 @@ ggplot(summary, aes(x=mean_methylation, y=efficiency, color=Fragment, label=samp
   labs(title="5X coverage-loci ONLY" , y="bisulfite conversion efficiency")
 ```
 
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-8-4.png)<!-- -->
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-6-4.png)<!-- -->
 
 ## 0.6 plots side by side
 
@@ -424,7 +474,7 @@ ggplot(all_methylation_data, aes(x=sample, y=methylation, fill=Fragment)) +
     ## Warning: Removed 102012 rows containing non-finite outside the scale range
     ## (`stat_boxplot()`).
 
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 ggplot(all_methylation_data_5x, aes(x=sample, y=methylation, fill=Fragment)) +
@@ -438,7 +488,7 @@ ggplot(all_methylation_data_5x, aes(x=sample, y=methylation, fill=Fragment)) +
     ## Warning: Removed 274652 rows containing non-finite outside the scale range
     ## (`stat_boxplot()`).
 
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
 
 ``` r
 ggplot(conversion_eff_data, aes(x=sample, y=efficiency, fill=Tissue)) +
@@ -450,7 +500,7 @@ ggplot(conversion_eff_data, aes(x=sample, y=efficiency, fill=Tissue)) +
   ylim(0, 1) 
 ```
 
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-9-3.png)<!-- -->
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-7-3.png)<!-- -->
 
 ``` r
 ggplot(conversion_eff_data_5x, aes(x=sample, y=efficiency, fill=Tissue)) +
@@ -462,7 +512,7 @@ ggplot(conversion_eff_data_5x, aes(x=sample, y=efficiency, fill=Tissue)) +
   ylim(0, 1) 
 ```
 
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-9-4.png)<!-- -->
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-7-4.png)<!-- -->
 
 ``` r
 ggplot(conversion_eff_data, aes(x=sample, y=efficiency, fill=PCR_ReAmp_Cycles)) +
@@ -474,7 +524,7 @@ ggplot(conversion_eff_data, aes(x=sample, y=efficiency, fill=PCR_ReAmp_Cycles)) 
   ylim(0, 1) 
 ```
 
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-9-5.png)<!-- -->
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-7-5.png)<!-- -->
 
 ``` r
 ggplot(conversion_eff_data_5x, aes(x=sample, y=efficiency, fill=PCR_ReAmp_Cycles)) +
@@ -486,7 +536,7 @@ ggplot(conversion_eff_data_5x, aes(x=sample, y=efficiency, fill=PCR_ReAmp_Cycles
   ylim(0, 1) 
 ```
 
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-9-6.png)<!-- -->
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-7-6.png)<!-- -->
 
 ``` r
 summary <- all_methylation_data %>%
@@ -508,7 +558,7 @@ ggplot(summary, aes(x=mean_methylation, y=efficiency, color=Fragment, label=samp
     labs(y="bisulfite conversion efficiency")
 ```
 
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-9-7.png)<!-- -->
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-7-7.png)<!-- -->
 
 ``` r
 summary <- all_methylation_data_5x %>%
@@ -530,40 +580,33 @@ ggplot(summary, aes(x=mean_methylation, y=efficiency, color=Fragment, label=samp
     labs(title="5X coverage-loci ONLY" , y="bisulfite conversion efficiency")
 ```
 
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-9-8.png)<!-- -->
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-7-8.png)<!-- -->
 
 ## 0.7 Filtered for conversion efficiency:
 
-first, count the lines of all the CHH and CHG files in terminal because
-it takes forever via R. You only need to do the “total” counts for one
-sample since this is the same for all samples (and takes a long time)
+Methyldackel has a setting where it can only extract methylation counts
+from reads that pass a certain minimum threshold of conversion
+efficiency. It recommends against using this for analyses, but I wanted
+to try it on a few samples and calculate conversion efficiency to
+confirm my caclulations were correct and also to get an idea of the
+results.
 
-> 50% conversion efficiency:
-
-``` bash
-cd ../output_WGBS/methylseq_V3_bwa_test/bwameth/deduplicated/min_efficiency_test
-
-wc -l min_50_LCM_3_quant/*_total.txt > min_50_total_counts.txt
-
-for dir in min_50_*_quant; do
-  wc -l ${dir}/*_unmethylated.txt > ${dir}/${dir}_counts.txt
-done
-```
+### 0.7.1 \> 90% conversion efficiency:
 
 ``` r
 #get list of all sample output directories and extract sample names
-sample_directories <- list.files("../output_WGBS/methylseq_V3_bwa_test/bwameth/deduplicated/min_efficiency_test", pattern = "_quant", full.names = TRUE, include.dirs = TRUE)
+sample_directories <- list.files("../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test", pattern = "_quant", full.names = TRUE, include.dirs = TRUE)
 
-sample_directories <- sample_directories[grep("min_50",sample_directories)]
+sample_directories <- sample_directories[grep("min_90",sample_directories)]
 samples <- gsub("_quant","",basename(sample_directories))
-samples <- gsub("min_50_","",samples)
+samples <- gsub("min_90_","",samples)
 
 # make an empty data frame to store methylation data and conversion efficiency data
 all_methylation_data <- data.frame()
 conversion_eff_data <- data.frame()
 
 for (sample in samples) {
-  output_dir <- paste0("/project/pi_hputnam_uri_edu/zdellaert/LaserCoral/output_WGBS/methylseq_V3_bwa_test/bwameth/deduplicated/min_efficiency_test/min_50_", sample, "_quant")
+  output_dir <- paste0("/project/pi_hputnam_uri_edu/zdellaert/LaserCoral/output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test/min_90_", sample, "_quant")
 
   # Read percent methylation data for CpG, CHG, and CHH contexts
   CpG <- read.table(file.path(output_dir, "gene_body_CpG_methylation.txt"), header=FALSE)
@@ -586,19 +629,13 @@ for (sample in samples) {
   
   # read in file length info for CHH and CHG total counts and unmethyated counts
   
-  count_table <- read.table(file.path(output_dir, paste0("min_50_",sample, "_quant_counts.txt")), header=FALSE)
+  count_table <- read.table(file.path(output_dir, "efficiency.txt"), header=FALSE)
   counts <- as.numeric(count_table$V1)
-  names(counts) <- basename(count_table$V2)
 
-  unmethylated_CHG <- counts["CHG_unmethylated.txt"]
-  unmethylated_CHH <- counts["CHH_unmethylated.txt"]
-
-  total_table <- read.table(file.path(gsub(paste0("min_50_",sample, "_quant"),"", output_dir), "min_50_total_counts.txt"), header=FALSE)
-  totals <- as.numeric(total_table$V1)
-  names(totals) <- basename(total_table$V2)
-  
-  total_CHG <- totals["CHG_total.txt"]
-  total_CHH <- totals["CHH_total.txt"]
+  unmethylated_CHG <- counts[1]
+  unmethylated_CHH <- counts[2]
+  total_CHG <- counts[3]
+  total_CHH <- counts[4]
 
   # Sum of unmethylated cytosines
   unmethylated_total <- unmethylated_CHG + unmethylated_CHH
@@ -610,18 +647,40 @@ for (sample in samples) {
   conversion_efficiency <- unmethylated_total / total_cytosines
   print(paste(sample, "Bisulfite Conversion Efficiency: ", conversion_efficiency))
 
-  conversion_eff_data <- rbind(conversion_eff_data, data.frame(sample=sample, efficiency=conversion_efficiency))
+  conversion_eff_data <- rbind(conversion_eff_data, data.frame(sample=sample, efficiency=conversion_efficiency, total_CHH_CHG=total_cytosines))
 }
+```
 
-write.csv(all_methylation_data, "../output_WGBS/methylseq_V3_bwa_test/bwameth/deduplicated/min_efficiency_test/min_50_gene_body_methylation.csv",row.names = FALSE)
-write.csv(conversion_eff_data, "../output_WGBS/methylseq_V3_bwa_test/bwameth/deduplicated/min_efficiency_test/min_50_conversion_efficiency.csv",row.names = FALSE)
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_1 Bisulfite Conversion Efficiency:  0.986506142062552"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_11 Bisulfite Conversion Efficiency:  0.987471049175749"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_3 Bisulfite Conversion Efficiency:  0.988587672541927"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_32 Bisulfite Conversion Efficiency:  0.986292382952433"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_33 Bisulfite Conversion Efficiency:  0.985349029783099"
+
+``` r
+write.csv(all_methylation_data, "../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test/min_90_gene_body_methylation.csv",row.names = FALSE)
+write.csv(conversion_eff_data, "../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test/min_90_conversion_efficiency.csv",row.names = FALSE)
 ```
 
 Analyze and plot:
 
 ``` r
-conversion_eff_data <- read.csv( "../output_WGBS/methylseq_V3_bwa_test/bwameth/deduplicated/min_efficiency_test/min_50_conversion_efficiency.csv", sep = ",", header = TRUE) 
-all_methylation_data <- read.csv(  "../output_WGBS/methylseq_V3_bwa_test/bwameth/deduplicated/min_efficiency_test/min_50_gene_body_methylation.csv", sep = ",", header = TRUE) 
+conversion_eff_data <- read.csv( "../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test/min_90_conversion_efficiency.csv", sep = ",", header = TRUE) 
+all_methylation_data <- read.csv(  "../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test/min_90_gene_body_methylation.csv", sep = ",", header = TRUE) 
 
 conversion_eff_data <- conversion_eff_data %>%
   left_join(meta_simple,by = join_by(sample == Sample)) %>%
@@ -639,10 +698,10 @@ ggplot(all_methylation_data, aes(x=sample, y=methylation, fill=Fragment)) +
   labs(title="Gene Body Methylation at CpG, CHG, and CHH loci", y="Mean Methylation (%)")
 ```
 
-    ## Warning: Removed 79609 rows containing non-finite outside the scale range
+    ## Warning: Removed 86887 rows containing non-finite outside the scale range
     ## (`stat_boxplot()`).
 
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
 ggplot(conversion_eff_data, aes(x=sample, y=efficiency, fill=Tissue)) +
@@ -654,7 +713,7 @@ ggplot(conversion_eff_data, aes(x=sample, y=efficiency, fill=Tissue)) +
   ylim(0, 1) 
 ```
 
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-12-2.png)<!-- -->
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
 
 ``` r
 ggplot(conversion_eff_data, aes(x=sample, y=efficiency, fill=PCR_ReAmp_Cycles)) +
@@ -666,7 +725,7 @@ ggplot(conversion_eff_data, aes(x=sample, y=efficiency, fill=PCR_ReAmp_Cycles)) 
   ylim(0, 1) 
 ```
 
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-12-3.png)<!-- -->
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-9-3.png)<!-- -->
 
 ``` r
 summary <- all_methylation_data %>%
@@ -688,4 +747,59 @@ ggplot(summary, aes(x=mean_methylation, y=efficiency, color=Fragment, label=samp
   labs(y="bisulfite conversion efficiency")
 ```
 
-![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-12-4.png)<!-- -->
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-9-4.png)<!-- -->
+
+## 0.8 Total counts comparisons
+
+``` r
+efficiency_all <- read.csv( "../output_WGBS/methylseq_V3_bwa_test/conversion_efficiency.csv", sep = ",", header = TRUE)
+
+efficiency_5x <- read.csv( "../output_WGBS/methylseq_V3_bwa_test/conversion_efficiency_5x.csv", sep = ",", header = TRUE) 
+
+efficiency_min90 <- read.csv( "../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test/min_90_conversion_efficiency.csv", sep = ",", header = TRUE) 
+
+efficiency_all$filter <- "none"
+efficiency_5x$filter <- "5x_coverage"
+efficiency_min90$filter <- "90_percent_efficiency"
+```
+
+``` r
+efficiency <- rbind(efficiency_all,efficiency_5x,efficiency_min90)
+reorder <- unique(efficiency$sample)[mixedorder(unique(efficiency$sample))]
+
+efficiency <- efficiency %>%
+  left_join(meta_simple,by = join_by(sample == Sample)) %>%
+  mutate(sample = fct_relevel(sample, reorder)) %>%
+  mutate(filter = fct_relevel(filter, c("none","5x_coverage","90_percent_efficiency")))
+
+ggplot(efficiency, aes(x=sample, y=efficiency, fill=Fragment)) +
+  geom_bar(stat="identity", color="black") +
+  theme_minimal() +
+  facet_grid(~filter) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ylim(0, 1) 
+```
+
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+
+``` r
+ggplot(efficiency, aes(x=sample, y=total_CHH_CHG, fill=Fragment)) +
+  geom_bar(stat="identity", color="black") +
+  theme_minimal() +
+  facet_grid(~filter) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+```
+
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-11-2.png)<!-- -->
+
+``` r
+ggplot(efficiency, aes(x=total_CHH_CHG, y=efficiency)) +
+  geom_point() +
+  facet_grid(~filter, scales = "free") +
+  geom_smooth(method="lm") +
+  labs(y="bisulfite conversion efficiency")
+```
+
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-11-3.png)<!-- -->
