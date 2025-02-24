@@ -1,7 +1,7 @@
-# LCM RNA-seq Bioinformatic Processing
+# LCM WGBS Bioinformatic Processing
 
 Script Written By:  Dellaert
-Last Updated: 1/16/2025
+Last Updated: 2/24/2025
 
 - Sample prep: https://zdellaert.github.io/ZD_Putnam_Lab_Notebook/LCM-Exp-Sample-Prep/
 - DNA extractions: 
