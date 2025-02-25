@@ -137,6 +137,29 @@ require("gplots")
 
 ``` r
 require("ggplot2")
+require("ggrepel")
+```
+
+    ## Loading required package: ggrepel
+
+``` r
+require("ggpmisc")
+```
+
+    ## Loading required package: ggpmisc
+    ## Loading required package: ggpp
+    ## Registered S3 methods overwritten by 'ggpp':
+    ##   method                  from   
+    ##   heightDetails.titleGrob ggplot2
+    ##   widthDetails.titleGrob  ggplot2
+    ## 
+    ## Attaching package: 'ggpp'
+    ## 
+    ## The following object is masked from 'package:ggplot2':
+    ## 
+    ##     annotate
+
+``` r
 require("dichromat")
 ```
 
@@ -196,62 +219,66 @@ sessionInfo() #provides list of loaded packages and version of R.
     ## 
     ## other attached packages:
     ##  [1] genomation_1.38.0     genomationData_1.38.0 dichromat_2.0-0.1    
-    ##  [4] gplots_3.2.0          vegan_2.6-10          lattice_0.22-6       
-    ##  [7] permute_0.9-7         lubridate_1.9.4       forcats_1.0.0        
-    ## [10] stringr_1.5.1         dplyr_1.1.4           purrr_1.0.4          
-    ## [13] readr_2.1.5           tidyr_1.3.1           tibble_3.2.1         
-    ## [16] ggplot2_3.5.1         tidyverse_2.0.0       methylKit_1.32.0     
-    ## [19] GenomicRanges_1.58.0  GenomeInfoDb_1.42.3   IRanges_2.40.1       
-    ## [22] S4Vectors_0.44.0      BiocGenerics_0.52.0  
+    ##  [4] ggpmisc_0.6.1         ggpp_0.5.8-1          ggrepel_0.9.6        
+    ##  [7] gplots_3.2.0          vegan_2.6-10          lattice_0.22-6       
+    ## [10] permute_0.9-7         lubridate_1.9.4       forcats_1.0.0        
+    ## [13] stringr_1.5.1         dplyr_1.1.4           purrr_1.0.4          
+    ## [16] readr_2.1.5           tidyr_1.3.1           tibble_3.2.1         
+    ## [19] ggplot2_3.5.1         tidyverse_2.0.0       methylKit_1.32.0     
+    ## [22] GenomicRanges_1.58.0  GenomeInfoDb_1.42.3   IRanges_2.40.1       
+    ## [25] S4Vectors_0.44.0      BiocGenerics_0.52.0  
     ## 
     ## loaded via a namespace (and not attached):
-    ##  [1] bitops_1.0-9                rlang_1.1.5                
-    ##  [3] magrittr_2.0.3              gridBase_0.4-7             
-    ##  [5] matrixStats_1.5.0           compiler_4.4.0             
-    ##  [7] mgcv_1.9-1                  vctrs_0.6.5                
-    ##  [9] reshape2_1.4.4              pkgconfig_2.0.3            
-    ## [11] crayon_1.5.3                fastmap_1.2.0              
-    ## [13] XVector_0.46.0              caTools_1.18.3             
-    ## [15] Rsamtools_2.22.0            rmarkdown_2.29             
-    ## [17] tzdb_0.4.0                  UCSC.utils_1.2.0           
-    ## [19] xfun_0.50                   zlibbioc_1.52.0            
-    ## [21] jsonlite_1.8.9              DelayedArray_0.32.0        
-    ## [23] BiocParallel_1.40.0         parallel_4.4.0             
-    ## [25] cluster_2.1.8               R6_2.6.0                   
-    ## [27] stringi_1.8.4               limma_3.62.2               
-    ## [29] rtracklayer_1.66.0          numDeriv_2016.8-1.1        
-    ## [31] Rcpp_1.0.14                 SummarizedExperiment_1.36.0
-    ## [33] knitr_1.49                  R.utils_2.12.3             
-    ## [35] Matrix_1.7-2                splines_4.4.0              
-    ## [37] timechange_0.3.0            tidyselect_1.2.1           
-    ## [39] seqPattern_1.38.0           qvalue_2.38.0              
-    ## [41] rstudioapi_0.17.1           abind_1.4-8                
-    ## [43] yaml_2.3.10                 codetools_0.2-20           
-    ## [45] curl_6.2.0                  plyr_1.8.9                 
-    ## [47] Biobase_2.66.0              withr_3.0.2                
-    ## [49] coda_0.19-4.1               evaluate_1.0.3             
-    ## [51] mclust_6.1.1                Biostrings_2.74.1          
-    ## [53] pillar_1.10.1               BiocManager_1.30.25        
-    ## [55] MatrixGenerics_1.18.1       KernSmooth_2.23-26         
-    ## [57] renv_1.1.1                  generics_0.1.3             
-    ## [59] RCurl_1.98-1.16             emdbook_1.3.13             
-    ## [61] hms_1.1.3                   munsell_0.5.1              
-    ## [63] scales_1.3.0                gtools_3.9.5               
-    ## [65] glue_1.8.0                  tools_4.4.0                
-    ## [67] BiocIO_1.16.0               data.table_1.16.4          
-    ## [69] BSgenome_1.74.0             GenomicAlignments_1.42.0   
-    ## [71] mvtnorm_1.3-3               XML_3.99-0.18              
-    ## [73] plotrix_3.8-4               impute_1.80.0              
-    ## [75] bbmle_1.0.25.1              bdsmatrix_1.3-7            
-    ## [77] colorspace_2.1-1            nlme_3.1-167               
-    ## [79] GenomeInfoDbData_1.2.13     restfulr_0.0.15            
-    ## [81] cli_3.6.4                   fastseg_1.52.0             
-    ## [83] S4Arrays_1.6.0              gtable_0.3.6               
-    ## [85] R.methodsS3_1.8.2           digest_0.6.37              
-    ## [87] SparseArray_1.6.1           rjson_0.2.23               
-    ## [89] htmltools_0.5.8.1           R.oo_1.27.0                
-    ## [91] lifecycle_1.0.4             httr_1.4.7                 
-    ## [93] statmod_1.5.0               MASS_7.3-64
+    ##  [1] rstudioapi_0.17.1           jsonlite_1.8.9             
+    ##  [3] magrittr_2.0.3              rmarkdown_2.29             
+    ##  [5] BiocIO_1.16.0               zlibbioc_1.52.0            
+    ##  [7] vctrs_0.6.5                 Rsamtools_2.22.0           
+    ##  [9] RCurl_1.98-1.16             htmltools_0.5.8.1          
+    ## [11] S4Arrays_1.6.0              polynom_1.4-1              
+    ## [13] plotrix_3.8-4               curl_6.2.0                 
+    ## [15] SparseArray_1.6.1           KernSmooth_2.23-26         
+    ## [17] plyr_1.8.9                  impute_1.80.0              
+    ## [19] GenomicAlignments_1.42.0    lifecycle_1.0.4            
+    ## [21] pkgconfig_2.0.3             Matrix_1.7-2               
+    ## [23] R6_2.6.0                    fastmap_1.2.0              
+    ## [25] GenomeInfoDbData_1.2.13     MatrixGenerics_1.18.1      
+    ## [27] digest_0.6.37               numDeriv_2016.8-1.1        
+    ## [29] colorspace_2.1-1            timechange_0.3.0           
+    ## [31] httr_1.4.7                  abind_1.4-8                
+    ## [33] mgcv_1.9-1                  compiler_4.4.0             
+    ## [35] withr_3.0.2                 BiocParallel_1.40.0        
+    ## [37] R.utils_2.12.3              MASS_7.3-64                
+    ## [39] quantreg_6.00               DelayedArray_0.32.0        
+    ## [41] rjson_0.2.23                gtools_3.9.5               
+    ## [43] caTools_1.18.3              tools_4.4.0                
+    ## [45] R.oo_1.27.0                 glue_1.8.0                 
+    ## [47] restfulr_0.0.15             nlme_3.1-167               
+    ## [49] gridBase_0.4-7              cluster_2.1.8              
+    ## [51] reshape2_1.4.4              generics_0.1.3             
+    ## [53] gtable_0.3.6                BSgenome_1.74.0            
+    ## [55] tzdb_0.4.0                  R.methodsS3_1.8.2          
+    ## [57] seqPattern_1.38.0           data.table_1.16.4          
+    ## [59] hms_1.1.3                   XVector_0.46.0             
+    ## [61] pillar_1.10.1               fastseg_1.52.0             
+    ## [63] emdbook_1.3.13              limma_3.62.2               
+    ## [65] splines_4.4.0               renv_1.1.1                 
+    ## [67] survival_3.8-3              rtracklayer_1.66.0         
+    ## [69] SparseM_1.84-2              tidyselect_1.2.1           
+    ## [71] Biostrings_2.74.1           knitr_1.49                 
+    ## [73] SummarizedExperiment_1.36.0 xfun_0.50                  
+    ## [75] Biobase_2.66.0              statmod_1.5.0              
+    ## [77] matrixStats_1.5.0           stringi_1.8.4              
+    ## [79] UCSC.utils_1.2.0            yaml_2.3.10                
+    ## [81] evaluate_1.0.3              codetools_0.2-20           
+    ## [83] bbmle_1.0.25.1              qvalue_2.38.0              
+    ## [85] BiocManager_1.30.25         cli_3.6.4                  
+    ## [87] munsell_0.5.1               Rcpp_1.0.14                
+    ## [89] coda_0.19-4.1               bdsmatrix_1.3-7            
+    ## [91] XML_3.99-0.18               parallel_4.4.0             
+    ## [93] MatrixModels_0.5-3          mclust_6.1.1               
+    ## [95] bitops_1.0-9                mvtnorm_1.3-3              
+    ## [97] scales_1.3.0                crayon_1.5.3               
+    ## [99] rlang_1.1.5
 
 ``` r
 meta <- read.csv("../data_WGBS/LCM_WGBS_metadata.csv", sep = ",", header = TRUE) %>%
@@ -824,3 +851,125 @@ DE_05[DE_05$query %in% DML_transcript_annot$transcript_id,]
     ## 930  1.100703e-06 1.711889e-05
     ## 1568 4.649329e-05 4.288769e-04
     ## 2597 1.414923e-03 7.880421e-03
+
+``` r
+plot_data <- merge(DML_transcript_annot, DESeq, by.x = "transcript_id", by.y = "query")
+
+ggplot(plot_data, aes(x = DML_methdiff, y = log2FoldChange)) +
+  geom_point(aes(color = padj < 0.05), size = 3) +
+  geom_text_repel(aes(label = ifelse(padj < 0.05, transcript_id, "")), max.overlaps = 20) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_color_manual(values = c("grey", "red")) +
+  labs(x = "Methylation Difference (%)", 
+       y = "RNA-seq: Log2FoldChange",
+       title = "Differentially methylated loci (DMLs) vs. Gene Expression",
+       color = "Significant DEGs") +
+  theme_minimal()
+```
+
+![](09-MethylKit_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+
+``` r
+# Find overlaps between DMLs and transcripts
+DMLs_in_genes <- regionCounts(meth_filter_destrand, regions=transcripts)
+```
+
+    ## Warning in .merge_two_Seqinfo_objects(x, y): Each of the 2 combined objects has sequence levels not in the other:
+    ##   - in 'x': Pocillopora_acuta_HIv2___Sc0000053, Pocillopora_acuta_HIv2___Sc0000056, Pocillopora_acuta_HIv2___Sc0000058, Pocillopora_acuta_HIv2___Sc0000059, Pocillopora_acuta_HIv2___Sc0000060, Pocillopora_acuta_HIv2___Sc0000062, Pocillopora_acuta_HIv2___Sc0000063, Pocillopora_acuta_HIv2___Sc0000064, Pocillopora_acuta_HIv2___Sc0000066, Pocillopora_acuta_HIv2___Sc0000068, Pocillopora_acuta_HIv2___Sc0000070, Pocillopora_acuta_HIv2___Sc0000073, Pocillopora_acuta_HIv2___Sc0000075, Pocillopora_acuta_HIv2___Sc0000076, Pocillopora_acuta_HIv2___Sc0000077, Pocillopora_acuta_HIv2___Sc0000078, Pocillopora_acuta_HIv2___Sc0000080, Pocillopora_acuta_HIv2___xfSc0000051, Pocillopora_acuta_HIv2___xfSc0000055, Pocillopora_acuta_HIv2___xfSc0000057, Pocillopora_acuta_HIv2___xfSc0000058, Pocillopora_acuta_HIv2___xfSc0000062, Pocillopora_acuta_HIv2___xfSc0000064, Pocillopora_acuta_HIv2___xfSc0000065, Pocillopora_acuta_HIv2___xfSc0000066, Pocillopora_acuta_HIv2___xfSc0000070, Pocillopora_acuta_HIv2___xfSc0000071, Pocillopora_acuta_HIv2___xfSc0000072, Pocillopora_acuta_HIv2___xfSc0000073, Pocillopora_acuta_HIv2___xfSc0000074, Pocillopora_acuta_HIv2___xfSc0000075, Pocillopora_acuta_HIv2___xfSc0000077, Pocillopora_acuta_HIv2___xfSc0000078, Pocillopora_acuta_HIv2___xfSc0000080, Pocillopora_acuta_HIv2___xfSc0000081, Pocillopora_acuta_HIv2___xfSc0000084, Pocillopora_acuta_HIv2___xfSc0000086, Pocillopora_acuta_HIv2___xfSc0000087, Pocillopora_acuta_HIv2___xfSc0000089, Pocillopora_acuta_HIv2___xfSc0000090, Pocillopora_acuta_HIv2___xfSc0000091, Pocillopora_acuta_HIv2___xfSc0000094, Pocillopora_acuta_HIv2___xfSc0000095, Pocillopora_acuta_HIv2___xfSc0000096, Pocillopora_acuta_HIv2___xfSc0000097, Pocillopora_acuta_HIv2___xfSc0000098, Pocillopora_acuta_HIv2___xfSc0000099, Pocillopora_acuta_HIv2___xfSc0000100, Pocillopora_acuta_HIv2___xfSc0000101, Pocillopora_acuta_HIv2___xfSc0000102, Pocillopora_acuta_HIv2___xfSc0000103, Pocillopora_acuta_HIv2___xfSc0000104, Pocillopora_acuta_HIv2___xfSc0000105, Pocillopora_acuta_HIv2___xfSc0000108, Pocillopora_acuta_HIv2___xfSc0000109, Pocillopora_acuta_HIv2___xfSc0000110, Pocillopora_acuta_HIv2___xfSc0000114, Pocillopora_acuta_HIv2___xfSc0000115, Pocillopora_acuta_HIv2___xfSc0000116, Pocillopora_acuta_HIv2___xfSc0000119, Pocillopora_acuta_HIv2___xfSc0000121, Pocillopora_acuta_HIv2___xfSc0000122, Pocillopora_acuta_HIv2___xfSc0000125, Pocillopora_acuta_HIv2___xfSc0000126, Pocillopora_acuta_HIv2___xfSc0000127, Pocillopora_acuta_HIv2___xfSc0000128, Pocillopora_acuta_HIv2___xfSc0000129, Pocillopora_acuta_HIv2___xfSc0000130, Pocillopora_acuta_HIv2___xfSc0000131, Pocillopora_acuta_HIv2___xfSc0000132, Pocillopora_acuta_HIv2___xfSc0000133, Pocillopora_acuta_HIv2___xfSc0000135, Pocillopora_acuta_HIv2___xfSc0000136, Pocillopora_acuta_HIv2___xfSc0000137, Pocillopora_acuta_HIv2___xfSc0000138, Pocillopora_acuta_HIv2___xfSc0000139, Pocillopora_acuta_HIv2___xfSc0000140, Pocillopora_acuta_HIv2___xfSc0000141, Pocillopora_acuta_HIv2___xfSc0000142, Pocillopora_acuta_HIv2___xfSc0000143, Pocillopora_acuta_HIv2___xfSc0000144, Pocillopora_acuta_HIv2___xfSc0000145, Pocillopora_acuta_HIv2___xfSc0000147, Pocillopora_acuta_HIv2___xfSc0000148, Pocillopora_acuta_HIv2___xfSc0000150, Pocillopora_acuta_HIv2___xfSc0000151, Pocillopora_acuta_HIv2___xfSc0000152, Pocillopora_acuta_HIv2___xfSc0000154, Pocillopora_acuta_HIv2___xfSc0000155, Pocillopora_acuta_HIv2___xfSc0000157, Pocillopora_acuta_HIv2___xfSc0000158, Pocillopora_acuta_HIv2___xfSc0000159, Pocillopora_acuta_HIv2___xfSc0000160, Pocillopora_acuta_HIv2___xfSc0000161, Pocillopora_acuta_HIv2___xfSc0000162, Pocillopora_acuta_HIv2___xfSc0000163, Pocillopora_acuta_HIv2___xfSc0000164, Pocillopora_acuta_HIv2___xfSc0000165, Pocillopora_acuta_HIv2___xfSc0000166, Pocillopora_acuta_HIv2___xfSc0000167, Pocillopora_acuta_HIv2___xfSc0000168, Pocillopora_acuta_HIv2___xfSc0000171, Pocillopora_acuta_HIv2___xfSc0000173, Pocillopora_acuta_HIv2___xfSc0000174, Pocillopora_acuta_HIv2___xfSc0000177, Pocillopora_acuta_HIv2___xfSc0000178, Pocillopora_acuta_HIv2___xfSc0000179, Pocillopora_acuta_HIv2___xfSc0000180, Pocillopora_acuta_HIv2___xfSc0000181, Pocillopora_acuta_HIv2___xfSc0000182, Pocillopora_acuta_HIv2___xfSc0000183, Pocillopora_acuta_HIv2___xfSc0000184, Pocillopora_acuta_HIv2___xfSc0000185, Pocillopora_acuta_HIv2___xfSc0000186, Pocillopora_acuta_HIv2___xfSc0000187, Pocillopora_acuta_HIv2___xfSc0000188, Pocillopora_acuta_HIv2___xfSc0000189, Pocillopora_acuta_HIv2___xfSc0000190, Pocillopora_acuta_HIv2___xfSc0000191, Pocillopora_acuta_HIv2___xfSc0000192, Pocillopora_acuta_HIv2___xfSc0000193, Pocillopora_acuta_HIv2___xfSc0000196, Pocillopora_acuta_HIv2___xfSc0000197, Pocillopora_acuta_HIv2___xfSc0000200, Pocillopora_acuta_HIv2___xfSc0000202, Pocillopora_acuta_HIv2___xfSc0000203, Pocillopora_acuta_HIv2___xfSc0000204, Pocillopora_acuta_HIv2___xfSc0000205, Pocillopora_acuta_HIv2___xfSc0000206, Pocillopora_acuta_HIv2___xfSc0000207, Pocillopora_acuta_HIv2___xfSc0000208, Pocillopora_acuta_HIv2___xfSc0000209, Pocillopora_acuta_HIv2___xfSc0000210, Pocillopora_acuta_HIv2___xfSc0000212, Pocillopora_acuta_HIv2___xfSc0000213, Pocillopora_acuta_HIv2___xfSc0000214, Pocillopora_acuta_HIv2___xfSc0000215, Pocillopora_acuta_HIv2___xfSc0000216, Pocillopora_acuta_HIv2___xfSc0000217, Pocillopora_acuta_HIv2___xfSc0000218, Pocillopora_acuta_HIv2___xfSc0000220, Pocillopora_acuta_HIv2___xfSc0000221, Pocillopora_acuta_HIv2___xfSc0000222, Pocillopora_acuta_HIv2___xfSc0000223, Pocillopora_acuta_HIv2___xfSc0000224, Pocillopora_acuta_HIv2___xfSc0000226, Pocillopora_acuta_HIv2___xfSc0000227, Pocillopora_acuta_HIv2___xfSc0000228, Pocillopora_acuta_HIv2___xfSc0000230, Pocillopora_acuta_HIv2___xfSc0000231, Pocillopora_acuta_HIv2___xfSc0000232, Pocillopora_acuta_HIv2___xfSc0000233, Pocillopora_acuta_HIv2___xfSc0000234, Pocillopora_acuta_HIv2___xfSc0000235, Pocillopora_acuta_HIv2___xfSc0000236, Pocillopora_acuta_HIv2___xfSc0000238, Pocillopora_acuta_HIv2___xfSc0000239, Pocillopora_acuta_HIv2___xfSc0000240, Pocillopora_acuta_HIv2___xfSc0000241, Pocillopora_acuta_HIv2___xfSc0000242, Pocillopora_acuta_HIv2___xfSc0000243, Pocillopora_acuta_HIv2___xfSc0000244, Pocillopora_acuta_HIv2___xfSc0000245, Pocillopora_acuta_HIv2___xfSc0000247, Pocillopora_acuta_HIv2___xfSc0000248, Pocillopora_acuta_HIv2___xfSc0000250, Pocillopora_acuta_HIv2___xfSc0000251, Pocillopora_acuta_HIv2___xfSc0000252, Pocillopora_acuta_HIv2___xfSc0000254, Pocillopora_acuta_HIv2___xfSc0000255, Pocillopora_acuta_HIv2___xfSc0000256, Pocillopora_acuta_HIv2___xfSc0000257, Pocillopora_acuta_HIv2___xfSc0000258, Pocillopora_acuta_HIv2___xfSc0000259, Pocillopora_acuta_HIv2___xfSc0000260, Pocillopora_acuta_HIv2___xfSc0000261, Pocillopora_acuta_HIv2___xfSc0000262, Pocillopora_acuta_HIv2___xfSc0000264, Pocillopora_acuta_HIv2___xfSc0000265, Pocillopora_acuta_HIv2___xfSc0000266, Pocillopora_acuta_HIv2___xfSc0000268, Pocillopora_acuta_HIv2___xfSc0000269, Pocillopora_acuta_HIv2___xfSc0000270, Pocillopora_acuta_HIv2___xfSc0000271, Pocillopora_acuta_HIv2___xfSc0000272, Pocillopora_acuta_HIv2___xfSc0000273, Pocillopora_acuta_HIv2___xfSc0000274, Pocillopora_acuta_HIv2___xfSc0000275, Pocillopora_acuta_HIv2___xfSc0000276, Pocillopora_acuta_HIv2___xfSc0000277, Pocillopora_acuta_HIv2___xfSc0000278, Pocillopora_acuta_HIv2___xfSc0000279, Pocillopora_acuta_HIv2___xfSc0000280, Pocillopora_acuta_HIv2___xfSc0000281, Pocillopora_acuta_HIv2___xfSc0000282, Pocillopora_acuta_HIv2___xfSc0000283, Pocillopora_acuta_HIv2___xfSc0000284, Pocillopora_acuta_HIv2___xfSc0000286, Pocillopora_acuta_HIv2___xfSc0000288, Pocillopora_acuta_HIv2___xfSc0000289, Pocillopora_acuta_HIv2___xfSc0000291, Pocillopora_acuta_HIv2___xfSc0000293, Pocillopora_acuta_HIv2___xfSc0000295, Pocillopora_acuta_HIv2___xfSc0000296, Pocillopora_acuta_HIv2___xfSc0000301, Pocillopora_acuta_HIv2___xfSc0000302, Pocillopora_acuta_HIv2___xfSc0000303, Pocillopora_acuta_HIv2___xfSc0000305, Pocillopora_acuta_HIv2___xfSc0000306, Pocillopora_acuta_HIv2___xfSc0000307, Pocillopora_acuta_HIv2___xfSc0000310, Pocillopora_acuta_HIv2___xfSc0000311, Pocillopora_acuta_HIv2___xfSc0000313, Pocillopora_acuta_HIv2___xfSc0000315, Pocillopora
+
+``` r
+#DMLs_in_genes <- getData(DMLs_in_genes)
+DMLs_in_genes$gene_id <- transcripts$gene_id[match(paste(DMLs_in_genes$chr, DMLs_in_genes$start, DMLs_in_genes$end), paste(seqnames(transcripts), start(transcripts), end(transcripts)))]
+
+percent_meth <- percMethylation(DMLs_in_genes)
+percent_meth <- as.data.frame(percent_meth)
+percent_meth$gene_id <- DMLs_in_genes$gene_id 
+
+percent_meth <- percent_meth %>% rowwise() %>%
+  mutate(percent_meth_ALL = mean(c_across(starts_with("LCM")), na.rm = TRUE)) %>%
+  ungroup()
+
+percent_meth <- percent_meth %>% rowwise() %>%
+  mutate(percent_meth_ORAL = mean(c_across(meta$Sample[meta$Tissue=="OralEpi"]), na.rm = TRUE)) %>%
+  mutate(percent_meth_ABORAL = mean(c_across(meta$Sample[meta$Tissue=="Aboral"]), na.rm = TRUE)) %>%
+  ungroup()
+  
+percent_meth_long <- percent_meth %>% pivot_longer(
+                                      cols = c(percent_meth_ORAL,percent_meth_ABORAL),
+                                      names_to = "Tissue",
+                                      values_to = "tissue_percent_meth"
+)
+```
+
+``` r
+plot_data <- merge(percent_meth, DESeq, by.x = "gene_id", by.y = "query")
+
+ggplot(plot_data, aes(y = baseMean, x = percent_meth_ALL)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2")) +
+  labs(x = "Average CpG % methylation of gene", y = "DeSeq2 BaseMean", 
+       title = "Gene Methylation vs Expression") +
+  theme_minimal()
+```
+
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+![](09-MethylKit_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+
+``` r
+ggplot(plot_data, aes(y = log2(baseMean), x = percent_meth_ALL)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2")) +
+  labs(x = "Average CpG % methylation of gene", y = "Log2(DeSeq2 BaseMean)", 
+       title = "Gene Methylation vs Expression") +
+  theme_minimal()
+```
+
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+![](09-MethylKit_files/figure-gfm/unnamed-chunk-21-2.png)<!-- -->
+
+``` r
+ggplot(plot_data, aes(y = abs(log2FoldChange), x = percent_meth_ALL)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm") +  stat_poly_eq(use_label("eq", "R2")) +
+  labs(x = "Average CpG % methylation of gene", y = "Abs(DeSeq2 Log2FoldChange)", 
+       title = "Gene Methylation vs Expression") +
+  theme_minimal()
+```
+
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+![](09-MethylKit_files/figure-gfm/unnamed-chunk-21-3.png)<!-- -->
+
+``` r
+# Create the plot
+ggplot(plot_data, aes(x = percent_meth_ALL, y = log2FoldChange)) +
+  geom_point(aes(color = padj < 0.05), size = 3) +
+  #geom_text_repel(aes(label = ifelse(padj < 0.05, gene_id, "")), max.overlaps = 20) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_color_manual(values = c("grey", "red")) +
+  labs(x = "Average CpG % methylation of gene", 
+       y = "RNA-seq: Log2FoldChange",
+       title = "Differentially methylated loci (DMLs) vs. Gene Expression",
+       color = "Significant DEGs") +
+  theme_minimal()
+```
+
+![](09-MethylKit_files/figure-gfm/unnamed-chunk-21-4.png)<!-- -->
+
+``` r
+plot_data <- merge(percent_meth_long, DESeq, by.x = "gene_id", by.y = "query")
+
+ggplot(plot_data, aes(y = abs(log2FoldChange), x = tissue_percent_meth, color=Tissue)) +
+  geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
+  labs(x = "Average CpG % methylation of gene", y = "Abs(DeSeq2 Log2FoldChange)", 
+       title = "Oral methylation only - Gene Methylation vs Expression") +
+  theme_minimal()
+```
+
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+![](09-MethylKit_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->

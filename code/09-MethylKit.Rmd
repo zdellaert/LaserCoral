@@ -36,6 +36,8 @@ require("tidyverse")
 require("vegan")
 require("gplots")
 require("ggplot2")
+require("ggrepel")
+require("ggpmisc")
 require("dichromat")
 require("readr")
 require("genomationData")
@@ -268,3 +270,95 @@ DML_transcript_annot[DML_transcript_annot$transcript_id %in% DE_05$query,]
 
 DE_05[DE_05$query %in% DML_transcript_annot$transcript_id,]
 ```
+
+
+```{r}
+plot_data <- merge(DML_transcript_annot, DESeq, by.x = "transcript_id", by.y = "query")
+
+ggplot(plot_data, aes(x = DML_methdiff, y = log2FoldChange)) +
+  geom_point(aes(color = padj < 0.05), size = 3) +
+  geom_text_repel(aes(label = ifelse(padj < 0.05, transcript_id, "")), max.overlaps = 20) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_color_manual(values = c("grey", "red")) +
+  labs(x = "Methylation Difference (%)", 
+       y = "RNA-seq: Log2FoldChange",
+       title = "Differentially methylated loci (DMLs) vs. Gene Expression",
+       color = "Significant DEGs") +
+  theme_minimal()
+```
+```{r}
+# Find overlaps between DMLs and transcripts
+DMLs_in_genes <- regionCounts(meth_filter_destrand, regions=transcripts)
+
+#DMLs_in_genes <- getData(DMLs_in_genes)
+DMLs_in_genes$gene_id <- transcripts$gene_id[match(paste(DMLs_in_genes$chr, DMLs_in_genes$start, DMLs_in_genes$end), paste(seqnames(transcripts), start(transcripts), end(transcripts)))]
+
+percent_meth <- percMethylation(DMLs_in_genes)
+percent_meth <- as.data.frame(percent_meth)
+percent_meth$gene_id <- DMLs_in_genes$gene_id 
+
+percent_meth <- percent_meth %>% rowwise() %>%
+  mutate(percent_meth_ALL = mean(c_across(starts_with("LCM")), na.rm = TRUE)) %>%
+  ungroup()
+
+percent_meth <- percent_meth %>% rowwise() %>%
+  mutate(percent_meth_ORAL = mean(c_across(meta$Sample[meta$Tissue=="OralEpi"]), na.rm = TRUE)) %>%
+  mutate(percent_meth_ABORAL = mean(c_across(meta$Sample[meta$Tissue=="Aboral"]), na.rm = TRUE)) %>%
+  ungroup()
+  
+percent_meth_long <- percent_meth %>% pivot_longer(
+                                      cols = c(percent_meth_ORAL,percent_meth_ABORAL),
+                                      names_to = "Tissue",
+                                      values_to = "tissue_percent_meth"
+)
+```
+
+```{r}
+plot_data <- merge(percent_meth, DESeq, by.x = "gene_id", by.y = "query")
+
+ggplot(plot_data, aes(y = baseMean, x = percent_meth_ALL)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2")) +
+  labs(x = "Average CpG % methylation of gene", y = "DeSeq2 BaseMean", 
+       title = "Gene Methylation vs Expression") +
+  theme_minimal()
+
+ggplot(plot_data, aes(y = log2(baseMean), x = percent_meth_ALL)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2")) +
+  labs(x = "Average CpG % methylation of gene", y = "Log2(DeSeq2 BaseMean)", 
+       title = "Gene Methylation vs Expression") +
+  theme_minimal()
+
+ggplot(plot_data, aes(y = abs(log2FoldChange), x = percent_meth_ALL)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm") +  stat_poly_eq(use_label("eq", "R2")) +
+  labs(x = "Average CpG % methylation of gene", y = "Abs(DeSeq2 Log2FoldChange)", 
+       title = "Gene Methylation vs Expression") +
+  theme_minimal()
+
+# Create the plot
+ggplot(plot_data, aes(x = percent_meth_ALL, y = log2FoldChange)) +
+  geom_point(aes(color = padj < 0.05), size = 3) +
+  #geom_text_repel(aes(label = ifelse(padj < 0.05, gene_id, "")), max.overlaps = 20) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_color_manual(values = c("grey", "red")) +
+  labs(x = "Average CpG % methylation of gene", 
+       y = "RNA-seq: Log2FoldChange",
+       title = "Differentially methylated loci (DMLs) vs. Gene Expression",
+       color = "Significant DEGs") +
+  theme_minimal()
+```
+
+```{r}
+plot_data <- merge(percent_meth_long, DESeq, by.x = "gene_id", by.y = "query")
+
+ggplot(plot_data, aes(y = abs(log2FoldChange), x = tissue_percent_meth, color=Tissue)) +
+  geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
+  labs(x = "Average CpG % methylation of gene", y = "Abs(DeSeq2 Log2FoldChange)", 
+       title = "Oral methylation only - Gene Methylation vs Expression") +
+  theme_minimal()
+```
+
