@@ -13,6 +13,7 @@ Zoe Dellaert
   methylation](#04-further-look-at-genome-wide-methylation)
   - [0.4.1 Annotation](#041-annotation)
 - [0.5 Are any DMGs DMLs?](#05-are-any-dmgs-dmls)
+  - [0.5.1 Read counts](#051-read-counts)
 
 ## 0.1 MethylKit
 
@@ -891,12 +892,12 @@ percent_meth <- percent_meth %>% rowwise() %>%
   ungroup()
 
 percent_meth <- percent_meth %>% rowwise() %>%
-  mutate(percent_meth_ORAL = mean(c_across(meta$Sample[meta$Tissue=="OralEpi"]), na.rm = TRUE)) %>%
-  mutate(percent_meth_ABORAL = mean(c_across(meta$Sample[meta$Tissue=="Aboral"]), na.rm = TRUE)) %>%
+  mutate(Oral = mean(c_across(meta$Sample[meta$Tissue=="OralEpi"]), na.rm = TRUE)) %>%
+  mutate(Aboral = mean(c_across(meta$Sample[meta$Tissue=="Aboral"]), na.rm = TRUE)) %>%
   ungroup()
   
 percent_meth_long <- percent_meth %>% pivot_longer(
-                                      cols = c(percent_meth_ORAL,percent_meth_ABORAL),
+                                      cols = c(Oral,Aboral),
                                       names_to = "Tissue",
                                       values_to = "tissue_percent_meth"
 )
@@ -946,7 +947,7 @@ ggplot(plot_data, aes(y = abs(log2FoldChange), x = percent_meth_ALL)) +
 ``` r
 # Create the plot
 ggplot(plot_data, aes(x = percent_meth_ALL, y = log2FoldChange)) +
-  geom_point(aes(color = padj < 0.05), size = 3) +
+  geom_point(aes(color = padj < 0.05)) +
   #geom_text_repel(aes(label = ifelse(padj < 0.05, gene_id, "")), max.overlaps = 20) +
   geom_hline(yintercept = 0, linetype = "dashed") +
   geom_vline(xintercept = 0, linetype = "dashed") +
@@ -966,10 +967,61 @@ plot_data <- merge(percent_meth_long, DESeq, by.x = "gene_id", by.y = "query")
 ggplot(plot_data, aes(y = abs(log2FoldChange), x = tissue_percent_meth, color=Tissue)) +
   geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
   labs(x = "Average CpG % methylation of gene", y = "Abs(DeSeq2 Log2FoldChange)", 
-       title = "Oral methylation only - Gene Methylation vs Expression") +
+       title = "Gene Methylation vs Expression") +
   theme_minimal()
 ```
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
 ![](09-MethylKit_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
+
+### 0.5.1 Read counts
+
+RNA metadata:
+
+``` r
+meta_RNA <- read.csv("../data_RNA/LCM_RNA_metadata.csv") %>%
+            dplyr::arrange(Sample) %>%
+            mutate(across(c(Tissue, Fragment, Section_Date, LCM_Date), factor)) # Set variables as factors 
+
+meta_RNA$Tissue <- factor(meta_RNA$Tissue, levels = c("OralEpi","Aboral")) #we want OralEpi to be the baseline
+```
+
+``` r
+filtered_counts_RNA <- read.csv("../output_RNA/differential_expression/filtered_counts.csv") 
+rownames(filtered_counts_RNA) <- filtered_counts_RNA$X
+filtered_counts_RNA <- filtered_counts_RNA %>% select(-X)
+filtered_counts_RNA$sum <- rowSums(filtered_counts_RNA)
+filtered_counts_RNA$gene_id <- rownames(filtered_counts_RNA)
+
+filtered_counts_RNA <- filtered_counts_RNA %>% rowwise() %>%
+  mutate(Oral = mean(c_across(meta_RNA$Sample[meta_RNA$Tissue=="OralEpi"]), na.rm = TRUE)) %>%
+  mutate(Aboral = mean(c_across(meta_RNA$Sample[meta_RNA$Tissue=="Aboral"]), na.rm = TRUE)) %>%
+  ungroup()
+  
+filtered_counts_RNA_long <- filtered_counts_RNA %>% pivot_longer(
+                                      cols = c(Oral,Aboral),
+                                      names_to = "Tissue",
+                                      values_to = "tissue_mean_counts"
+)
+```
+
+``` r
+plot_data <- merge(percent_meth_long, filtered_counts_RNA_long, by = c("gene_id", "Tissue"))
+
+ggplot(plot_data, aes(y = log2(tissue_mean_counts), x = tissue_percent_meth, color=Tissue)) +
+  geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
+  labs(x = "Average CpG % methylation of gene", y = "Mean counts, all samples", 
+       title = "Gene Methylation vs Expression") +
+  theme_minimal()
+```
+
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+    ## Warning: Removed 15 rows containing non-finite outside the scale range
+    ## (`stat_smooth()`).
+
+    ## Warning: Removed 15 rows containing non-finite outside the scale range
+    ## (`stat_poly_eq()`).
+
+![](09-MethylKit_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
