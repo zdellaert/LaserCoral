@@ -6,8 +6,9 @@ Zoe Dellaert
 - [0.1 MethylKit](#01-methylkit)
 - [0.2 Managing Packages Using Renv](#02-managing-packages-using-renv)
 - [0.3 Load packages](#03-load-packages)
-  - [0.3.1 other possible filtering](#031-other-possible-filtering)
-  - [0.3.2 Identify DML](#032-identify-dml)
+  - [0.3.1 batch effects](#031-batch-effects)
+  - [0.3.2 other possible filtering](#032-other-possible-filtering)
+  - [0.3.3 Identify DML](#033-identify-dml)
 - [0.4 Further look at genome wide
   methylation](#04-further-look-at-genome-wide-methylation)
   - [0.4.1 Annotation](#041-annotation)
@@ -281,10 +282,10 @@ fragment <- meta$Fragment
 #            assembly = "Pacuta",
 #            treatment = tissue_binary,
 #            context = "CpG",
-#            mincov = 10
+#            mincov = 5
 #            )
-#   
-# save(methylObj, file = "../output_WGBS/MethylKit.RData") 
+
+# save(methylObj, file = "../output_WGBS/MethylKit.RData")
 ```
 
 ``` r
@@ -296,12 +297,12 @@ getMethylationStats(methylObj[[2]],plot=FALSE,both.strands=FALSE)
     ## methylation statistics per base
     ## summary:
     ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-    ##    0.00    0.00    0.00   12.70   18.18  100.00 
+    ##    0.00    0.00    0.00   12.92    0.00  100.00 
     ## percentiles:
     ##        0%       10%       20%       30%       40%       50%       60%       70% 
-    ##   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   9.52381 
+    ##   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 
     ##       80%       90%       95%       99%     99.5%     99.9%      100% 
-    ##  27.27273  45.45455  64.28571 100.00000 100.00000 100.00000 100.00000
+    ##  19.04762  57.14286 100.00000 100.00000 100.00000 100.00000 100.00000
 
 ``` r
 getMethylationStats(methylObj[[2]],plot=TRUE,both.strands=FALSE)
@@ -316,7 +317,13 @@ getCoverageStats(methylObj[[2]],plot=TRUE,both.strands=FALSE)
 ![](09-MethylKit_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->
 
 ``` r
-filtered_methylObj=filterByCoverage(methylObj,lo.count=10,lo.perc=NULL,
+getCoverageStats(methylObj[[2]],plot=TRUE,both.strands=TRUE)
+```
+
+![](09-MethylKit_files/figure-gfm/unnamed-chunk-4-3.png)<!-- -->
+
+``` r
+filtered_methylObj=filterByCoverage(methylObj,lo.count=5,lo.perc=NULL,
                                       hi.count=NULL,hi.perc=99.9)
 
 filtered_methylObj_norm <- filtered_methylObj %>% methylKit::normalizeCoverage(.)
@@ -384,27 +391,27 @@ getCorrelation(meth_filter_destrand,plot=TRUE)
 ```
 
     ##            LCM_1    LCM_11    LCM_12    LCM_17    LCM_18    LCM_24    LCM_25
-    ## LCM_1  1.0000000 0.8071167 0.7926500 0.7987458 0.7720128 0.6870701 0.7760903
-    ## LCM_11 0.8071167 1.0000000 0.8090847 0.8112960 0.7812533 0.6885644 0.7713116
-    ## LCM_12 0.7926500 0.8090847 1.0000000 0.8166968 0.7694800 0.6984713 0.7666580
-    ## LCM_17 0.7987458 0.8112960 0.8166968 1.0000000 0.7715643 0.6852749 0.7733168
-    ## LCM_18 0.7720128 0.7812533 0.7694800 0.7715643 1.0000000 0.7011845 0.7711137
-    ## LCM_24 0.6870701 0.6885644 0.6984713 0.6852749 0.7011845 1.0000000 0.7222715
-    ## LCM_25 0.7760903 0.7713116 0.7666580 0.7733168 0.7711137 0.7222715 1.0000000
-    ## LCM_3  0.7734702 0.7998513 0.7887419 0.7740742 0.7522157 0.6579610 0.7343776
-    ## LCM_32 0.7591867 0.7810416 0.7644149 0.7624203 0.7641989 0.6607244 0.7409674
-    ## LCM_33 0.7685862 0.8026637 0.7790518 0.7669838 0.7445778 0.6355911 0.7290590
+    ## LCM_1  1.0000000 0.6892526 0.6728976 0.6657415 0.6355410 0.6403901 0.6759630
+    ## LCM_11 0.6892526 1.0000000 0.6603484 0.6588697 0.6264304 0.6082192 0.6581236
+    ## LCM_12 0.6728976 0.6603484 1.0000000 0.6558708 0.6324357 0.6112462 0.6528702
+    ## LCM_17 0.6657415 0.6588697 0.6558708 1.0000000 0.6323791 0.5993774 0.6473040
+    ## LCM_18 0.6355410 0.6264304 0.6324357 0.6323791 1.0000000 0.5933854 0.6209116
+    ## LCM_24 0.6403901 0.6082192 0.6112462 0.5993774 0.5933854 1.0000000 0.6550695
+    ## LCM_25 0.6759630 0.6581236 0.6528702 0.6473040 0.6209116 0.6550695 1.0000000
+    ## LCM_3  0.6059547 0.6040347 0.5991381 0.6107807 0.5842224 0.5430122 0.5837491
+    ## LCM_32 0.6193958 0.6199490 0.6047293 0.5989849 0.5821232 0.5527861 0.5962708
+    ## LCM_33 0.5291518 0.5398136 0.5069320 0.5269192 0.5080946 0.4494055 0.5005961
     ##            LCM_3    LCM_32    LCM_33
-    ## LCM_1  0.7734702 0.7591867 0.7685862
-    ## LCM_11 0.7998513 0.7810416 0.8026637
-    ## LCM_12 0.7887419 0.7644149 0.7790518
-    ## LCM_17 0.7740742 0.7624203 0.7669838
-    ## LCM_18 0.7522157 0.7641989 0.7445778
-    ## LCM_24 0.6579610 0.6607244 0.6355911
-    ## LCM_25 0.7343776 0.7409674 0.7290590
-    ## LCM_3  1.0000000 0.7600768 0.7669578
-    ## LCM_32 0.7600768 1.0000000 0.7727821
-    ## LCM_33 0.7669578 0.7727821 1.0000000
+    ## LCM_1  0.6059547 0.6193958 0.5291518
+    ## LCM_11 0.6040347 0.6199490 0.5398136
+    ## LCM_12 0.5991381 0.6047293 0.5069320
+    ## LCM_17 0.6107807 0.5989849 0.5269192
+    ## LCM_18 0.5842224 0.5821232 0.5080946
+    ## LCM_24 0.5430122 0.5527861 0.4494055
+    ## LCM_25 0.5837491 0.5962708 0.5005961
+    ## LCM_3  1.0000000 0.5581504 0.5185112
+    ## LCM_32 0.5581504 1.0000000 0.5276969
+    ## LCM_33 0.5185112 0.5276969 1.0000000
 
     ## Warning in par(usr): argument 1 does not name a graphical parameter
     ## Warning in par(usr): argument 1 does not name a graphical parameter
@@ -462,8 +469,9 @@ getCorrelation(meth_filter_destrand,plot=TRUE)
     ## Warning in par(usr): argument 1 does not name a graphical parameter
     ## Warning in par(usr): argument 1 does not name a graphical parameter
 
-![](09-MethylKit_files/figure-gfm/unnamed-chunk-7-1.png)<!-- --> \###
-batch effects
+![](09-MethylKit_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+
+### 0.3.1 batch effects
 
 ``` r
 as=assocComp(mBase=meth_filter_destrand,select(meta,c("PCR_ReAmp_Cycles", "Fragment")))
@@ -471,42 +479,42 @@ as
 ```
 
     ## $pcs
-    ##               PC1         PC2         PC3         PC4          PC5         PC6
-    ## LCM_1  -0.3216779  0.05915356  0.30196916 -0.14420962  0.106034156  0.02317996
-    ## LCM_11 -0.3265585  0.15514843  0.09086618  0.10898681  0.060885171 -0.09416565
-    ## LCM_12 -0.3237446  0.07166955  0.28814038  0.19168049  0.002164678 -0.12638941
-    ## LCM_17 -0.3227715  0.08032452  0.38387620 -0.05271814  0.062569105 -0.12800268
-    ## LCM_18 -0.3170704 -0.09337650 -0.24292276 -0.48602692 -0.476847742 -0.58246573
-    ## LCM_24 -0.2877121 -0.83279369 -0.15221492  0.42336874  0.065202942 -0.06486596
-    ## LCM_25 -0.3152164 -0.25590050  0.16930676 -0.54083301  0.234757957  0.51179484
-    ## LCM_3  -0.3164516  0.22392814  0.07429410  0.39346280 -0.627734867  0.38598279
-    ## LCM_32 -0.3146195  0.17257995 -0.69944046 -0.09631807  0.031696993  0.35712452
-    ## LCM_33 -0.3147866  0.33639865 -0.25414553  0.23611671  0.547108693 -0.27623910
-    ##                 PC7         PC8         PC9        PC10
-    ## LCM_1   0.139546895  0.82219692  0.26173767 -0.07262323
-    ## LCM_11  0.109075131  0.06607662 -0.56734877  0.70599677
-    ## LCM_12 -0.367549042 -0.30982410  0.63482906  0.34672241
-    ## LCM_17 -0.521088871 -0.10202600 -0.43947948 -0.49380329
-    ## LCM_18  0.139134965 -0.07779117  0.05051128 -0.03003498
-    ## LCM_24  0.001981578  0.08167280 -0.05123066 -0.05922844
-    ## LCM_25  0.263831482 -0.35517125  0.01959832  0.02837934
-    ## LCM_3   0.305140224 -0.09386892 -0.01449674 -0.21027636
-    ## LCM_32 -0.463220542  0.16450265  0.02599882  0.04340127
-    ## LCM_33  0.406632547 -0.19617546  0.08374050 -0.28446617
+    ##              PC1         PC2         PC3          PC4         PC5          PC6
+    ## LCM_1  0.3338583  0.12128846 -0.07720379 -0.005419477 -0.03308604  0.256605642
+    ## LCM_11 0.3301683  0.02569803 -0.03934815  0.097854257  0.01277378  0.390744918
+    ## LCM_12 0.3267925  0.13493914  0.06177046  0.096404568  0.16752421  0.297409509
+    ## LCM_17 0.3266056  0.04043675  0.16266871  0.024208156  0.19839302  0.329042567
+    ## LCM_18 0.3171073  0.06761685  0.13471362 -0.028405125  0.74872176 -0.525390239
+    ## LCM_24 0.3090060  0.39200633 -0.31114649 -0.435479535 -0.33502102 -0.395386389
+    ## LCM_25 0.3265171  0.23376956 -0.17432660 -0.173740178 -0.15174089  0.089122089
+    ## LCM_3  0.3058523 -0.16036635  0.80404167 -0.036076566 -0.42610825 -0.209587363
+    ## LCM_32 0.3086454 -0.15279027 -0.30726667  0.787485411 -0.23152323 -0.316933508
+    ## LCM_33 0.2731303 -0.83835170 -0.27562496 -0.372082762  0.01726556  0.008292728
+    ##                PC7         PC8          PC9          PC10
+    ## LCM_1   0.16046495 -0.23475447  0.156550083  0.8339845594
+    ## LCM_11  0.24173983 -0.57598024  0.263104355 -0.5166669223
+    ## LCM_12  0.46053971  0.72024244  0.020727658 -0.1187276977
+    ## LCM_17 -0.82007693  0.15946463  0.132997196 -0.0370712945
+    ## LCM_18  0.08312060 -0.17091853 -0.054813809  0.0130530300
+    ## LCM_24 -0.07672461  0.12919691  0.396299536 -0.1272415963
+    ## LCM_25 -0.05495299 -0.10796954 -0.852562633 -0.0751974424
+    ## LCM_3   0.07356071 -0.03248837 -0.031043612  0.0051931926
+    ## LCM_32 -0.09681841  0.05673023 -0.014289933  0.0009484129
+    ## LCM_33  0.02427633  0.08439634 -0.007839138  0.0033420682
     ## 
     ## $vars
-    ##  [1] 78.100976  4.266914  2.673250  2.621410  2.334903  2.187428  2.181249
-    ##  [8]  2.072173  1.829281  1.732416
+    ##  [1] 64.096864  6.045395  4.519961  4.320724  3.995412  3.870769  3.428768
+    ##  [8]  3.395078  3.272026  3.055003
     ## 
     ## $association
-    ##                         PC1       PC2       PC3       PC4       PC5       PC6
-    ## PCR_ReAmp_Cycles 0.78459351 0.3339619 0.1283833 0.4572514 0.7734739 0.2419045
-    ## Fragment         0.09291936 0.1553095 0.3205067 0.8780986 0.5487392 0.2249586
+    ##                        PC1       PC2       PC3       PC4       PC5       PC6
+    ## PCR_ReAmp_Cycles 0.1916616 0.1106778 0.6213573 0.4382057 0.1587682 0.3891865
+    ## Fragment         0.3084410 0.1688444 0.1368522 0.3084410 0.1489187 0.4468051
     ##                        PC7       PC8       PC9      PC10
-    ## PCR_ReAmp_Cycles 0.4221351 0.7070921 0.6163093 0.1533615
-    ## Fragment         0.5855722 0.8410289 0.8410289 0.2536518
+    ## PCR_ReAmp_Cycles 0.1223133 0.8336374 0.9260907 0.9825280
+    ## Fragment         0.1834361 0.8780986 0.8598312 0.1153717
 
-### 0.3.1 other possible filtering
+### 0.3.2 other possible filtering
 
 ``` r
 # get percent methylation matrix
@@ -530,15 +538,15 @@ meth <- meth_filter_destrand[sds > 2]
 nrow(meth_filter_destrand)
 ```
 
-    ## [1] 5669
+    ## [1] 12252
 
 ``` r
 nrow(meth)
 ```
 
-    ## [1] 5481
+    ## [1] 11885
 
-### 0.3.2 Identify DML
+### 0.3.3 Identify DML
 
 ``` r
 DMLStats_Tissue <- methylKit::calculateDiffMeth(meth_filter_destrand, overdispersion = "MN", test = "Chisq", mc.cores = 8) #Calculate differential methylation statistics and include covariate information.
@@ -553,19 +561,19 @@ head(DMLStats_Tissue) #Look at differential methylation output
 ```
 
     ##                                  chr  start    end strand     pvalue    qvalue
-    ## 1 Pocillopora_acuta_HIv2___Sc0000000  48656  48656      + 0.34173181 0.9030236
-    ## 2 Pocillopora_acuta_HIv2___Sc0000000 508417 508417      + 0.06541963 0.6828262
-    ## 3 Pocillopora_acuta_HIv2___Sc0000000 508643 508643      + 0.17842512 0.8308404
-    ## 4 Pocillopora_acuta_HIv2___Sc0000000 509163 509163      + 0.30851610 0.8891573
-    ## 5 Pocillopora_acuta_HIv2___Sc0000000 844614 844614      + 0.75207902 0.9655994
-    ## 6 Pocillopora_acuta_HIv2___Sc0000000 844624 844624      + 0.62496289 0.9494677
-    ##   meth.diff
-    ## 1  7.382703
-    ## 2 19.510490
-    ## 3  8.511694
-    ## 4  6.805556
-    ## 5 -2.404868
-    ## 6 -3.431472
+    ## 1 Pocillopora_acuta_HIv2___Sc0000000   8517   8517      + 0.73974649 0.9398592
+    ## 2 Pocillopora_acuta_HIv2___Sc0000000   8556   8556      + 0.75975304 0.9416162
+    ## 3 Pocillopora_acuta_HIv2___Sc0000000  48656  48656      + 0.33135768 0.8056480
+    ## 4 Pocillopora_acuta_HIv2___Sc0000000  48703  48703      + 0.06329730 0.5296139
+    ## 5 Pocillopora_acuta_HIv2___Sc0000000  55614  55614      + 0.03206979 0.4294523
+    ## 6 Pocillopora_acuta_HIv2___Sc0000000 508403 508403      + 0.40262375 0.8430765
+    ##    meth.diff
+    ## 1   3.576616
+    ## 2   5.253078
+    ## 3   7.268433
+    ## 4  24.354545
+    ## 5  34.260797
+    ## 6 -13.901639
 
 ``` r
 # Filter DMRs with q-value < 0.05
@@ -621,26 +629,26 @@ DMLs <- methylKit::getMethylDiff(DMLStats_Tissue, difference = 2, qvalue = 0.05)
 length(DMLs$chr) #DML
 ```
 
-    ## [1] 9
+    ## [1] 59
 
 ``` r
 head(DMLs)
 ```
 
-    ##                                     chr   start     end strand       pvalue
-    ## 163  Pocillopora_acuta_HIv2___Sc0000001 3408801 3408801      + 2.890498e-05
-    ## 166  Pocillopora_acuta_HIv2___Sc0000001 3408829 3408829      + 3.437585e-06
-    ## 170  Pocillopora_acuta_HIv2___Sc0000001 3408857 3408857      + 1.639072e-06
-    ## 670  Pocillopora_acuta_HIv2___Sc0000003 9609977 9609977      + 5.074907e-05
-    ## 2203 Pocillopora_acuta_HIv2___Sc0000020 3271786 3271786      + 1.874037e-05
-    ## 2448 Pocillopora_acuta_HIv2___Sc0000024  987115  987115      + 1.139080e-06
-    ##           qvalue  meth.diff
-    ## 163  0.022750677 -17.780636
-    ## 166  0.004734927 -20.282751
-    ## 170  0.003010208 -22.591117
-    ## 670  0.031067429   4.918137
-    ## 2203 0.017208641  18.014797
-    ## 2448 0.003010208 -25.779357
+    ##                                    chr   start     end strand       pvalue
+    ## 61  Pocillopora_acuta_HIv2___Sc0000000 6962047 6962047      + 1.327078e-05
+    ## 282 Pocillopora_acuta_HIv2___Sc0000001 3408829 3408829      + 2.463817e-05
+    ## 286 Pocillopora_acuta_HIv2___Sc0000001 3408857 3408857      + 1.941094e-06
+    ## 287 Pocillopora_acuta_HIv2___Sc0000001 3408864 3408864      + 1.907778e-04
+    ## 291 Pocillopora_acuta_HIv2___Sc0000001 3408892 3408892      + 4.173266e-05
+    ## 648 Pocillopora_acuta_HIv2___Sc0000002 7012109 7012109      + 8.147227e-05
+    ##          qvalue meth.diff
+    ## 61  0.011313340 -17.40617
+    ## 282 0.016904276 -19.50357
+    ## 286 0.006863872 -22.60904
+    ## 287 0.043630941 -24.99178
+    ## 291 0.021163390 -20.35679
+    ## 648 0.027949105 -21.93292
 
 ## 0.4 Further look at genome wide methylation
 
@@ -697,22 +705,22 @@ head(DML_grange)
     ## GRanges object with 6 ranges and 3 metadata columns:
     ##                     seqnames    ranges strand |      pvalue     qvalue
     ##                        <Rle> <IRanges>  <Rle> |   <numeric>  <numeric>
-    ##   [1] Pocillopora_acuta_HI..   3408801      + | 2.89050e-05 0.02275068
-    ##   [2] Pocillopora_acuta_HI..   3408829      + | 3.43759e-06 0.00473493
-    ##   [3] Pocillopora_acuta_HI..   3408857      + | 1.63907e-06 0.00301021
-    ##   [4] Pocillopora_acuta_HI..   9609977      + | 5.07491e-05 0.03106743
-    ##   [5] Pocillopora_acuta_HI..   3271786      + | 1.87404e-05 0.01720864
-    ##   [6] Pocillopora_acuta_HI..    987115      + | 1.13908e-06 0.00301021
+    ##   [1] Pocillopora_acuta_HI..   6962047      + | 1.32708e-05 0.01131334
+    ##   [2] Pocillopora_acuta_HI..   3408829      + | 2.46382e-05 0.01690428
+    ##   [3] Pocillopora_acuta_HI..   3408857      + | 1.94109e-06 0.00686387
+    ##   [4] Pocillopora_acuta_HI..   3408864      + | 1.90778e-04 0.04363094
+    ##   [5] Pocillopora_acuta_HI..   3408892      + | 4.17327e-05 0.02116339
+    ##   [6] Pocillopora_acuta_HI..   7012109      + | 8.14723e-05 0.02794910
     ##       meth.diff
     ##       <numeric>
-    ##   [1] -17.78064
-    ##   [2] -20.28275
-    ##   [3] -22.59112
-    ##   [4]   4.91814
-    ##   [5]  18.01480
-    ##   [6] -25.77936
+    ##   [1]  -17.4062
+    ##   [2]  -19.5036
+    ##   [3]  -22.6090
+    ##   [4]  -24.9918
+    ##   [5]  -20.3568
+    ##   [6]  -21.9329
     ##   -------
-    ##   seqinfo: 6 sequences from an unspecified genome; no seqlengths
+    ##   seqinfo: 42 sequences from an unspecified genome; no seqlengths
 
 ``` r
 transcripts = gffToGRanges(gff.file, filter = "transcript")
@@ -739,33 +747,33 @@ head(DML_transcript_annot)
 ```
 
     ##                              DML_chr DML_start DML_end  DML_qvalue DML_methdiff
-    ## 1 Pocillopora_acuta_HIv2___Sc0000001   3408801 3408801 0.022750677   -17.780636
-    ## 2 Pocillopora_acuta_HIv2___Sc0000001   3408829 3408829 0.004734927   -20.282751
-    ## 3 Pocillopora_acuta_HIv2___Sc0000001   3408857 3408857 0.003010208   -22.591117
-    ## 4 Pocillopora_acuta_HIv2___Sc0000003   9609977 9609977 0.031067429     4.918137
-    ## 5 Pocillopora_acuta_HIv2___Sc0000020   3271786 3271786 0.017208641    18.014797
-    ## 6 Pocillopora_acuta_HIv2___Sc0000024    987115  987115 0.003010208   -25.779357
+    ## 1 Pocillopora_acuta_HIv2___Sc0000001   3408829 3408829 0.016904276    -19.50357
+    ## 2 Pocillopora_acuta_HIv2___Sc0000001   3408857 3408857 0.006863872    -22.60904
+    ## 3 Pocillopora_acuta_HIv2___Sc0000001   3408864 3408864 0.043630941    -24.99178
+    ## 4 Pocillopora_acuta_HIv2___Sc0000001   3408892 3408892 0.021163390    -20.35679
+    ## 5 Pocillopora_acuta_HIv2___Sc0000006   2741380 2741380 0.042772094     27.00782
+    ## 6 Pocillopora_acuta_HIv2___Sc0000007   4800418 4800418 0.037574118    -20.22096
     ##                       transcript_chr transcript_start transcript_end
     ## 1 Pocillopora_acuta_HIv2___Sc0000001          3407978        3412324
     ## 2 Pocillopora_acuta_HIv2___Sc0000001          3407978        3412324
     ## 3 Pocillopora_acuta_HIv2___Sc0000001          3407978        3412324
-    ## 4 Pocillopora_acuta_HIv2___Sc0000003          9605569        9649727
-    ## 5 Pocillopora_acuta_HIv2___Sc0000020          3263869        3273843
-    ## 6 Pocillopora_acuta_HIv2___Sc0000024           985385         998579
+    ## 4 Pocillopora_acuta_HIv2___Sc0000001          3407978        3412324
+    ## 5 Pocillopora_acuta_HIv2___Sc0000006          2733883        2747450
+    ## 6 Pocillopora_acuta_HIv2___Sc0000007          4793420        4810018
     ##                               transcript_id
     ## 1 Pocillopora_acuta_HIv2___RNAseq.g10458.t1
     ## 2 Pocillopora_acuta_HIv2___RNAseq.g10458.t1
     ## 3 Pocillopora_acuta_HIv2___RNAseq.g10458.t1
-    ## 4  Pocillopora_acuta_HIv2___RNAseq.g5543.t2
-    ## 5 Pocillopora_acuta_HIv2___RNAseq.g14913.t1
-    ## 6  Pocillopora_acuta_HIv2___RNAseq.g3700.t1
+    ## 4 Pocillopora_acuta_HIv2___RNAseq.g10458.t1
+    ## 5     Pocillopora_acuta_HIv2___TS.g27914.t3
+    ## 6 Pocillopora_acuta_HIv2___RNAseq.g17735.t1
     ##                                     gene_id
     ## 1 Pocillopora_acuta_HIv2___RNAseq.g10458.t1
     ## 2 Pocillopora_acuta_HIv2___RNAseq.g10458.t1
     ## 3 Pocillopora_acuta_HIv2___RNAseq.g10458.t1
-    ## 4  Pocillopora_acuta_HIv2___RNAseq.g5543.t2
-    ## 5 Pocillopora_acuta_HIv2___RNAseq.g14913.t1
-    ## 6  Pocillopora_acuta_HIv2___RNAseq.g3700.t1
+    ## 4 Pocillopora_acuta_HIv2___RNAseq.g10458.t1
+    ## 5     Pocillopora_acuta_HIv2___TS.g27914.t3
+    ## 6 Pocillopora_acuta_HIv2___RNAseq.g17735.t1
 
 ## 0.5 Are any DMGs DMLs?
 
@@ -781,15 +789,38 @@ DE_05 <- DESeq %>% filter(padj < 0.05)
 DML_transcript_annot[DML_transcript_annot$transcript_id %in% DE_05$query,]
 ```
 
-    ##  [1] DML_chr          DML_start        DML_end          DML_qvalue      
-    ##  [5] DML_methdiff     transcript_chr   transcript_start transcript_end  
-    ##  [9] transcript_id    gene_id         
-    ## <0 rows> (or 0-length row.names)
+    ##                                 DML_chr DML_start DML_end DML_qvalue
+    ## 10   Pocillopora_acuta_HIv2___Sc0000015    409253  409253 0.01725888
+    ## 18 Pocillopora_acuta_HIv2___xfSc0000009   4968296 4968296 0.02159195
+    ## 21 Pocillopora_acuta_HIv2___xfSc0000012   1505143 1505143 0.04856409
+    ## 22 Pocillopora_acuta_HIv2___xfSc0000021   2601350 2601350 0.04578924
+    ##    DML_methdiff                       transcript_chr transcript_start
+    ## 10     27.85388   Pocillopora_acuta_HIv2___Sc0000015           404604
+    ## 18     15.20642 Pocillopora_acuta_HIv2___xfSc0000009          4960678
+    ## 21     19.30342 Pocillopora_acuta_HIv2___xfSc0000012          1498290
+    ## 22     15.57377 Pocillopora_acuta_HIv2___xfSc0000021          2589323
+    ##    transcript_end                            transcript_id
+    ## 10         412806    Pocillopora_acuta_HIv2___TS.g29592.t2
+    ## 18        4972226     Pocillopora_acuta_HIv2___TS.g3401.t1
+    ## 21        1508944 Pocillopora_acuta_HIv2___RNAseq.g1208.t1
+    ## 22        2605551    Pocillopora_acuta_HIv2___TS.g19623.t2
+    ##                                     gene_id
+    ## 10    Pocillopora_acuta_HIv2___TS.g29592.t2
+    ## 18     Pocillopora_acuta_HIv2___TS.g3401.t1
+    ## 21 Pocillopora_acuta_HIv2___RNAseq.g1208.t1
+    ## 22    Pocillopora_acuta_HIv2___TS.g19623.t2
 
 ``` r
 DE_05[DE_05$query %in% DML_transcript_annot$transcript_id,]
 ```
 
-    ## [1] query          baseMean       log2FoldChange lfcSE          pvalue        
-    ## [6] padj          
-    ## <0 rows> (or 0-length row.names)
+    ##                                         query  baseMean log2FoldChange    lfcSE
+    ## 637      Pocillopora_acuta_HIv2___TS.g3401.t1  92.69481    -11.2018977 3.635355
+    ## 930     Pocillopora_acuta_HIv2___TS.g19623.t2 269.40223     -0.7395856 1.427873
+    ## 1568 Pocillopora_acuta_HIv2___RNAseq.g1208.t1 544.93022      0.7332125 1.457682
+    ## 2597    Pocillopora_acuta_HIv2___TS.g29592.t2 198.58417     -0.4754287 1.109910
+    ##            pvalue         padj
+    ## 637  6.463609e-08 1.467655e-06
+    ## 930  1.100703e-06 1.711889e-05
+    ## 1568 4.649329e-05 4.288769e-04
+    ## 2597 1.414923e-03 7.880421e-03

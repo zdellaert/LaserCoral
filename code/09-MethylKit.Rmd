@@ -70,10 +70,10 @@ fragment <- meta$Fragment
 #            assembly = "Pacuta",
 #            treatment = tissue_binary,
 #            context = "CpG",
-#            mincov = 10
+#            mincov = 5
 #            )
-#   
-# save(methylObj, file = "../output_WGBS/MethylKit.RData") 
+
+# save(methylObj, file = "../output_WGBS/MethylKit.RData")
 ```
 
 
@@ -83,10 +83,11 @@ load("../output_WGBS/MethylKit.RData")
 getMethylationStats(methylObj[[2]],plot=FALSE,both.strands=FALSE)
 getMethylationStats(methylObj[[2]],plot=TRUE,both.strands=FALSE)
 getCoverageStats(methylObj[[2]],plot=TRUE,both.strands=FALSE)
+getCoverageStats(methylObj[[2]],plot=TRUE,both.strands=TRUE)
 ```
 
 ```{r}
-filtered_methylObj=filterByCoverage(methylObj,lo.count=10,lo.perc=NULL,
+filtered_methylObj=filterByCoverage(methylObj,lo.count=5,lo.perc=NULL,
                                       hi.count=NULL,hi.perc=99.9)
 
 filtered_methylObj_norm <- filtered_methylObj %>% methylKit::normalizeCoverage(.)
@@ -107,6 +108,7 @@ PCASamples(meth_filter_destrand)
 ```{r}
 getCorrelation(meth_filter_destrand,plot=TRUE)
 ```
+
 ### batch effects 
 
 ```{r}
