@@ -84,6 +84,7 @@ output_WGBS/*/methyldackel/*quant
 *bedGraph
 *bedgraph
 *bed
+*pickle
 *cytosine_report.txt
 *5x_sorted.tab_gene
 *5x_sorted.tab

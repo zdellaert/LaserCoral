@@ -1,0 +1,9 @@
+Loading conda
+/work/pi_hputnam_uri_edu/conda/envs/spladder/lib/python3.8/site-packages/spladder/spladder_test.py:742: RuntimeWarning: invalid value encountered in subtract
+  fc=(fc_ev - fc_ge),
+/work/pi_hputnam_uri_edu/conda/envs/spladder/lib/python3.8/site-packages/spladder/spladder_test.py:742: RuntimeWarning: invalid value encountered in subtract
+  fc=(fc_ev - fc_ge),
+/work/pi_hputnam_uri_edu/conda/envs/spladder/lib/python3.8/site-packages/spladder/spladder_test.py:742: RuntimeWarning: invalid value encountered in subtract
+  fc=(fc_ev - fc_ge),
+/work/pi_hputnam_uri_edu/conda/envs/spladder/lib/python3.8/site-packages/spladder/spladder_test.py:742: RuntimeWarning: invalid value encountered in subtract
+  fc=(fc_ev - fc_ge),
