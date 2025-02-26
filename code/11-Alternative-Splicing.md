@@ -12,8 +12,6 @@ Zoe Dellaert
 - [0.7 make some diagnostic plots of
   counts](#07-make-some-diagnostic-plots-of-counts)
 - [0.8 Spladder test output](#08-spladder-test-output)
-- [0.9 What if I run spladder with the geneExt-extended gtf
-  file?](#09-what-if-i-run-spladder-with-the-geneext-extended-gtf-file)
 
 ## 0.1 Managing Packages Using Renv
 
@@ -78,7 +76,7 @@ output_RNA/hisat2/LCM_27.bam
 Run spladder build:
 
 ``` bash
-nano scripts/spladder_build.sh
+nano scripts/spladder_build_ext.sh
 ```
 
 ``` bash
@@ -95,12 +93,12 @@ module load conda/latest
 conda activate /work/pi_hputnam_uri_edu/conda/envs/spladder
 
 spladder_dir="output_RNA/splicing"
-out_dir="/scratch3/workspace/zdellaert_uri_edu-shared/spladder_out"
+out_dir="/scratch3/workspace/zdellaert_uri_edu-shared/spladder_out_ext"
 
 mkdir -p ${out_dir}
 
 spladder build --bams ${spladder_dir}/alignments.txt \
-               --annotation ${spladder_dir}/Pocillopora_acuta_HIv2.gtf \
+               --annotation ${spladder_dir}/Pocillopora_acuta_GeneExt.gtf \
                --outdir ${out_dir} \
                --parallel 4 \
                --verbose
@@ -136,7 +134,7 @@ output_RNA/hisat2/LCM_26.bam
 ```
 
 ``` bash
-nano scripts/spladder_test.sh
+nano scripts/spladder_test_ext.sh
 ```
 
 ``` bash
@@ -153,7 +151,7 @@ module load conda/latest
 conda activate /work/pi_hputnam_uri_edu/conda/envs/spladder
 
 spladder_dir="output_RNA/splicing"
-out_dir="/scratch3/workspace/zdellaert_uri_edu-shared/spladder_out"
+out_dir="/scratch3/workspace/zdellaert_uri_edu-shared/spladder_out_ext"
 
 spladder test --conditionA ${spladder_dir}/Oral.txt \
               --conditionB ${spladder_dir}/Aboral.txt \
@@ -297,7 +295,7 @@ here](https://github.com/kate-stankiewicz/Acer_globalSearch_AltSplice/blob/main/
 
 ``` r
 df <- list() 
-listcsv <- list.files("../output_RNA/splicing/spladder_out/", pattern = "_C3.confirmed.txt",full.names = TRUE)
+listcsv <- list.files("../output_RNA/splicing/spladder_out_ext/", pattern = "_C3.confirmed.txt",full.names = TRUE)
 
 for (i in 1:length(listcsv)){
   df[[i]] <- read.table(file = listcsv[i], header = T)
@@ -710,7 +708,7 @@ table(row_annot)
 
     ## Event_Type
     ##       alt_3prime       alt_5prime        exon_skip intron_retention 
-    ##               20               11               12               21 
+    ##               21               14               14               39 
     ##   mult_exon_skip 
     ##                4
 
@@ -757,7 +755,7 @@ here](https://github.com/kate-stankiewicz/Acer_globalSearch_AltSplice/blob/main/
 ``` r
 # read in the event file for the Oral vs Aboral contrast
 df <- list() 
-listcsv <- grep(list.files("../output_RNA/splicing/spladder_out/testing_Oral_vs_Aboral", pattern = "*.tsv",full.names = TRUE), pattern='gene.unique|extended', invert = TRUE, value = TRUE)
+listcsv <- grep(list.files("../output_RNA/splicing/spladder_out_ext/testing_Oral_vs_Aboral/", pattern = "*.tsv",full.names = TRUE), pattern='gene.unique|extended', invert = TRUE, value = TRUE)
 
 for (i in 1:length(listcsv)){
   df[[i]] <- read.table(file = listcsv[i], header = T)
@@ -767,7 +765,7 @@ for (i in 1:length(listcsv)){
 one_df <- do.call(rbind, df)
 
 #write out the results as one table
-write.table(one_df, "../output_RNA/splicing/all_events_parsed/Oral_vs_Aboral.tsv", quote = F, row.names = F)
+write.table(one_df, "../output_RNA/splicing/all_events_parsed/GeneExt_Oral_vs_Aboral.tsv", quote = F, row.names = F)
 ```
 
 Based on Kate Stankiewicz’ work from [Stankiewicz et al 2025,
@@ -781,7 +779,7 @@ here](https://github.com/kate-stankiewicz/Acer_globalSearch_AltSplice/blob/main/
 
 # read in testing files
 
-one_df <- read.table(file = "../output_RNA/splicing/all_events_parsed/Oral_vs_Aboral.tsv", header = T)
+one_df <- read.table(file = "../output_RNA/splicing/all_events_parsed/GeneExt_Oral_vs_Aboral.tsv", header = T)
 
 #filter for only significant events
 sig_all <- one_df %>% dplyr::filter(p_val_adj <= 0.05)
@@ -791,16 +789,46 @@ split_ID <- sig_all %>% tidyr::separate(event_id, sep = "\\.", into = c("event_t
 sig_all
 ```
 
-    ##               event_id                               chrm
-    ## 1 intron_retention.786 Pocillopora_acuta_HIv2___Sc0000029
+    ##                event_id                                 chrm
+    ## 1  intron_retention.285   Pocillopora_acuta_HIv2___Sc0000002
+    ## 2 intron_retention.1340   Pocillopora_acuta_HIv2___Sc0000029
+    ## 3 intron_retention.1366   Pocillopora_acuta_HIv2___Sc0000029
+    ## 4 intron_retention.2906 Pocillopora_acuta_HIv2___xfSc0000193
+    ## 5 intron_retention.1091   Pocillopora_acuta_HIv2___Sc0000018
+    ## 6 intron_retention.2518 Pocillopora_acuta_HIv2___xfSc0000018
+    ## 7  intron_retention.902   Pocillopora_acuta_HIv2___Sc0000013
     ##                                          exon_pos alt_usage
-    ## 1 1879511-1879774:1879511-1879834:1879807-1879834     1:1:1
-    ##                                    gene_id gene_name        p_val  p_val_adj
-    ## 1 Pocillopora_acuta_HIv2___RNAseq.g4097.t1      None 7.746017e-05 0.04275801
+    ## 1 5561291-5561861:5561291-5562731:5562676-5562731     1:1:1
+    ## 2 1878632-1879774:1878632-1879834:1879807-1879834     1:1:1
+    ## 3 1879972-1880038:1879972-1880242:1880071-1880242     1:1:1
+    ## 4             18202-18393:18202-18517:18465-18517     1:1:1
+    ## 5 3543815-3544293:3543815-3544892:3544595-3544892     1:1:1
+    ## 6             79588-79634:79588-79903:79706-79903     1:1:1
+    ## 7 3200060-3200715:3200060-3201441:3201078-3201441     1:1:1
+    ##                                    gene_id gene_name        p_val   p_val_adj
+    ## 1    Pocillopora_acuta_HIv2___TS.g21568.t1      None 1.339495e-05 0.009082428
+    ## 2 Pocillopora_acuta_HIv2___RNAseq.g4097.t1      None 2.655681e-05 0.009082428
+    ## 3 Pocillopora_acuta_HIv2___RNAseq.g4097.t1      None 8.569755e-05 0.015562219
+    ## 4 Pocillopora_acuta_HIv2___RNAseq.g2469.t1      None 9.100713e-05 0.015562219
+    ## 5   Pocillopora_acuta_HIv2___TS.g30202.t3b      None 1.285660e-04 0.017587835
+    ## 6 Pocillopora_acuta_HIv2___RNAseq.g5868.t1      None 1.781595e-04 0.020310183
+    ## 7     Pocillopora_acuta_HIv2___TS.g314.t3a      None 4.660673e-04 0.045541437
     ##          dPSI mean_event_count_A mean_event_count_B log2FC_event_count
-    ## 1 -0.08631326            97.5473                  0                Inf
+    ## 1 -0.74334516          84.462312          1.0506996           6.328886
+    ## 2 -0.08631326          95.727314          0.0000000                Inf
+    ## 3 -0.05164111          58.220352          0.0000000                Inf
+    ## 4 -0.71939150           3.280697          0.0000000                Inf
+    ## 5 -0.48053703           8.528360          0.0000000                Inf
+    ## 6 -0.37436589           1.769771          0.0000000                Inf
+    ## 7 -0.05863189           1.129242          0.2063006           2.452535
     ##   mean_gene_exp_A mean_gene_exp_B log2FC_gene_exp
-    ## 1        73904.45         5461.36        3.758329
+    ## 1      13081.4733       8305.7737       0.6553386
+    ## 2     131815.0149       8663.9324       3.9273489
+    ## 3     131815.0149       8663.9324       3.9273489
+    ## 4       1481.4254       1006.4058       0.5577739
+    ## 5        896.3527        405.1805       1.1455016
+    ## 6       1434.6135       1081.4598       0.4076821
+    ## 7       2498.0680       5792.2975      -1.2133230
 
 ``` r
 # plot the significant results per contrast
@@ -814,121 +842,71 @@ ggplot(split_ID, aes(fill=event_type, x = treatment_contrast)) + geom_bar(positi
 
 ![](11-Alternative-Splicing_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
 
-There was only one significant event.
+There were six significant events.
 
-## 0.9 What if I run spladder with the geneExt-extended gtf file?
+``` r
+# filter for dPSI > 0.3
+dpsi_split <- split_ID %>% dplyr::filter(abs(dPSI) > 0.3)
 
-Within this repo:
-
-``` bash
-cd output_RNA
-mkdir splicing
-cd splicing
-
-cp ../../references/Pocillopora_acuta_HIv2.gtf .
-cp ../../references/geneext/Pocillopora_acuta_GeneExt.gtf .
-nano alignments.txt
+ggplot(dpsi_split, aes(fill=event_type, x = as.factor(treatment_contrast))) + geom_bar(position = "stack") + theme_bw() 
 ```
 
-Enter the following, one bam file path per line:
+![](11-Alternative-Splicing_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
 
-``` bash
-output_RNA/hisat2/LCM_4.bam
-output_RNA/hisat2/LCM_5.bam
-output_RNA/hisat2/LCM_8.bam
-output_RNA/hisat2/LCM_9.bam
-output_RNA/hisat2/LCM_15.bam
-output_RNA/hisat2/LCM_16.bam
-output_RNA/hisat2/LCM_20.bam
-output_RNA/hisat2/LCM_21.bam
-output_RNA/hisat2/LCM_26.bam
-output_RNA/hisat2/LCM_27.bam
+``` r
+# join the test result file with psi file by event id
+# rename the gene_name column 
+split_ID_rename <- filt_thresh %>% dplyr::rename(gene_id = gene_name)
+
+joined_psi <- dplyr::left_join(split_ID, split_ID_rename, by = c('event_id', 'event_type', 'event_num', 'gene_id'))
+
+joined_psi_noNA <- na.omit(joined_psi)
+
+
+
+
+# look at the gene level for the top variance events
+per_gene_counts_low_var_psi <- long_no_na_ident %>% dplyr::group_by(gene_name, Sample) %>% dplyr::summarise(count = sum(psi > 0.5, na.rm = T))
 ```
 
-Run spladder build:
+    ## `summarise()` has grouped output by 'gene_name'. You can override using the
+    ## `.groups` argument.
 
-``` bash
-nano scripts/spladder_build_ext.sh
+``` r
+# join back with the meta information
+per_gene_counts_low_var_psi_meta <- dplyr::left_join(per_gene_counts_low_var_psi, meta, by = "Sample")
+
+# convert back to wide format
+wide_per_gene_low_var_psi <- per_gene_counts_low_var_psi %>% tidyr::pivot_wider(names_from = "Sample", values_from = "count")
+
+# convert to a matrix and add in gene names as row names
+gene_counts_just_counts <- subset(wide_per_gene_low_var_psi, select = -c(gene_name))
+gene_counts_just_counts <- sapply(gene_counts_just_counts, function(x) as.numeric(as.character(x)))
+mat_gene_counts_low_var <- as.matrix(gene_counts_just_counts)
+rownames(mat_gene_counts_low_var) <- wide_per_gene_low_var_psi$gene_name
+mat_gene_counts_low_var_scale <- scale(mat_gene_counts_low_var)
+
+# generate the column annotations
+col_annot_genes <- meta %>% dplyr::select(Tissue)
+rownames(col_annot_genes) <- meta$Sample
+
+# basic heatmap
+pheatmap(mat_gene_counts_low_var_scale, scale = "none", annotation_col = col_annot_genes, annotation_colors = annot_colors)
 ```
 
-``` bash
-#!/usr/bin/env bash
-#SBATCH --ntasks=1 --cpus-per-task=6 #split one task over multiple CPU
-#SBATCH --mem=250GB
-#SBATCH -t 48:00:00
-#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
-#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
-#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
-#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
+![](11-Alternative-Splicing_files/figure-gfm/unnamed-chunk-36-1.png)<!-- -->
 
-module load conda/latest
-conda activate /work/pi_hputnam_uri_edu/conda/envs/spladder
+``` r
+# check distribution of the counts
+per_gene_counts_low_var_psi_meta$Tissue <- factor(per_gene_counts_low_var_psi_meta$Tissue, levels = c("OralEpi", "Aboral"))
 
-spladder_dir="output_RNA/splicing"
-out_dir="/scratch3/workspace/zdellaert_uri_edu-shared/spladder_out_ext"
-
-mkdir -p ${out_dir}
-
-spladder build --bams ${spladder_dir}/alignments.txt \
-               --annotation ${spladder_dir}/Pocillopora_acuta_GeneExt.gtf \
-               --outdir ${out_dir} \
-               --parallel 4 \
-               --verbose
+ggplot(per_gene_counts_low_var_psi_meta, aes(x=count)) + geom_bar(position = "stack") + theme_bw() + facet_grid(. ~ Tissue)
 ```
 
-``` bash
-cd output_RNA/splicing
-nano Aboral.txt
+![](11-Alternative-Splicing_files/figure-gfm/unnamed-chunk-36-2.png)<!-- -->
+
+``` r
+ggplot(per_gene_counts_low_var_psi_meta, aes(x=count, fill=Tissue)) + geom_bar(position = "stack") + theme_bw() 
 ```
 
-Enter the following, one bam file path per line:
-
-``` bash
-output_RNA/hisat2/LCM_4.bam
-output_RNA/hisat2/LCM_9.bam
-output_RNA/hisat2/LCM_16.bam
-output_RNA/hisat2/LCM_21.bam
-output_RNA/hisat2/LCM_27.bam
-```
-
-``` bash
-nano Oral.txt
-```
-
-Enter the following, one bam file path per line:
-
-``` bash
-output_RNA/hisat2/LCM_5.bam
-output_RNA/hisat2/LCM_8.bam
-output_RNA/hisat2/LCM_15.bam
-output_RNA/hisat2/LCM_20.bam
-output_RNA/hisat2/LCM_26.bam
-```
-
-``` bash
-nano scripts/spladder_test_ext.sh
-```
-
-``` bash
-#!/usr/bin/env bash
-#SBATCH --ntasks=1 --cpus-per-task=12 #split one task over multiple CPU
-#SBATCH --mem=250GB
-#SBATCH -t 48:00:00
-#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
-#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
-#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
-#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
-
-module load conda/latest
-conda activate /work/pi_hputnam_uri_edu/conda/envs/spladder
-
-spladder_dir="output_RNA/splicing"
-out_dir="/scratch3/workspace/zdellaert_uri_edu-shared/spladder_out_ext"
-
-spladder test --conditionA ${spladder_dir}/Oral.txt \
-              --conditionB ${spladder_dir}/Aboral.txt \
-              --labelA Oral --labelB Aboral \
-              --diagnose-plots \
-              --parallel 12 \
-              --outdir ${out_dir}
-```
+![](11-Alternative-Splicing_files/figure-gfm/unnamed-chunk-36-3.png)<!-- -->

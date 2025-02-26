@@ -73,7 +73,7 @@ output_RNA/hisat2/LCM_27.bam
 Run spladder build:
 
 ```{bash, eval=FALSE}
-nano scripts/spladder_build.sh
+nano scripts/spladder_build_ext.sh
 ```
 
 ```{bash, eval=FALSE}
@@ -90,16 +90,17 @@ module load conda/latest
 conda activate /work/pi_hputnam_uri_edu/conda/envs/spladder
 
 spladder_dir="output_RNA/splicing"
-out_dir="/scratch3/workspace/zdellaert_uri_edu-shared/spladder_out"
+out_dir="/scratch3/workspace/zdellaert_uri_edu-shared/spladder_out_ext"
 
 mkdir -p ${out_dir}
 
 spladder build --bams ${spladder_dir}/alignments.txt \
-               --annotation ${spladder_dir}/Pocillopora_acuta_HIv2.gtf \
+               --annotation ${spladder_dir}/Pocillopora_acuta_GeneExt.gtf \
                --outdir ${out_dir} \
                --parallel 4 \
                --verbose
 ```
+
 
 ```{bash, eval=FALSE}
 cd output_RNA/splicing
@@ -132,7 +133,7 @@ output_RNA/hisat2/LCM_26.bam
 
 
 ```{bash, eval=FALSE}
-nano scripts/spladder_test.sh
+nano scripts/spladder_test_ext.sh
 ```
 
 ```{bash, eval=FALSE}
@@ -149,7 +150,7 @@ module load conda/latest
 conda activate /work/pi_hputnam_uri_edu/conda/envs/spladder
 
 spladder_dir="output_RNA/splicing"
-out_dir="/scratch3/workspace/zdellaert_uri_edu-shared/spladder_out"
+out_dir="/scratch3/workspace/zdellaert_uri_edu-shared/spladder_out_ext"
 
 spladder test --conditionA ${spladder_dir}/Oral.txt \
               --conditionB ${spladder_dir}/Aboral.txt \
@@ -158,7 +159,6 @@ spladder test --conditionA ${spladder_dir}/Oral.txt \
               --parallel 12 \
               --outdir ${out_dir}
 ```
-
 
 Unsure about this next part:
 
@@ -215,7 +215,7 @@ Based on Kate Stankiewicz' work from [Stankiewicz et al 2025, bioRxiv](https://w
 
 ```{r spladder-output}
 df <- list() 
-listcsv <- list.files("../output_RNA/splicing/spladder_out/", pattern = "_C3.confirmed.txt",full.names = TRUE)
+listcsv <- list.files("../output_RNA/splicing/spladder_out_ext/", pattern = "_C3.confirmed.txt",full.names = TRUE)
 
 for (i in 1:length(listcsv)){
   df[[i]] <- read.table(file = listcsv[i], header = T)
@@ -266,6 +266,7 @@ merged <- merge(test_res, meta, by = "Sample")
 ```{r}
 ggplot(merged, aes(x = Tissue, y = count)) + geom_boxplot() + theme_bw() 
 ```
+
 ```{r}
 # now lets consider event type
 # split the event ID into type and number
@@ -588,7 +589,7 @@ Based on Kate Stankiewicz' work from [Stankiewicz et al 2025, bioRxiv](https://w
 ```{r spladder-contrast-output}
 # read in the event file for the Oral vs Aboral contrast
 df <- list() 
-listcsv <- grep(list.files("../output_RNA/splicing/spladder_out/testing_Oral_vs_Aboral", pattern = "*.tsv",full.names = TRUE), pattern='gene.unique|extended', invert = TRUE, value = TRUE)
+listcsv <- grep(list.files("../output_RNA/splicing/spladder_out_ext/testing_Oral_vs_Aboral/", pattern = "*.tsv",full.names = TRUE), pattern='gene.unique|extended', invert = TRUE, value = TRUE)
 
 for (i in 1:length(listcsv)){
   df[[i]] <- read.table(file = listcsv[i], header = T)
@@ -598,7 +599,7 @@ for (i in 1:length(listcsv)){
 one_df <- do.call(rbind, df)
 
 #write out the results as one table
-write.table(one_df, "../output_RNA/splicing/all_events_parsed/Oral_vs_Aboral.tsv", quote = F, row.names = F)
+write.table(one_df, "../output_RNA/splicing/all_events_parsed/GeneExt_Oral_vs_Aboral.tsv", quote = F, row.names = F)
 ```
 
 Based on Kate Stankiewicz' work from [Stankiewicz et al 2025, bioRxiv](https://www.biorxiv.org/content/10.1101/2025.01.21.634199v1.full.pdf): [code here](https://github.com/kate-stankiewicz/Acer_globalSearch_AltSplice/blob/main/scripts/Acer_Sfit_runs/analysis/Acer_AS_analysis.R)
@@ -609,7 +610,7 @@ Based on Kate Stankiewicz' work from [Stankiewicz et al 2025, bioRxiv](https://w
 
 # read in testing files
 
-one_df <- read.table(file = "../output_RNA/splicing/all_events_parsed/Oral_vs_Aboral.tsv", header = T)
+one_df <- read.table(file = "../output_RNA/splicing/all_events_parsed/GeneExt_Oral_vs_Aboral.tsv", header = T)
 
 #filter for only significant events
 sig_all <- one_df %>% dplyr::filter(p_val_adj <= 0.05)
@@ -626,126 +627,57 @@ split_ID$treatment_contrast <- "Oral_vs_Aboral"
 
 # plot the counts
 ggplot(split_ID, aes(fill=event_type, x = treatment_contrast)) + geom_bar(position = "dodge") + theme_bw() 
+```
+
+There were six significant events. 
+
+```{r}
+# filter for dPSI > 0.3
+dpsi_split <- split_ID %>% dplyr::filter(abs(dPSI) > 0.3)
+
+ggplot(dpsi_split, aes(fill=event_type, x = as.factor(treatment_contrast))) + geom_bar(position = "stack") + theme_bw() 
+```
+```{r}
+# join the test result file with psi file by event id
+# rename the gene_name column 
+split_ID_rename <- filt_thresh %>% dplyr::rename(gene_id = gene_name)
+
+joined_psi <- dplyr::left_join(split_ID, split_ID_rename, by = c('event_id', 'event_type', 'event_num', 'gene_id'))
+
+joined_psi_noNA <- na.omit(joined_psi)
+
+
+
+
+# look at the gene level for the top variance events
+per_gene_counts_low_var_psi <- long_no_na_ident %>% dplyr::group_by(gene_name, Sample) %>% dplyr::summarise(count = sum(psi > 0.5, na.rm = T))
+
+# join back with the meta information
+per_gene_counts_low_var_psi_meta <- dplyr::left_join(per_gene_counts_low_var_psi, meta, by = "Sample")
+
+# convert back to wide format
+wide_per_gene_low_var_psi <- per_gene_counts_low_var_psi %>% tidyr::pivot_wider(names_from = "Sample", values_from = "count")
+
+# convert to a matrix and add in gene names as row names
+gene_counts_just_counts <- subset(wide_per_gene_low_var_psi, select = -c(gene_name))
+gene_counts_just_counts <- sapply(gene_counts_just_counts, function(x) as.numeric(as.character(x)))
+mat_gene_counts_low_var <- as.matrix(gene_counts_just_counts)
+rownames(mat_gene_counts_low_var) <- wide_per_gene_low_var_psi$gene_name
+mat_gene_counts_low_var_scale <- scale(mat_gene_counts_low_var)
+
+# generate the column annotations
+col_annot_genes <- meta %>% dplyr::select(Tissue)
+rownames(col_annot_genes) <- meta$Sample
+
+# basic heatmap
+pheatmap(mat_gene_counts_low_var_scale, scale = "none", annotation_col = col_annot_genes, annotation_colors = annot_colors)
+
+# check distribution of the counts
+per_gene_counts_low_var_psi_meta$Tissue <- factor(per_gene_counts_low_var_psi_meta$Tissue, levels = c("OralEpi", "Aboral"))
+
+ggplot(per_gene_counts_low_var_psi_meta, aes(x=count)) + geom_bar(position = "stack") + theme_bw() + facet_grid(. ~ Tissue)
+ggplot(per_gene_counts_low_var_psi_meta, aes(x=count, fill=Tissue)) + geom_bar(position = "stack") + theme_bw() 
+
 
 ```
 
-There was only one significant event.
-
-## What if I run spladder with the geneExt-extended gtf file?
-
-Within this repo:
-
-```{bash, eval=FALSE}
-cd output_RNA
-mkdir splicing
-cd splicing
-
-cp ../../references/Pocillopora_acuta_HIv2.gtf .
-cp ../../references/geneext/Pocillopora_acuta_GeneExt.gtf .
-nano alignments.txt
-```
-
-Enter the following, one bam file path per line:
-
-```{bash, eval=FALSE}
-output_RNA/hisat2/LCM_4.bam
-output_RNA/hisat2/LCM_5.bam
-output_RNA/hisat2/LCM_8.bam
-output_RNA/hisat2/LCM_9.bam
-output_RNA/hisat2/LCM_15.bam
-output_RNA/hisat2/LCM_16.bam
-output_RNA/hisat2/LCM_20.bam
-output_RNA/hisat2/LCM_21.bam
-output_RNA/hisat2/LCM_26.bam
-output_RNA/hisat2/LCM_27.bam
-```
-
-Run spladder build:
-
-```{bash, eval=FALSE}
-nano scripts/spladder_build_ext.sh
-```
-
-```{bash, eval=FALSE}
-#!/usr/bin/env bash
-#SBATCH --ntasks=1 --cpus-per-task=6 #split one task over multiple CPU
-#SBATCH --mem=250GB
-#SBATCH -t 48:00:00
-#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
-#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
-#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
-#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
-
-module load conda/latest
-conda activate /work/pi_hputnam_uri_edu/conda/envs/spladder
-
-spladder_dir="output_RNA/splicing"
-out_dir="/scratch3/workspace/zdellaert_uri_edu-shared/spladder_out_ext"
-
-mkdir -p ${out_dir}
-
-spladder build --bams ${spladder_dir}/alignments.txt \
-               --annotation ${spladder_dir}/Pocillopora_acuta_GeneExt.gtf \
-               --outdir ${out_dir} \
-               --parallel 4 \
-               --verbose
-```
-
-
-```{bash, eval=FALSE}
-cd output_RNA/splicing
-nano Aboral.txt
-```
-
-Enter the following, one bam file path per line:
-
-```{bash, eval=FALSE}
-output_RNA/hisat2/LCM_4.bam
-output_RNA/hisat2/LCM_9.bam
-output_RNA/hisat2/LCM_16.bam
-output_RNA/hisat2/LCM_21.bam
-output_RNA/hisat2/LCM_27.bam
-```
-
-```{bash, eval=FALSE}
-nano Oral.txt
-```
-
-Enter the following, one bam file path per line:
-
-```{bash, eval=FALSE}
-output_RNA/hisat2/LCM_5.bam
-output_RNA/hisat2/LCM_8.bam
-output_RNA/hisat2/LCM_15.bam
-output_RNA/hisat2/LCM_20.bam
-output_RNA/hisat2/LCM_26.bam
-```
-
-
-```{bash, eval=FALSE}
-nano scripts/spladder_test_ext.sh
-```
-
-```{bash, eval=FALSE}
-#!/usr/bin/env bash
-#SBATCH --ntasks=1 --cpus-per-task=12 #split one task over multiple CPU
-#SBATCH --mem=250GB
-#SBATCH -t 48:00:00
-#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
-#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
-#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
-#SBATCH -D /project/pi_hputnam_uri_edu/zdellaert/LaserCoral
-
-module load conda/latest
-conda activate /work/pi_hputnam_uri_edu/conda/envs/spladder
-
-spladder_dir="output_RNA/splicing"
-out_dir="/scratch3/workspace/zdellaert_uri_edu-shared/spladder_out_ext"
-
-spladder test --conditionA ${spladder_dir}/Oral.txt \
-              --conditionB ${spladder_dir}/Aboral.txt \
-              --labelA Oral --labelB Aboral \
-              --diagnose-plots \
-              --parallel 12 \
-              --outdir ${out_dir}
-```

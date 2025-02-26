@@ -236,6 +236,29 @@ pheatmap(sampleDistMatrix,
 ## Principal component plot of the samples
 
 ```{r}
+pcaData <- plotPCA(vsd, intgroup=c("Tissue", "Fragment"), returnData=TRUE, ntop = 14464)
+
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+PCA <- ggplot(pcaData, aes(PC1, PC2, color=Tissue, shape=Fragment)) +
+  geom_point(size=2) +
+  scale_color_manual(values = c("Aboral" = "mediumpurple1", "OralEpi" = "palegreen3"))+
+  xlab(paste0("PC1: ",percentVar[1],"% variance")) +
+  ylab(paste0("PC2: ",percentVar[2],"% variance")) + 
+  coord_fixed() + theme_bw()
+
+save_ggplot(PCA, "../output_RNA/differential_expression/PCA_allgenes")
+
+PCA_small <- ggplot(pcaData, aes(PC1, PC2, color=Tissue)) +
+  geom_point(size=2) +
+  scale_color_manual(values = c("Aboral" = "mediumpurple1", "OralEpi" = "palegreen3"))+
+  xlab(paste0("PC1: ",percentVar[1],"% variance")) +
+  ylab(paste0("PC2: ",percentVar[2],"% variance")) + 
+  coord_fixed() + theme_bw()
+
+ggsave(filename = paste0("../output_RNA/differential_expression/PCA_allgenes_small", ".png"), plot = PCA_small, width = 4, height = 2.5, units = "in", dpi = 300)
+```
+
+```{r}
 pcaData <- plotPCA(vsd, intgroup=c("Tissue", "Fragment"), returnData=TRUE)
 
 percentVar <- round(100 * attr(pcaData, "percentVar"))
