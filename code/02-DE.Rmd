@@ -381,6 +381,11 @@ Biomin <- Biomin %>%
 Biomin$def_short <- ifelse(nchar(Biomin$definition) > 40, 
                             paste0(substr(Biomin$definition, 1, 37), "..."), 
                             Biomin$definition)
+
+Biomin_filtered_counts <- filtered_counts[(rownames(filtered_counts) %in% Biomin$query),]
+
+
+write.csv(Biomin_filtered_counts, "../output_RNA/differential_expression/Biomin_filtered_counts.csv")
 ```
 
 
