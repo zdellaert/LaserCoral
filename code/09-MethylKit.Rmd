@@ -288,15 +288,15 @@ ggplot(plot_data, aes(x = DML_methdiff, y = log2FoldChange)) +
   theme_minimal()
 ```
 ```{r}
-# Find overlaps between DMLs and transcripts
-DMLs_in_genes <- regionCounts(meth_filter_destrand, regions=transcripts)
+# Find overlaps between methylated loci and transcripts
+MLs_in_genes <- regionCounts(meth_filter_destrand, regions=transcripts)
 
-#DMLs_in_genes <- getData(DMLs_in_genes)
-DMLs_in_genes$gene_id <- transcripts$gene_id[match(paste(DMLs_in_genes$chr, DMLs_in_genes$start, DMLs_in_genes$end), paste(seqnames(transcripts), start(transcripts), end(transcripts)))]
+#MLs_in_genes <- getData(MLs_in_genes)
+MLs_in_genes$gene_id <- transcripts$gene_id[match(paste(MLs_in_genes$chr, MLs_in_genes$start, MLs_in_genes$end), paste(seqnames(transcripts), start(transcripts), end(transcripts)))]
 
-percent_meth <- percMethylation(DMLs_in_genes)
+percent_meth <- percMethylation(MLs_in_genes)
 percent_meth <- as.data.frame(percent_meth)
-percent_meth$gene_id <- DMLs_in_genes$gene_id 
+percent_meth$gene_id <- MLs_in_genes$gene_id 
 
 percent_meth <- percent_meth %>% rowwise() %>%
   mutate(percent_meth_ALL = mean(c_across(starts_with("LCM")), na.rm = TRUE)) %>%
@@ -404,3 +404,41 @@ ggplot(plot_data, aes(y = log2(tissue_mean_counts), x = tissue_percent_meth, col
   theme_minimal()
 ```
 
+## Can i get methylation in FPKM format instead of % methylation?
+
+
+
+## Appendix: Methylation percent count matrix
+
+```{r}
+percent_meth_5x_orig <- read.csv("../output_WGBS/methylseq_V3_bwa_test/gene_body_methylation_5x.csv") 
+
+percent_meth_5x <-percent_meth_5x_orig %>% filter(context=="CpG")
+percent_meth_5x <- percent_meth_5x %>% select(transcript_id, methylation, sample)
+percent_meth_5x <- percent_meth_5x %>% pivot_wider(names_from = sample, values_from = methylation )
+
+percent_meth_5x <-percent_meth_5x %>% column_to_rownames(var = "transcript_id") 
+
+write.csv(percent_meth_5x, "../output_WGBS/methylseq_V3_bwa_test/gene_body_CpG_matrix_5x.csv")
+```
+
+
+## Appendix: Joining percent methylation data to annotations:
+
+```{r}
+Biomin <- read.csv("../references/Pacuta_Biomin.csv") %>% dplyr::rename("query" = Pocillopora_acuta_best_hit) %>% select(-c(accessionnumber.geneID, Ref))
+
+Biomin <- Biomin %>%
+  group_by(query,List) %>%
+  summarize(definition = paste(unique(definition), collapse = ","))
+
+Biomin$def_short <- ifelse(nchar(Biomin$definition) > 40, 
+                            paste0(substr(Biomin$definition, 1, 37), "..."), 
+                            Biomin$definition)
+
+#percent_meth_5x <- read.csv("../output_WGBS/methylseq_V3_bwa_test/gene_body_CpG_matrix_5x.csv") %>% dplyr::rename("query" = "gene_id") %>% select(-c(X)) 
+
+Biomin_filtered_percent_methylation <- percent_meth_5x[(rownames(percent_meth_5x) %in% Biomin$query),]
+
+write.csv(Biomin_filtered_percent_methylation, "../output_WGBS/methylseq_V3_bwa_test/Biomin_percent_methylation.csv")
+```
