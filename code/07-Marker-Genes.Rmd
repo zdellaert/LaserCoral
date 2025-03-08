@@ -15,7 +15,7 @@ always_allow_html: true
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Gene Ontology Analysis analysis of LCM RNA Data
+## Cell type Marker Gene Lists from other cnidarians
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -39,33 +39,188 @@ require("tidyverse")
 
 ## Gathering marker genes of cell types from cnidarian single cell atlases
 
-- [ ] Levy et al 2021
-- [ ] Hydra single cell atlas
-- [ ] Nematostella single cell atlas
-- [ ] Hydractinia
-- [ ] Orbicella
-- [ ] Aiptasia Cui et al 
-  - [ ] also look at their LCM
-
-### What did I do in the past:
-
-- take Spis marker genes from Levy et al 2021
-- manually download fasta files from shiny app
-- BLAST against all my genomes of interest --> could probably skip this!
-- Run orthofinder across genomes of interest
-- Get orthogroup for each Spis marker gene
-- Determine presensce of each OG in each species
-- Did not acutally use OGs to get the final marker gene list for each species
+- [X] 1 Aiptasia (Cui et al., 2023; 10.1126/sciadv.adf7108)
+- [X] 2 Hydra (Siebert et al., 2019; 10.1126/science.aav9314)
+  - Note: their published marker genes in the supplement are based on their de novo transcriptome, but they also mapped to the genome and have a seurat object for that
+- [X] 3 Hydractinia (Salamanca-Díaz et al., 2025; 10.1038/s41467-025-57168-z)
+- [X] 4 Nematostella (Cole et al., 2024;10.1186/s12983-024-00529-z)
+- [X] 5 Oculina (Valadez-Ingersoll et al., 2024; 10.1101/2024.06.20.599951)
+- [X] 6 Orbicella (del Campo et al., 2024; 10.21203/rs.3.rs-5397639/v1)
+- [X] 7 Pocillopora (Diao et al., 2025; 10.3389/fmars.2025.1551763)
+- [X] 8 Stylophora (Levy et al., 2021; 10.1016/j.cell.2021.04.005)
+- [X] 9 Xenia (Hu et al., 2020; 10.1038/s41586-020-2385-7)
 
 ### To do now:
 
 - [ ] combine marker gene lists from all species
-- [ ] run orthofinder with all these species and P acuta (maybe also Pcomp and Mcap while we're at it)
-  - [ ] or Broccoli?
-      - [ ] "O.faveolata cell clusters were identied using matching cnidarian cell type marker orthologs between our dataset and the scRNAseq datasets for Hydra vulgaris7, Nematostella vectensis 6, Stylophora  pistillata 11, and Xenia sp. 8 using Broccoli 85."
-- [ ] For each species with source marker genes map the marker gene OG to OG in target species
 - [ ] ID all genes in the OG of each species of interest as belonging to that marker gene w/ species source
 
+## Okay, lets do it?
+
+1. Rerun orthofinder with the following genomes
+   1. Aiptasia (Cui et al., 2023; 10.1126/sciadv.adf7108)
+   2. Hydra (Siebert et al., 2019; 10.1126/science.aav9314)
+   3. Hydractinia (Salamanca-Díaz et al., 2025; 10.1038/s41467-025-57168-z)
+   4. Nematostella (Cole et al., 2024;10.1186/s12983-024-00529-z)
+   5. Astrangia (used to map Oculina data by Valadez-Ingersoll et al., 2024; 10.1101/2024.06.20.599951)
+   6. Orbicella (del Campo et al., 2024; 10.21203/rs.3.rs-5397639/v1)
+   7. Pocillopora damicornis (Diao et al., 2025; 10.3389/fmars.2025.1551763)
+   8. Stylophora (Levy et al., 2021; 10.1016/j.cell.2021.04.005)
+   9. Xenia (Hu et al., 2020; 10.1038/s41586-020-2385-7)
+   10. ***Pocillopora acuta***
+   11. ***Porites compressa***
+   12. ***Montipora capitata***
+2.  Run broccoli on all those genomes
+3.  
+
+
+## Directory Structure: 
+
+All of this will be self contained in a directory called "cnidarian_marker_genes" - can be the same between LaserCoral and MultiSp repos
+
+```
+cd reference_genes/cnidarian_marker_genes/
+```
+
+### Step 1: Aquire genome protein fasta sequences
+
+```{bash}
+mkdir cnidarian_protein_fastas
+cd cnidarian_protein_fastas
+
+# 1 - Aiptasia, assembled by Baumgarten et al., 2015 (10.1073/pnas.1513318112)
+wget http://aiptasia.reefgenomics.org/download/aiptasia_genome.proteins.fa.gz
+
+# 2 - Hydra, assembled by Steele et al 2015 (https://research.nhgri.nih.gov/hydra/)
+wget https://research.nhgri.nih.gov/hydra/download/genemodels_proteins/hydra2.0_genemodels.aa.gz
+
+# 3 - Hydractinia, assembled by Kon-Nanjo et al 2023 (10.1093/g3journal/jkad107)
+wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/029/227/915/GCF_029227915.1_HSymV2.1/GCF_029227915.1_HSymV2.1_protein.faa.gz
+
+# 4 - Nematostella, assembled by Zimmermann et al., 2023 (10.1038/s41467-023-44080-7)
+wget https://simrbase.stowers.org/files/pub/nematostella/Nvec/genomes/Nvec200/aligned/tcs_v2/20240221/NV2g.20240221.protein.fa
+
+# 5 - Astrangia, assembled by Stankiewicz et al., 2025 (10.1093/g3journal/jkaf033)
+wget -O apoculata_proteins.fasta.gz https://zenodo.org/records/14110456/files/apoculata_proteins.fasta.gz?download=1
+
+# 6 - Orbicella, assembled by Young et al., 2024 (10.1186/s12864-024-10092-w)
+wget -O Orbicella_faveolata_gen_17.proteins.fa https://zenodo.org/records/10151798/files/Orbicella_faveolata_gen_17.proteins.fa?download=1
+
+# 7 - Pocillopora damicornis, assembled by Cunning et al., 2018 (10.1038/s41598-018-34459-8)
+wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/003/704/095/GCF_003704095.1_ASM370409v1/GCF_003704095.1_ASM370409v1_protein.faa.gz
+
+# 8 - Stylophora, assembled by Voolstra et al., 2017 (10.1038/s41598-017-17484-x)
+wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/002/571/385/GCF_002571385.2_Stylophora_pistillata_v1.1/GCF_002571385.2_Stylophora_pistillata_v1.1_protein.faa.gz
+
+# 9 - Xenia, assembled by Hu et al., 2020 (10.1038/s41586-020-2385-7)
+wget https://cmo.carnegiescience.edu/endosymbiosis/genome/xenSp1.proteins.fa
+
+# Pocillopora acuta, assembled by Stephens et al., 2022 (10.1093/gigascience/giac098)
+wget http://cyanophora.rutgers.edu/Pocillopora_acuta/Pocillopora_acuta_HIv2.genes.pep.faa.gz
+
+# Porites compressa, assembled by Stephens et al., 2022 (10.1093/gigascience/giac098)
+wget http://cyanophora.rutgers.edu/porites_compressa/Porites_compressa_HIv1.genes.pep.faa.gz
+
+# Montipora capitata, assembled by Stephens et al., 2022 (10.1093/gigascience/giac098)
+wget http://cyanophora.rutgers.edu/montipora/Montipora_capitata_HIv3.genes.pep.faa.gz
+
+gunzip *
+
+mv aiptasia_genome.proteins.fa Edia_proteins.faa
+mv hydra2.0_genemodels.aa Hvul_proteins.faa
+mv GCF_029227915.1_HSymV2.1_protein.faa Hsym_proteins.faa
+mv NV2g.20240221.protein.fa Nvec_proteins.faa
+mv apoculata_proteins.fasta Apoc_proteins.faa
+mv Orbicella_faveolata_gen_17.proteins.fa Ofav_proteins.faa
+mv GCF_003704095.1_ASM370409v1_protein.faa Pdam_proteins.faa
+mv GCF_002571385.2_Stylophora_pistillata_v1.1_protein.faa Spis_proteins.faa
+mv xenSp1.proteins.fa Xesp_proteins.faa
+mv Pocillopora_acuta_HIv2.genes.pep.faa Pacu_proteins.faa
+mv Porites_compressa_HIv1.genes.pep.faa Pcom_proteins.faa
+mv Montipora_capitata_HIv3.genes.pep.faa Mcap_proteins.faa
+```
+
+for reference: *file_shortname*
+
+```
+Edia_proteins.faa
+Hvul_proteins.faa
+Hsym_proteins.faa
+Nvec_proteins.faa
+Apoc_proteins.faa
+Ofav_proteins.faa
+Pdam_proteins.faa
+Spis_proteins.faa
+Xesp_proteins.faa
+Pacu_proteins.faa
+Pcom_proteins.faa
+Mcap_proteins.faa
+```
+
+## Run orthofinder on 12 cnidarian genomes
+
+```
+cd reference_genes/cnidarian_marker_genes/
+```
+
+```{bash, eval = FALSE}
+mkdir scripts
+mkdir scripts/outs_errs
+
+nano scripts/orthofinder.sh
+```
+
+```{bash, eval = FALSE}
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --ntasks=1 --cpus-per-task=20 #split one task over multiple CPU
+#SBATCH --mem=500GB
+#SBATCH -p cpu-preempt
+#SBATCH -t 48:00:00
+#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
+#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+
+mkdir -p output
+
+# run orthofinder with 20 threads
+/work/pi_hputnam_uri_edu/pgrams/OrthoFinder/orthofinder -f cnidarian_protein_fastas/ -t 20 -o output/orthofinder_results/
+```
+
+## Running broccoli on 12 cnidarian genomes
+
+```
+cd reference_genes/cnidarian_marker_genes/
+nano scripts/broccoli.sh
+```
+
+```{bash, eval = FALSE}
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --ntasks=1 --cpus-per-task=20 #split one task over multiple CPU
+#SBATCH --mem=500GB
+#SBATCH -p cpu-preempt
+#SBATCH -t 48:00:00
+#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80 #email you when job stops and/or fails or is nearing its time limit
+#SBATCH --error=scripts/outs_errs/"%x_error.%j" #if your job fails, the error report will be put in this file
+#SBATCH --output=scripts/outs_errs/"%x_output.%j" #once your job is completed, any final job report comments will be put in this file
+
+#load conda and activate conda environment
+module load conda/latest
+conda activate /work/pi_hputnam_uri_edu/conda/envs/env-broccoli
+
+#load additional programs needed to run broccoli
+module load uri/main
+module load diamond/2.1.7
+module load all/FastTree/2.1.11-GCCcore-12.3.0
+
+mkdir -p output/broccoli
+
+cd output/broccoli
+python ~/broccoli.py -dir ../../cnidarian_protein_fastas/ -ext '.faa' -path_fasttree FastTree -threads 8
+```
+  
+---
 
 ## Custom P. acuta BLASTP database:
 
@@ -283,5 +438,52 @@ while read -r accession; do
     sleep 1  # Avoid hitting rate limits
   fi
 done < "YinYang.txt"
+```
+
+
+## Appendix: Program installations
+
+### Install Orthofinder on unity
+
+```{bash, eval = FALSE}
+cd /work/pi_hputnam_uri_edu/pgrams
+
+wget https://github.com/davidemms/OrthoFinder/releases/latest/download/OrthoFinder.tar.gz
+
+tar xzvf OrthoFinder.tar.gz
+cd OrthoFinder/
+
+#print help 
+./orthofinder -h
+```
+
+### Install Broccoli on unity
+
+Set up conda environments and install program
+
+```{bash, eval=FALSE}
+# enter interactive session
+salloc
+
+# load conda
+module load conda/latest
+
+# create and activate environment
+conda create --prefix /work/pi_hputnam_uri_edu/conda/envs/env-broccoli python=3.8 ete3
+conda activate /work/pi_hputnam_uri_edu/conda/envs/env-broccoli
+
+# clone broccoli repo into environment
+cd /work/pi_hputnam_uri_edu/conda/envs/env-broccoli
+git clone https://github.com/rderelle/Broccoli.git
+cd Broccoli
+
+# check that the install is sucessful by running the help command
+python broccoli.py -help
+
+# Make a symlink (shortcut) to home directory
+ln -s /work/pi_hputnam_uri_edu/conda/envs/env-broccoli/Broccoli/broccoli.py ~/broccoli.py
+
+# now it can run in any directory via
+python ~/broccoli.py -help
 ```
 
