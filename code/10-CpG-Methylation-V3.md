@@ -472,7 +472,7 @@ results.
 
 ``` r
 #get list of all sample output directories and extract sample names
-sample_directories <- list.files("../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test", pattern = "_quant", full.names = TRUE, include.dirs = TRUE)
+sample_directories <- list.files("../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test_new", pattern = "_quant", full.names = TRUE, include.dirs = TRUE)
 
 sample_directories <- sample_directories[grep("min_90",sample_directories)]
 samples <- gsub("_quant","",basename(sample_directories))
@@ -483,7 +483,7 @@ all_methylation_data <- data.frame()
 conversion_eff_data <- data.frame()
 
 for (sample in samples) {
-  output_dir <- paste0("/project/pi_hputnam_uri_edu/zdellaert/LaserCoral/output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test/min_90_", sample, "_quant")
+  output_dir <- paste0("../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test_new/min_90_", sample, "_quant")
 
   # Read percent methylation data for CpG, CHG, and CHH contexts
   CpG <- read.table(file.path(output_dir, "gene_body_CpG_methylation.txt"), header=FALSE)
@@ -530,38 +530,58 @@ for (sample in samples) {
 
     ## Warning: NAs introduced by coercion
 
-    ## [1] "LCM_1 Bisulfite Conversion Efficiency:  0.986506142062552"
+    ## [1] "LCM_1 Bisulfite Conversion Efficiency:  0.986510462036031"
 
     ## Warning: NAs introduced by coercion
 
-    ## [1] "LCM_11 Bisulfite Conversion Efficiency:  0.987471049175749"
+    ## [1] "LCM_11 Bisulfite Conversion Efficiency:  0.987471481438896"
 
     ## Warning: NAs introduced by coercion
 
-    ## [1] "LCM_3 Bisulfite Conversion Efficiency:  0.988587672541927"
+    ## [1] "LCM_12 Bisulfite Conversion Efficiency:  0.987040149602644"
 
     ## Warning: NAs introduced by coercion
 
-    ## [1] "LCM_32 Bisulfite Conversion Efficiency:  0.986292382952433"
+    ## [1] "LCM_17 Bisulfite Conversion Efficiency:  0.987141758517886"
 
     ## Warning: NAs introduced by coercion
 
-    ## [1] "LCM_33 Bisulfite Conversion Efficiency:  0.985349029783099"
+    ## [1] "LCM_18 Bisulfite Conversion Efficiency:  0.985403845972864"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_24 Bisulfite Conversion Efficiency:  0.977596623138475"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_25 Bisulfite Conversion Efficiency:  0.984539842589393"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_3 Bisulfite Conversion Efficiency:  0.988588403593704"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_32 Bisulfite Conversion Efficiency:  0.986295668831883"
+
+    ## Warning: NAs introduced by coercion
+
+    ## [1] "LCM_33 Bisulfite Conversion Efficiency:  0.985355898011945"
 
 ``` r
-write.csv(all_methylation_data, "../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test/min_90_gene_body_methylation.csv",row.names = FALSE)
-write.csv(conversion_eff_data, "../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test/min_90_conversion_efficiency.csv",row.names = FALSE)
+write.csv(all_methylation_data, "../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test_new/min_90_gene_body_methylation_Version2.csv",row.names = FALSE)
+write.csv(conversion_eff_data, "../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test_new/min_90_conversion_efficiency_Version2.csv",row.names = FALSE)
 ```
 
 Analyze and plot:
 
 ``` r
-conversion_eff_data <- read.csv( "../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test/min_90_conversion_efficiency.csv", sep = ",", header = TRUE) 
-all_methylation_data <- read.csv(  "../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test/min_90_gene_body_methylation.csv", sep = ",", header = TRUE) 
+all_methylation_data <- read.csv( "../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test_new/min_90_gene_body_methylation_Version2.csv", sep = ",", header = TRUE) 
+conversion_eff_data <- read.csv(  "../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test_new/min_90_conversion_efficiency_Version2.csv", sep = ",", header = TRUE) 
 
 conversion_eff_data <- conversion_eff_data %>%
   left_join(meta_simple,by = join_by(sample == Sample)) %>%
-  mutate(sample = fct_relevel(sample, conversion_eff_data$sample[mixedorder(conversion_eff_data$sample)])) 
+  mutate(sample = fct_relevel(sample, unique(conversion_eff_data$sample)[mixedorder(unique(conversion_eff_data$sample))])) 
 
 all_methylation_data <- all_methylation_data %>% left_join(meta_simple,by = join_by(sample == Sample)) %>%
   mutate(sample = fct_relevel(sample, (unique(all_methylation_data$sample)[mixedorder(unique(all_methylation_data$sample))]))) 
@@ -575,7 +595,7 @@ ggplot(all_methylation_data, aes(x=sample, y=methylation, fill=Fragment)) +
   labs(title="Gene Body Methylation at CpG, CHG, and CHH loci", y="Mean Methylation (%)")
 ```
 
-    ## Warning: Removed 86887 rows containing non-finite outside the scale range
+    ## Warning: Removed 131739 rows containing non-finite outside the scale range
     ## (`stat_boxplot()`).
 
 ![](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
@@ -633,7 +653,7 @@ efficiency_all <- read.csv( "../output_WGBS/methylseq_V3_bwa_test/conversion_eff
 
 efficiency_5x <- read.csv( "../output_WGBS/methylseq_V3_bwa_test/conversion_efficiency_5x.csv", sep = ",", header = TRUE) 
 
-efficiency_min90 <- read.csv( "../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test/min_90_conversion_efficiency.csv", sep = ",", header = TRUE) 
+efficiency_min90 <- read.csv( "../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test_new/min_90_conversion_efficiency_Version2.csv", sep = ",", header = TRUE) 
 
 efficiency_all$filter <- "none"
 efficiency_5x$filter <- "5x_coverage"

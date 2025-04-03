@@ -1651,30 +1651,36 @@ done
 
 ## Testing what happens if I filter for min-conversion efficeincy during the methylation extraction.
 
+https://github.com/dpryan79/MethylDackel:
+
+"Excluding partially converted reads
+Some users wish to filter out reads that have evidence of incomplete bisulfite conversion. This can be determined by looking for CHH and CHG-context Cytosines in each read and determining their methylation state. Such filtering should generally be avoided, since there are regions in most genomes with at least some CHH and CHG-context Cytosine methylation, which would cause excess filtering in those regions. However, if you absolutely need to filter out only partially-converted alignments, you can do so with the --minConversionEfficiency option. The default is 0, meaning that CHH and CHG-context Cytosine conversion status is ignored. The maximum value is 1.0, meaning that 100% of the CHH and CHG-context Cytosines in an alignment must be converted to T. Note that an alignment with no CHH or CHG-context Cytosines will be given a conversion efficiency of 1.0."
+
+
 This is recommended against, but I just want to see how it affects the calculations.
 
 ```
 #!/usr/bin/env bash
 #SBATCH --export=NONE
-#SBATCH --ntasks=1 --cpus-per-task=48
-#SBATCH --mem=300GB
-#SBATCH -t 24:00:00
+#SBATCH --ntasks=1 --cpus-per-task=6
+#SBATCH --mem=200GB
+#SBATCH -t 12:00:00
 #SBATCH --mail-type=END,FAIL,TIME_LIMIT_80
 #SBATCH --error=outs_errs/"%x_error.%j"
 #SBATCH --output=outs_errs/"%x_output.%j"
 
 module load samtools/1.19.2
 module load apptainer/latest
-reference="Pocillopora_acuta_HIv2.assembly.fasta"
+reference=" ../../../references/Pocillopora_acuta_HIv2.assembly.fasta"
+
+#singularity pull https://depot.galaxyproject.org/singularity/methyldackel:0.6.1--he4a0461_7
 
 for bamFile in *.markdup.sorted.bam; do
 	prefix=$(basename $bamFile .markdup.sorted.bam)
 
-	singularity exec https://depot.galaxyproject.org/singularity/methyldackel:0.6.1--he4a0461_7 MethylDackel extract -@ 24 --CHG --CHH --cytosine_report --minConversionEfficiency 0.9 -o min_efficiency_test/min_90_${prefix} $reference $bamFile
-	singularity exec https://depot.galaxyproject.org/singularity/methyldackel:0.6.1--he4a0461_7 MethylDackel extract -@ 24 --CHG --CHH --minConversionEfficiency 0.9 -o min_efficiency_test/min_90_${prefix} $reference $bamFile
-
-	singularity exec https://depot.galaxyproject.org/singularity/methyldackel:0.6.1--he4a0461_7 MethylDackel extract -@ 24 --CHG --CHH --cytosine_report --minConversionEfficiency 0.5 -o min_efficiency_test/min_50_${prefix} $reference $bamFile
-    singularity exec https://depot.galaxyproject.org/singularity/methyldackel:0.6.1--he4a0461_7 MethylDackel extract -@ 24 --CHG --CHH --minConversionEfficiency 0.5 -o min_efficiency_test/min_50_${prefix} $reference $bamFile
+	singularity exec methyldackel:0.6.1--he4a0461_7 MethylDackel extract -@ 1 --CHG --CHH --cytosine_report --minConversionEfficiency 0.9 -o min_efficiency_test_new/min_90_${prefix} $reference $bamFile
+	singularity exec methyldackel:0.6.1--he4a0461_7 MethylDackel extract -@ 1 --CHG --CHH --minConversionEfficiency 0.9 -o min_efficiency_test_new/min_90_${prefix} $reference $bamFile
+	singularity exec methyldackel:0.6.1--he4a0461_7 MethylDackel extract -@ 1 --methylKit --minConversionEfficiency 0.9 -o min_efficiency_test_new/min_90_${prefix} $reference $bamFile
 done
 ```
 
@@ -1682,19 +1688,20 @@ done
 #!/usr/bin/env bash
 #SBATCH --export=NONE
 #SBATCH --ntasks=1 --cpus-per-task=8
-#SBATCH --mem=200GB
-#SBATCH -t 24:00:00
-#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80
-#SBATCH --error=scripts/outs_errs/"%x_error.%j"
-#SBATCH --output=scripts/outs_errs/"%x_output.%j"
+#SBATCH --mem=100GB
+#SBATCH -p cpu -t 2:00:00
+#SBATCH --error=outs_errs/"%x_error.%j"
+#SBATCH --output=outs_errs/"%x_output.%j"
 
 # load modules
 module load bedtools2/2.31.1
 
 # reference file
-Pacuta_gff="../../../../../references/Pocillopora_acuta_HIv2.gtf.cleaned.bed"
+Pacuta_gff="../../../../references/Pocillopora_acuta_HIv2.gtf.cleaned.bed"
 
 # loop through all samples - there is only one cytosine_report.txt file per sample
+
+cd min_efficiency_test_new
 
 for file in *cytosine_report.txt; do
 
@@ -1718,10 +1725,10 @@ for file in *cytosine_report.txt; do
     # extract conversion efficiency info
 
     #count unmethylated CHG
-    awk '$4 != 0' $CHG_bed | wc -l > $output_dir/efficiency.txt
+    awk '$4 == 0' $CHG_bed | wc -l > $output_dir/efficiency.txt
 
     #count unmethylated CHH
-    awk '$4 != 0' $CHH_bed | wc -l >> $output_dir/efficiency.txt
+    awk '$4 == 0' $CHH_bed | wc -l >> $output_dir/efficiency.txt
 
     #count total CHG
     cat $CHG_bed | wc -l >> $output_dir/efficiency.txt

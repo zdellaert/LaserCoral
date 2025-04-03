@@ -1,0 +1,408 @@
+---
+title: "09-MethylKit, filtered for >90% conversion efficiency"
+author: "Zoe Dellaert"
+date: "2025-02-09"
+output:
+  github_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    html_preview: true
+always_allow_html: true
+---
+
+## MethylKit - Reads filtered for >90% conversion efficiency
+
+I am identifying differentially methylated loci using methylkit based on [Yaamini Venkataraman's code](https://osf.io/u46xj)
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Managing Packages Using Renv
+
+To run this code in my project using the renv environment, run the following lines of code
+
+```{r, eval=FALSE}
+install.packages("renv") #install the package on the new computer (may not be necessary if renv bootstraps itself as expected)
+renv::restore() #reinstall all the package versions in the renv lockfile
+```
+
+## Load packages
+
+```{r packages}
+require("methylKit")
+require("tidyverse")
+require("vegan")
+require("gplots")
+require("ggplot2")
+require("ggrepel")
+require("ggpmisc")
+require("dichromat")
+require("readr")
+require("genomationData")
+require("genomation")
+
+sessionInfo() #provides list of loaded packages and version of R.
+```
+
+
+```{r}
+meta <- read.csv("../data_WGBS/LCM_WGBS_metadata.csv", sep = ",", header = TRUE) %>%
+  mutate(Section_Date = as.character(Section_Date), LCM_Date = as.character(LCM_Date),DNA_Extraction_Date = as.character(DNA_Extraction_Date))
+
+meta <- meta %>% arrange(Sample)
+```
+
+```{r}
+#file_list <- list.files("/scratch3/workspace/zdellaert_uri_edu-shared/methylseq_V3_bwa_test/bwameth/deduplicated/min_efficiency_test",pattern = "^min_90.*_CpG.methylKit$",  full.names = TRUE, include.dirs = FALSE)
+
+file_list <- list.files("../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test_new",pattern = "^min_90.*_CpG.methylKit$",  full.names = TRUE, include.dirs = FALSE)
+
+sample <- gsub("_CpG.methylKit", "", basename(file_list) )
+sample <- gsub("min_90_", "", sample)
+
+sample == meta$Sample #the files and metadata are in the same order
+
+tissue <- meta$Tissue
+tissue_binary <- gsub("Aboral", "1", tissue)
+tissue_binary <- gsub("OralEpi", "0", tissue_binary)
+tissue_binary <- as.numeric(tissue_binary)
+fragment <- meta$Fragment
+
+methylObj=methRead(as.list(file_list),
+           sample.id = as.list(sample),
+           assembly = "Pacuta",
+           treatment = tissue_binary,
+           context = "CpG",
+           mincov = 5
+           )
+
+# save(methylObj, file = "../output_WGBS/MethylKit.RData")
+```
+
+
+```{r}
+#load("../output_WGBS/MethylKit.RData")
+
+getMethylationStats(methylObj[[2]],plot=FALSE,both.strands=FALSE)
+getMethylationStats(methylObj[[2]],plot=TRUE,both.strands=FALSE)
+getCoverageStats(methylObj[[2]],plot=TRUE,both.strands=FALSE)
+getCoverageStats(methylObj[[2]],plot=TRUE,both.strands=TRUE)
+```
+
+```{r}
+filtered_methylObj=filterByCoverage(methylObj,lo.count=5,lo.perc=NULL,
+                                      hi.count=NULL,hi.perc=99.9)
+
+filtered_methylObj_norm <- filtered_methylObj %>% methylKit::normalizeCoverage(.)
+```
+
+
+```{r}
+meth_filter=methylKit::unite(filtered_methylObj_norm)
+meth_filter_destrand=methylKit::unite(filtered_methylObj_norm,destrand = TRUE)
+ 
+clusterSamples(meth_filter, dist="correlation", method="ward", plot=TRUE)
+clusterSamples(meth_filter_destrand, dist="correlation", method="ward", plot=TRUE)
+
+PCASamples(meth_filter)
+PCASamples(meth_filter_destrand)
+```
+
+```{r}
+getCorrelation(meth_filter_destrand,plot=TRUE)
+```
+
+### batch effects 
+
+```{r}
+as=assocComp(mBase=meth_filter_destrand,dplyr::select(meta,c("PCR_ReAmp_Cycles", "Fragment")))
+as
+```
+
+
+### other possible filtering
+
+```{r}
+# get percent methylation matrix
+pm=percMethylation(meth_filter_destrand)
+
+# calculate standard deviation of CpGs
+sds=matrixStats::rowSds(pm)
+
+# Visualize the distribution of the per-CpG standard deviation
+# to determine a suitable cutoff
+hist(sds, breaks = 100)
+
+# keep only CpG with standard deviations larger than 2%
+meth <- meth_filter_destrand[sds > 2]
+
+# This leaves us with this number of CpG sites
+nrow(meth_filter_destrand)
+nrow(meth)
+```
+
+
+### Identify DML
+
+```{r}
+DMLStats_Tissue <- methylKit::calculateDiffMeth(meth_filter_destrand, overdispersion = "MN", test = "Chisq", mc.cores = 8) #Calculate differential methylation statistics and include covariate information.
+
+head(DMLStats_Tissue) #Look at differential methylation output
+```
+
+```{r}
+# Filter DMRs with q-value < 0.05
+significant_dmg <- getData(DMLStats_Tissue[DMLStats_Tissue$qvalue < 0.1, ])
+
+# Create a data frame for plotting
+plot_data <- data.frame(
+  chr = significant_dmg$chr,
+  start = significant_dmg$start,
+  meth.diff = significant_dmg$meth.diff
+)
+
+# Count the number of positive and negative methylation differences
+positive_count <- sum(significant_dmg$meth.diff > 0)
+negative_count <- sum(significant_dmg$meth.diff < 0)
+
+# Plot with counts added to the quadrants
+ggplot(plot_data, aes(x = start, y = meth.diff)) +
+  geom_point(alpha = 0.5) +  # Set alpha to reduce point transparency
+  theme_minimal() +
+  labs(title = "Significant Differentially Methylated Regions (q-value < 0.05)",
+       x = "Genomic Position (start)",
+       y = "Methylation Difference (%)") +
+  theme(legend.position = "none") +  # Remove the legend
+  # Add the count of positive and negative methylation differences as text annotations
+  annotate("text", x = Inf, y = Inf, label = paste("Positive:", positive_count), 
+           hjust = 1.1, vjust = 1.1, size = 4, color = "blue") +
+  annotate("text", x = Inf, y = -Inf, label = paste("Negative:", negative_count), 
+           hjust = 1.1, vjust = -0.1, size = 4, color = "red")
+
+
+dml_df <- as.data.frame(DMLStats_Tissue)
+
+# Volcano plot
+ggplot(dml_df, aes(x = meth.diff, y = -log10(qvalue))) +
+  geom_point(alpha = 0.5) +
+  geom_vline(xintercept = c(-5, 5), linetype = "dashed", color = "red") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "blue") +
+  labs(title = "Differentially Methylated Loci (DMLs)",
+       x = "Methylation Difference (%)",
+       y = "-log10(q-value)") +
+  theme_minimal()
+```
+
+
+```{r}
+DMLs <- methylKit::getMethylDiff(DMLStats_Tissue, difference = 2, qvalue = 0.05) #Identify DML based on difference threshold
+
+length(DMLs$chr) #DML
+
+head(DMLs)
+```
+## Further look at genome wide methylation
+
+```{r}
+diffMethPerChr(DMLStats_Tissue, meth.cutoff = 2, qvalue.cutoff = 0.05,cex.names=.75)
+```
+
+
+### Annotation
+
+```{r}
+require("genomationData")
+require("genomation")
+
+gff.file = "../references/Pocillopora_acuta_HIv2.gtf"
+gff = gffToGRanges(gff.file)
+head(gff)
+```
+
+
+```{r}
+exons = gffToGRanges(gff.file, filter = "exon")
+
+transcripts = gffToGRanges(gff.file, filter = "transcript")
+```
+
+```{r}
+DML_grange = as(DMLs,"GRanges")
+head(DML_grange)
+```
+
+
+```{r}
+transcripts = gffToGRanges(gff.file, filter = "transcript")
+
+# Find overlaps between DMLs and transcripts
+overlaps_transcripts <- findOverlaps(DML_grange, transcripts,ignore.strand = TRUE)
+
+# Extract matching transcript information
+DML_transcript_annot <- data.frame(
+  DML_chr = seqnames(DML_grange)[queryHits(overlaps_transcripts)],
+  DML_start = start(DML_grange)[queryHits(overlaps_transcripts)],
+  DML_end = end(DML_grange)[queryHits(overlaps_transcripts)],
+  DML_qvalue = (DML_grange$qvalue)[queryHits(overlaps_transcripts)],
+  DML_methdiff = (DML_grange$meth.diff)[queryHits(overlaps_transcripts)],
+  transcript_chr = seqnames(transcripts)[subjectHits(overlaps_transcripts)],
+  transcript_start = start(transcripts)[subjectHits(overlaps_transcripts)],
+  transcript_end = end(transcripts)[subjectHits(overlaps_transcripts)],
+  transcript_id = transcripts$transcript_id[subjectHits(overlaps_transcripts)],
+  gene_id = transcripts$gene_id[subjectHits(overlaps_transcripts)]
+)
+
+# View first few rows
+head(DML_transcript_annot)
+```
+
+## Are any DMGs DMLs?
+
+```{r}
+#load in DESeq results
+DESeq <- read.csv("../output_RNA/differential_expression/DESeq_results.csv", header = TRUE) %>% dplyr::rename("query" ="X")
+
+#make dataframes of just differentially expressed genes for each LFC direction
+DE_05_Aboral <- DESeq %>% filter(padj < 0.05 & log2FoldChange > 0)
+DE_05_OralEpi <- DESeq %>% filter(padj < 0.05& log2FoldChange < 0)
+DE_05 <- DESeq %>% filter(padj < 0.05)
+
+DML_transcript_annot[DML_transcript_annot$transcript_id %in% DE_05$query,]
+
+DE_05[DE_05$query %in% DML_transcript_annot$transcript_id,]
+```
+
+
+```{r}
+plot_data <- merge(DML_transcript_annot, DESeq, by.x = "transcript_id", by.y = "query")
+
+ggplot(plot_data, aes(x = DML_methdiff, y = log2FoldChange)) +
+  geom_point(aes(color = padj < 0.05), size = 3) +
+  geom_text_repel(aes(label = ifelse(padj < 0.05, transcript_id, "")), max.overlaps = 20) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_color_manual(values = c("grey", "red")) +
+  labs(x = "Methylation Difference (%)", 
+       y = "RNA-seq: Log2FoldChange",
+       title = "Differentially methylated loci (DMLs) vs. Gene Expression",
+       color = "Significant DEGs") +
+  theme_minimal()
+```
+```{r}
+# Find overlaps between methylated loci and transcripts
+MLs_in_genes <- regionCounts(meth_filter_destrand, regions=transcripts)
+
+#MLs_in_genes <- getData(MLs_in_genes)
+MLs_in_genes$gene_id <- transcripts$gene_id[match(paste(MLs_in_genes$chr, MLs_in_genes$start, MLs_in_genes$end), paste(seqnames(transcripts), start(transcripts), end(transcripts)))]
+
+percent_meth <- percMethylation(MLs_in_genes)
+percent_meth <- as.data.frame(percent_meth)
+percent_meth$gene_id <- MLs_in_genes$gene_id 
+
+percent_meth <- percent_meth %>% rowwise() %>%
+  mutate(percent_meth_ALL = mean(c_across(starts_with("LCM")), na.rm = TRUE)) %>%
+  ungroup()
+
+percent_meth <- percent_meth %>% rowwise() %>%
+  mutate(Oral = mean(c_across(meta$Sample[meta$Tissue=="OralEpi"]), na.rm = TRUE)) %>%
+  mutate(Aboral = mean(c_across(meta$Sample[meta$Tissue=="Aboral"]), na.rm = TRUE)) %>%
+  ungroup()
+  
+percent_meth_long <- percent_meth %>% pivot_longer(
+                                      cols = c(Oral,Aboral),
+                                      names_to = "Tissue",
+                                      values_to = "tissue_percent_meth"
+)
+```
+
+```{r}
+plot_data <- merge(percent_meth, DESeq, by.x = "gene_id", by.y = "query")
+
+ggplot(plot_data, aes(y = baseMean, x = percent_meth_ALL)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2")) +
+  labs(x = "Average CpG % methylation of gene", y = "DeSeq2 BaseMean", 
+       title = "Gene Methylation vs Expression") +
+  theme_minimal()
+
+ggplot(plot_data, aes(y = log2(baseMean), x = percent_meth_ALL)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2")) +
+  labs(x = "Average CpG % methylation of gene", y = "Log2(DeSeq2 BaseMean)", 
+       title = "Gene Methylation vs Expression") +
+  theme_minimal()
+
+ggplot(plot_data, aes(y = abs(log2FoldChange), x = percent_meth_ALL)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm") +  stat_poly_eq(use_label("eq", "R2")) +
+  labs(x = "Average CpG % methylation of gene", y = "Abs(DeSeq2 Log2FoldChange)", 
+       title = "Gene Methylation vs Expression") +
+  theme_minimal()
+
+# Create the plot
+ggplot(plot_data, aes(x = percent_meth_ALL, y = log2FoldChange)) +
+  geom_point(aes(color = padj < 0.05)) +
+  #geom_text_repel(aes(label = ifelse(padj < 0.05, gene_id, "")), max.overlaps = 20) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_color_manual(values = c("grey", "red")) +
+  labs(x = "Average CpG % methylation of gene", 
+       y = "RNA-seq: Log2FoldChange",
+       title = "Differentially methylated loci (DMLs) vs. Gene Expression",
+       color = "Significant DEGs") +
+  theme_minimal()
+```
+
+```{r}
+plot_data <- merge(percent_meth_long, DESeq, by.x = "gene_id", by.y = "query")
+
+ggplot(plot_data, aes(y = abs(log2FoldChange), x = tissue_percent_meth, color=Tissue)) +
+  geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
+  labs(x = "Average CpG % methylation of gene", y = "Abs(DeSeq2 Log2FoldChange)", 
+       title = "Gene Methylation vs Expression") +
+  theme_minimal()
+```
+
+### Read counts
+
+RNA metadata:
+
+```{r}
+meta_RNA <- read.csv("../data_RNA/LCM_RNA_metadata.csv") %>%
+            dplyr::arrange(Sample) %>%
+            mutate(across(c(Tissue, Fragment, Section_Date, LCM_Date), factor)) # Set variables as factors 
+
+meta_RNA$Tissue <- factor(meta_RNA$Tissue, levels = c("OralEpi","Aboral")) #we want OralEpi to be the baseline
+```
+
+
+```{r}
+filtered_counts_RNA <- read.csv("../output_RNA/differential_expression/filtered_counts.csv") 
+rownames(filtered_counts_RNA) <- filtered_counts_RNA$X
+filtered_counts_RNA <- filtered_counts_RNA %>% dplyr::select(-X)
+filtered_counts_RNA$sum <- rowSums(filtered_counts_RNA)
+filtered_counts_RNA$gene_id <- rownames(filtered_counts_RNA)
+
+filtered_counts_RNA <- filtered_counts_RNA %>% rowwise() %>%
+  mutate(Oral = mean(c_across(meta_RNA$Sample[meta_RNA$Tissue=="OralEpi"]), na.rm = TRUE)) %>%
+  mutate(Aboral = mean(c_across(meta_RNA$Sample[meta_RNA$Tissue=="Aboral"]), na.rm = TRUE)) %>%
+  ungroup()
+  
+filtered_counts_RNA_long <- filtered_counts_RNA %>% pivot_longer(
+                                      cols = c(Oral,Aboral),
+                                      names_to = "Tissue",
+                                      values_to = "tissue_mean_counts"
+)
+```
+
+```{r}
+plot_data <- merge(percent_meth_long, filtered_counts_RNA_long, by = c("gene_id", "Tissue"))
+
+ggplot(plot_data, aes(y = log2(tissue_mean_counts), x = tissue_percent_meth, color=Tissue)) +
+  geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
+  labs(x = "Average CpG % methylation of gene", y = "Mean counts, all samples", 
+       title = "Gene Methylation vs Expression") +
+  theme_minimal()
+```

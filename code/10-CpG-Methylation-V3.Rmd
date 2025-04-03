@@ -283,7 +283,7 @@ Methyldackel has a setting where it can only extract methylation counts from rea
 
 ```{r}
 #get list of all sample output directories and extract sample names
-sample_directories <- list.files("../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test", pattern = "_quant", full.names = TRUE, include.dirs = TRUE)
+sample_directories <- list.files("../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test_new", pattern = "_quant", full.names = TRUE, include.dirs = TRUE)
 
 sample_directories <- sample_directories[grep("min_90",sample_directories)]
 samples <- gsub("_quant","",basename(sample_directories))
@@ -294,7 +294,7 @@ all_methylation_data <- data.frame()
 conversion_eff_data <- data.frame()
 
 for (sample in samples) {
-  output_dir <- paste0("/project/pi_hputnam_uri_edu/zdellaert/LaserCoral/output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test/min_90_", sample, "_quant")
+  output_dir <- paste0("../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test_new/min_90_", sample, "_quant")
 
   # Read percent methylation data for CpG, CHG, and CHH contexts
   CpG <- read.table(file.path(output_dir, "gene_body_CpG_methylation.txt"), header=FALSE)
@@ -338,19 +338,19 @@ for (sample in samples) {
   conversion_eff_data <- rbind(conversion_eff_data, data.frame(sample=sample, efficiency=conversion_efficiency, total_CHH_CHG=total_cytosines))
 }
 
-write.csv(all_methylation_data, "../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test/min_90_gene_body_methylation.csv",row.names = FALSE)
-write.csv(conversion_eff_data, "../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test/min_90_conversion_efficiency.csv",row.names = FALSE)
+write.csv(all_methylation_data, "../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test_new/min_90_gene_body_methylation_Version2.csv",row.names = FALSE)
+write.csv(conversion_eff_data, "../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test_new/min_90_conversion_efficiency_Version2.csv",row.names = FALSE)
 ```
 
 Analyze and plot:
 
 ```{r}
-conversion_eff_data <- read.csv( "../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test/min_90_conversion_efficiency.csv", sep = ",", header = TRUE) 
-all_methylation_data <- read.csv(  "../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test/min_90_gene_body_methylation.csv", sep = ",", header = TRUE) 
+all_methylation_data <- read.csv( "../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test_new/min_90_gene_body_methylation_Version2.csv", sep = ",", header = TRUE) 
+conversion_eff_data <- read.csv(  "../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test_new/min_90_conversion_efficiency_Version2.csv", sep = ",", header = TRUE) 
 
 conversion_eff_data <- conversion_eff_data %>%
   left_join(meta_simple,by = join_by(sample == Sample)) %>%
-  mutate(sample = fct_relevel(sample, conversion_eff_data$sample[mixedorder(conversion_eff_data$sample)])) 
+  mutate(sample = fct_relevel(sample, unique(conversion_eff_data$sample)[mixedorder(unique(conversion_eff_data$sample))])) 
 
 all_methylation_data <- all_methylation_data %>% left_join(meta_simple,by = join_by(sample == Sample)) %>%
   mutate(sample = fct_relevel(sample, (unique(all_methylation_data$sample)[mixedorder(unique(all_methylation_data$sample))]))) 
@@ -392,7 +392,6 @@ ggplot(summary, aes(x=mean_methylation, y=efficiency, color=Fragment, label=samp
   labs(y="bisulfite conversion efficiency")
 ```
 
-
 ## Total counts comparisons
 
 ```{r}
@@ -400,7 +399,7 @@ efficiency_all <- read.csv( "../output_WGBS/methylseq_V3_bwa_test/conversion_eff
 
 efficiency_5x <- read.csv( "../output_WGBS/methylseq_V3_bwa_test/conversion_efficiency_5x.csv", sep = ",", header = TRUE) 
 
-efficiency_min90 <- read.csv( "../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test/min_90_conversion_efficiency.csv", sep = ",", header = TRUE) 
+efficiency_min90 <- read.csv( "../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test_new/min_90_conversion_efficiency_Version2.csv", sep = ",", header = TRUE) 
 
 efficiency_all$filter <- "none"
 efficiency_5x$filter <- "5x_coverage"
