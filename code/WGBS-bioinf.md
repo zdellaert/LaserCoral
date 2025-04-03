@@ -1745,7 +1745,7 @@ done
 
 First: See [This markdown](https://github.com/zdellaert/LaserCoral/blob/main/code/10-CpG-Methylation-V3.md) for conversion efficiency info for the whole dataset, the dataset with 5X coverage, and the dataset filtered for > 90% conversion efficiency.
 
-![alt text](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-11-1.png) ![alt text](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-11-2.png) ![alt text](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-11-3.png)
+![alt text](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-10-1.png) ![alt text](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-10-2.png) ![alt text](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-10-3.png)
 
 Two main files of DML/DMG interpretation:
 
@@ -1774,5 +1774,6 @@ Takeaways:
 Takeaways:
 - There are 3 DMLs, 0 of which occur in gene bodies (DMGs)
 - No DMGs exist in this dataset post-filtering, so none of these overlap with DEGs
+- Only 332 genes remain in the dataset with methylation data post-filtering
 
 ![alt text](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-25-1.png) ![alt text](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-22-1.png)
