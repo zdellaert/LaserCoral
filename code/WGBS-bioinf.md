@@ -1740,3 +1740,34 @@ for file in *cytosine_report.txt; do
     # conversion efficiency = (efficiency.txt[1] + efficiency.txt[2])/(efficiency.txt[3] + efficiency.txt[4])
 done
 ```
+
+## Summary / Conclusions of where we stand with this data.
+
+First: See [This markdown](https://github.com/zdellaert/LaserCoral/blob/main/code/10-CpG-Methylation-V3.md) for conversion efficiency info for the whole dataset, the dataset with 5X coverage, and the dataset filtered for > 90% conversion efficiency.
+
+![alt text](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-11-1.png) ![alt text](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-11-2.png) ![alt text](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-11-3.png)
+
+Two main files of DML/DMG interpretation:
+
+1. [Whole Dataset, Mapped with BWA Meth (V3 trimming)](https://github.com/zdellaert/LaserCoral/blob/main/code/09-MethylKit.md)
+
+Takeaways:
+
+- There are 59 DMLs, 42 of which occur in gene bodies (DMGs)
+- 4 DMGs are also DEGs
+    - Pocillopora_acuta_HIv2___TS.g29592.t2
+    - Pocillopora_acuta_HIv2___TS.g3401.t1
+    - Pocillopora_acuta_HIv2___RNAseq.g1208.t1
+    - Pocillopora_acuta_HIv2___TS.g19623.t2
+
+| Query                                     | BaseMean  | Log2FoldChange | lfcSE  | PValue       | Padj        | QValue     | MethDiff  |
+|-------------------------------------------|-----------|---------------|--------|-------------|------------|------------|-----------|
+| Pocillopora_acuta_HIv2___TS.g3401.t1      | 92.69481  | -11.2018977   | 3.6354 | 6.46e-08    | 1.47e-06   | 0.02159195 | 15.20642  |
+| Pocillopora_acuta_HIv2___TS.g19623.t2     | 269.40223 | -0.7395856    | 1.4279 | 1.10e-06    | 1.71e-05   | 0.04578924 | 15.57377  |
+| Pocillopora_acuta_HIv2___RNAseq.g1208.t1  | 544.93022 | 0.7332125     | 1.4577 | 4.65e-05    | 4.29e-04   | 0.04856409 | 19.30342  |
+| Pocillopora_acuta_HIv2___TS.g29592.t2     | 198.58417 | -0.4754287    | 1.1099 | 1.41e-03    | 7.88e-03   | 0.01725888 | 27.85388  |
+
+2. [Same as above, but reads filtered for > 90% conversion efficiency](https://github.com/zdellaert/LaserCoral/blob/main/code/09-MethylKit-ConvFilt.md)
+
+Takeaways:
+- No DMGs exist in this dataset post-filtering, so none of these overlap with DEGs
