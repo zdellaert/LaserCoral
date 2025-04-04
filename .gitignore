@@ -89,6 +89,6 @@ output_WGBS/*/methyldackel/*quant
 *5x_sorted.tab_gene
 *5x_sorted.tab
 output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test/*
-output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test_new/*
+output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test_new*
 output_RNA/splicing/Pocillopora_acuta_HIv2.gtf*
 output_WGBS/methylseq_V3_bwa_test/methyldackel/methyldackel:0.6.1--he4a0461_7
