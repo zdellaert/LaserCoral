@@ -1753,27 +1753,28 @@ Two main files of DML/DMG interpretation:
 
 Takeaways:
 
-- There are 59 DMLs, 42 of which occur in gene bodies (DMGs)
+- After filtering, there are 12,252 CpGs in the dataset with 5X coverage, and those of which that occur in gene bodies cover 1107 unique genes out of 33,730 in the genome
+- There are 59 DMLs, 42 of which occur in gene bodies (covering 21 unique genes, which we can consider DMGs)
 - 4 DMGs are also DEGs
     - Pocillopora_acuta_HIv2___TS.g29592.t2
     - Pocillopora_acuta_HIv2___TS.g3401.t1
     - Pocillopora_acuta_HIv2___RNAseq.g1208.t1
     - Pocillopora_acuta_HIv2___TS.g19623.t2
 
-| Query                                     | BaseMean  | Log2FoldChange | lfcSE  | PValue       | Padj        | QValue     | MethDiff  |
-|-------------------------------------------|-----------|---------------|--------|-------------|------------|------------|-----------|
-| Pocillopora_acuta_HIv2___TS.g3401.t1      | 92.69481  | -11.2018977   | 3.6354 | 6.46e-08    | 1.47e-06   | 0.02159195 | 15.20642  |
-| Pocillopora_acuta_HIv2___TS.g19623.t2     | 269.40223 | -0.7395856    | 1.4279 | 1.10e-06    | 1.71e-05   | 0.04578924 | 15.57377  |
-| Pocillopora_acuta_HIv2___RNAseq.g1208.t1  | 544.93022 | 0.7332125     | 1.4577 | 4.65e-05    | 4.29e-04   | 0.04856409 | 19.30342  |
-| Pocillopora_acuta_HIv2___TS.g29592.t2     | 198.58417 | -0.4754287    | 1.1099 | 1.41e-03    | 7.88e-03   | 0.01725888 | 27.85388  |
+| Query                                     | BaseMean  | Log2FoldChange | lfcSE  | PValue       | Padj        | QValue     | MethDiff  | SwissProt Annotation |
+|-------------------------------------------|-----------|---------------|--------|-------------|------------|------------|-----------|------|
+| Pocillopora_acuta_HIv2___TS.g3401.t1      | 92.69481  | -11.2018977   | 3.6354 | 6.46e-08    | 1.47e-06   | 0.02159195 | 15.20642  | Asparagine synthetase domain-containing protein 1 |
+| Pocillopora_acuta_HIv2___TS.g19623.t2     | 269.40223 | -0.7395856    | 1.4279 | 1.10e-06    | 1.71e-05   | 0.04578924 | 15.57377  | NACHT domain- and WD repeat-containing protein 1	(negative regulation of NF-kappaB transcription factor activity [GO:0032088]; positive regulation of gene expression [GO:0010628]) |
+| Pocillopora_acuta_HIv2___RNAseq.g1208.t1  | 544.93022 | 0.7332125     | 1.4577 | 4.65e-05    | 4.29e-04   | 0.04856409 | 19.30342  | Protein white (ATP binding, ATP hydrolysis activity, pigment binding) |
+| Pocillopora_acuta_HIv2___TS.g29592.t2     | 198.58417 | -0.4754287    | 1.1099 | 1.41e-03    | 7.88e-03   | 0.01725888 | 27.85388  | N-fatty-acyl-amino acid synthase/hydrolase PM20D1.2 |
 
 ![alt text](09-MethylKit_files/figure-gfm/unnamed-chunk-25-1.png) ![alt text](09-MethylKit_files/figure-gfm/unnamed-chunk-22-1.png)
 
 2. [Same as above, but reads filtered for > 90% conversion efficiency](https://github.com/zdellaert/LaserCoral/blob/main/code/09-MethylKit-ConvFilt.md)
 
 Takeaways:
+- After filtering, there are 2,987 CpGs in the dataset with 5X coverage, and those of which that occur in gene bodies cover 166 unique genes out of 33,730 in the genome)
 - There are 3 DMLs, 0 of which occur in gene bodies (DMGs)
 - No DMGs exist in this dataset post-filtering, so none of these overlap with DEGs
-- Only 332 genes remain in the dataset with methylation data post-filtering
 
 ![alt text](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-25-1.png) ![alt text](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-22-1.png)

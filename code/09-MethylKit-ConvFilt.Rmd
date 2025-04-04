@@ -256,6 +256,9 @@ DML_transcript_annot <- data.frame(
 
 # View first few rows
 head(DML_transcript_annot)
+
+#how many genes do these consist of?
+length(unique(DML_transcript_annot$gene_id))
 ```
 
 ## Are any DMGs DMLs?
@@ -290,9 +293,14 @@ ggplot(plot_data, aes(x = DML_methdiff, y = log2FoldChange)) +
        color = "Significant DEGs") +
   theme_minimal()
 ```
+
 ```{r}
+# how many CpG sites are there after filtering?
+dim(meth_filter_destrand)
+
 # Find overlaps between methylated loci and transcripts
 MLs_in_genes <- regionCounts(meth_filter_destrand, regions=transcripts)
+nrow(MLs_in_genes)
 
 #MLs_in_genes <- getData(MLs_in_genes)
 MLs_in_genes$gene_id <- transcripts$gene_id[match(paste(MLs_in_genes$chr, MLs_in_genes$start, MLs_in_genes$end), paste(seqnames(transcripts), start(transcripts), end(transcripts)))]

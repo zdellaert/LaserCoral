@@ -114,7 +114,7 @@ getCorrelation(meth_filter_destrand,plot=TRUE)
 ### batch effects 
 
 ```{r}
-as=assocComp(mBase=meth_filter_destrand,select(meta,c("PCR_ReAmp_Cycles", "Fragment")))
+as=assocComp(mBase=meth_filter_destrand,dplyr::select(meta,c("PCR_ReAmp_Cycles", "Fragment")))
 as
 ```
 
@@ -253,6 +253,9 @@ DML_transcript_annot <- data.frame(
 
 # View first few rows
 head(DML_transcript_annot)
+
+#how many genes do these consist of?
+length(unique(DML_transcript_annot$gene_id))
 ```
 
 ## Are any DMGs DMLs?
@@ -288,8 +291,11 @@ ggplot(plot_data, aes(x = DML_methdiff, y = log2FoldChange)) +
   theme_minimal()
 ```
 ```{r}
+dim(meth_filter_destrand)
+
 # Find overlaps between methylated loci and transcripts
 MLs_in_genes <- regionCounts(meth_filter_destrand, regions=transcripts)
+nrow(MLs_in_genes)
 
 #MLs_in_genes <- getData(MLs_in_genes)
 MLs_in_genes$gene_id <- transcripts$gene_id[match(paste(MLs_in_genes$chr, MLs_in_genes$start, MLs_in_genes$end), paste(seqnames(transcripts), start(transcripts), end(transcripts)))]
@@ -378,7 +384,7 @@ meta_RNA$Tissue <- factor(meta_RNA$Tissue, levels = c("OralEpi","Aboral")) #we w
 ```{r}
 filtered_counts_RNA <- read.csv("../output_RNA/differential_expression/filtered_counts.csv") 
 rownames(filtered_counts_RNA) <- filtered_counts_RNA$X
-filtered_counts_RNA <- filtered_counts_RNA %>% select(-X)
+filtered_counts_RNA <- filtered_counts_RNA %>% dplyr::select(-X)
 filtered_counts_RNA$sum <- rowSums(filtered_counts_RNA)
 filtered_counts_RNA$gene_id <- rownames(filtered_counts_RNA)
 
