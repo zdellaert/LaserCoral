@@ -1745,7 +1745,7 @@ done
 
 First: See [This markdown](https://github.com/zdellaert/LaserCoral/blob/main/code/10-CpG-Methylation-V3.md) for conversion efficiency info for the whole dataset, the dataset with 5X coverage, and the dataset filtered for > 90% conversion efficiency.
 
-![alt text](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-10-1.png) ![alt text](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-10-2.png) ![alt text](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-10-3.png)
+![alt text](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-12-1.png) ![alt text](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-12-2.png) ![alt text](10-CpG-Methylation-V3_files/figure-gfm/unnamed-chunk-12-3.png)
 
 Two main files of DML/DMG interpretation:
 
