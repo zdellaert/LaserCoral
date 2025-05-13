@@ -1778,3 +1778,107 @@ Takeaways:
 - No DMGs exist in this dataset post-filtering, so none of these overlap with DEGs
 
 ![alt text](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-25-1.png) ![alt text](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-22-1.png)
+
+## LiBis: https://github.com/Dangertrip/LiBis?tab=readme-ov-file
+
+```
+# enter interactive session
+salloc
+
+# load conda
+module load conda/latest
+conda activate /work/pi_hputnam_uri_edu/conda/envs/env-LiBis
+
+cd ../output_WGBS
+git clone https://github.com/Dangertrip/LiBis.git
+```
+
+### test case
+
+```
+# enter interactive session
+salloc -p cpu -c 8 --mem 16G
+
+cd ../output_WGBS/LiBis/Example
+
+#wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/GCF_000001405.40_GRCh38.p14/GCF_000001405.40_GRCh38.p14_genomic.fna.gz
+#gunzip GCF_000001405.40_GRCh38.p14_genomic.fna.gz
+
+# load conda
+module load conda/latest
+conda activate /work/pi_hputnam_uri_edu/conda/envs/env-LiBis
+
+LiBis -p 8 -n sample1_mate1.fq.gz,sample1_mate2.fq.gz sample2_mate1.fq.gz,sample2_mate2.fq.gz -r GCF_000001405.40_GRCh38.p14_genomic.fna
+```
+
+### singularity attempt
+
+```
+tmux new -s 
+
+cd /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/output_WGBS
+
+wget https://github.com/Dangertrip/LiBis/archive/master.zip
+unzip master.zip
+cd LiBis-master/
+
+module load apptainer/latest
+apptainer pull libis.sif docker://conda/miniconda3-centos7
+apptainer shell libis.sif
+```
+ 
+in the shell: (Apptainer>)
+
+```
+conda create -p ./libis_env -c bioconda libis
+conda activate ./libis_env
+
+LiBis --help
+```
+
+
+### try 700000
+
+```
+salloc --mem=8G --time=3:00:00 --cpus-per-task=2
+module load conda/latest
+conda create -n libisenv -c bioconda libis
+
+conda env export -n libisenv > libis_env.yaml
+apptainer shell libis.sif
+conda env create -p ./libis_env -f libis_env.yaml
+conda activate ./libis_env
+```
+
+
+### try 780000
+
+```
+tmux new -s libis
+
+cd /project/pi_hputnam_uri_edu/zdellaert/LaserCoral/output_WGBS/Libis_Docker
+
+wget https://github.com/Dangertrip/LiBis/archive/master.zip
+unzip master.zip
+cd LiBis-master/
+nano Singularity.def
+```
+
+```
+Bootstrap: docker
+From: conda/miniconda3-centos7
+
+%post
+    conda install -c bioconda libis
+    conda clean -a
+
+%environment
+    export PATH=/opt/conda/bin:$PATH
+
+%runscript
+    exec LiBis "$@"
+```
+
+```
+singularity build libis.sif Singularity.def
+```
