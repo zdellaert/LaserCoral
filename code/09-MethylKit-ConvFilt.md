@@ -7,9 +7,15 @@ Zoe Dellaert
   efficiency](#01-methylkit---reads-filtered-for-90-conversion-efficiency)
 - [0.2 Managing Packages Using Renv](#02-managing-packages-using-renv)
 - [0.3 Load packages](#03-load-packages)
-  - [0.3.1 batch effects](#031-batch-effects)
-  - [0.3.2 other possible filtering](#032-other-possible-filtering)
-  - [0.3.3 Identify DML](#033-identify-dml)
+  - [0.3.1 Note: I changed the code below so that a CpG does not have to
+    have 5X coverage in all samples to be analyzed, and only needs 5X
+    coverage in 2 samples per group to be retained. This way we don’t
+    remove CpGs that happen to have lower coverage in a few samples or
+    one
+    tissue.](#031-note-i-changed-the-code-below-so-that-a-cpg-does-not-have-to-have-5x-coverage-in-all-samples-to-be-analyzed-and-only-needs-5x-coverage-in-2-samples-per-group-to-be-retained-this-way-we-dont-remove-cpgs-that-happen-to-have-lower-coverage-in-a-few-samples-or-one-tissue)
+  - [0.3.2 batch effects](#032-batch-effects)
+  - [0.3.3 other possible filtering](#033-other-possible-filtering)
+  - [0.3.4 Identify DML](#034-identify-dml)
 - [0.4 Further look at genome wide
   methylation](#04-further-look-at-genome-wide-methylation)
   - [0.4.1 Annotation](#041-annotation)
@@ -77,6 +83,12 @@ require("methylKit")
     ## Loading required package: IRanges
 
     ## Loading required package: GenomeInfoDb
+
+``` r
+require("parallel")
+```
+
+    ## Loading required package: parallel
 
 ``` r
 require("tidyverse")
@@ -216,8 +228,8 @@ sessionInfo() #provides list of loaded packages and version of R.
     ## tzcode source: system (glibc)
     ## 
     ## attached base packages:
-    ## [1] grid      stats4    stats     graphics  grDevices datasets  utils    
-    ## [8] methods   base     
+    ##  [1] grid      parallel  stats4    stats     graphics  grDevices datasets 
+    ##  [8] utils     methods   base     
     ## 
     ## other attached packages:
     ##  [1] genomation_1.38.0     genomationData_1.38.0 dichromat_2.0-0.1    
@@ -276,11 +288,10 @@ sessionInfo() #provides list of loaded packages and version of R.
     ## [85] BiocManager_1.30.25         cli_3.6.4                  
     ## [87] munsell_0.5.1               Rcpp_1.0.14                
     ## [89] coda_0.19-4.1               bdsmatrix_1.3-7            
-    ## [91] XML_3.99-0.18               parallel_4.4.0             
-    ## [93] MatrixModels_0.5-3          mclust_6.1.1               
-    ## [95] bitops_1.0-9                mvtnorm_1.3-3              
-    ## [97] scales_1.3.0                crayon_1.5.3               
-    ## [99] rlang_1.1.5
+    ## [91] XML_3.99-0.18               MatrixModels_0.5-3         
+    ## [93] mclust_6.1.1                bitops_1.0-9               
+    ## [95] mvtnorm_1.3-3               scales_1.3.0               
+    ## [97] crayon_1.5.3                rlang_1.1.5
 
 ``` r
 meta <- read.csv("../data_WGBS/LCM_WGBS_metadata.csv", sep = ",", header = TRUE) %>%
@@ -293,6 +304,9 @@ meta <- meta %>% arrange(Sample)
 #file_list <- list.files("/scratch3/workspace/zdellaert_uri_edu-shared/methylseq_V3_bwa_test/bwameth/deduplicated/min_efficiency_test",pattern = "^min_90.*_CpG.methylKit$",  full.names = TRUE, include.dirs = FALSE)
 
 file_list <- list.files("../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test_new",pattern = "^min_90.*_CpG.methylKit$",  full.names = TRUE, include.dirs = FALSE)
+
+#file_list <- file_list[-grep("LCM_33",file_list)]
+#meta <- meta %>% filter(Sample!="LCM_33")
 
 sample <- gsub("_CpG.methylKit", "", basename(file_list) )
 sample <- gsub("min_90_", "", sample)
@@ -308,35 +322,37 @@ tissue_binary <- gsub("Aboral", "1", tissue)
 tissue_binary <- gsub("OralEpi", "0", tissue_binary)
 tissue_binary <- as.numeric(tissue_binary)
 fragment <- meta$Fragment
-
-methylObj=methRead(as.list(file_list),
-           sample.id = as.list(sample),
-           assembly = "Pacuta",
-           treatment = tissue_binary,
-           context = "CpG",
-           mincov = 5
-           )
 ```
 
-    ## Received list of locations.
-
-    ## Reading file.
-    ## Reading file.
-    ## Reading file.
-    ## Reading file.
-    ## Reading file.
-    ## Reading file.
-    ## Reading file.
-    ## Reading file.
-    ## Reading file.
-    ## Reading file.
-
 ``` r
+# methylObj=methRead(as.list(file_list),
+#            sample.id = as.list(sample),
+#            assembly = "Pacuta",
+#            treatment = tissue_binary,
+#            context = "CpG",
+#            mincov = 5
+#            )
+
 # save(methylObj, file = "../output_WGBS/MethylKit.RData")
+
+methyl_list <- mclapply(seq_along(file_list), function(i) {
+  methRead(
+    file_list[[i]],
+    sample.id = sample[[i]],
+    assembly = "Pacuta",
+    treatment = tissue_binary[[i]],
+    context = "CpG",
+    mincov = 5
+  )
+}, mc.cores = 4) 
+
+methylObj <- new("methylRawList", methyl_list, treatment = tissue_binary)
+
+save(methylObj, file = "../output_WGBS/MethylKit_20250513.RData")
 ```
 
 ``` r
-#load("../output_WGBS/MethylKit.RData")
+#load("../output_WGBS/MethylKit_20250513.RData")
 
 getMethylationStats(methylObj[[2]],plot=FALSE,both.strands=FALSE)
 ```
@@ -355,39 +371,52 @@ getMethylationStats(methylObj[[2]],plot=FALSE,both.strands=FALSE)
 getMethylationStats(methylObj[[2]],plot=TRUE,both.strands=FALSE)
 ```
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 ``` r
 getCoverageStats(methylObj[[2]],plot=TRUE,both.strands=FALSE)
 ```
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-5-2.png)<!-- -->
 
 ``` r
 getCoverageStats(methylObj[[2]],plot=TRUE,both.strands=TRUE)
 ```
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-4-3.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-5-3.png)<!-- -->
+
+### 0.3.1 Note: I changed the code below so that a CpG does not have to have 5X coverage in all samples to be analyzed, and only needs 5X coverage in 2 samples per group to be retained. This way we don’t remove CpGs that happen to have lower coverage in a few samples or one tissue.
 
 ``` r
-filtered_methylObj=filterByCoverage(methylObj,lo.count=5,lo.perc=NULL,
-                                      hi.count=NULL,hi.perc=99.9)
+#filtered_methylObj=filterByCoverage(methylObj,lo.count=5,lo.perc=NULL,
+#                                      hi.count=NULL,hi.perc=99.9)
 
-filtered_methylObj_norm <- filtered_methylObj %>% methylKit::normalizeCoverage(.)
+#filtered_methylObj_norm <- filtered_methylObj %>% methylKit::normalizeCoverage(.)
+methylObj_norm <- methylObj %>% methylKit::normalizeCoverage(.)
 ```
 
 ``` r
-meth_filter=methylKit::unite(filtered_methylObj_norm)
+#meth_filter=methylKit::unite(filtered_methylObj_norm)
+meth_filter=methylKit::unite(methylObj_norm, min.per.group = c(3L,3L))
 ```
 
     ## uniting...
 
+    ## Warning in rowSums(ldat) >= min.per.group: longer object length is not a
+    ## multiple of shorter object length
+
 ``` r
-meth_filter_destrand=methylKit::unite(filtered_methylObj_norm,destrand = TRUE)
+#meth_filter_destrand=methylKit::unite(filtered_methylObj_norm,destrand = TRUE)
+meth_filter_destrand=methylKit::unite(methylObj_norm, min.per.group = c(3L,3L), destrand = TRUE)
 ```
 
     ## destranding...
     ## uniting...
+
+    ## Warning in rowSums(ldat) >= min.per.group: longer object length is not a
+    ## multiple of shorter object length
+    ## Warning in rowSums(ldat) >= min.per.group: longer object length is not a
+    ## multiple of shorter object length
 
 ``` r
 clusterSamples(meth_filter, dist="correlation", method="ward", plot=TRUE)
@@ -395,7 +424,7 @@ clusterSamples(meth_filter, dist="correlation", method="ward", plot=TRUE)
 
     ## The "ward" method has been renamed to "ward.D"; note new "ward.D2"
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
     ## 
     ## Call:
@@ -411,7 +440,7 @@ clusterSamples(meth_filter_destrand, dist="correlation", method="ward", plot=TRU
 
     ## The "ward" method has been renamed to "ward.D"; note new "ward.D2"
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
 
     ## 
     ## Call:
@@ -425,40 +454,119 @@ clusterSamples(meth_filter_destrand, dist="correlation", method="ward", plot=TRU
 PCASamples(meth_filter)
 ```
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-7-3.png)<!-- -->
 
 ``` r
 PCASamples(meth_filter_destrand)
 ```
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-6-4.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-7-4.png)<!-- -->
 
 ``` r
 getCorrelation(meth_filter_destrand,plot=TRUE)
 ```
 
     ##            LCM_1    LCM_11    LCM_12    LCM_17    LCM_18    LCM_24    LCM_25
-    ## LCM_1  1.0000000 0.6548849 0.6442972 0.6675210 0.7071313 0.6183485 0.6590492
-    ## LCM_11 0.6548849 1.0000000 0.6131597 0.6221372 0.6138284 0.5603577 0.6079632
-    ## LCM_12 0.6442972 0.6131597 1.0000000 0.6808556 0.6822028 0.6467358 0.6924756
-    ## LCM_17 0.6675210 0.6221372 0.6808556 1.0000000 0.6908618 0.6052214 0.6836569
-    ## LCM_18 0.7071313 0.6138284 0.6822028 0.6908618 1.0000000 0.6289884 0.6983488
-    ## LCM_24 0.6183485 0.5603577 0.6467358 0.6052214 0.6289884 1.0000000 0.6871517
-    ## LCM_25 0.6590492 0.6079632 0.6924756 0.6836569 0.6983488 0.6871517 1.0000000
-    ## LCM_3  0.5934479 0.5942247 0.5873359 0.6078850 0.5753703 0.6234846 0.6210878
-    ## LCM_32 0.6273917 0.5553906 0.5911450 0.5960248 0.5920193 0.5671652 0.6003708
-    ## LCM_33 0.6219982 0.5252421 0.5934366 0.6355371 0.6420074 0.5373079 0.5931981
+    ## LCM_1  1.0000000 0.7222808 0.7057141 0.7223606 0.7507291 0.6701742 0.7235446
+    ## LCM_11 0.7222808 1.0000000 0.6855233 0.6821552 0.6858891 0.6332845 0.6866522
+    ## LCM_12 0.7057141 0.6855233 1.0000000 0.7235759 0.7371029 0.7103337 0.7362472
+    ## LCM_17 0.7223606 0.6821552 0.7235759 1.0000000 0.7327728 0.6518541 0.7299340
+    ## LCM_18 0.7507291 0.6858891 0.7371029 0.7327728 1.0000000 0.6837319 0.7504358
+    ## LCM_24 0.6701742 0.6332845 0.7103337 0.6518541 0.6837319 1.0000000 0.7266801
+    ## LCM_25 0.7235446 0.6866522 0.7362472 0.7299340 0.7504358 0.7266801 1.0000000
+    ## LCM_3  0.6447084 0.6611449 0.6455462 0.6312393 0.6349158 0.6784281 0.6782781
+    ## LCM_32 0.6620827 0.6091002 0.6556295 0.6316165 0.6513680 0.6415957 0.6665304
+    ## LCM_33 0.6619763 0.5983036 0.6270250 0.6429158 0.6617203 0.5945263 0.6355318
     ##            LCM_3    LCM_32    LCM_33
-    ## LCM_1  0.5934479 0.6273917 0.6219982
-    ## LCM_11 0.5942247 0.5553906 0.5252421
-    ## LCM_12 0.5873359 0.5911450 0.5934366
-    ## LCM_17 0.6078850 0.5960248 0.6355371
-    ## LCM_18 0.5753703 0.5920193 0.6420074
-    ## LCM_24 0.6234846 0.5671652 0.5373079
-    ## LCM_25 0.6210878 0.6003708 0.5931981
-    ## LCM_3  1.0000000 0.5827830 0.4866721
-    ## LCM_32 0.5827830 1.0000000 0.5748508
-    ## LCM_33 0.4866721 0.5748508 1.0000000
+    ## LCM_1  0.6447084 0.6620827 0.6619763
+    ## LCM_11 0.6611449 0.6091002 0.5983036
+    ## LCM_12 0.6455462 0.6556295 0.6270250
+    ## LCM_17 0.6312393 0.6316165 0.6429158
+    ## LCM_18 0.6349158 0.6513680 0.6617203
+    ## LCM_24 0.6784281 0.6415957 0.5945263
+    ## LCM_25 0.6782781 0.6665304 0.6355318
+    ## LCM_3  1.0000000 0.6473983 0.5666346
+    ## LCM_32 0.6473983 1.0000000 0.6036661
+    ## LCM_33 0.5666346 0.6036661 1.0000000
+
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+
+    ## Warning in KernSmooth::bkde2D(x, bandwidth = bandwidth, gridsize = nbin, :
+    ## Binning grid too coarse for current (small) bandwidth: consider increasing
+    ## 'gridsize'
+    ## Warning in KernSmooth::bkde2D(x, bandwidth = bandwidth, gridsize = nbin, :
+    ## Binning grid too coarse for current (small) bandwidth: consider increasing
+    ## 'gridsize'
+
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+
+    ## Warning in KernSmooth::bkde2D(x, bandwidth = bandwidth, gridsize = nbin, :
+    ## Binning grid too coarse for current (small) bandwidth: consider increasing
+    ## 'gridsize'
+    ## Warning in KernSmooth::bkde2D(x, bandwidth = bandwidth, gridsize = nbin, :
+    ## Binning grid too coarse for current (small) bandwidth: consider increasing
+    ## 'gridsize'
+    ## Warning in KernSmooth::bkde2D(x, bandwidth = bandwidth, gridsize = nbin, :
+    ## Binning grid too coarse for current (small) bandwidth: consider increasing
+    ## 'gridsize'
+    ## Warning in KernSmooth::bkde2D(x, bandwidth = bandwidth, gridsize = nbin, :
+    ## Binning grid too coarse for current (small) bandwidth: consider increasing
+    ## 'gridsize'
+    ## Warning in KernSmooth::bkde2D(x, bandwidth = bandwidth, gridsize = nbin, :
+    ## Binning grid too coarse for current (small) bandwidth: consider increasing
+    ## 'gridsize'
+
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+
+    ## Warning in KernSmooth::bkde2D(x, bandwidth = bandwidth, gridsize = nbin, :
+    ## Binning grid too coarse for current (small) bandwidth: consider increasing
+    ## 'gridsize'
+
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+
+    ## Warning in KernSmooth::bkde2D(x, bandwidth = bandwidth, gridsize = nbin, :
+    ## Binning grid too coarse for current (small) bandwidth: consider increasing
+    ## 'gridsize'
+
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+
+    ## Warning in KernSmooth::bkde2D(x, bandwidth = bandwidth, gridsize = nbin, :
+    ## Binning grid too coarse for current (small) bandwidth: consider increasing
+    ## 'gridsize'
+    ## Warning in KernSmooth::bkde2D(x, bandwidth = bandwidth, gridsize = nbin, :
+    ## Binning grid too coarse for current (small) bandwidth: consider increasing
+    ## 'gridsize'
+
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+    ## Warning in par(usr): argument 1 does not name a graphical parameter
+
+    ## Warning in KernSmooth::bkde2D(x, bandwidth = bandwidth, gridsize = nbin, :
+    ## Binning grid too coarse for current (small) bandwidth: consider increasing
+    ## 'gridsize'
+    ## Warning in KernSmooth::bkde2D(x, bandwidth = bandwidth, gridsize = nbin, :
+    ## Binning grid too coarse for current (small) bandwidth: consider increasing
+    ## 'gridsize'
 
     ## Warning in par(usr): argument 1 does not name a graphical parameter
     ## Warning in par(usr): argument 1 does not name a graphical parameter
@@ -487,81 +595,17 @@ getCorrelation(meth_filter_destrand,plot=TRUE)
     ## Warning in par(usr): argument 1 does not name a graphical parameter
     ## Warning in par(usr): argument 1 does not name a graphical parameter
     ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
-    ## Warning in par(usr): argument 1 does not name a graphical parameter
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
-### 0.3.1 batch effects
+### 0.3.2 batch effects
 
 ``` r
-as=assocComp(mBase=meth_filter_destrand,dplyr::select(meta,c("PCR_ReAmp_Cycles", "Fragment")))
-as
+#as=assocComp(mBase=meth_filter_destrand,dplyr::select(meta,c("PCR_ReAmp_Cycles", "Fragment")))
+#as
 ```
 
-    ## $pcs
-    ##               PC1         PC2         PC3         PC4        PC5         PC6
-    ## LCM_1  -0.3278981  0.12625480  0.18982046  0.18376942  0.2390968 -0.38714766
-    ## LCM_11 -0.3052206 -0.18122081  0.38587520  0.67073994  0.1138058 -0.09699804
-    ## LCM_12 -0.3250024  0.01216415 -0.29540627  0.07384750  0.1930995  0.53779603
-    ## LCM_17 -0.3278144  0.14561919 -0.06870506  0.13823951 -0.3381564  0.43750457
-    ## LCM_18 -0.3300652  0.22475300 -0.18624015  0.14059548  0.1147250 -0.08109501
-    ## LCM_24 -0.3118345 -0.33403137 -0.43656180 -0.27582151  0.1860107 -0.45649863
-    ## LCM_25 -0.3305895 -0.08956165 -0.34202501 -0.05199291  0.1114517  0.09241968
-    ## LCM_3  -0.3011445 -0.58621666  0.19818948 -0.14885317 -0.6119190 -0.02570500
-    ## LCM_32 -0.3017975  0.01990903  0.58262496 -0.57650744  0.3888855  0.23218534
-    ## LCM_33 -0.2983141  0.64475371  0.04582194 -0.19674136 -0.4386156 -0.28634537
-    ##                PC7         PC8         PC9        PC10
-    ## LCM_1   0.43704976  0.23049787 -0.30679726  0.51129504
-    ## LCM_11 -0.43346114 -0.17856653  0.10903110 -0.14555043
-    ## LCM_12 -0.30165952  0.59787664 -0.02718236  0.16062784
-    ## LCM_17  0.19912895 -0.41379169 -0.56571458 -0.10408334
-    ## LCM_18  0.46881302  0.16557232  0.33598091 -0.63739258
-    ## LCM_24 -0.28432815 -0.09289277 -0.37400164 -0.22842675
-    ## LCM_25  0.08723227 -0.51112209  0.52498405  0.44449806
-    ## LCM_3   0.16824506  0.26897416  0.16555857  0.03250943
-    ## LCM_32 -0.02318647 -0.11528313  0.01596961 -0.13222861
-    ## LCM_33 -0.39162036  0.05812346  0.13108194  0.07867609
-    ## 
-    ## $vars
-    ##  [1] 65.682286  5.671953  4.790223  4.629650  3.761410  3.578142  3.355369
-    ##  [8]  2.984270  2.882112  2.664585
-    ## 
-    ## $association
-    ##                        PC1        PC2       PC3       PC4       PC5       PC6
-    ## PCR_ReAmp_Cycles 0.7968283 0.03306508 0.5372258 0.3863827 0.6475336 0.5721282
-    ## Fragment         0.2854370 0.22495865 0.1991483 0.1991483 0.9689278 0.7424472
-    ##                        PC7       PC8       PC9      PC10
-    ## PCR_ReAmp_Cycles 0.6138154 0.5804624 0.8785944 0.1338345
-    ## Fragment         0.1058444 0.4311711 0.9944651 0.6044507
-
-### 0.3.2 other possible filtering
+### 0.3.3 other possible filtering
 
 ``` r
 # get percent methylation matrix
@@ -575,25 +619,23 @@ sds=matrixStats::rowSds(pm)
 hist(sds, breaks = 100)
 ```
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ``` r
 # keep only CpG with standard deviations larger than 2%
-meth <- meth_filter_destrand[sds > 2]
+#meth <- meth_filter_destrand[sds > 2]
 
 # This leaves us with this number of CpG sites
 nrow(meth_filter_destrand)
 ```
 
-    ## [1] 2987
+    ## [1] 134034
 
 ``` r
-nrow(meth)
+#nrow(meth)
 ```
 
-    ## [1] 1451
-
-### 0.3.3 Identify DML
+### 0.3.4 Identify DML
 
 ``` r
 DMLStats_Tissue <- methylKit::calculateDiffMeth(meth_filter_destrand, overdispersion = "MN", test = "Chisq", mc.cores = 8) #Calculate differential methylation statistics and include covariate information.
@@ -607,20 +649,20 @@ DMLStats_Tissue <- methylKit::calculateDiffMeth(meth_filter_destrand, overdisper
 head(DMLStats_Tissue) #Look at differential methylation output
 ```
 
-    ##                                  chr   start     end strand     pvalue
-    ## 1 Pocillopora_acuta_HIv2___Sc0000000  844614  844614      + 0.51009168
-    ## 2 Pocillopora_acuta_HIv2___Sc0000000  844624  844624      + 0.97976035
-    ## 3 Pocillopora_acuta_HIv2___Sc0000000  844628  844628      + 0.34743888
-    ## 4 Pocillopora_acuta_HIv2___Sc0000000  867803  867803      + 0.22663944
-    ## 5 Pocillopora_acuta_HIv2___Sc0000000 5859931 5859931      + 1.00000000
-    ## 6 Pocillopora_acuta_HIv2___Sc0000000 8087338 8087338      + 0.01061017
-    ##      qvalue   meth.diff
-    ## 1 0.9453423  1.03812117
-    ## 2 0.9453423  0.03189793
-    ## 3 0.7517825 -3.71219844
-    ## 4 0.6829760 -3.48837209
-    ## 5 0.9453423  0.00000000
-    ## 6 0.3947417 -8.13953488
+    ##                                  chr  start    end strand      pvalue    qvalue
+    ## 1 Pocillopora_acuta_HIv2___Sc0000000   5326   5326      + 1.000000000 0.8599801
+    ## 2 Pocillopora_acuta_HIv2___Sc0000000   5331   5331      + 1.000000000 0.8599801
+    ## 3 Pocillopora_acuta_HIv2___Sc0000000  83557  83557      + 0.004626153 0.5025833
+    ## 4 Pocillopora_acuta_HIv2___Sc0000000  83565  83565      + 0.053009864 0.8599801
+    ## 5 Pocillopora_acuta_HIv2___Sc0000000  83588  83588      + 0.123774009 0.8599801
+    ## 6 Pocillopora_acuta_HIv2___Sc0000000 153088 153088      + 1.000000000 0.8599801
+    ##   meth.diff
+    ## 1   0.00000
+    ## 2   0.00000
+    ## 3 -54.54545
+    ## 4 -28.12500
+    ## 5 -26.66667
+    ## 6   0.00000
 
 ``` r
 # Filter DMRs with q-value < 0.05
@@ -652,7 +694,7 @@ ggplot(plot_data, aes(x = start, y = meth.diff)) +
            hjust = 1.1, vjust = -0.1, size = 4, color = "red")
 ```
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
 dml_df <- as.data.frame(DMLStats_Tissue)
@@ -668,7 +710,7 @@ ggplot(dml_df, aes(x = meth.diff, y = -log10(qvalue))) +
   theme_minimal()
 ```
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-11-2.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-12-2.png)<!-- -->
 
 ``` r
 DMLs <- methylKit::getMethylDiff(DMLStats_Tissue, difference = 2, qvalue = 0.05) #Identify DML based on difference threshold
@@ -676,20 +718,26 @@ DMLs <- methylKit::getMethylDiff(DMLStats_Tissue, difference = 2, qvalue = 0.05)
 length(DMLs$chr) #DML
 ```
 
-    ## [1] 3
+    ## [1] 190
 
 ``` r
 head(DMLs)
 ```
 
-    ##                                       chr   start     end strand       pvalue
-    ## 2122 Pocillopora_acuta_HIv2___xfSc0000006 3476631 3476631      + 3.957521e-05
-    ## 2319 Pocillopora_acuta_HIv2___xfSc0000018 2653917 2653917      + 1.626684e-05
-    ## 2928 Pocillopora_acuta_HIv2___xpSc0000391 1758128 1758128      + 2.866148e-05
-    ##       qvalue meth.diff
-    ## 2122 0.03725  41.55973
-    ## 2319 0.03725  14.08451
-    ## 2928 0.03725 -22.03390
+    ##                                     chr   start     end strand       pvalue
+    ## 4981 Pocillopora_acuta_HIv2___Sc0000002 3933210 3933210      + 6.801995e-06
+    ## 5079 Pocillopora_acuta_HIv2___Sc0000002 4354140 4354140      + 4.217920e-05
+    ## 5080 Pocillopora_acuta_HIv2___Sc0000002 4354519 4354519      + 3.498027e-06
+    ## 5083 Pocillopora_acuta_HIv2___Sc0000002 4354790 4354790      + 2.793794e-10
+    ## 6087 Pocillopora_acuta_HIv2___Sc0000002 9281328 9281328      + 5.825224e-05
+    ## 7904 Pocillopora_acuta_HIv2___Sc0000003 2149671 2149671      + 1.223095e-06
+    ##            qvalue meth.diff
+    ## 4981 8.340879e-03  75.00000
+    ## 5079 3.077121e-02  15.29412
+    ## 5080 5.236437e-03  22.64151
+    ## 5083 2.477162e-06  29.78723
+    ## 6087 3.837845e-02  23.07692
+    ## 7904 2.468497e-03 -44.00000
 
 ## 0.4 Further look at genome wide methylation
 
@@ -699,7 +747,7 @@ diffMethPerChr(DMLStats_Tissue, meth.cutoff = 2, qvalue.cutoff = 0.05,cex.names=
 
     ## Warning in eval(quote(list(...)), env): NAs introduced by coercion
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ### 0.4.1 Annotation
 
@@ -743,14 +791,25 @@ DML_grange = as(DMLs,"GRanges")
 head(DML_grange)
 ```
 
-    ## GRanges object with 3 ranges and 3 metadata columns:
-    ##                     seqnames    ranges strand |      pvalue    qvalue meth.diff
-    ##                        <Rle> <IRanges>  <Rle> |   <numeric> <numeric> <numeric>
-    ##   [1] Pocillopora_acuta_HI..   3476631      + | 3.95752e-05   0.03725   41.5597
-    ##   [2] Pocillopora_acuta_HI..   2653917      + | 1.62668e-05   0.03725   14.0845
-    ##   [3] Pocillopora_acuta_HI..   1758128      + | 2.86615e-05   0.03725  -22.0339
+    ## GRanges object with 6 ranges and 3 metadata columns:
+    ##                     seqnames    ranges strand |      pvalue      qvalue
+    ##                        <Rle> <IRanges>  <Rle> |   <numeric>   <numeric>
+    ##   [1] Pocillopora_acuta_HI..   3933210      + | 6.80199e-06 8.34088e-03
+    ##   [2] Pocillopora_acuta_HI..   4354140      + | 4.21792e-05 3.07712e-02
+    ##   [3] Pocillopora_acuta_HI..   4354519      + | 3.49803e-06 5.23644e-03
+    ##   [4] Pocillopora_acuta_HI..   4354790      + | 2.79379e-10 2.47716e-06
+    ##   [5] Pocillopora_acuta_HI..   9281328      + | 5.82522e-05 3.83785e-02
+    ##   [6] Pocillopora_acuta_HI..   2149671      + | 1.22310e-06 2.46850e-03
+    ##       meth.diff
+    ##       <numeric>
+    ##   [1]   75.0000
+    ##   [2]   15.2941
+    ##   [3]   22.6415
+    ##   [4]   29.7872
+    ##   [5]   23.0769
+    ##   [6]  -44.0000
     ##   -------
-    ##   seqinfo: 3 sequences from an unspecified genome; no seqlengths
+    ##   seqinfo: 64 sequences from an unspecified genome; no seqlengths
 
 ``` r
 transcripts = gffToGRanges(gff.file, filter = "transcript")
@@ -776,10 +835,41 @@ DML_transcript_annot <- data.frame(
 head(DML_transcript_annot)
 ```
 
-    ##  [1] DML_chr          DML_start        DML_end          DML_qvalue      
-    ##  [5] DML_methdiff     transcript_chr   transcript_start transcript_end  
-    ##  [9] transcript_id    gene_id         
-    ## <0 rows> (or 0-length row.names)
+    ##                              DML_chr DML_start DML_end   DML_qvalue
+    ## 1 Pocillopora_acuta_HIv2___Sc0000002   4354140 4354140 3.077121e-02
+    ## 2 Pocillopora_acuta_HIv2___Sc0000002   4354519 4354519 5.236437e-03
+    ## 3 Pocillopora_acuta_HIv2___Sc0000002   4354790 4354790 2.477162e-06
+    ## 4 Pocillopora_acuta_HIv2___Sc0000002   9281328 9281328 3.837845e-02
+    ## 5 Pocillopora_acuta_HIv2___Sc0000003   2461240 2461240 3.643553e-02
+    ## 6 Pocillopora_acuta_HIv2___Sc0000003   8702392 8702392 1.725322e-02
+    ##   DML_methdiff                     transcript_chr transcript_start
+    ## 1     15.29412 Pocillopora_acuta_HIv2___Sc0000002          4352529
+    ## 2     22.64151 Pocillopora_acuta_HIv2___Sc0000002          4352529
+    ## 3     29.78723 Pocillopora_acuta_HIv2___Sc0000002          4352529
+    ## 4     23.07692 Pocillopora_acuta_HIv2___Sc0000002          9279157
+    ## 5    -35.00000 Pocillopora_acuta_HIv2___Sc0000003          2441368
+    ## 6     30.30303 Pocillopora_acuta_HIv2___Sc0000003          8696824
+    ##   transcript_end                             transcript_id
+    ## 1        4355343 Pocillopora_acuta_HIv2___RNAseq.g25038.t1
+    ## 2        4355343 Pocillopora_acuta_HIv2___RNAseq.g25038.t1
+    ## 3        4355343 Pocillopora_acuta_HIv2___RNAseq.g25038.t1
+    ## 4        9293249 Pocillopora_acuta_HIv2___RNAseq.g25453.t1
+    ## 5        2461336  Pocillopora_acuta_HIv2___RNAseq.g4860.t2
+    ## 6        8734794  Pocillopora_acuta_HIv2___RNAseq.g5465.t1
+    ##                                     gene_id
+    ## 1 Pocillopora_acuta_HIv2___RNAseq.g25038.t1
+    ## 2 Pocillopora_acuta_HIv2___RNAseq.g25038.t1
+    ## 3 Pocillopora_acuta_HIv2___RNAseq.g25038.t1
+    ## 4 Pocillopora_acuta_HIv2___RNAseq.g25453.t1
+    ## 5  Pocillopora_acuta_HIv2___RNAseq.g4860.t2
+    ## 6  Pocillopora_acuta_HIv2___RNAseq.g5465.t1
+
+``` r
+#how many genes do these consist of?
+length(unique(DML_transcript_annot$gene_id))
+```
+
+    ## [1] 65
 
 ## 0.5 Are any DMGs DMLs?
 
@@ -795,18 +885,77 @@ DE_05 <- DESeq %>% filter(padj < 0.05)
 DML_transcript_annot[DML_transcript_annot$transcript_id %in% DE_05$query,]
 ```
 
-    ##  [1] DML_chr          DML_start        DML_end          DML_qvalue      
-    ##  [5] DML_methdiff     transcript_chr   transcript_start transcript_end  
-    ##  [9] transcript_id    gene_id         
-    ## <0 rows> (or 0-length row.names)
+    ##                                 DML_chr DML_start DML_end   DML_qvalue
+    ## 1    Pocillopora_acuta_HIv2___Sc0000002   4354140 4354140 3.077121e-02
+    ## 2    Pocillopora_acuta_HIv2___Sc0000002   4354519 4354519 5.236437e-03
+    ## 3    Pocillopora_acuta_HIv2___Sc0000002   4354790 4354790 2.477162e-06
+    ## 10   Pocillopora_acuta_HIv2___Sc0000006   5260722 5260722 2.225195e-02
+    ## 11   Pocillopora_acuta_HIv2___Sc0000007   1469599 1469599 1.443216e-02
+    ## 19   Pocillopora_acuta_HIv2___Sc0000009   1926284 1926284 4.300753e-02
+    ## 20   Pocillopora_acuta_HIv2___Sc0000009   1926297 1926297 3.564570e-02
+    ## 37 Pocillopora_acuta_HIv2___xfSc0000000   5400485 5400485 3.281083e-02
+    ## 63 Pocillopora_acuta_HIv2___xfSc0000009   1377935 1377935 1.383141e-02
+    ## 64 Pocillopora_acuta_HIv2___xfSc0000009   3043722 3043722 1.327307e-02
+    ## 74 Pocillopora_acuta_HIv2___xfSc0000024   2471817 2471817 2.468497e-03
+    ##    DML_methdiff                       transcript_chr transcript_start
+    ## 1     15.294118   Pocillopora_acuta_HIv2___Sc0000002          4352529
+    ## 2     22.641509   Pocillopora_acuta_HIv2___Sc0000002          4352529
+    ## 3     29.787234   Pocillopora_acuta_HIv2___Sc0000002          4352529
+    ## 10    36.502508   Pocillopora_acuta_HIv2___Sc0000006          5258672
+    ## 11   -29.268293   Pocillopora_acuta_HIv2___Sc0000007          1469481
+    ## 19    15.789474   Pocillopora_acuta_HIv2___Sc0000009          1924903
+    ## 20    14.754098   Pocillopora_acuta_HIv2___Sc0000009          1924903
+    ## 37    25.806452 Pocillopora_acuta_HIv2___xfSc0000000          5393991
+    ## 63    14.035088 Pocillopora_acuta_HIv2___xfSc0000009          1376679
+    ## 64   -55.555556 Pocillopora_acuta_HIv2___xfSc0000009          3018389
+    ## 74    -9.360961 Pocillopora_acuta_HIv2___xfSc0000024          2471129
+    ##    transcript_end                             transcript_id
+    ## 1         4355343 Pocillopora_acuta_HIv2___RNAseq.g25038.t1
+    ## 2         4355343 Pocillopora_acuta_HIv2___RNAseq.g25038.t1
+    ## 3         4355343 Pocillopora_acuta_HIv2___RNAseq.g25038.t1
+    ## 10        5262000 Pocillopora_acuta_HIv2___RNAseq.g15474.t1
+    ## 11        1470395 Pocillopora_acuta_HIv2___RNAseq.g17564.t1
+    ## 19        1932130  Pocillopora_acuta_HIv2___RNAseq.g2626.t1
+    ## 20        1932130  Pocillopora_acuta_HIv2___RNAseq.g2626.t1
+    ## 37        5402276 Pocillopora_acuta_HIv2___RNAseq.g22998.t1
+    ## 63        1378770 Pocillopora_acuta_HIv2___RNAseq.g12189.t1
+    ## 64        3057287      Pocillopora_acuta_HIv2___TS.g3256.t1
+    ## 74        2473563 Pocillopora_acuta_HIv2___RNAseq.g20860.t1
+    ##                                      gene_id
+    ## 1  Pocillopora_acuta_HIv2___RNAseq.g25038.t1
+    ## 2  Pocillopora_acuta_HIv2___RNAseq.g25038.t1
+    ## 3  Pocillopora_acuta_HIv2___RNAseq.g25038.t1
+    ## 10 Pocillopora_acuta_HIv2___RNAseq.g15474.t1
+    ## 11 Pocillopora_acuta_HIv2___RNAseq.g17564.t1
+    ## 19  Pocillopora_acuta_HIv2___RNAseq.g2626.t1
+    ## 20  Pocillopora_acuta_HIv2___RNAseq.g2626.t1
+    ## 37 Pocillopora_acuta_HIv2___RNAseq.g22998.t1
+    ## 63 Pocillopora_acuta_HIv2___RNAseq.g12189.t1
+    ## 64      Pocillopora_acuta_HIv2___TS.g3256.t1
+    ## 74 Pocillopora_acuta_HIv2___RNAseq.g20860.t1
 
 ``` r
 DE_05[DE_05$query %in% DML_transcript_annot$transcript_id,]
 ```
 
-    ## [1] query          baseMean       log2FoldChange lfcSE          pvalue        
-    ## [6] padj          
-    ## <0 rows> (or 0-length row.names)
+    ##                                          query   baseMean log2FoldChange
+    ## 21   Pocillopora_acuta_HIv2___RNAseq.g20860.t1 1265.27422    -15.5762448
+    ## 1788 Pocillopora_acuta_HIv2___RNAseq.g17564.t1  708.27278     -0.7085281
+    ## 1802  Pocillopora_acuta_HIv2___RNAseq.g2626.t1  237.04137      5.6905130
+    ## 1928 Pocillopora_acuta_HIv2___RNAseq.g15474.t1   42.82082     -4.5903434
+    ## 2005 Pocillopora_acuta_HIv2___RNAseq.g22998.t1  287.46168     -0.7535547
+    ## 2924 Pocillopora_acuta_HIv2___RNAseq.g25038.t1  453.44869      1.4528771
+    ## 3133 Pocillopora_acuta_HIv2___RNAseq.g12189.t1  184.60827     -0.3170635
+    ## 3249      Pocillopora_acuta_HIv2___TS.g3256.t1  295.29556     -1.0719805
+    ##         lfcSE       pvalue         padj
+    ## 21   3.873810 1.358173e-16 9.354577e-14
+    ## 1788 1.285995 1.192290e-04 9.645014e-04
+    ## 1802 2.267624 1.246384e-04 1.000427e-03
+    ## 1928 2.195922 1.899619e-04 1.425108e-03
+    ## 2005 1.430480 2.545588e-04 1.836378e-03
+    ## 2924 2.114543 3.385288e-03 1.674583e-02
+    ## 3133 1.047937 5.237407e-03 2.417933e-02
+    ## 3249 1.600315 6.755427e-03 3.007402e-02
 
 ``` r
 plot_data <- merge(DML_transcript_annot, DESeq, by.x = "transcript_id", by.y = "query")
@@ -824,7 +973,17 @@ ggplot(plot_data, aes(x = DML_methdiff, y = log2FoldChange)) +
   theme_minimal()
 ```
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+    ## Warning: ggrepel: 3 unlabeled data points (too many overlaps). Consider
+    ## increasing max.overlaps
+
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+
+``` r
+# how many CpG sites are there after filtering?
+dim(meth_filter_destrand)
+```
+
+    ## [1] 134034     34
 
 ``` r
 # Find overlaps between methylated loci and transcripts
@@ -832,7 +991,16 @@ MLs_in_genes <- regionCounts(meth_filter_destrand, regions=transcripts)
 ```
 
     ## Warning in .merge_two_Seqinfo_objects(x, y): Each of the 2 combined objects has sequence levels not in the other:
-    ##   - in 'x': Pocillopora_acuta_HIv2___Sc0000026, Pocillopora_acuta_HIv2___Sc0000028, Pocillopora_acuta_HIv2___Sc0000036, Pocillopora_acuta_HIv2___Sc0000037, Pocillopora_acuta_HIv2___Sc0000041, Pocillopora_acuta_HIv2___Sc0000046, Pocillopora_acuta_HIv2___Sc0000047, Pocillopora_acuta_HIv2___Sc0000050, Pocillopora_acuta_HIv2___Sc0000052, Pocillopora_acuta_HIv2___Sc0000053, Pocillopora_acuta_HIv2___Sc0000056, Pocillopora_acuta_HIv2___Sc0000058, Pocillopora_acuta_HIv2___Sc0000059, Pocillopora_acuta_HIv2___Sc0000060, Pocillopora_acuta_HIv2___Sc0000062, Pocillopora_acuta_HIv2___Sc0000063, Pocillopora_acuta_HIv2___Sc0000064, Pocillopora_acuta_HIv2___Sc0000066, Pocillopora_acuta_HIv2___Sc0000068, Pocillopora_acuta_HIv2___Sc0000070, Pocillopora_acuta_HIv2___Sc0000073, Pocillopora_acuta_HIv2___Sc0000075, Pocillopora_acuta_HIv2___Sc0000076, Pocillopora_acuta_HIv2___Sc0000077, Pocillopora_acuta_HIv2___Sc0000078, Pocillopora_acuta_HIv2___Sc0000080, Pocillopora_acuta_HIv2___xfSc0000031, Pocillopora_acuta_HIv2___xfSc0000032, Pocillopora_acuta_HIv2___xfSc0000034, Pocillopora_acuta_HIv2___xfSc0000041, Pocillopora_acuta_HIv2___xfSc0000042, Pocillopora_acuta_HIv2___xfSc0000044, Pocillopora_acuta_HIv2___xfSc0000045, Pocillopora_acuta_HIv2___xfSc0000047, Pocillopora_acuta_HIv2___xfSc0000050, Pocillopora_acuta_HIv2___xfSc0000051, Pocillopora_acuta_HIv2___xfSc0000055, Pocillopora_acuta_HIv2___xfSc0000056, Pocillopora_acuta_HIv2___xfSc0000057, Pocillopora_acuta_HIv2___xfSc0000058, Pocillopora_acuta_HIv2___xfSc0000062, Pocillopora_acuta_HIv2___xfSc0000063, Pocillopora_acuta_HIv2___xfSc0000064, Pocillopora_acuta_HIv2___xfSc0000065, Pocillopora_acuta_HIv2___xfSc0000066, Pocillopora_acuta_HIv2___xfSc0000070, Pocillopora_acuta_HIv2___xfSc0000071, Pocillopora_acuta_HIv2___xfSc0000072, Pocillopora_acuta_HIv2___xfSc0000073, Pocillopora_acuta_HIv2___xfSc0000074, Pocillopora_acuta_HIv2___xfSc0000075, Pocillopora_acuta_HIv2___xfSc0000077, Pocillopora_acuta_HIv2___xfSc0000078, Pocillopora_acuta_HIv2___xfSc0000079, Pocillopora_acuta_HIv2___xfSc0000080, Pocillopora_acuta_HIv2___xfSc0000081, Pocillopora_acuta_HIv2___xfSc0000084, Pocillopora_acuta_HIv2___xfSc0000085, Pocillopora_acuta_HIv2___xfSc0000086, Pocillopora_acuta_HIv2___xfSc0000087, Pocillopora_acuta_HIv2___xfSc0000089, Pocillopora_acuta_HIv2___xfSc0000090, Pocillopora_acuta_HIv2___xfSc0000091, Pocillopora_acuta_HIv2___xfSc0000092, Pocillopora_acuta_HIv2___xfSc0000094, Pocillopora_acuta_HIv2___xfSc0000095, Pocillopora_acuta_HIv2___xfSc0000096, Pocillopora_acuta_HIv2___xfSc0000097, Pocillopora_acuta_HIv2___xfSc0000098, Pocillopora_acuta_HIv2___xfSc0000099, Pocillopora_acuta_HIv2___xfSc0000100, Pocillopora_acuta_HIv2___xfSc0000101, Pocillopora_acuta_HIv2___xfSc0000102, Pocillopora_acuta_HIv2___xfSc0000103, Pocillopora_acuta_HIv2___xfSc0000104, Pocillopora_acuta_HIv2___xfSc0000105, Pocillopora_acuta_HIv2___xfSc0000107, Pocillopora_acuta_HIv2___xfSc0000108, Pocillopora_acuta_HIv2___xfSc0000109, Pocillopora_acuta_HIv2___xfSc0000110, Pocillopora_acuta_HIv2___xfSc0000113, Pocillopora_acuta_HIv2___xfSc0000114, Pocillopora_acuta_HIv2___xfSc0000115, Pocillopora_acuta_HIv2___xfSc0000116, Pocillopora_acuta_HIv2___xfSc0000117, Pocillopora_acuta_HIv2___xfSc0000119, Pocillopora_acuta_HIv2___xfSc0000121, Pocillopora_acuta_HIv2___xfSc0000122, Pocillopora_acuta_HIv2___xfSc0000125, Pocillopora_acuta_HIv2___xfSc0000126, Pocillopora_acuta_HIv2___xfSc0000127, Pocillopora_acuta_HIv2___xfSc0000128, Pocillopora_acuta_HIv2___xfSc0000129, Pocillopora_acuta_HIv2___xfSc0000130, Pocillopora_acuta_HIv2___xfSc0000131, Pocillopora_acuta_HIv2___xfSc0000132, Pocillopora_acuta_HIv2___xfSc0000133, Pocillopora_acuta_HIv2___xfSc0000135, Pocillopora_acuta_HIv2___xfSc0000136, Pocillopora_acuta_HIv2___xfSc0000137, Pocillopora_acuta_HIv2___xfSc0000138, Pocillopora_acuta_HIv2___xfSc0000139, Pocillopora_acuta_HIv2___xfSc0000140, Pocillopora_acuta_HIv2___xfSc0000141, Pocillopora_acuta_HIv2___xfSc0000142, Pocillopora_acuta_HIv2___xfSc0000143, Pocillopora_acuta_HIv2___xfSc0000144, Pocillopora_acuta_HIv2___xfSc0000145, Pocillopora_acuta_HIv2___xfSc0000147, Pocillopora_acuta_HIv2___xfSc0000148, Pocillopora_acuta_HIv2___xfSc0000150, Pocillopora_acuta_HIv2___xfSc0000151, Pocillopora_acuta_HIv2___xfSc0000152, Pocillopora_acuta_HIv2___xfSc0000154, Pocillopora_acuta_HIv2___xfSc0000155, Pocillopora_acuta_HIv2___xfSc0000157, Pocillopora_acuta_HIv2___xfSc0000158, Pocillopora_acuta_HIv2___xfSc0000159, Pocillopora_acuta_HIv2___xfSc0000160, Pocillopora_acuta_HIv2___xfSc0000161, Pocillopora_acuta_HIv2___xfSc0000162, Pocillopora_acuta_HIv2___xfSc0000163, Pocillopora_acuta_HIv2___xfSc0000164, Pocillopora_acuta_HIv2___xfSc0000165, Pocillopora_acuta_HIv2___xfSc0000166, Pocillopora_acuta_HIv2___xfSc0000167, Pocillopora_acuta_HIv2___xfSc0000168, Pocillopora_acuta_HIv2___xfSc0000170, Pocillopora_acuta_HIv2___xfSc0000171, Pocillopora_acuta_HIv2___xfSc0000173, Pocillopora_acuta_HIv2___xfSc0000174, Pocillopora_acuta_HIv2___xfSc0000177, Pocillopora_acuta_HIv2___xfSc0000178, Pocillopora_acuta_HIv2___xfSc0000179, Pocillopora_acuta_HIv2___xfSc0000180, Pocillopora_acuta_HIv2___xfSc0000181, Pocillopora_acuta_HIv2___xfSc0000182, Pocillopora_acuta_HIv2___xfSc0000183, Pocillopora_acuta_HIv2___xfSc0000184, Pocillopora_acuta_HIv2___xfSc0000185, Pocillopora_acuta_HIv2___xfSc0000186, Pocillopora_acuta_HIv2___xfSc0000187, Pocillopora_acuta_HIv2___xfSc0000188, Pocillopora_acuta_HIv2___xfSc0000189, Pocillopora_acuta_HIv2___xfSc0000190, Pocillopora_acuta_HIv2___xfSc0000191, Pocillopora_acuta_HIv2___xfSc0000192, Pocillopora_acuta_HIv2___xfSc0000193, Pocillopora_acuta_HIv2___xfSc0000195, Pocillopora_acuta_HIv2___xfSc0000196, Pocillopora_acuta_HIv2___xfSc0000197, Pocillopora_acuta_HIv2___xfSc0000200, Pocillopora_acuta_HIv2___xfSc0000202, Pocillopora_acuta_HIv2___xfSc0000203, Pocillopora_acuta_HIv2___xfSc0000204, Pocillopora_acuta_HIv2___xfSc0000205, Pocillopora_acuta_HIv2___xfSc0000206, Pocillopora_acuta_HIv2___xfSc0000207, Pocillopora_acuta_HIv2___xfSc0000208, Pocillopora_acuta_HIv2___xfSc0000209, Pocillopora_acuta_HIv2___xfSc0000210, Pocillopora_acuta_HIv2___xfSc0000212, Pocillopora_acuta_HIv2___xfSc0000213, Pocillopora_acuta_HIv2___xfSc0000214, Pocillopora_acuta_HIv2___xfSc0000215, Pocillopora_acuta_HIv2___xfSc0000216, Pocillopora_acuta_HIv2___xfSc0000217, Pocillopora_acuta_HIv2___xfSc0000218, Pocillopora_acuta_HIv2___xfSc0000220, Pocillopora_acuta_HIv2___xfSc0000221, Pocillopora_acuta_HIv2___xfSc0000222, Pocillopora_acuta_HIv2___xfSc0000223, Pocillopora_acuta_HIv2___xfSc0000224, Pocillopora_acuta_HIv2___xfSc0000226, Pocillopora_acuta_HIv2___xfSc0000227, Pocillopora_acuta_HIv2___xfSc0000228, Pocillopora_acuta_HIv2___xfSc0000230, Pocillopora_acuta_HIv2___xfSc0000231, Pocillopora_acuta_HIv2___xfSc0000232, Pocillopora_acuta_HIv2___xfSc0000233, Pocillopora_acuta_HIv2___xfSc0000234, Pocillopora_acuta_HIv2___xfSc0000235, Pocillopora_acuta_HIv2___xfSc0000236, Pocillopora_acuta_HIv2___xfSc0000237, Pocillopora_acuta_HIv2___xfSc0000238, Pocillopora_acuta_HIv2___xfSc0000239, Pocillopora_acuta_HIv2___xfSc0000240, Pocillopora_acuta_HIv2___xfSc0000241, Pocillopora_acuta_HIv2___xfSc0000242, Pocillopora_acuta_HIv2___xfSc0000243, Pocillopora_acuta_HIv2___xfSc0000244, Pocillopora_acuta_HIv2___xfSc0000245, Pocillopora_acuta_HIv2___xfSc0000247, Pocillopora_acuta_HIv2___xfSc0000248, Pocillopora_acuta_HIv2___xfSc0000249, Pocillopora_acuta_HIv2___xfSc0000250, Pocillopora_acuta_HIv2___xfSc0000251, Pocillopora_acuta_HIv2___xfSc0000252, Pocillopora_acuta_HIv2___xfSc0000254, Pocillopora_acuta_HIv2___xfSc0000255, Pocillopora_acuta_HIv2___xfSc0000256, Pocillopora_acuta_HIv2___xfSc0000257, Pocillopora_acuta_HIv2___xfSc0000258, Pocillopora_acuta_HIv2___xfSc0000259, Pocillopora_acuta_HIv2___xfSc0000260, Pocillopora_acuta_HIv2___xfSc0000261, Pocillopora_acuta_HIv2___xfSc0000262, Pocillopora_acuta_HIv2___xfSc0000264, Pocillopora_acuta_HIv2___xfSc0000265, Pocillopora_acuta_HIv2___xfSc0000266, Pocillopora_acuta_HIv2___xfSc0000267, Pocillopora_acuta_HIv2___xfSc0000268, Pocillopora_acuta_HIv2___xfSc0000269, Pocillopora_acuta_HIv2___xfSc0000270, Pocillopora_acuta_HIv2___xfSc
+    ##   - in 'x': Pocillopora_acuta_HIv2___Sc0000056, Pocillopora_acuta_HIv2___Sc0000058, Pocillopora_acuta_HIv2___Sc0000059, Pocillopora_acuta_HIv2___Sc0000062, Pocillopora_acuta_HIv2___Sc0000064, Pocillopora_acuta_HIv2___Sc0000068, Pocillopora_acuta_HIv2___Sc0000070, Pocillopora_acuta_HIv2___Sc0000073, Pocillopora_acuta_HIv2___Sc0000076, Pocillopora_acuta_HIv2___Sc0000077, Pocillopora_acuta_HIv2___Sc0000080, Pocillopora_acuta_HIv2___xfSc0000071, Pocillopora_acuta_HIv2___xfSc0000074, Pocillopora_acuta_HIv2___xfSc0000078, Pocillopora_acuta_HIv2___xfSc0000087, Pocillopora_acuta_HIv2___xfSc0000089, Pocillopora_acuta_HIv2___xfSc0000090, Pocillopora_acuta_HIv2___xfSc0000095, Pocillopora_acuta_HIv2___xfSc0000097, Pocillopora_acuta_HIv2___xfSc0000099, Pocillopora_acuta_HIv2___xfSc0000104, Pocillopora_acuta_HIv2___xfSc0000105, Pocillopora_acuta_HIv2___xfSc0000108, Pocillopora_acuta_HIv2___xfSc0000109, Pocillopora_acuta_HIv2___xfSc0000110, Pocillopora_acuta_HIv2___xfSc0000116, Pocillopora_acuta_HIv2___xfSc0000119, Pocillopora_acuta_HIv2___xfSc0000121, Pocillopora_acuta_HIv2___xfSc0000122, Pocillopora_acuta_HIv2___xfSc0000128, Pocillopora_acuta_HIv2___xfSc0000129, Pocillopora_acuta_HIv2___xfSc0000131, Pocillopora_acuta_HIv2___xfSc0000132, Pocillopora_acuta_HIv2___xfSc0000135, Pocillopora_acuta_HIv2___xfSc0000136, Pocillopora_acuta_HIv2___xfSc0000139, Pocillopora_acuta_HIv2___xfSc0000140, Pocillopora_acuta_HIv2___xfSc0000141, Pocillopora_acuta_HIv2___xfSc0000143, Pocillopora_acuta_HIv2___xfSc0000144, Pocillopora_acuta_HIv2___xfSc0000147, Pocillopora_acuta_HIv2___xfSc0000148, Pocillopora_acuta_HIv2___xfSc0000151, Pocillopora_acuta_HIv2___xfSc0000152, Pocillopora_acuta_HIv2___xfSc0000154, Pocillopora_acuta_HIv2___xfSc0000155, Pocillopora_acuta_HIv2___xfSc0000158, Pocillopora_acuta_HIv2___xfSc0000160, Pocillopora_acuta_HIv2___xfSc0000161, Pocillopora_acuta_HIv2___xfSc0000163, Pocillopora_acuta_HIv2___xfSc0000165, Pocillopora_acuta_HIv2___xfSc0000166, Pocillopora_acuta_HIv2___xfSc0000167, Pocillopora_acuta_HIv2___xfSc0000168, Pocillopora_acuta_HIv2___xfSc0000171, Pocillopora_acuta_HIv2___xfSc0000177, Pocillopora_acuta_HIv2___xfSc0000179, Pocillopora_acuta_HIv2___xfSc0000180, Pocillopora_acuta_HIv2___xfSc0000182, Pocillopora_acuta_HIv2___xfSc0000183, Pocillopora_acuta_HIv2___xfSc0000184, Pocillopora_acuta_HIv2___xfSc0000185, Pocillopora_acuta_HIv2___xfSc0000186, Pocillopora_acuta_HIv2___xfSc0000187, Pocillopora_acuta_HIv2___xfSc0000189, Pocillopora_acuta_HIv2___xfSc0000191, Pocillopora_acuta_HIv2___xfSc0000192, Pocillopora_acuta_HIv2___xfSc0000193, Pocillopora_acuta_HIv2___xfSc0000195, Pocillopora_acuta_HIv2___xfSc0000196, Pocillopora_acuta_HIv2___xfSc0000200, Pocillopora_acuta_HIv2___xfSc0000203, Pocillopora_acuta_HIv2___xfSc0000204, Pocillopora_acuta_HIv2___xfSc0000205, Pocillopora_acuta_HIv2___xfSc0000207, Pocillopora_acuta_HIv2___xfSc0000208, Pocillopora_acuta_HIv2___xfSc0000209, Pocillopora_acuta_HIv2___xfSc0000212, Pocillopora_acuta_HIv2___xfSc0000214, Pocillopora_acuta_HIv2___xfSc0000215, Pocillopora_acuta_HIv2___xfSc0000216, Pocillopora_acuta_HIv2___xfSc0000217, Pocillopora_acuta_HIv2___xfSc0000218, Pocillopora_acuta_HIv2___xfSc0000223, Pocillopora_acuta_HIv2___xfSc0000228, Pocillopora_acuta_HIv2___xfSc0000230, Pocillopora_acuta_HIv2___xfSc0000231, Pocillopora_acuta_HIv2___xfSc0000232, Pocillopora_acuta_HIv2___xfSc0000233, Pocillopora_acuta_HIv2___xfSc0000234, Pocillopora_acuta_HIv2___xfSc0000236, Pocillopora_acuta_HIv2___xfSc0000237, Pocillopora_acuta_HIv2___xfSc0000239, Pocillopora_acuta_HIv2___xfSc0000240, Pocillopora_acuta_HIv2___xfSc0000243, Pocillopora_acuta_HIv2___xfSc0000244, Pocillopora_acuta_HIv2___xfSc0000248, Pocillopora_acuta_HIv2___xfSc0000249, Pocillopora_acuta_HIv2___xfSc0000250, Pocillopora_acuta_HIv2___xfSc0000251, Pocillopora_acuta_HIv2___xfSc0000252, Pocillopora_acuta_HIv2___xfSc0000255, Pocillopora_acuta_HIv2___xfSc0000256, Pocillopora_acuta_HIv2___xfSc0000257, Pocillopora_acuta_HIv2___xfSc0000258, Pocillopora_acuta_HIv2___xfSc0000260, Pocillopora_acuta_HIv2___xfSc0000262, Pocillopora_acuta_HIv2___xfSc0000264, Pocillopora_acuta_HIv2___xfSc0000265, Pocillopora_acuta_HIv2___xfSc0000266, Pocillopora_acuta_HIv2___xfSc0000267, Pocillopora_acuta_HIv2___xfSc0000268, Pocillopora_acuta_HIv2___xfSc0000269, Pocillopora_acuta_HIv2___xfSc0000271, Pocillopora_acuta_HIv2___xfSc0000272, Pocillopora_acuta_HIv2___xfSc0000273, Pocillopora_acuta_HIv2___xfSc0000275, Pocillopora_acuta_HIv2___xfSc0000276, Pocillopora_acuta_HIv2___xfSc0000277, Pocillopora_acuta_HIv2___xfSc0000280, Pocillopora_acuta_HIv2___xfSc0000281, Pocillopora_acuta_HIv2___xfSc0000283, Pocillopora_acuta_HIv2___xfSc0000284, Pocillopora_acuta_HIv2___xfSc0000287, Pocillopora_acuta_HIv2___xfSc0000288, Pocillopora_acuta_HIv2___xfSc0000291, Pocillopora_acuta_HIv2___xfSc0000293, Pocillopora_acuta_HIv2___xfSc0000296, Pocillopora_acuta_HIv2___xfSc0000302, Pocillopora_acuta_HIv2___xfSc0000303, Pocillopora_acuta_HIv2___xfSc0000305, Pocillopora_acuta_HIv2___xfSc0000306, Pocillopora_acuta_HIv2___xfSc0000310, Pocillopora_acuta_HIv2___xfSc0000311, Pocillopora_acuta_HIv2___xfSc0000313, Pocillopora_acuta_HIv2___xfSc0000315, Pocillopora_acuta_HIv2___xfSc0000316, Pocillopora_acuta_HIv2___xfSc0000319, Pocillopora_acuta_HIv2___xfSc0000322, Pocillopora_acuta_HIv2___xfSc0000325, Pocillopora_acuta_HIv2___xfSc0000326, Pocillopora_acuta_HIv2___xfSc0000327, Pocillopora_acuta_HIv2___xfSc0000334, Pocillopora_acuta_HIv2___xfSc0000343, Pocillopora_acuta_HIv2___xfSc0000344, Pocillopora_acuta_HIv2___xfSc0000345, Pocillopora_acuta_HIv2___xfSc0000346, Pocillopora_acuta_HIv2___xfSc0000347, Pocillopora_acuta_HIv2___xfSc0000349, Pocillopora_acuta_HIv2___xfSc0000350, Pocillopora_acuta_HIv2___xfSc0000354, Pocillopora_acuta_HIv2___xfSc0000361, Pocillopora_acuta_HIv2___xfSc0000362, Pocillopora_acuta_HIv2___xfSc0000363, Pocillopora_acuta_HIv2___xfSc0000368, Pocillopora_acuta_HIv2___xfSc0000370, Pocillopora_acuta_HIv2___xfSc0000371, Pocillopora_acuta_HIv2___xfSc0000374, Pocillopora_acuta_HIv2___xfSc0000376, Pocillopora_acuta_HIv2___xfSc0000377, Pocillopora_acuta_HIv2___xfSc0000378, Pocillopora_acuta_HIv2___xfSc0000379, Pocillopora_acuta_HIv2___xfSc0000380, Pocillopora_acuta_HIv2___xfSc0000384, Pocillopora_acuta_HIv2___xfSc0000386, Pocillopora_acuta_HIv2___xpSc0000402, Pocillopora_acuta_HIv2___xpSc0000412, Pocillopora_acuta_HIv2___xpSc0000414, Pocillopora_acuta_HIv2___xpSc0000415, Pocillopora_acuta_HIv2___xpSc0000417, Pocillopora_acuta_HIv2___xpSc0000422, Pocillopora_acuta_HIv2___xpSc0000423, Pocillopora_acuta_HIv2___xpSc0000425, Pocillopora_acuta_HIv2___xpSc0000430, Pocillopora_acuta_HIv2___xpSc0000439, Pocillopora_acuta_HIv2___xpSc0000447
+    ##   - in 'y': Pocillopora_acuta_HIv2___Sc0000054, Pocillopora_acuta_HIv2___Sc0000069, Pocillopora_acuta_HIv2___xfSc0000067, Pocillopora_acuta_HIv2___xfSc0000112, Pocillopora_acuta_HIv2___xfSc0000153, Pocillopora_acuta_HIv2___xfSc0000172, Pocillopora_acuta_HIv2___xfSc0000225, Pocillopora_acuta_HIv2___xfSc0000365, Pocillopora_acuta_HIv2___xfSc0000369, Pocillopora_acuta_HIv2___xfSc0000372, Pocillopora_acuta_HIv2___xfSc0000375, Pocillopora_acuta_HIv2___xfSc0000383, Pocillopora_acuta_HIv2___xpSc0000428
+    ##   Make sure to always combine/compare objects based on the same reference
+    ##   genome (use suppressWarnings() to suppress this warning).
+
+``` r
+nrow(MLs_in_genes)
+```
+
+    ## [1] 4972
 
 ``` r
 #MLs_in_genes <- getData(MLs_in_genes)
@@ -871,7 +1039,7 @@ ggplot(plot_data, aes(y = baseMean, x = percent_meth_ALL)) +
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
 
 ``` r
 ggplot(plot_data, aes(y = log2(baseMean), x = percent_meth_ALL)) +
@@ -884,7 +1052,7 @@ ggplot(plot_data, aes(y = log2(baseMean), x = percent_meth_ALL)) +
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-21-2.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-22-2.png)<!-- -->
 
 ``` r
 ggplot(plot_data, aes(y = abs(log2FoldChange), x = percent_meth_ALL)) +
@@ -897,7 +1065,7 @@ ggplot(plot_data, aes(y = abs(log2FoldChange), x = percent_meth_ALL)) +
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-21-3.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-22-3.png)<!-- -->
 
 ``` r
 # Create the plot
@@ -914,7 +1082,7 @@ ggplot(plot_data, aes(x = percent_meth_ALL, y = log2FoldChange)) +
   theme_minimal()
 ```
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-21-4.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-22-4.png)<!-- -->
 
 ``` r
 plot_data <- merge(percent_meth_long, DESeq, by.x = "gene_id", by.y = "query")
@@ -928,7 +1096,7 @@ ggplot(plot_data, aes(y = abs(log2FoldChange), x = tissue_percent_meth, color=Ti
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
 
 ### 0.5.1 Read counts
 
@@ -973,15 +1141,27 @@ ggplot(plot_data, aes(y = log2(tissue_mean_counts), x = tissue_percent_meth, col
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-    ## Warning: Removed 3 rows containing non-finite outside the scale range
+    ## Warning: Removed 71 rows containing non-finite outside the scale range
     ## (`stat_smooth()`).
 
-    ## Warning: Removed 3 rows containing non-finite outside the scale range
+    ## Warning: Removed 71 rows containing non-finite outside the scale range
     ## (`stat_poly_eq()`).
 
-    ## Warning in ci_f_ncp(stat, df1 = df1, df2 = df2, probs = probs): Upper limit
-    ## outside search range. Set to the maximum of the parameter range.
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
 
-    ## Warning in compute_group(...): CI computation error: Error in check_output(cint, probs = probs, parameter_range = c(0, 1)): out[1] <= out[2] is not TRUE
+``` r
+ggplot(plot_data, aes(y = log2(tissue_mean_counts), x = tissue_percent_meth)) +
+  geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
+  labs(x = "Average CpG % methylation of gene", y = "Mean counts, all samples", 
+       title = "Gene Methylation vs Expression") +
+  theme_minimal()
+```
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+    ## Warning: Removed 71 rows containing non-finite outside the scale range
+    ## (`stat_smooth()`).
+    ## Removed 71 rows containing non-finite outside the scale range
+    ## (`stat_poly_eq()`).
+
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-26-2.png)<!-- -->
