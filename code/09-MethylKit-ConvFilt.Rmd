@@ -32,6 +32,7 @@ renv::restore() #reinstall all the package versions in the renv lockfile
 
 ```{r packages}
 require("methylKit")
+require("parallel")
 require("tidyverse")
 require("vegan")
 require("gplots")
@@ -69,21 +70,38 @@ tissue_binary <- gsub("Aboral", "1", tissue)
 tissue_binary <- gsub("OralEpi", "0", tissue_binary)
 tissue_binary <- as.numeric(tissue_binary)
 fragment <- meta$Fragment
+```
 
-methylObj=methRead(as.list(file_list),
-           sample.id = as.list(sample),
-           assembly = "Pacuta",
-           treatment = tissue_binary,
-           context = "CpG",
-           mincov = 5
-           )
+```{r}
+# methylObj=methRead(as.list(file_list),
+#            sample.id = as.list(sample),
+#            assembly = "Pacuta",
+#            treatment = tissue_binary,
+#            context = "CpG",
+#            mincov = 5
+#            )
 
 # save(methylObj, file = "../output_WGBS/MethylKit.RData")
+
+methyl_list <- mclapply(seq_along(file_list), function(i) {
+  methRead(
+    file_list[[i]],
+    sample.id = sample[[i]],
+    assembly = "Pacuta",
+    treatment = tissue_binary[[i]],
+    context = "CpG",
+    mincov = 5
+  )
+}, mc.cores = 4) 
+
+methylObj <- new("methylRawList", methyl_list, treatment = tissue_binary)
+
+save(methylObj, file = "../output_WGBS/MethylKit_20250513.RData")
 ```
 
 
 ```{r}
-#load("../output_WGBS/MethylKit.RData")
+#load("../output_WGBS/MethylKit_20250513.RData")
 
 getMethylationStats(methylObj[[2]],plot=FALSE,both.strands=FALSE)
 getMethylationStats(methylObj[[2]],plot=TRUE,both.strands=FALSE)
@@ -91,17 +109,24 @@ getCoverageStats(methylObj[[2]],plot=TRUE,both.strands=FALSE)
 getCoverageStats(methylObj[[2]],plot=TRUE,both.strands=TRUE)
 ```
 
-```{r}
-filtered_methylObj=filterByCoverage(methylObj,lo.count=5,lo.perc=NULL,
-                                      hi.count=NULL,hi.perc=99.9)
 
-filtered_methylObj_norm <- filtered_methylObj %>% methylKit::normalizeCoverage(.)
+
+### Note: I changed the code below so that a CpG does not have to have 5X coverage in all samples to be analyzed, and only needs 5X coverage in 2 samples per group to be retained. This way we don't remove CpGs that happen to have lower coverage in a few samples or one tissue.
+
+```{r}
+#filtered_methylObj=filterByCoverage(methylObj,lo.count=5,lo.perc=NULL,
+#                                      hi.count=NULL,hi.perc=99.9)
+
+#filtered_methylObj_norm <- filtered_methylObj %>% methylKit::normalizeCoverage(.)
+methylObj_norm <- methylObj %>% methylKit::normalizeCoverage(.)
 ```
 
-
 ```{r}
-meth_filter=methylKit::unite(filtered_methylObj_norm)
-meth_filter_destrand=methylKit::unite(filtered_methylObj_norm,destrand = TRUE)
+#meth_filter=methylKit::unite(filtered_methylObj_norm)
+meth_filter=methylKit::unite(methylObj_norm, min.per.group = c(3L,3L))
+
+#meth_filter_destrand=methylKit::unite(filtered_methylObj_norm,destrand = TRUE)
+meth_filter_destrand=methylKit::unite(methylObj_norm, min.per.group = c(3L,3L), destrand = TRUE)
  
 clusterSamples(meth_filter, dist="correlation", method="ward", plot=TRUE)
 clusterSamples(meth_filter_destrand, dist="correlation", method="ward", plot=TRUE)
@@ -117,8 +142,8 @@ getCorrelation(meth_filter_destrand,plot=TRUE)
 ### batch effects 
 
 ```{r}
-as=assocComp(mBase=meth_filter_destrand,dplyr::select(meta,c("PCR_ReAmp_Cycles", "Fragment")))
-as
+#as=assocComp(mBase=meth_filter_destrand,dplyr::select(meta,c("PCR_ReAmp_Cycles", "Fragment")))
+#as
 ```
 
 
@@ -136,11 +161,11 @@ sds=matrixStats::rowSds(pm)
 hist(sds, breaks = 100)
 
 # keep only CpG with standard deviations larger than 2%
-meth <- meth_filter_destrand[sds > 2]
+#meth <- meth_filter_destrand[sds > 2]
 
 # This leaves us with this number of CpG sites
 nrow(meth_filter_destrand)
-nrow(meth)
+#nrow(meth)
 ```
 
 
@@ -409,6 +434,12 @@ filtered_counts_RNA_long <- filtered_counts_RNA %>% pivot_longer(
 plot_data <- merge(percent_meth_long, filtered_counts_RNA_long, by = c("gene_id", "Tissue"))
 
 ggplot(plot_data, aes(y = log2(tissue_mean_counts), x = tissue_percent_meth, color=Tissue)) +
+  geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
+  labs(x = "Average CpG % methylation of gene", y = "Mean counts, all samples", 
+       title = "Gene Methylation vs Expression") +
+  theme_minimal()
+
+ggplot(plot_data, aes(y = log2(tissue_mean_counts), x = tissue_percent_meth)) +
   geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
   labs(x = "Average CpG % methylation of gene", y = "Mean counts, all samples", 
        title = "Gene Methylation vs Expression") +
