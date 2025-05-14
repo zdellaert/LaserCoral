@@ -93,4 +93,5 @@ output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test_new*
 output_RNA/splicing/Pocillopora_acuta_HIv2.gtf*
 output_WGBS/methylseq_V3_bwa_test/methyldackel/methyldackel:0.6.1--he4a0461_7
 output_WGBS/Libis_Docker/
+output_WGBS/LiBis/
 random/
