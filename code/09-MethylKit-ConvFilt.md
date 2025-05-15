@@ -31,6 +31,7 @@ Zoe Dellaert
     expressed](#053-absolute-value-of-log2foldchange-relationship-between-overall-methylation-of-a-gene-and-whether-or-not-it-is-differentially-expressed)
   - [0.5.4 Read counts/vsd transformed
     counts](#054-read-countsvsd-transformed-counts)
+- [0.6 Methylated CpG locations](#06-methylated-cpg-locations)
 
 ## 0.1 MethylKit - Reads filtered for \>90% conversion efficiency
 
@@ -359,7 +360,7 @@ save(methylObj, file = "../output_WGBS/MethylKit_20250513.RData")
 ```
 
 ``` r
-#load("../output_WGBS/MethylKit_20250513.RData")
+load("../output_WGBS/MethylKit_20250513.RData")
 
 getMethylationStats(methylObj[[2]],plot=FALSE,both.strands=FALSE)
 ```
@@ -791,9 +792,7 @@ head(gff)
 exons = gffToGRanges(gff.file, filter = "exon")
 
 transcripts = gffToGRanges(gff.file, filter = "transcript")
-```
 
-``` r
 DML_grange = as(DMLs,"GRanges")
 DML_grange
 ```
@@ -1012,7 +1011,7 @@ ggplot(plot_data, aes(x = DML_methdiff, y = log2FoldChange)) +
     ## Warning: ggrepel: 3 unlabeled data points (too many overlaps). Consider
     ## increasing max.overlaps
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
 
 ``` r
 # how many CpG sites are there after filtering?
@@ -1022,10 +1021,10 @@ dim(meth_filter_destrand)
     ## [1] 134034     34
 
 ``` r
-ML_grange = as(meth_filter_destrand,"GRanges")
+CpG_grange = as(meth_filter_destrand,"GRanges")
 
-# identify all the MLs that are in transcripts
-genes_with_MLs <- findOverlaps(ML_grange, transcripts,ignore.strand = TRUE)
+# identify all the CpGs that are in transcripts
+genes_with_CpGs <- findOverlaps(CpG_grange, transcripts,ignore.strand = TRUE)
 ```
 
     ## Warning in .merge_two_Seqinfo_objects(x, y): Each of the 2 combined objects has sequence levels not in the other:
@@ -1036,26 +1035,75 @@ genes_with_MLs <- findOverlaps(ML_grange, transcripts,ignore.strand = TRUE)
 
 ``` r
 # Extract matching transcript information
-ML_transcript_annot <- data.frame(
-  ML_chr = seqnames(ML_grange)[queryHits(genes_with_MLs)],
-  ML_start = start(ML_grange)[queryHits(genes_with_MLs)],
-  ML_end = end(ML_grange)[queryHits(genes_with_MLs)],
-  transcript_chr = seqnames(transcripts)[subjectHits(genes_with_MLs)],
-  transcript_start = start(transcripts)[subjectHits(genes_with_MLs)],
-  transcript_end = end(transcripts)[subjectHits(genes_with_MLs)],
-  transcript_id = transcripts$transcript_id[subjectHits(genes_with_MLs)],
-  gene_id = transcripts$gene_id[subjectHits(genes_with_MLs)]
+CpG_transcript_annot <- data.frame(
+  CpG_chr = seqnames(CpG_grange)[queryHits(genes_with_CpGs)],
+  CpG_start = start(CpG_grange)[queryHits(genes_with_CpGs)],
+  CpG_end = end(CpG_grange)[queryHits(genes_with_CpGs)],
+  transcript_chr = seqnames(transcripts)[subjectHits(genes_with_CpGs)],
+  transcript_start = start(transcripts)[subjectHits(genes_with_CpGs)],
+  transcript_end = end(transcripts)[subjectHits(genes_with_CpGs)],
+  transcript_id = transcripts$transcript_id[subjectHits(genes_with_CpGs)],
+  gene_id = transcripts$gene_id[subjectHits(genes_with_CpGs)]
 )
 
-#how many MLs are represented
-length(ML_transcript_annot$transcript_id)
+#how many CpGs are represented
+length(CpG_transcript_annot$transcript_id)
 ```
 
     ## [1] 38747
 
 ``` r
+# how many CpGs are in these genes?
+cpg_counts <- CpG_transcript_annot %>%
+  group_by(gene_id) %>%
+  summarise(num_cpgs = n())
+
+hist <- ggplot(cpg_counts, aes(x = num_cpgs)) +
+  geom_histogram(binwidth = 3, fill = "#1f78b4", color = "black") +
+  scale_x_continuous(limits = c(0, max(cpg_counts$num_cpgs))) +
+  labs(x = "Number of CpGs per gene passing coverage filtering",
+       y = "Count of genes") +
+  theme_minimal()
+
+# Calculate summary stats
+summary_stats <- cpg_counts %>%
+  summarise(
+    min_cpgs = min(num_cpgs),
+    median_cpgs = median(num_cpgs),
+    mean_cpgs = mean(num_cpgs),
+    max_cpgs = max(num_cpgs),
+    total_genes = n(),
+    one_cpg = sum(num_cpgs == 1)
+  )
+
+# Create annotation text
+annotation_text <- paste0(
+  "Total genes: ", summary_stats$total_genes, "\n",
+  "Min CpGs: ", summary_stats$min_cpgs, "\n",
+  "Median: ", summary_stats$median_cpgs, "\n",
+  "Mean: ", round(summary_stats$mean_cpgs,2), "\n",
+  "Max CpGs: ", summary_stats$max_cpgs, "\n",
+  "Genes with 1 CpG: ", summary_stats$one_cpg, "(",(round(summary_stats$one_cpg/summary_stats$total_genes*100)),"%)")
+
+# Plot histogram with annotation box
+hist +
+  annotate("text", 
+           x = Inf, y = Inf, 
+           label = annotation_text, 
+           hjust = 1.1, vjust = 1.1, 
+           size = 4, 
+           fontface = "italic",
+           color = "black")
+```
+
+    ## Warning: Removed 2 rows containing missing values or values outside the scale range
+    ## (`geom_bar()`).
+
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+
+``` r
 # Find overlaps between methylated loci and transcripts, averaged by gene
-MLs_in_genes <- regionCounts(meth_filter_destrand, regions=transcripts)
+CpGs_in_genes <- regionCounts(meth_filter_destrand, regions=transcripts)
 ```
 
     ## Warning in .merge_two_Seqinfo_objects(x, y): Each of the 2 combined objects has sequence levels not in the other:
@@ -1065,25 +1113,25 @@ MLs_in_genes <- regionCounts(meth_filter_destrand, regions=transcripts)
     ##   genome (use suppressWarnings() to suppress this warning).
 
 ``` r
-MLs_in_genes$gene_id <- transcripts$gene_id[match(paste(MLs_in_genes$chr, MLs_in_genes$start, MLs_in_genes$end), paste(seqnames(transcripts), start(transcripts), end(transcripts)))]
+CpGs_in_genes$gene_id <- transcripts$gene_id[match(paste(CpGs_in_genes$chr, CpGs_in_genes$start, CpGs_in_genes$end), paste(seqnames(transcripts), start(transcripts), end(transcripts)))]
 
 #how many genes are represented
-nrow(MLs_in_genes)
+nrow(CpGs_in_genes)
 ```
 
     ## [1] 4972
 
 ``` r
 #does this match the above?
-length(unique(ML_transcript_annot$transcript_id))
+length(unique(CpG_transcript_annot$transcript_id))
 ```
 
     ## [1] 4972
 
 ``` r
-percent_meth <- percMethylation(MLs_in_genes)
+percent_meth <- percMethylation(CpGs_in_genes)
 percent_meth <- as.data.frame(percent_meth)
-percent_meth$gene_id <- MLs_in_genes$gene_id 
+percent_meth$gene_id <- CpGs_in_genes$gene_id 
 percent_meth <- percent_meth %>% select(gene_id, everything())
 
 percent_meth <- percent_meth %>% rowwise() %>%
@@ -1107,7 +1155,7 @@ filtering with the genes that were found to be expressed in our RNA-seq
 dataset (14464).
 
 ``` r
-# number of genes containing MLs
+# number of genes containing CpGs
 nrow(percent_meth)
 ```
 
@@ -1130,7 +1178,14 @@ nrow(expressed_genes_percent_meth)
 
 ``` r
 plot_data <- merge(percent_meth_long, DESeq, by.x = "gene_id", by.y = "query")
+
+ggplot(percent_meth, aes(x = percent_meth_ALL)) +
+  geom_histogram(bins = 50) +
+  theme_minimal() +
+  labs(x = "(% gene body methylation", y = "Gene count")
 ```
+
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
 
 ### 0.5.1 BaseMean: Raw gene expression levels (skewed by highly expressed genes)
 
@@ -1226,7 +1281,7 @@ ggplot(plot_data, aes(x = percent_meth_ALL, y = log2FoldChange)) +
   scale_color_manual(values = c("grey", "red")) +
   labs(x = "Average CpG % methylation of gene", 
        y = "RNA-seq: Log2FoldChange",
-       title = "Differentially methylated loci (DMLs) vs. Gene Expression",
+       title = "LFC and DEGs (red) vs. % CpG Methylation",
        color = "Significant DEGs") +
   theme_minimal()
 ```
@@ -1267,11 +1322,11 @@ vsd_long <- vsd %>% pivot_longer(cols = c(Oral,Aboral),
 ```
 
 ``` r
-plot_data <- merge(percent_meth_long, vsd_long, by = c("gene_id", "Tissue"))
+plot_data_tissue <- merge(percent_meth_long, vsd_long, by = c("gene_id", "Tissue"))
 
-ggplot(plot_data, aes(y = tissue_vst_mean, x = tissue_percent_meth, color=Tissue)) +
+ggplot(plot_data_tissue, aes(y = tissue_vst_mean, x = tissue_percent_meth, color=Tissue)) +
   geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
-  labs(x = "Average CpG % methylation of gene", y = "Mean counts, all samples", 
+  labs(x = "Average CpG % methylation of gene", y = "VST Expression", 
        title = "Gene Methylation vs Expression") +
   theme_minimal()
 ```
@@ -1281,9 +1336,11 @@ ggplot(plot_data, aes(y = tissue_vst_mean, x = tissue_percent_meth, color=Tissue
 ![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
 
 ``` r
+plot_data <- merge(percent_meth, vsd, by = c("gene_id"))
+
 ggplot(plot_data, aes(y = vst_mean, x = percent_meth_ALL)) +
   geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
-  labs(x = "Average CpG % methylation of gene", y = "Mean counts, all samples", 
+  labs(x = "Average CpG % methylation of gene", y = "VST Expression", 
        title = "Gene Methylation vs Expression") +
   theme_minimal()
 ```
@@ -1293,7 +1350,7 @@ ggplot(plot_data, aes(y = vst_mean, x = percent_meth_ALL)) +
 ![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-28-2.png)<!-- -->
 
 ``` r
-model <- lm(tissue_vst_mean ~ tissue_percent_meth * Tissue, data = plot_data)
+model <- lm(tissue_vst_mean ~ tissue_percent_meth * Tissue, data = plot_data_tissue)
 
 summary(model)
 ```
@@ -1301,7 +1358,7 @@ summary(model)
     ## 
     ## Call:
     ## lm(formula = tissue_vst_mean ~ tissue_percent_meth * Tissue, 
-    ##     data = plot_data)
+    ##     data = plot_data_tissue)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
@@ -1319,3 +1376,455 @@ summary(model)
     ## Residual standard error: 2.274 on 5140 degrees of freedom
     ## Multiple R-squared:  0.02764,    Adjusted R-squared:  0.02707 
     ## F-statistic:  48.7 on 3 and 5140 DF,  p-value: < 2.2e-16
+
+``` r
+# Full model
+full_model <- lm(vst_mean ~ percent_meth_ALL, data = plot_data)
+
+# Per-tissue models
+oral_model <- lm(tissue_vst_mean ~ tissue_percent_meth, data = filter(plot_data_tissue, Tissue == "Oral"))
+aboral_model <- lm(tissue_vst_mean ~ tissue_percent_meth, data = filter(plot_data_tissue, Tissue == "Aboral"))
+
+summary(full_model)$r.squared
+```
+
+    ## [1] 0.007249067
+
+``` r
+summary(oral_model)$r.squared
+```
+
+    ## [1] 0.008261222
+
+``` r
+summary(aboral_model)$r.squared
+```
+
+    ## [1] 0.003628742
+
+``` r
+# Model 1: simple model, no tissue info
+full_model <- lm(tissue_vst_mean ~ tissue_percent_meth, data = plot_data_tissue)
+
+# Model 2: interaction model, includes tissue and interaction term
+interaction_model <- lm(tissue_vst_mean ~ tissue_percent_meth * Tissue, data = plot_data_tissue)
+
+summary(full_model)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = tissue_vst_mean ~ tissue_percent_meth, data = plot_data_tissue)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -4.9061 -1.7960 -0.1833  1.6215  8.4146 
+    ## 
+    ## Coefficients:
+    ##                     Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)         8.018113   0.034298 233.778  < 2e-16 ***
+    ## tissue_percent_meth 0.008555   0.001695   5.047 4.65e-07 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 2.3 on 5142 degrees of freedom
+    ## Multiple R-squared:  0.004929,   Adjusted R-squared:  0.004736 
+    ## F-statistic: 25.47 on 1 and 5142 DF,  p-value: 4.646e-07
+
+``` r
+summary(interaction_model)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = tissue_vst_mean ~ tissue_percent_meth * Tissue, 
+    ##     data = plot_data_tissue)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -4.7884 -1.7766 -0.2367  1.5714  8.7536 
+    ## 
+    ## Coefficients:
+    ##                                Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)                    7.679166   0.048148 159.491   <2e-16 ***
+    ## tissue_percent_meth            0.007577   0.002320   3.267   0.0011 ** 
+    ## TissueOral                     0.672722   0.067824   9.919   <2e-16 ***
+    ## tissue_percent_meth:TissueOral 0.002831   0.003356   0.844   0.3989    
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 2.274 on 5140 degrees of freedom
+    ## Multiple R-squared:  0.02764,    Adjusted R-squared:  0.02707 
+    ## F-statistic:  48.7 on 3 and 5140 DF,  p-value: < 2.2e-16
+
+``` r
+anova(full_model, interaction_model)
+```
+
+    ## Analysis of Variance Table
+    ## 
+    ## Model 1: tissue_vst_mean ~ tissue_percent_meth
+    ## Model 2: tissue_vst_mean ~ tissue_percent_meth * Tissue
+    ##   Res.Df   RSS Df Sum of Sq      F    Pr(>F)    
+    ## 1   5142 27207                                  
+    ## 2   5140 26586  2    620.98 60.029 < 2.2e-16 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+## 0.6 Methylated CpG locations
+
+``` r
+library(dplyr)
+
+# Define sequencing error rate and alpha
+p_error <- 0.01
+alpha <- 0.05
+
+# Function to compute adjusted binomial p-values and flag methylated sites per sample
+compute_methylation_flags <- function(data, coverage_col, methylated_col, p_error = 0.01, alpha = 0.05) {
+  # Extract vectors
+  coverage <- data[[coverage_col]]
+  methylated <- data[[methylated_col]]
+  
+  # Handle zero or NA coverage by setting p-values to 1 (not significant)
+  pvals <- rep(1, length(coverage))
+  
+  valid <- !is.na(coverage) & !is.na(methylated) & coverage > 0
+  
+  # Calculate p-values for valid sites only
+  pvals[valid] <- 1 - pbinom(q = methylated[valid] - 1, size = coverage[valid], prob = p_error)
+  
+  # Adjust p-values for multiple testing with FDR correction
+  pvals_adj <- p.adjust(pvals, method = "fdr")
+  
+  # Return logical vector: TRUE if site methylated (adjusted p < alpha), else FALSE
+  return(pvals_adj < alpha)
+}
+
+# Assuming you know how many samples you have, for example 10 samples:
+num_samples <- 10
+methylated_CpGs <- meth_filter_destrand
+
+for (i in 1:num_samples) {
+  coverage_col <- paste0("coverage", i)
+  methylated_col <- paste0("numCs", i)
+  methylation_flag_col <- paste0("methylated_sample", i)
+
+  methylated_CpGs[[methylation_flag_col]] <- compute_methylation_flags(
+    methylated_CpGs, 
+    coverage_col = coverage_col, 
+    methylated_col = methylated_col, 
+    p_error = p_error, 
+    alpha = alpha
+  )
+}
+```
+
+``` r
+methylated_CpGs <- getData(methylated_CpGs)
+
+oral_samples <- which(sample %in% meta$Sample[meta$Tissue=="OralEpi"])
+aboral_samples <- which(sample %in%meta$Sample[meta$Tissue=="Aboral"])
+   
+oral_samples <- paste0("methylated_sample", oral_samples) 
+aboral_samples <- paste0("methylated_sample", aboral_samples)
+
+methylated_CpGs <- methylated_CpGs %>%
+  rowwise() %>%
+  mutate(
+    methylated_Oral = sum(c_across(all_of(oral_samples))) >= 3,
+    methylated_Aboral = sum(c_across(all_of(aboral_samples))) >= 3,
+    methylated_overall = (methylated_Oral | methylated_Aboral)
+  ) %>%
+  ungroup()
+
+nrow(methylated_CpGs)
+```
+
+    ## [1] 134034
+
+``` r
+sum(methylated_CpGs$methylated_Oral)
+```
+
+    ## [1] 1052
+
+``` r
+sum(methylated_CpGs$methylated_Aboral)
+```
+
+    ## [1] 1480
+
+``` r
+sum(methylated_CpGs$methylated_overall)
+```
+
+    ## [1] 1846
+
+``` r
+ML_grange = as(methylated_CpGs,"GRanges")
+
+# identify all the MLs that are in transcripts
+genes_with_MLs <- findOverlaps(ML_grange, transcripts,ignore.strand = TRUE)
+```
+
+    ## Warning in .merge_two_Seqinfo_objects(x, y): Each of the 2 combined objects has sequence levels not in the other:
+    ##   - in 'x': Pocillopora_acuta_HIv2___Sc0000054, Pocillopora_acuta_HIv2___Sc0000069, Pocillopora_acuta_HIv2___xfSc0000067, Pocillopora_acuta_HIv2___xfSc0000112, Pocillopora_acuta_HIv2___xfSc0000153, Pocillopora_acuta_HIv2___xfSc0000172, Pocillopora_acuta_HIv2___xfSc0000225, Pocillopora_acuta_HIv2___xfSc0000365, Pocillopora_acuta_HIv2___xfSc0000369, Pocillopora_acuta_HIv2___xfSc0000372, Pocillopora_acuta_HIv2___xfSc0000375, Pocillopora_acuta_HIv2___xfSc0000383, Pocillopora_acuta_HIv2___xpSc0000428
+    ##   - in 'y': Pocillopora_acuta_HIv2___Sc0000056, Pocillopora_acuta_HIv2___Sc0000058, Pocillopora_acuta_HIv2___Sc0000059, Pocillopora_acuta_HIv2___Sc0000062, Pocillopora_acuta_HIv2___Sc0000064, Pocillopora_acuta_HIv2___Sc0000068, Pocillopora_acuta_HIv2___Sc0000070, Pocillopora_acuta_HIv2___Sc0000073, Pocillopora_acuta_HIv2___Sc0000076, Pocillopora_acuta_HIv2___Sc0000077, Pocillopora_acuta_HIv2___Sc0000080, Pocillopora_acuta_HIv2___xfSc0000071, Pocillopora_acuta_HIv2___xfSc0000074, Pocillopora_acuta_HIv2___xfSc0000078, Pocillopora_acuta_HIv2___xfSc0000087, Pocillopora_acuta_HIv2___xfSc0000089, Pocillopora_acuta_HIv2___xfSc0000090, Pocillopora_acuta_HIv2___xfSc0000095, Pocillopora_acuta_HIv2___xfSc0000097, Pocillopora_acuta_HIv2___xfSc0000099, Pocillopora_acuta_HIv2___xfSc0000104, Pocillopora_acuta_HIv2___xfSc0000105, Pocillopora_acuta_HIv2___xfSc0000108, Pocillopora_acuta_HIv2___xfSc0000109, Pocillopora_acuta_HIv2___xfSc0000110, Pocillopora_acuta_HIv2___xfSc0000116, Pocillopora_acuta_HIv2___xfSc0000119, Pocillopora_acuta_HIv2___xfSc0000121, Pocillopora_acuta_HIv2___xfSc0000122, Pocillopora_acuta_HIv2___xfSc0000128, Pocillopora_acuta_HIv2___xfSc0000129, Pocillopora_acuta_HIv2___xfSc0000131, Pocillopora_acuta_HIv2___xfSc0000132, Pocillopora_acuta_HIv2___xfSc0000135, Pocillopora_acuta_HIv2___xfSc0000136, Pocillopora_acuta_HIv2___xfSc0000139, Pocillopora_acuta_HIv2___xfSc0000140, Pocillopora_acuta_HIv2___xfSc0000141, Pocillopora_acuta_HIv2___xfSc0000143, Pocillopora_acuta_HIv2___xfSc0000144, Pocillopora_acuta_HIv2___xfSc0000147, Pocillopora_acuta_HIv2___xfSc0000148, Pocillopora_acuta_HIv2___xfSc0000151, Pocillopora_acuta_HIv2___xfSc0000152, Pocillopora_acuta_HIv2___xfSc0000154, Pocillopora_acuta_HIv2___xfSc0000155, Pocillopora_acuta_HIv2___xfSc0000158, Pocillopora_acuta_HIv2___xfSc0000160, Pocillopora_acuta_HIv2___xfSc0000161, Pocillopora_acuta_HIv2___xfSc0000163, Pocillopora_acuta_HIv2___xfSc0000165, Pocillopora_acuta_HIv2___xfSc0000166, Pocillopora_acuta_HIv2___xfSc0000167, Pocillopora_acuta_HIv2___xfSc0000168, Pocillopora_acuta_HIv2___xfSc0000171, Pocillopora_acuta_HIv2___xfSc0000177, Pocillopora_acuta_HIv2___xfSc0000179, Pocillopora_acuta_HIv2___xfSc0000180, Pocillopora_acuta_HIv2___xfSc0000182, Pocillopora_acuta_HIv2___xfSc0000183, Pocillopora_acuta_HIv2___xfSc0000184, Pocillopora_acuta_HIv2___xfSc0000185, Pocillopora_acuta_HIv2___xfSc0000186, Pocillopora_acuta_HIv2___xfSc0000187, Pocillopora_acuta_HIv2___xfSc0000189, Pocillopora_acuta_HIv2___xfSc0000191, Pocillopora_acuta_HIv2___xfSc0000192, Pocillopora_acuta_HIv2___xfSc0000193, Pocillopora_acuta_HIv2___xfSc0000195, Pocillopora_acuta_HIv2___xfSc0000196, Pocillopora_acuta_HIv2___xfSc0000200, Pocillopora_acuta_HIv2___xfSc0000203, Pocillopora_acuta_HIv2___xfSc0000204, Pocillopora_acuta_HIv2___xfSc0000205, Pocillopora_acuta_HIv2___xfSc0000207, Pocillopora_acuta_HIv2___xfSc0000208, Pocillopora_acuta_HIv2___xfSc0000209, Pocillopora_acuta_HIv2___xfSc0000212, Pocillopora_acuta_HIv2___xfSc0000214, Pocillopora_acuta_HIv2___xfSc0000215, Pocillopora_acuta_HIv2___xfSc0000216, Pocillopora_acuta_HIv2___xfSc0000217, Pocillopora_acuta_HIv2___xfSc0000218, Pocillopora_acuta_HIv2___xfSc0000223, Pocillopora_acuta_HIv2___xfSc0000228, Pocillopora_acuta_HIv2___xfSc0000230, Pocillopora_acuta_HIv2___xfSc0000231, Pocillopora_acuta_HIv2___xfSc0000232, Pocillopora_acuta_HIv2___xfSc0000233, Pocillopora_acuta_HIv2___xfSc0000234, Pocillopora_acuta_HIv2___xfSc0000236, Pocillopora_acuta_HIv2___xfSc0000237, Pocillopora_acuta_HIv2___xfSc0000239, Pocillopora_acuta_HIv2___xfSc0000240, Pocillopora_acuta_HIv2___xfSc0000243, Pocillopora_acuta_HIv2___xfSc0000244, Pocillopora_acuta_HIv2___xfSc0000248, Pocillopora_acuta_HIv2___xfSc0000249, Pocillopora_acuta_HIv2___xfSc0000250, Pocillopora_acuta_HIv2___xfSc0000251, Pocillopora_acuta_HIv2___xfSc0000252, Pocillopora_acuta_HIv2___xfSc0000255, Pocillopora_acuta_HIv2___xfSc0000256, Pocillopora_acuta_HIv2___xfSc0000257, Pocillopora_acuta_HIv2___xfSc0000258, Pocillopora_acuta_HIv2___xfSc0000260, Pocillopora_acuta_HIv2___xfSc0000262, Pocillopora_acuta_HIv2___xfSc0000264, Pocillopora_acuta_HIv2___xfSc0000265, Pocillopora_acuta_HIv2___xfSc0000266, Pocillopora_acuta_HIv2___xfSc0000267, Pocillopora_acuta_HIv2___xfSc0000268, Pocillopora_acuta_HIv2___xfSc0000269, Pocillopora_acuta_HIv2___xfSc0000271, Pocillopora_acuta_HIv2___xfSc0000272, Pocillopora_acuta_HIv2___xfSc0000273, Pocillopora_acuta_HIv2___xfSc0000275, Pocillopora_acuta_HIv2___xfSc0000276, Pocillopora_acuta_HIv2___xfSc0000277, Pocillopora_acuta_HIv2___xfSc0000280, Pocillopora_acuta_HIv2___xfSc0000281, Pocillopora_acuta_HIv2___xfSc0000283, Pocillopora_acuta_HIv2___xfSc0000284, Pocillopora_acuta_HIv2___xfSc0000287, Pocillopora_acuta_HIv2___xfSc0000288, Pocillopora_acuta_HIv2___xfSc0000291, Pocillopora_acuta_HIv2___xfSc0000293, Pocillopora_acuta_HIv2___xfSc0000296, Pocillopora_acuta_HIv2___xfSc0000302, Pocillopora_acuta_HIv2___xfSc0000303, Pocillopora_acuta_HIv2___xfSc0000305, Pocillopora_acuta_HIv2___xfSc0000306, Pocillopora_acuta_HIv2___xfSc0000310, Pocillopora_acuta_HIv2___xfSc0000311, Pocillopora_acuta_HIv2___xfSc0000313, Pocillopora_acuta_HIv2___xfSc0000315, Pocillopora_acuta_HIv2___xfSc0000316, Pocillopora_acuta_HIv2___xfSc0000319, Pocillopora_acuta_HIv2___xfSc0000322, Pocillopora_acuta_HIv2___xfSc0000325, Pocillopora_acuta_HIv2___xfSc0000326, Pocillopora_acuta_HIv2___xfSc0000327, Pocillopora_acuta_HIv2___xfSc0000334, Pocillopora_acuta_HIv2___xfSc0000343, Pocillopora_acuta_HIv2___xfSc0000344, Pocillopora_acuta_HIv2___xfSc0000345, Pocillopora_acuta_HIv2___xfSc0000346, Pocillopora_acuta_HIv2___xfSc0000347, Pocillopora_acuta_HIv2___xfSc0000349, Pocillopora_acuta_HIv2___xfSc0000350, Pocillopora_acuta_HIv2___xfSc0000354, Pocillopora_acuta_HIv2___xfSc0000361, Pocillopora_acuta_HIv2___xfSc0000362, Pocillopora_acuta_HIv2___xfSc0000363, Pocillopora_acuta_HIv2___xfSc0000368, Pocillopora_acuta_HIv2___xfSc0000370, Pocillopora_acuta_HIv2___xfSc0000371, Pocillopora_acuta_HIv2___xfSc0000374, Pocillopora_acuta_HIv2___xfSc0000376, Pocillopora_acuta_HIv2___xfSc0000377, Pocillopora_acuta_HIv2___xfSc0000378, Pocillopora_acuta_HIv2___xfSc0000379, Pocillopora_acuta_HIv2___xfSc0000380, Pocillopora_acuta_HIv2___xfSc0000384, Pocillopora_acuta_HIv2___xfSc0000386, Pocillopora_acuta_HIv2___xpSc0000402, Pocillopora_acuta_HIv2___xpSc0000412, Pocillopora_acuta_HIv2___xpSc0000414, Pocillopora_acuta_HIv2___xpSc0000415, Pocillopora_acuta_HIv2___xpSc0000417, Pocillopora_acuta_HIv2___xpSc0000422, Pocillopora_acuta_HIv2___xpSc0000423, Pocillopora_acuta_HIv2___xpSc0000425, Pocillopora_acuta_HIv2___xpSc0000430, Pocillopora_acuta_HIv2___xpSc0000439, Pocillopora_acuta_HIv2___xpSc0000447
+    ##   Make sure to always combine/compare objects based on the same reference
+    ##   genome (use suppressWarnings() to suppress this warning).
+
+``` r
+# Extract matching transcript information
+ML_transcript_annot <- data.frame(
+  ML_chr = seqnames(ML_grange)[queryHits(genes_with_MLs)],
+  ML_start = start(ML_grange)[queryHits(genes_with_MLs)],
+  ML_end = end(ML_grange)[queryHits(genes_with_MLs)],
+  methylated_Oral = (ML_grange$methylated_Oral)[queryHits(genes_with_MLs)],
+  methylated_Aboral = (ML_grange$methylated_Aboral)[queryHits(genes_with_MLs)],
+  methylated_overall = (ML_grange$methylated_overall)[queryHits(genes_with_MLs)],
+  transcript_chr = seqnames(transcripts)[subjectHits(genes_with_MLs)],
+  transcript_start = start(transcripts)[subjectHits(genes_with_MLs)],
+  transcript_end = end(transcripts)[subjectHits(genes_with_MLs)],
+  transcript_id = transcripts$transcript_id[subjectHits(genes_with_MLs)],
+  gene_id = transcripts$gene_id[subjectHits(genes_with_MLs)]
+)
+
+nrow(ML_transcript_annot)
+```
+
+    ## [1] 38747
+
+``` r
+## At this point, ML_transcript_annot == CpG_transcript_annot with extra info about methylation or not. but it is the same list of CpGs
+
+methylated_transcript_annot <- ML_transcript_annot %>% filter(methylated_overall==TRUE)
+
+num_methylated_genic <- nrow(methylated_transcript_annot)
+num_methylated_genic
+```
+
+    ## [1] 1073
+
+``` r
+num_methylated_total <- sum(ML_grange$methylated_overall)
+num_methylated_total
+```
+
+    ## [1] 1846
+
+``` r
+percent_genic <- num_methylated_genic / num_methylated_total * 100
+percent_genic
+```
+
+    ## [1] 58.12568
+
+``` r
+percent_intergenic <- 100 - percent_genic
+percent_intergenic
+```
+
+    ## [1] 41.87432
+
+``` r
+num_methylated_genic_oral <- methylated_transcript_annot %>% filter(methylated_Oral) %>% nrow()
+num_methylated_oral <- sum(ML_grange$methylated_Oral)
+percent_genic_oral <- num_methylated_genic_oral / num_methylated_oral * 100
+
+num_methylated_genic_aboral <- methylated_transcript_annot %>% filter(methylated_Aboral) %>% nrow()
+num_methylated_aboral <- sum(ML_grange$methylated_Aboral)
+percent_genic_aboral <- num_methylated_genic_aboral / num_methylated_aboral * 100
+
+percent_genic_oral
+```
+
+    ## [1] 57.98479
+
+``` r
+percent_genic_aboral
+```
+
+    ## [1] 57.5
+
+``` r
+ML_grange = as(methylated_CpGs,"GRanges")
+
+# identify all the MLs that are in transcripts
+exons_with_MLs <- findOverlaps(ML_grange, exons,ignore.strand = TRUE)
+```
+
+    ## Warning in .merge_two_Seqinfo_objects(x, y): Each of the 2 combined objects has sequence levels not in the other:
+    ##   - in 'x': Pocillopora_acuta_HIv2___Sc0000054, Pocillopora_acuta_HIv2___Sc0000069, Pocillopora_acuta_HIv2___xfSc0000067, Pocillopora_acuta_HIv2___xfSc0000112, Pocillopora_acuta_HIv2___xfSc0000153, Pocillopora_acuta_HIv2___xfSc0000172, Pocillopora_acuta_HIv2___xfSc0000225, Pocillopora_acuta_HIv2___xfSc0000365, Pocillopora_acuta_HIv2___xfSc0000369, Pocillopora_acuta_HIv2___xfSc0000372, Pocillopora_acuta_HIv2___xfSc0000375, Pocillopora_acuta_HIv2___xfSc0000383, Pocillopora_acuta_HIv2___xpSc0000428
+    ##   - in 'y': Pocillopora_acuta_HIv2___Sc0000056, Pocillopora_acuta_HIv2___Sc0000058, Pocillopora_acuta_HIv2___Sc0000059, Pocillopora_acuta_HIv2___Sc0000062, Pocillopora_acuta_HIv2___Sc0000064, Pocillopora_acuta_HIv2___Sc0000068, Pocillopora_acuta_HIv2___Sc0000070, Pocillopora_acuta_HIv2___Sc0000073, Pocillopora_acuta_HIv2___Sc0000076, Pocillopora_acuta_HIv2___Sc0000077, Pocillopora_acuta_HIv2___Sc0000080, Pocillopora_acuta_HIv2___xfSc0000071, Pocillopora_acuta_HIv2___xfSc0000074, Pocillopora_acuta_HIv2___xfSc0000078, Pocillopora_acuta_HIv2___xfSc0000087, Pocillopora_acuta_HIv2___xfSc0000089, Pocillopora_acuta_HIv2___xfSc0000090, Pocillopora_acuta_HIv2___xfSc0000095, Pocillopora_acuta_HIv2___xfSc0000097, Pocillopora_acuta_HIv2___xfSc0000099, Pocillopora_acuta_HIv2___xfSc0000104, Pocillopora_acuta_HIv2___xfSc0000105, Pocillopora_acuta_HIv2___xfSc0000108, Pocillopora_acuta_HIv2___xfSc0000109, Pocillopora_acuta_HIv2___xfSc0000110, Pocillopora_acuta_HIv2___xfSc0000116, Pocillopora_acuta_HIv2___xfSc0000119, Pocillopora_acuta_HIv2___xfSc0000121, Pocillopora_acuta_HIv2___xfSc0000122, Pocillopora_acuta_HIv2___xfSc0000128, Pocillopora_acuta_HIv2___xfSc0000129, Pocillopora_acuta_HIv2___xfSc0000131, Pocillopora_acuta_HIv2___xfSc0000132, Pocillopora_acuta_HIv2___xfSc0000135, Pocillopora_acuta_HIv2___xfSc0000136, Pocillopora_acuta_HIv2___xfSc0000139, Pocillopora_acuta_HIv2___xfSc0000140, Pocillopora_acuta_HIv2___xfSc0000141, Pocillopora_acuta_HIv2___xfSc0000143, Pocillopora_acuta_HIv2___xfSc0000144, Pocillopora_acuta_HIv2___xfSc0000147, Pocillopora_acuta_HIv2___xfSc0000148, Pocillopora_acuta_HIv2___xfSc0000151, Pocillopora_acuta_HIv2___xfSc0000152, Pocillopora_acuta_HIv2___xfSc0000154, Pocillopora_acuta_HIv2___xfSc0000155, Pocillopora_acuta_HIv2___xfSc0000158, Pocillopora_acuta_HIv2___xfSc0000160, Pocillopora_acuta_HIv2___xfSc0000161, Pocillopora_acuta_HIv2___xfSc0000163, Pocillopora_acuta_HIv2___xfSc0000165, Pocillopora_acuta_HIv2___xfSc0000166, Pocillopora_acuta_HIv2___xfSc0000167, Pocillopora_acuta_HIv2___xfSc0000168, Pocillopora_acuta_HIv2___xfSc0000171, Pocillopora_acuta_HIv2___xfSc0000177, Pocillopora_acuta_HIv2___xfSc0000179, Pocillopora_acuta_HIv2___xfSc0000180, Pocillopora_acuta_HIv2___xfSc0000182, Pocillopora_acuta_HIv2___xfSc0000183, Pocillopora_acuta_HIv2___xfSc0000184, Pocillopora_acuta_HIv2___xfSc0000185, Pocillopora_acuta_HIv2___xfSc0000186, Pocillopora_acuta_HIv2___xfSc0000187, Pocillopora_acuta_HIv2___xfSc0000189, Pocillopora_acuta_HIv2___xfSc0000191, Pocillopora_acuta_HIv2___xfSc0000192, Pocillopora_acuta_HIv2___xfSc0000193, Pocillopora_acuta_HIv2___xfSc0000195, Pocillopora_acuta_HIv2___xfSc0000196, Pocillopora_acuta_HIv2___xfSc0000200, Pocillopora_acuta_HIv2___xfSc0000203, Pocillopora_acuta_HIv2___xfSc0000204, Pocillopora_acuta_HIv2___xfSc0000205, Pocillopora_acuta_HIv2___xfSc0000207, Pocillopora_acuta_HIv2___xfSc0000208, Pocillopora_acuta_HIv2___xfSc0000209, Pocillopora_acuta_HIv2___xfSc0000212, Pocillopora_acuta_HIv2___xfSc0000214, Pocillopora_acuta_HIv2___xfSc0000215, Pocillopora_acuta_HIv2___xfSc0000216, Pocillopora_acuta_HIv2___xfSc0000217, Pocillopora_acuta_HIv2___xfSc0000218, Pocillopora_acuta_HIv2___xfSc0000223, Pocillopora_acuta_HIv2___xfSc0000228, Pocillopora_acuta_HIv2___xfSc0000230, Pocillopora_acuta_HIv2___xfSc0000231, Pocillopora_acuta_HIv2___xfSc0000232, Pocillopora_acuta_HIv2___xfSc0000233, Pocillopora_acuta_HIv2___xfSc0000234, Pocillopora_acuta_HIv2___xfSc0000236, Pocillopora_acuta_HIv2___xfSc0000237, Pocillopora_acuta_HIv2___xfSc0000239, Pocillopora_acuta_HIv2___xfSc0000240, Pocillopora_acuta_HIv2___xfSc0000243, Pocillopora_acuta_HIv2___xfSc0000244, Pocillopora_acuta_HIv2___xfSc0000248, Pocillopora_acuta_HIv2___xfSc0000249, Pocillopora_acuta_HIv2___xfSc0000250, Pocillopora_acuta_HIv2___xfSc0000251, Pocillopora_acuta_HIv2___xfSc0000252, Pocillopora_acuta_HIv2___xfSc0000255, Pocillopora_acuta_HIv2___xfSc0000256, Pocillopora_acuta_HIv2___xfSc0000257, Pocillopora_acuta_HIv2___xfSc0000258, Pocillopora_acuta_HIv2___xfSc0000260, Pocillopora_acuta_HIv2___xfSc0000262, Pocillopora_acuta_HIv2___xfSc0000264, Pocillopora_acuta_HIv2___xfSc0000265, Pocillopora_acuta_HIv2___xfSc0000266, Pocillopora_acuta_HIv2___xfSc0000267, Pocillopora_acuta_HIv2___xfSc0000268, Pocillopora_acuta_HIv2___xfSc0000269, Pocillopora_acuta_HIv2___xfSc0000271, Pocillopora_acuta_HIv2___xfSc0000272, Pocillopora_acuta_HIv2___xfSc0000273, Pocillopora_acuta_HIv2___xfSc0000275, Pocillopora_acuta_HIv2___xfSc0000276, Pocillopora_acuta_HIv2___xfSc0000277, Pocillopora_acuta_HIv2___xfSc0000280, Pocillopora_acuta_HIv2___xfSc0000281, Pocillopora_acuta_HIv2___xfSc0000283, Pocillopora_acuta_HIv2___xfSc0000284, Pocillopora_acuta_HIv2___xfSc0000287, Pocillopora_acuta_HIv2___xfSc0000288, Pocillopora_acuta_HIv2___xfSc0000291, Pocillopora_acuta_HIv2___xfSc0000293, Pocillopora_acuta_HIv2___xfSc0000296, Pocillopora_acuta_HIv2___xfSc0000302, Pocillopora_acuta_HIv2___xfSc0000303, Pocillopora_acuta_HIv2___xfSc0000305, Pocillopora_acuta_HIv2___xfSc0000306, Pocillopora_acuta_HIv2___xfSc0000310, Pocillopora_acuta_HIv2___xfSc0000311, Pocillopora_acuta_HIv2___xfSc0000313, Pocillopora_acuta_HIv2___xfSc0000315, Pocillopora_acuta_HIv2___xfSc0000316, Pocillopora_acuta_HIv2___xfSc0000319, Pocillopora_acuta_HIv2___xfSc0000322, Pocillopora_acuta_HIv2___xfSc0000325, Pocillopora_acuta_HIv2___xfSc0000326, Pocillopora_acuta_HIv2___xfSc0000327, Pocillopora_acuta_HIv2___xfSc0000334, Pocillopora_acuta_HIv2___xfSc0000343, Pocillopora_acuta_HIv2___xfSc0000344, Pocillopora_acuta_HIv2___xfSc0000345, Pocillopora_acuta_HIv2___xfSc0000346, Pocillopora_acuta_HIv2___xfSc0000347, Pocillopora_acuta_HIv2___xfSc0000349, Pocillopora_acuta_HIv2___xfSc0000350, Pocillopora_acuta_HIv2___xfSc0000354, Pocillopora_acuta_HIv2___xfSc0000361, Pocillopora_acuta_HIv2___xfSc0000362, Pocillopora_acuta_HIv2___xfSc0000363, Pocillopora_acuta_HIv2___xfSc0000368, Pocillopora_acuta_HIv2___xfSc0000370, Pocillopora_acuta_HIv2___xfSc0000371, Pocillopora_acuta_HIv2___xfSc0000374, Pocillopora_acuta_HIv2___xfSc0000376, Pocillopora_acuta_HIv2___xfSc0000377, Pocillopora_acuta_HIv2___xfSc0000378, Pocillopora_acuta_HIv2___xfSc0000379, Pocillopora_acuta_HIv2___xfSc0000380, Pocillopora_acuta_HIv2___xfSc0000384, Pocillopora_acuta_HIv2___xfSc0000386, Pocillopora_acuta_HIv2___xpSc0000402, Pocillopora_acuta_HIv2___xpSc0000412, Pocillopora_acuta_HIv2___xpSc0000414, Pocillopora_acuta_HIv2___xpSc0000415, Pocillopora_acuta_HIv2___xpSc0000417, Pocillopora_acuta_HIv2___xpSc0000422, Pocillopora_acuta_HIv2___xpSc0000423, Pocillopora_acuta_HIv2___xpSc0000425, Pocillopora_acuta_HIv2___xpSc0000430, Pocillopora_acuta_HIv2___xpSc0000439, Pocillopora_acuta_HIv2___xpSc0000447
+    ##   Make sure to always combine/compare objects based on the same reference
+    ##   genome (use suppressWarnings() to suppress this warning).
+
+``` r
+# Extract matching transcript information
+ML_exon_annot <- data.frame(
+  ML_chr = seqnames(ML_grange)[queryHits(exons_with_MLs)],
+  ML_start = start(ML_grange)[queryHits(exons_with_MLs)],
+  ML_end = end(ML_grange)[queryHits(exons_with_MLs)],
+  methylated_Oral = (ML_grange$methylated_Oral)[queryHits(exons_with_MLs)],
+  methylated_Aboral = (ML_grange$methylated_Aboral)[queryHits(exons_with_MLs)],
+  methylated_overall = (ML_grange$methylated_overall)[queryHits(exons_with_MLs)],
+  exon_chr = seqnames(exons)[subjectHits(exons_with_MLs)],
+  exon_start = start(exons)[subjectHits(exons_with_MLs)],
+  exon_end = end(exons)[subjectHits(exons_with_MLs)],
+  transcript_id = exons$transcript_id[subjectHits(exons_with_MLs)],
+  gene_id = exons$gene_id[subjectHits(exons_with_MLs)]
+)
+
+nrow(ML_exon_annot)
+```
+
+    ## [1] 15311
+
+``` r
+genic_CpGs <- ML_transcript_annot
+exonic_CpGs <- ML_exon_annot 
+
+# Counts:
+num_methylated_total <- sum(ML_grange$methylated_overall)
+num_methylated_total
+```
+
+    ## [1] 1846
+
+``` r
+num_genic <- sum(genic_CpGs$methylated_overall)
+num_genic
+```
+
+    ## [1] 1073
+
+``` r
+num_intergenic <- num_methylated_total - num_genic
+num_intergenic
+```
+
+    ## [1] 773
+
+``` r
+num_exonic <- sum(exonic_CpGs$methylated_overall)
+num_exonic
+```
+
+    ## [1] 409
+
+``` r
+num_intronic <- num_genic-num_exonic
+num_intronic
+```
+
+    ## [1] 664
+
+``` r
+# Inner ring: Genic vs Intergenic
+inner_data <- data.frame(
+  group = c("Genic", "Intergenic"),
+  count = c(num_genic, num_intergenic)
+)
+
+inner_data <- inner_data %>%
+  mutate(
+    fraction = count / sum(count),
+    ymax = cumsum(fraction),
+    ymin = c(0, head(ymax, n = -1)),
+    label = paste0(group, "\n", round(fraction * 100, 1), "%")
+  )
+
+# Outer ring: Exonic, Intronic, Intergenic
+outer_data <- data.frame(
+  subgroup = c("Exonic", "Intronic", "Intergenic"),
+  group = c("Genic", "Genic", "Intergenic"),
+  count = c(num_exonic, num_intronic, num_intergenic)
+)
+
+outer_data <- outer_data %>%
+  mutate(
+    fraction = count / sum(count),
+    ymax = cumsum(fraction),
+    ymin = c(0, head(ymax, n = -1)),
+    label = paste0(subgroup, "\n", count)
+  )
+
+region_colors <- c(
+  "Intergenic" = "#f7a884",   # orange
+  "Exonic"     = "#2268ae",   # dark blue
+  "Intronic"   = "#d4e6f5",   # light blue
+  "Genic"      = "#808080"    # gray (for inner ring genic portion)
+)
+
+ggplot() +
+  # Outer ring (Exonic, Intronic, Intergenic)
+  geom_rect(data = outer_data, aes(
+    ymin = ymin, ymax = ymax,
+    xmin = 1, xmax = 2,
+    fill = subgroup
+  ), color = "white") +
+
+  # Inner ring (Genic, Intergenic)
+  geom_rect(data = inner_data, aes(
+    ymin = ymin, ymax = ymax,
+    xmin = 0, xmax = 1,
+    fill = group
+  ), color = "white") +
+
+  coord_polar(theta = "y") +
+  xlim(c(0, 2)) +
+  theme_void() +
+  geom_text(data = outer_data, aes(
+    x = 1.5,
+    y = (ymin + ymax) / 2,
+    label = label
+  ), size = 4) +
+  geom_text(data = inner_data, aes(
+    x = 0.5,
+    y = (ymin + ymax) / 2,
+    label = label
+  ), size = 4, fontface = "bold") +
+  scale_fill_manual(values = region_colors) +
+  ggtitle("Nested Donut: Methylated CpGs by Genomic Region") +
+  theme(legend.position = "none")
+```
+
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
+
+``` r
+all_CpGs <- data.frame(
+  region = c("Intergenic", "Exonic", "Intronic"),
+  total_CpGs = c(nrow(methylated_CpGs)-nrow(genic_CpGs), nrow(exonic_CpGs), nrow(genic_CpGs)-nrow(exonic_CpGs)),
+  methylated_CpGs = c(num_intergenic, num_exonic, num_intronic)
+)
+
+# Calculate percentage
+all_CpGs <- all_CpGs %>%
+  mutate(region = factor(region, levels = c("Intronic","Exonic","Intergenic")),
+         percent_methylated = (methylated_CpGs / total_CpGs) * 100)
+
+# Define custom colors
+region_colors <- c(
+  "Intergenic" = "#f7a884",   # orange
+  "Exonic"     = "#2268ae",   # dark blue
+  "Intronic"   = "#d4e6f5"    # light blue
+)
+
+# Plot
+ggplot(all_CpGs, aes(y = region, x = percent_methylated, fill = region)) +
+  geom_col(width = 0.6) +
+  geom_text(aes(label = paste0(round(percent_methylated, 1), "%")),
+            hjust = -0.1, size = 5) +
+  scale_fill_manual(values = region_colors) +
+  scale_x_continuous(expand = expansion(mult = c(0, 0.1))) +
+  labs(
+    title = "Methylated CpGs as % of All CpGs by Region",
+    x = "% Methylated",
+    y = NULL
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "none")
+```
+
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->

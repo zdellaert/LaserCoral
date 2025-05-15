@@ -72,7 +72,7 @@ tissue_binary <- as.numeric(tissue_binary)
 fragment <- meta$Fragment
 ```
 
-```{r}
+```{r,eval=FALSE}
 # methylObj=methRead(as.list(file_list),
 #            sample.id = as.list(sample),
 #            assembly = "Pacuta",
@@ -101,7 +101,7 @@ save(methylObj, file = "../output_WGBS/MethylKit_20250513.RData")
 
 
 ```{r}
-#load("../output_WGBS/MethylKit_20250513.RData")
+load("../output_WGBS/MethylKit_20250513.RData")
 
 getMethylationStats(methylObj[[2]],plot=FALSE,both.strands=FALSE)
 getMethylationStats(methylObj[[2]],plot=TRUE,both.strands=FALSE)
@@ -251,9 +251,7 @@ head(gff)
 exons = gffToGRanges(gff.file, filter = "exon")
 
 transcripts = gffToGRanges(gff.file, filter = "transcript")
-```
 
-```{r}
 DML_grange = as(DMLs,"GRanges")
 DML_grange
 ```
@@ -328,39 +326,83 @@ ggplot(plot_data, aes(x = DML_methdiff, y = log2FoldChange)) +
 # how many CpG sites are there after filtering?
 dim(meth_filter_destrand)
 
-ML_grange = as(meth_filter_destrand,"GRanges")
+CpG_grange = as(meth_filter_destrand,"GRanges")
 
-# identify all the MLs that are in transcripts
-genes_with_MLs <- findOverlaps(ML_grange, transcripts,ignore.strand = TRUE)
+# identify all the CpGs that are in transcripts
+genes_with_CpGs <- findOverlaps(CpG_grange, transcripts,ignore.strand = TRUE)
 
 # Extract matching transcript information
-ML_transcript_annot <- data.frame(
-  ML_chr = seqnames(ML_grange)[queryHits(genes_with_MLs)],
-  ML_start = start(ML_grange)[queryHits(genes_with_MLs)],
-  ML_end = end(ML_grange)[queryHits(genes_with_MLs)],
-  transcript_chr = seqnames(transcripts)[subjectHits(genes_with_MLs)],
-  transcript_start = start(transcripts)[subjectHits(genes_with_MLs)],
-  transcript_end = end(transcripts)[subjectHits(genes_with_MLs)],
-  transcript_id = transcripts$transcript_id[subjectHits(genes_with_MLs)],
-  gene_id = transcripts$gene_id[subjectHits(genes_with_MLs)]
+CpG_transcript_annot <- data.frame(
+  CpG_chr = seqnames(CpG_grange)[queryHits(genes_with_CpGs)],
+  CpG_start = start(CpG_grange)[queryHits(genes_with_CpGs)],
+  CpG_end = end(CpG_grange)[queryHits(genes_with_CpGs)],
+  transcript_chr = seqnames(transcripts)[subjectHits(genes_with_CpGs)],
+  transcript_start = start(transcripts)[subjectHits(genes_with_CpGs)],
+  transcript_end = end(transcripts)[subjectHits(genes_with_CpGs)],
+  transcript_id = transcripts$transcript_id[subjectHits(genes_with_CpGs)],
+  gene_id = transcripts$gene_id[subjectHits(genes_with_CpGs)]
 )
 
-#how many MLs are represented
-length(ML_transcript_annot$transcript_id)
+#how many CpGs are represented
+length(CpG_transcript_annot$transcript_id)
 
+# how many CpGs are in these genes?
+cpg_counts <- CpG_transcript_annot %>%
+  group_by(gene_id) %>%
+  summarise(num_cpgs = n())
+
+hist <- ggplot(cpg_counts, aes(x = num_cpgs)) +
+  geom_histogram(binwidth = 3, fill = "#1f78b4", color = "black") +
+  scale_x_continuous(limits = c(0, max(cpg_counts$num_cpgs))) +
+  labs(x = "Number of CpGs per gene passing coverage filtering",
+       y = "Count of genes") +
+  theme_minimal()
+
+# Calculate summary stats
+summary_stats <- cpg_counts %>%
+  summarise(
+    min_cpgs = min(num_cpgs),
+    median_cpgs = median(num_cpgs),
+    mean_cpgs = mean(num_cpgs),
+    max_cpgs = max(num_cpgs),
+    total_genes = n(),
+    one_cpg = sum(num_cpgs == 1)
+  )
+
+# Create annotation text
+annotation_text <- paste0(
+  "Total genes: ", summary_stats$total_genes, "\n",
+  "Min CpGs: ", summary_stats$min_cpgs, "\n",
+  "Median: ", summary_stats$median_cpgs, "\n",
+  "Mean: ", round(summary_stats$mean_cpgs,2), "\n",
+  "Max CpGs: ", summary_stats$max_cpgs, "\n",
+  "Genes with 1 CpG: ", summary_stats$one_cpg, "(",(round(summary_stats$one_cpg/summary_stats$total_genes*100)),"%)")
+
+# Plot histogram with annotation box
+hist +
+  annotate("text", 
+           x = Inf, y = Inf, 
+           label = annotation_text, 
+           hjust = 1.1, vjust = 1.1, 
+           size = 4, 
+           fontface = "italic",
+           color = "black")
+```
+
+```{r}
 # Find overlaps between methylated loci and transcripts, averaged by gene
-MLs_in_genes <- regionCounts(meth_filter_destrand, regions=transcripts)
-MLs_in_genes$gene_id <- transcripts$gene_id[match(paste(MLs_in_genes$chr, MLs_in_genes$start, MLs_in_genes$end), paste(seqnames(transcripts), start(transcripts), end(transcripts)))]
+CpGs_in_genes <- regionCounts(meth_filter_destrand, regions=transcripts)
+CpGs_in_genes$gene_id <- transcripts$gene_id[match(paste(CpGs_in_genes$chr, CpGs_in_genes$start, CpGs_in_genes$end), paste(seqnames(transcripts), start(transcripts), end(transcripts)))]
 
 #how many genes are represented
-nrow(MLs_in_genes)
+nrow(CpGs_in_genes)
 
 #does this match the above?
-length(unique(ML_transcript_annot$transcript_id))
+length(unique(CpG_transcript_annot$transcript_id))
 
-percent_meth <- percMethylation(MLs_in_genes)
+percent_meth <- percMethylation(CpGs_in_genes)
 percent_meth <- as.data.frame(percent_meth)
-percent_meth$gene_id <- MLs_in_genes$gene_id 
+percent_meth$gene_id <- CpGs_in_genes$gene_id 
 percent_meth <- percent_meth %>% select(gene_id, everything())
 
 percent_meth <- percent_meth %>% rowwise() %>%
@@ -382,7 +424,7 @@ percent_meth_long <- percent_meth %>% pivot_longer(
 Now, combine the genes that contain methylated loci that passed filtering with the genes that were found to be expressed in our RNA-seq dataset (14464). 
 
 ```{r}
-# number of genes containing MLs
+# number of genes containing CpGs
 nrow(percent_meth)
 
 # number of expressed genes
@@ -393,6 +435,11 @@ expressed_genes_percent_meth <- merge(percent_meth, DESeq, by.x = "gene_id", by.
 nrow(expressed_genes_percent_meth)
 
 plot_data <- merge(percent_meth_long, DESeq, by.x = "gene_id", by.y = "query")
+
+ggplot(percent_meth, aes(x = percent_meth_ALL)) +
+  geom_histogram(bins = 50) +
+  theme_minimal() +
+  labs(x = "(% gene body methylation", y = "Gene count")
 ```
 
 ### BaseMean: Raw gene expression levels (skewed by highly expressed genes)
@@ -457,7 +504,7 @@ ggplot(plot_data, aes(x = percent_meth_ALL, y = log2FoldChange)) +
   scale_color_manual(values = c("grey", "red")) +
   labs(x = "Average CpG % methylation of gene", 
        y = "RNA-seq: Log2FoldChange",
-       title = "Differentially methylated loci (DMLs) vs. Gene Expression",
+       title = "LFC and DEGs (red) vs. % CpG Methylation",
        color = "Significant DEGs") +
   theme_minimal()
 ```
@@ -496,24 +543,325 @@ vsd_long <- vsd %>% pivot_longer(cols = c(Oral,Aboral),
 ```
 
 ```{r}
-plot_data <- merge(percent_meth_long, vsd_long, by = c("gene_id", "Tissue"))
+plot_data_tissue <- merge(percent_meth_long, vsd_long, by = c("gene_id", "Tissue"))
 
-ggplot(plot_data, aes(y = tissue_vst_mean, x = tissue_percent_meth, color=Tissue)) +
+ggplot(plot_data_tissue, aes(y = tissue_vst_mean, x = tissue_percent_meth, color=Tissue)) +
   geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
-  labs(x = "Average CpG % methylation of gene", y = "Mean counts, all samples", 
+  labs(x = "Average CpG % methylation of gene", y = "VST Expression", 
        title = "Gene Methylation vs Expression") +
   theme_minimal()
 
+plot_data <- merge(percent_meth, vsd, by = c("gene_id"))
+
 ggplot(plot_data, aes(y = vst_mean, x = percent_meth_ALL)) +
   geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
-  labs(x = "Average CpG % methylation of gene", y = "Mean counts, all samples", 
+  labs(x = "Average CpG % methylation of gene", y = "VST Expression", 
        title = "Gene Methylation vs Expression") +
   theme_minimal()
 ```
 
 ```{r}
-model <- lm(tissue_vst_mean ~ tissue_percent_meth * Tissue, data = plot_data)
+model <- lm(tissue_vst_mean ~ tissue_percent_meth * Tissue, data = plot_data_tissue)
 
 summary(model)
 ```
+
+```{r}
+# Full model
+full_model <- lm(vst_mean ~ percent_meth_ALL, data = plot_data)
+
+# Per-tissue models
+oral_model <- lm(tissue_vst_mean ~ tissue_percent_meth, data = filter(plot_data_tissue, Tissue == "Oral"))
+aboral_model <- lm(tissue_vst_mean ~ tissue_percent_meth, data = filter(plot_data_tissue, Tissue == "Aboral"))
+
+summary(full_model)$r.squared
+summary(oral_model)$r.squared
+summary(aboral_model)$r.squared
+```
+
+```{r}
+# Model 1: simple model, no tissue info
+full_model <- lm(tissue_vst_mean ~ tissue_percent_meth, data = plot_data_tissue)
+
+# Model 2: interaction model, includes tissue and interaction term
+interaction_model <- lm(tissue_vst_mean ~ tissue_percent_meth * Tissue, data = plot_data_tissue)
+
+summary(full_model)
+summary(interaction_model)
+anova(full_model, interaction_model)
+```
+
+
+## Methylated CpG locations
+
+```{r}
+library(dplyr)
+
+# Define sequencing error rate and alpha
+p_error <- 0.01
+alpha <- 0.05
+
+# Function to compute adjusted binomial p-values and flag methylated sites per sample
+compute_methylation_flags <- function(data, coverage_col, methylated_col, p_error = 0.01, alpha = 0.05) {
+  # Extract vectors
+  coverage <- data[[coverage_col]]
+  methylated <- data[[methylated_col]]
+  
+  # Handle zero or NA coverage by setting p-values to 1 (not significant)
+  pvals <- rep(1, length(coverage))
+  
+  valid <- !is.na(coverage) & !is.na(methylated) & coverage > 0
+  
+  # Calculate p-values for valid sites only
+  pvals[valid] <- 1 - pbinom(q = methylated[valid] - 1, size = coverage[valid], prob = p_error)
+  
+  # Adjust p-values for multiple testing with FDR correction
+  pvals_adj <- p.adjust(pvals, method = "fdr")
+  
+  # Return logical vector: TRUE if site methylated (adjusted p < alpha), else FALSE
+  return(pvals_adj < alpha)
+}
+
+# Assuming you know how many samples you have, for example 10 samples:
+num_samples <- 10
+methylated_CpGs <- meth_filter_destrand
+
+for (i in 1:num_samples) {
+  coverage_col <- paste0("coverage", i)
+  methylated_col <- paste0("numCs", i)
+  methylation_flag_col <- paste0("methylated_sample", i)
+
+  methylated_CpGs[[methylation_flag_col]] <- compute_methylation_flags(
+    methylated_CpGs, 
+    coverage_col = coverage_col, 
+    methylated_col = methylated_col, 
+    p_error = p_error, 
+    alpha = alpha
+  )
+}
+
+```
+
+```{r}
+methylated_CpGs <- getData(methylated_CpGs)
+
+oral_samples <- which(sample %in% meta$Sample[meta$Tissue=="OralEpi"])
+aboral_samples <- which(sample %in%meta$Sample[meta$Tissue=="Aboral"])
+   
+oral_samples <- paste0("methylated_sample", oral_samples) 
+aboral_samples <- paste0("methylated_sample", aboral_samples)
+
+methylated_CpGs <- methylated_CpGs %>%
+  rowwise() %>%
+  mutate(
+    methylated_Oral = sum(c_across(all_of(oral_samples))) >= 3,
+    methylated_Aboral = sum(c_across(all_of(aboral_samples))) >= 3,
+    methylated_overall = (methylated_Oral | methylated_Aboral)
+  ) %>%
+  ungroup()
+
+nrow(methylated_CpGs)
+sum(methylated_CpGs$methylated_Oral)
+sum(methylated_CpGs$methylated_Aboral)
+sum(methylated_CpGs$methylated_overall)
+```
+```{r}
+ML_grange = as(methylated_CpGs,"GRanges")
+
+# identify all the MLs that are in transcripts
+genes_with_MLs <- findOverlaps(ML_grange, transcripts,ignore.strand = TRUE)
+
+# Extract matching transcript information
+ML_transcript_annot <- data.frame(
+  ML_chr = seqnames(ML_grange)[queryHits(genes_with_MLs)],
+  ML_start = start(ML_grange)[queryHits(genes_with_MLs)],
+  ML_end = end(ML_grange)[queryHits(genes_with_MLs)],
+  methylated_Oral = (ML_grange$methylated_Oral)[queryHits(genes_with_MLs)],
+  methylated_Aboral = (ML_grange$methylated_Aboral)[queryHits(genes_with_MLs)],
+  methylated_overall = (ML_grange$methylated_overall)[queryHits(genes_with_MLs)],
+  transcript_chr = seqnames(transcripts)[subjectHits(genes_with_MLs)],
+  transcript_start = start(transcripts)[subjectHits(genes_with_MLs)],
+  transcript_end = end(transcripts)[subjectHits(genes_with_MLs)],
+  transcript_id = transcripts$transcript_id[subjectHits(genes_with_MLs)],
+  gene_id = transcripts$gene_id[subjectHits(genes_with_MLs)]
+)
+
+nrow(ML_transcript_annot)
+
+## At this point, ML_transcript_annot == CpG_transcript_annot with extra info about methylation or not. but it is the same list of CpGs
+
+methylated_transcript_annot <- ML_transcript_annot %>% filter(methylated_overall==TRUE)
+
+num_methylated_genic <- nrow(methylated_transcript_annot)
+num_methylated_genic
+num_methylated_total <- sum(ML_grange$methylated_overall)
+num_methylated_total
+percent_genic <- num_methylated_genic / num_methylated_total * 100
+percent_genic
+
+percent_intergenic <- 100 - percent_genic
+percent_intergenic
+
+num_methylated_genic_oral <- methylated_transcript_annot %>% filter(methylated_Oral) %>% nrow()
+num_methylated_oral <- sum(ML_grange$methylated_Oral)
+percent_genic_oral <- num_methylated_genic_oral / num_methylated_oral * 100
+
+num_methylated_genic_aboral <- methylated_transcript_annot %>% filter(methylated_Aboral) %>% nrow()
+num_methylated_aboral <- sum(ML_grange$methylated_Aboral)
+percent_genic_aboral <- num_methylated_genic_aboral / num_methylated_aboral * 100
+
+percent_genic_oral
+percent_genic_aboral
+```
+
+
+```{r}
+ML_grange = as(methylated_CpGs,"GRanges")
+
+# identify all the MLs that are in transcripts
+exons_with_MLs <- findOverlaps(ML_grange, exons,ignore.strand = TRUE)
+
+# Extract matching transcript information
+ML_exon_annot <- data.frame(
+  ML_chr = seqnames(ML_grange)[queryHits(exons_with_MLs)],
+  ML_start = start(ML_grange)[queryHits(exons_with_MLs)],
+  ML_end = end(ML_grange)[queryHits(exons_with_MLs)],
+  methylated_Oral = (ML_grange$methylated_Oral)[queryHits(exons_with_MLs)],
+  methylated_Aboral = (ML_grange$methylated_Aboral)[queryHits(exons_with_MLs)],
+  methylated_overall = (ML_grange$methylated_overall)[queryHits(exons_with_MLs)],
+  exon_chr = seqnames(exons)[subjectHits(exons_with_MLs)],
+  exon_start = start(exons)[subjectHits(exons_with_MLs)],
+  exon_end = end(exons)[subjectHits(exons_with_MLs)],
+  transcript_id = exons$transcript_id[subjectHits(exons_with_MLs)],
+  gene_id = exons$gene_id[subjectHits(exons_with_MLs)]
+)
+
+nrow(ML_exon_annot)
+```
+
+```{r}
+genic_CpGs <- ML_transcript_annot
+exonic_CpGs <- ML_exon_annot 
+
+# Counts:
+num_methylated_total <- sum(ML_grange$methylated_overall)
+num_methylated_total
+num_genic <- sum(genic_CpGs$methylated_overall)
+num_genic
+num_intergenic <- num_methylated_total - num_genic
+num_intergenic
+num_exonic <- sum(exonic_CpGs$methylated_overall)
+num_exonic
+num_intronic <- num_genic-num_exonic
+num_intronic
+```
+
+```{r}
+# Inner ring: Genic vs Intergenic
+inner_data <- data.frame(
+  group = c("Genic", "Intergenic"),
+  count = c(num_genic, num_intergenic)
+)
+
+inner_data <- inner_data %>%
+  mutate(
+    fraction = count / sum(count),
+    ymax = cumsum(fraction),
+    ymin = c(0, head(ymax, n = -1)),
+    label = paste0(group, "\n", round(fraction * 100, 1), "%")
+  )
+
+# Outer ring: Exonic, Intronic, Intergenic
+outer_data <- data.frame(
+  subgroup = c("Exonic", "Intronic", "Intergenic"),
+  group = c("Genic", "Genic", "Intergenic"),
+  count = c(num_exonic, num_intronic, num_intergenic)
+)
+
+outer_data <- outer_data %>%
+  mutate(
+    fraction = count / sum(count),
+    ymax = cumsum(fraction),
+    ymin = c(0, head(ymax, n = -1)),
+    label = paste0(subgroup, "\n", count)
+  )
+
+region_colors <- c(
+  "Intergenic" = "#f7a884",   # orange
+  "Exonic"     = "#2268ae",   # dark blue
+  "Intronic"   = "#d4e6f5",   # light blue
+  "Genic"      = "#808080"    # gray (for inner ring genic portion)
+)
+
+ggplot() +
+  # Outer ring (Exonic, Intronic, Intergenic)
+  geom_rect(data = outer_data, aes(
+    ymin = ymin, ymax = ymax,
+    xmin = 1, xmax = 2,
+    fill = subgroup
+  ), color = "white") +
+
+  # Inner ring (Genic, Intergenic)
+  geom_rect(data = inner_data, aes(
+    ymin = ymin, ymax = ymax,
+    xmin = 0, xmax = 1,
+    fill = group
+  ), color = "white") +
+
+  coord_polar(theta = "y") +
+  xlim(c(0, 2)) +
+  theme_void() +
+  geom_text(data = outer_data, aes(
+    x = 1.5,
+    y = (ymin + ymax) / 2,
+    label = label
+  ), size = 4) +
+  geom_text(data = inner_data, aes(
+    x = 0.5,
+    y = (ymin + ymax) / 2,
+    label = label
+  ), size = 4, fontface = "bold") +
+  scale_fill_manual(values = region_colors) +
+  ggtitle("Nested Donut: Methylated CpGs by Genomic Region") +
+  theme(legend.position = "none")
+
+```
+
+
+```{r}
+all_CpGs <- data.frame(
+  region = c("Intergenic", "Exonic", "Intronic"),
+  total_CpGs = c(nrow(methylated_CpGs)-nrow(genic_CpGs), nrow(exonic_CpGs), nrow(genic_CpGs)-nrow(exonic_CpGs)),
+  methylated_CpGs = c(num_intergenic, num_exonic, num_intronic)
+)
+
+# Calculate percentage
+all_CpGs <- all_CpGs %>%
+  mutate(region = factor(region, levels = c("Intronic","Exonic","Intergenic")),
+         percent_methylated = (methylated_CpGs / total_CpGs) * 100)
+
+# Define custom colors
+region_colors <- c(
+  "Intergenic" = "#f7a884",   # orange
+  "Exonic"     = "#2268ae",   # dark blue
+  "Intronic"   = "#d4e6f5"    # light blue
+)
+
+# Plot
+ggplot(all_CpGs, aes(y = region, x = percent_methylated, fill = region)) +
+  geom_col(width = 0.6) +
+  geom_text(aes(label = paste0(round(percent_methylated, 1), "%")),
+            hjust = -0.1, size = 5) +
+  scale_fill_manual(values = region_colors) +
+  scale_x_continuous(expand = expansion(mult = c(0, 0.1))) +
+  labs(
+    title = "Methylated CpGs as % of All CpGs by Region",
+    x = "% Methylated",
+    y = NULL
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "none")
+```
+
+
 
