@@ -31,6 +31,7 @@ Zoe Dellaert
     expressed](#053-absolute-value-of-log2foldchange-relationship-between-overall-methylation-of-a-gene-and-whether-or-not-it-is-differentially-expressed)
   - [0.5.4 Read counts/vsd transformed
     counts](#054-read-countsvsd-transformed-counts)
+  - [0.5.5 Extracting table of genes](#055-extracting-table-of-genes)
 - [0.6 Methylated CpG locations](#06-methylated-cpg-locations)
 
 ## 0.1 MethylKit - Reads filtered for \>90% conversion efficiency
@@ -312,8 +313,6 @@ meta <- meta %>% arrange(Sample)
 ```
 
 ``` r
-#file_list <- list.files("/scratch3/workspace/zdellaert_uri_edu-shared/methylseq_V3_bwa_test/bwameth/deduplicated/min_efficiency_test",pattern = "^min_90.*_CpG.methylKit$",  full.names = TRUE, include.dirs = FALSE)
-
 file_list <- list.files("../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test_new",pattern = "^min_90.*_CpG.methylKit$",  full.names = TRUE, include.dirs = FALSE)
 
 sample <- gsub("_CpG.methylKit", "", basename(file_list) )
@@ -747,6 +746,33 @@ head(DMLs)
     ## 6087 3.837845e-02  23.07692
     ## 7904 2.468497e-03 -44.00000
 
+``` r
+DMLs_25 <- methylKit::getMethylDiff(DMLStats_Tissue, difference = 25, qvalue = 0.05) #Identify DML based on difference threshold
+
+length(DMLs_25$chr) #DML
+```
+
+    ## [1] 128
+
+``` r
+head(DMLs_25)
+```
+
+    ##                                     chr   start     end strand       pvalue
+    ## 4981 Pocillopora_acuta_HIv2___Sc0000002 3933210 3933210      + 6.801995e-06
+    ## 5083 Pocillopora_acuta_HIv2___Sc0000002 4354790 4354790      + 2.793794e-10
+    ## 7904 Pocillopora_acuta_HIv2___Sc0000003 2149671 2149671      + 1.223095e-06
+    ## 8011 Pocillopora_acuta_HIv2___Sc0000003 2461240 2461240      + 5.405275e-05
+    ## 9203 Pocillopora_acuta_HIv2___Sc0000003 8383662 8383662      + 4.331291e-06
+    ## 9218 Pocillopora_acuta_HIv2___Sc0000003 8702392 8702392      + 2.065599e-05
+    ##            qvalue meth.diff
+    ## 4981 8.340879e-03  75.00000
+    ## 5083 2.477162e-06  29.78723
+    ## 7904 2.468497e-03 -44.00000
+    ## 8011 3.643553e-02 -35.00000
+    ## 9203 5.854711e-03  37.50000
+    ## 9218 1.725322e-02  30.30303
+
 ## 0.4 Further look at genome wide methylation
 
 ``` r
@@ -793,6 +819,7 @@ exons = gffToGRanges(gff.file, filter = "exon")
 
 transcripts = gffToGRanges(gff.file, filter = "transcript")
 
+DML_all_grange = as(DMLStats_Tissue,"GRanges")
 DML_grange = as(DMLs,"GRanges")
 DML_grange
 ```
@@ -831,15 +858,23 @@ DML_grange
 transcripts = gffToGRanges(gff.file, filter = "transcript")
 
 # Find overlaps between DMLs and transcripts
-overlaps_transcripts <- findOverlaps(DML_grange, transcripts,ignore.strand = TRUE)
+overlaps_transcripts <- findOverlaps(DML_all_grange, transcripts,ignore.strand = TRUE)
+```
 
+    ## Warning in .merge_two_Seqinfo_objects(x, y): Each of the 2 combined objects has sequence levels not in the other:
+    ##   - in 'x': Pocillopora_acuta_HIv2___Sc0000054, Pocillopora_acuta_HIv2___Sc0000069, Pocillopora_acuta_HIv2___xfSc0000067, Pocillopora_acuta_HIv2___xfSc0000112, Pocillopora_acuta_HIv2___xfSc0000153, Pocillopora_acuta_HIv2___xfSc0000172, Pocillopora_acuta_HIv2___xfSc0000225, Pocillopora_acuta_HIv2___xfSc0000365, Pocillopora_acuta_HIv2___xfSc0000369, Pocillopora_acuta_HIv2___xfSc0000372, Pocillopora_acuta_HIv2___xfSc0000375, Pocillopora_acuta_HIv2___xfSc0000383, Pocillopora_acuta_HIv2___xpSc0000428
+    ##   - in 'y': Pocillopora_acuta_HIv2___Sc0000056, Pocillopora_acuta_HIv2___Sc0000058, Pocillopora_acuta_HIv2___Sc0000059, Pocillopora_acuta_HIv2___Sc0000062, Pocillopora_acuta_HIv2___Sc0000064, Pocillopora_acuta_HIv2___Sc0000068, Pocillopora_acuta_HIv2___Sc0000070, Pocillopora_acuta_HIv2___Sc0000073, Pocillopora_acuta_HIv2___Sc0000076, Pocillopora_acuta_HIv2___Sc0000077, Pocillopora_acuta_HIv2___Sc0000080, Pocillopora_acuta_HIv2___xfSc0000071, Pocillopora_acuta_HIv2___xfSc0000074, Pocillopora_acuta_HIv2___xfSc0000078, Pocillopora_acuta_HIv2___xfSc0000087, Pocillopora_acuta_HIv2___xfSc0000089, Pocillopora_acuta_HIv2___xfSc0000090, Pocillopora_acuta_HIv2___xfSc0000095, Pocillopora_acuta_HIv2___xfSc0000097, Pocillopora_acuta_HIv2___xfSc0000099, Pocillopora_acuta_HIv2___xfSc0000104, Pocillopora_acuta_HIv2___xfSc0000105, Pocillopora_acuta_HIv2___xfSc0000108, Pocillopora_acuta_HIv2___xfSc0000109, Pocillopora_acuta_HIv2___xfSc0000110, Pocillopora_acuta_HIv2___xfSc0000116, Pocillopora_acuta_HIv2___xfSc0000119, Pocillopora_acuta_HIv2___xfSc0000121, Pocillopora_acuta_HIv2___xfSc0000122, Pocillopora_acuta_HIv2___xfSc0000128, Pocillopora_acuta_HIv2___xfSc0000129, Pocillopora_acuta_HIv2___xfSc0000131, Pocillopora_acuta_HIv2___xfSc0000132, Pocillopora_acuta_HIv2___xfSc0000135, Pocillopora_acuta_HIv2___xfSc0000136, Pocillopora_acuta_HIv2___xfSc0000139, Pocillopora_acuta_HIv2___xfSc0000140, Pocillopora_acuta_HIv2___xfSc0000141, Pocillopora_acuta_HIv2___xfSc0000143, Pocillopora_acuta_HIv2___xfSc0000144, Pocillopora_acuta_HIv2___xfSc0000147, Pocillopora_acuta_HIv2___xfSc0000148, Pocillopora_acuta_HIv2___xfSc0000151, Pocillopora_acuta_HIv2___xfSc0000152, Pocillopora_acuta_HIv2___xfSc0000154, Pocillopora_acuta_HIv2___xfSc0000155, Pocillopora_acuta_HIv2___xfSc0000158, Pocillopora_acuta_HIv2___xfSc0000160, Pocillopora_acuta_HIv2___xfSc0000161, Pocillopora_acuta_HIv2___xfSc0000163, Pocillopora_acuta_HIv2___xfSc0000165, Pocillopora_acuta_HIv2___xfSc0000166, Pocillopora_acuta_HIv2___xfSc0000167, Pocillopora_acuta_HIv2___xfSc0000168, Pocillopora_acuta_HIv2___xfSc0000171, Pocillopora_acuta_HIv2___xfSc0000177, Pocillopora_acuta_HIv2___xfSc0000179, Pocillopora_acuta_HIv2___xfSc0000180, Pocillopora_acuta_HIv2___xfSc0000182, Pocillopora_acuta_HIv2___xfSc0000183, Pocillopora_acuta_HIv2___xfSc0000184, Pocillopora_acuta_HIv2___xfSc0000185, Pocillopora_acuta_HIv2___xfSc0000186, Pocillopora_acuta_HIv2___xfSc0000187, Pocillopora_acuta_HIv2___xfSc0000189, Pocillopora_acuta_HIv2___xfSc0000191, Pocillopora_acuta_HIv2___xfSc0000192, Pocillopora_acuta_HIv2___xfSc0000193, Pocillopora_acuta_HIv2___xfSc0000195, Pocillopora_acuta_HIv2___xfSc0000196, Pocillopora_acuta_HIv2___xfSc0000200, Pocillopora_acuta_HIv2___xfSc0000203, Pocillopora_acuta_HIv2___xfSc0000204, Pocillopora_acuta_HIv2___xfSc0000205, Pocillopora_acuta_HIv2___xfSc0000207, Pocillopora_acuta_HIv2___xfSc0000208, Pocillopora_acuta_HIv2___xfSc0000209, Pocillopora_acuta_HIv2___xfSc0000212, Pocillopora_acuta_HIv2___xfSc0000214, Pocillopora_acuta_HIv2___xfSc0000215, Pocillopora_acuta_HIv2___xfSc0000216, Pocillopora_acuta_HIv2___xfSc0000217, Pocillopora_acuta_HIv2___xfSc0000218, Pocillopora_acuta_HIv2___xfSc0000223, Pocillopora_acuta_HIv2___xfSc0000228, Pocillopora_acuta_HIv2___xfSc0000230, Pocillopora_acuta_HIv2___xfSc0000231, Pocillopora_acuta_HIv2___xfSc0000232, Pocillopora_acuta_HIv2___xfSc0000233, Pocillopora_acuta_HIv2___xfSc0000234, Pocillopora_acuta_HIv2___xfSc0000236, Pocillopora_acuta_HIv2___xfSc0000237, Pocillopora_acuta_HIv2___xfSc0000239, Pocillopora_acuta_HIv2___xfSc0000240, Pocillopora_acuta_HIv2___xfSc0000243, Pocillopora_acuta_HIv2___xfSc0000244, Pocillopora_acuta_HIv2___xfSc0000248, Pocillopora_acuta_HIv2___xfSc0000249, Pocillopora_acuta_HIv2___xfSc0000250, Pocillopora_acuta_HIv2___xfSc0000251, Pocillopora_acuta_HIv2___xfSc0000252, Pocillopora_acuta_HIv2___xfSc0000255, Pocillopora_acuta_HIv2___xfSc0000256, Pocillopora_acuta_HIv2___xfSc0000257, Pocillopora_acuta_HIv2___xfSc0000258, Pocillopora_acuta_HIv2___xfSc0000260, Pocillopora_acuta_HIv2___xfSc0000262, Pocillopora_acuta_HIv2___xfSc0000264, Pocillopora_acuta_HIv2___xfSc0000265, Pocillopora_acuta_HIv2___xfSc0000266, Pocillopora_acuta_HIv2___xfSc0000267, Pocillopora_acuta_HIv2___xfSc0000268, Pocillopora_acuta_HIv2___xfSc0000269, Pocillopora_acuta_HIv2___xfSc0000271, Pocillopora_acuta_HIv2___xfSc0000272, Pocillopora_acuta_HIv2___xfSc0000273, Pocillopora_acuta_HIv2___xfSc0000275, Pocillopora_acuta_HIv2___xfSc0000276, Pocillopora_acuta_HIv2___xfSc0000277, Pocillopora_acuta_HIv2___xfSc0000280, Pocillopora_acuta_HIv2___xfSc0000281, Pocillopora_acuta_HIv2___xfSc0000283, Pocillopora_acuta_HIv2___xfSc0000284, Pocillopora_acuta_HIv2___xfSc0000287, Pocillopora_acuta_HIv2___xfSc0000288, Pocillopora_acuta_HIv2___xfSc0000291, Pocillopora_acuta_HIv2___xfSc0000293, Pocillopora_acuta_HIv2___xfSc0000296, Pocillopora_acuta_HIv2___xfSc0000302, Pocillopora_acuta_HIv2___xfSc0000303, Pocillopora_acuta_HIv2___xfSc0000305, Pocillopora_acuta_HIv2___xfSc0000306, Pocillopora_acuta_HIv2___xfSc0000310, Pocillopora_acuta_HIv2___xfSc0000311, Pocillopora_acuta_HIv2___xfSc0000313, Pocillopora_acuta_HIv2___xfSc0000315, Pocillopora_acuta_HIv2___xfSc0000316, Pocillopora_acuta_HIv2___xfSc0000319, Pocillopora_acuta_HIv2___xfSc0000322, Pocillopora_acuta_HIv2___xfSc0000325, Pocillopora_acuta_HIv2___xfSc0000326, Pocillopora_acuta_HIv2___xfSc0000327, Pocillopora_acuta_HIv2___xfSc0000334, Pocillopora_acuta_HIv2___xfSc0000343, Pocillopora_acuta_HIv2___xfSc0000344, Pocillopora_acuta_HIv2___xfSc0000345, Pocillopora_acuta_HIv2___xfSc0000346, Pocillopora_acuta_HIv2___xfSc0000347, Pocillopora_acuta_HIv2___xfSc0000349, Pocillopora_acuta_HIv2___xfSc0000350, Pocillopora_acuta_HIv2___xfSc0000354, Pocillopora_acuta_HIv2___xfSc0000361, Pocillopora_acuta_HIv2___xfSc0000362, Pocillopora_acuta_HIv2___xfSc0000363, Pocillopora_acuta_HIv2___xfSc0000368, Pocillopora_acuta_HIv2___xfSc0000370, Pocillopora_acuta_HIv2___xfSc0000371, Pocillopora_acuta_HIv2___xfSc0000374, Pocillopora_acuta_HIv2___xfSc0000376, Pocillopora_acuta_HIv2___xfSc0000377, Pocillopora_acuta_HIv2___xfSc0000378, Pocillopora_acuta_HIv2___xfSc0000379, Pocillopora_acuta_HIv2___xfSc0000380, Pocillopora_acuta_HIv2___xfSc0000384, Pocillopora_acuta_HIv2___xfSc0000386, Pocillopora_acuta_HIv2___xpSc0000402, Pocillopora_acuta_HIv2___xpSc0000412, Pocillopora_acuta_HIv2___xpSc0000414, Pocillopora_acuta_HIv2___xpSc0000415, Pocillopora_acuta_HIv2___xpSc0000417, Pocillopora_acuta_HIv2___xpSc0000422, Pocillopora_acuta_HIv2___xpSc0000423, Pocillopora_acuta_HIv2___xpSc0000425, Pocillopora_acuta_HIv2___xpSc0000430, Pocillopora_acuta_HIv2___xpSc0000439, Pocillopora_acuta_HIv2___xpSc0000447
+    ##   Make sure to always combine/compare objects based on the same reference
+    ##   genome (use suppressWarnings() to suppress this warning).
+
+``` r
 # Extract matching transcript information
-DML_transcript_annot <- data.frame(
-  DML_chr = seqnames(DML_grange)[queryHits(overlaps_transcripts)],
-  DML_start = start(DML_grange)[queryHits(overlaps_transcripts)],
-  DML_end = end(DML_grange)[queryHits(overlaps_transcripts)],
-  DML_qvalue = (DML_grange$qvalue)[queryHits(overlaps_transcripts)],
-  DML_methdiff = (DML_grange$meth.diff)[queryHits(overlaps_transcripts)],
+DML_transcript_annot_allCpg <- data.frame(
+  DML_chr = seqnames(DML_all_grange)[queryHits(overlaps_transcripts)],
+  DML_start = start(DML_all_grange)[queryHits(overlaps_transcripts)],
+  DML_end = end(DML_all_grange)[queryHits(overlaps_transcripts)],
+  DML_qvalue = (DML_all_grange$qvalue)[queryHits(overlaps_transcripts)],
+  DML_methdiff = (DML_all_grange$meth.diff)[queryHits(overlaps_transcripts)],
   transcript_chr = seqnames(transcripts)[subjectHits(overlaps_transcripts)],
   transcript_start = start(transcripts)[subjectHits(overlaps_transcripts)],
   transcript_end = end(transcripts)[subjectHits(overlaps_transcripts)],
@@ -847,6 +882,8 @@ DML_transcript_annot <- data.frame(
   gene_id = transcripts$gene_id[subjectHits(overlaps_transcripts)]
 )
 
+DML_transcript_annot <- DML_transcript_annot_allCpg %>% filter(DML_qvalue < 0.05)
+  
 # View first few rows
 head(DML_transcript_annot)
 ```
@@ -1471,6 +1508,41 @@ anova(full_model, interaction_model)
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
+### 0.5.5 Extracting table of genes
+
+``` r
+DML_info <- DML_transcript_annot %>% dplyr::select(DML_start,DML_end,DML_qvalue,DML_methdiff,gene_id)
+DML_info <- DML_info %>% group_by(gene_id) %>% summarise(n_DML = n(),
+                                                         mean_methdiff = mean(DML_methdiff),
+                                                         median_methdiff = median(DML_methdiff),
+                                                         mean_methdiff_qvalue = mean(DML_qvalue),
+                                                         min_methdiff_qvalue = min(DML_qvalue),
+                                                         max_methdiff_qvalue = max(DML_qvalue))
+  
+RNA_CpG <- left_join(percent_meth, DML_info, by = c("gene_id")) # take percent methylated CpGs per gene matrix and add signficance info for any differentially methylated loci
+RNA_CpG <- inner_join(RNA_CpG, vsd, by = c("gene_id")) # add gene expression info, vst-transformed expression values
+RNA_CpG <- inner_join(RNA_CpG, DESeq, by = join_by(gene_id == query)) # add DEseq results
+
+RNA_CpG <- RNA_CpG %>% 
+              rename(mean_percent_meth_ALL = percent_meth_ALL,
+                     Aboral_mean_perc_meth = Aboral.x,
+                     Aboral_mean_vst_expr = Aboral.y,
+                     Oral_mean_perc_meth = Oral.x,
+                     Oral_mean_vst_expr =  Oral.y,
+                     vst_mean_gene_expression = vst_mean,
+                     DEseq_baseMean = baseMean,
+                     DEseq_log2FoldChange = log2FoldChange,
+                     DEseq_lfcSE = lfcSE,
+                     DEseq_pvalue = pvalue,
+                     DEseq_padj = padj
+              )
+
+SwissProt <- read.delim("../references/annotation/protein-GO.tsv")
+
+RNA_CpG_annot <- RNA_CpG%>% left_join(SwissProt, by = join_by(gene_id == query)) 
+write.csv(RNA_CpG_annot, "../output_WGBS/MethylKit_ConvFilt90_RNA_Meth.csv")
+```
+
 ## 0.6 Methylated CpG locations
 
 ``` r
@@ -1790,7 +1862,7 @@ ggplot() +
   theme(legend.position = "none")
 ```
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->
 
 ``` r
 all_CpGs <- data.frame(
@@ -1827,4 +1899,4 @@ ggplot(all_CpGs, aes(y = region, x = percent_methylated, fill = region)) +
   theme(legend.position = "none")
 ```
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-39-1.png)<!-- -->
