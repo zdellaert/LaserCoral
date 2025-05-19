@@ -56,8 +56,6 @@ meta <- meta %>% arrange(Sample)
 ```
 
 ```{r}
-#file_list <- list.files("/scratch3/workspace/zdellaert_uri_edu-shared/methylseq_V3_bwa_test/bwameth/deduplicated/min_efficiency_test",pattern = "^min_90.*_CpG.methylKit$",  full.names = TRUE, include.dirs = FALSE)
-
 file_list <- list.files("../output_WGBS/methylseq_V3_bwa_test/methyldackel/min_efficiency_test_new",pattern = "^min_90.*_CpG.methylKit$",  full.names = TRUE, include.dirs = FALSE)
 
 sample <- gsub("_CpG.methylKit", "", basename(file_list) )
@@ -227,6 +225,12 @@ DMLs <- methylKit::getMethylDiff(DMLStats_Tissue, difference = 2, qvalue = 0.05)
 length(DMLs$chr) #DML
 
 head(DMLs)
+
+DMLs_25 <- methylKit::getMethylDiff(DMLStats_Tissue, difference = 25, qvalue = 0.05) #Identify DML based on difference threshold
+
+length(DMLs_25$chr) #DML
+
+head(DMLs_25)
 ```
 ## Further look at genome wide methylation
 
@@ -252,6 +256,7 @@ exons = gffToGRanges(gff.file, filter = "exon")
 
 transcripts = gffToGRanges(gff.file, filter = "transcript")
 
+DML_all_grange = as(DMLStats_Tissue,"GRanges")
 DML_grange = as(DMLs,"GRanges")
 DML_grange
 ```
@@ -261,15 +266,15 @@ DML_grange
 transcripts = gffToGRanges(gff.file, filter = "transcript")
 
 # Find overlaps between DMLs and transcripts
-overlaps_transcripts <- findOverlaps(DML_grange, transcripts,ignore.strand = TRUE)
+overlaps_transcripts <- findOverlaps(DML_all_grange, transcripts,ignore.strand = TRUE)
 
 # Extract matching transcript information
-DML_transcript_annot <- data.frame(
-  DML_chr = seqnames(DML_grange)[queryHits(overlaps_transcripts)],
-  DML_start = start(DML_grange)[queryHits(overlaps_transcripts)],
-  DML_end = end(DML_grange)[queryHits(overlaps_transcripts)],
-  DML_qvalue = (DML_grange$qvalue)[queryHits(overlaps_transcripts)],
-  DML_methdiff = (DML_grange$meth.diff)[queryHits(overlaps_transcripts)],
+DML_transcript_annot_allCpg <- data.frame(
+  DML_chr = seqnames(DML_all_grange)[queryHits(overlaps_transcripts)],
+  DML_start = start(DML_all_grange)[queryHits(overlaps_transcripts)],
+  DML_end = end(DML_all_grange)[queryHits(overlaps_transcripts)],
+  DML_qvalue = (DML_all_grange$qvalue)[queryHits(overlaps_transcripts)],
+  DML_methdiff = (DML_all_grange$meth.diff)[queryHits(overlaps_transcripts)],
   transcript_chr = seqnames(transcripts)[subjectHits(overlaps_transcripts)],
   transcript_start = start(transcripts)[subjectHits(overlaps_transcripts)],
   transcript_end = end(transcripts)[subjectHits(overlaps_transcripts)],
@@ -277,6 +282,8 @@ DML_transcript_annot <- data.frame(
   gene_id = transcripts$gene_id[subjectHits(overlaps_transcripts)]
 )
 
+DML_transcript_annot <- DML_transcript_annot_allCpg %>% filter(DML_qvalue < 0.05)
+  
 # View first few rows
 head(DML_transcript_annot)
 
@@ -589,6 +596,40 @@ interaction_model <- lm(tissue_vst_mean ~ tissue_percent_meth * Tissue, data = p
 summary(full_model)
 summary(interaction_model)
 anova(full_model, interaction_model)
+```
+### Extracting table of genes
+
+```{r}
+DML_info <- DML_transcript_annot %>% dplyr::select(DML_start,DML_end,DML_qvalue,DML_methdiff,gene_id)
+DML_info <- DML_info %>% group_by(gene_id) %>% summarise(n_DML = n(),
+                                                         mean_methdiff = mean(DML_methdiff),
+                                                         median_methdiff = median(DML_methdiff),
+                                                         mean_methdiff_qvalue = mean(DML_qvalue),
+                                                         min_methdiff_qvalue = min(DML_qvalue),
+                                                         max_methdiff_qvalue = max(DML_qvalue))
+  
+RNA_CpG <- left_join(percent_meth, DML_info, by = c("gene_id")) # take percent methylated CpGs per gene matrix and add signficance info for any differentially methylated loci
+RNA_CpG <- inner_join(RNA_CpG, vsd, by = c("gene_id")) # add gene expression info, vst-transformed expression values
+RNA_CpG <- inner_join(RNA_CpG, DESeq, by = join_by(gene_id == query)) # add DEseq results
+
+RNA_CpG <- RNA_CpG %>% 
+              rename(mean_percent_meth_ALL = percent_meth_ALL,
+                     Aboral_mean_perc_meth = Aboral.x,
+                     Aboral_mean_vst_expr = Aboral.y,
+                     Oral_mean_perc_meth = Oral.x,
+                     Oral_mean_vst_expr =  Oral.y,
+                     vst_mean_gene_expression = vst_mean,
+                     DEseq_baseMean = baseMean,
+                     DEseq_log2FoldChange = log2FoldChange,
+                     DEseq_lfcSE = lfcSE,
+                     DEseq_pvalue = pvalue,
+                     DEseq_padj = padj
+              )
+
+SwissProt <- read.delim("../references/annotation/protein-GO.tsv")
+
+RNA_CpG_annot <- RNA_CpG%>% left_join(SwissProt, by = join_by(gene_id == query)) 
+write.csv(RNA_CpG_annot, "../output_WGBS/MethylKit_ConvFilt90_RNA_Meth.csv")
 ```
 
 
