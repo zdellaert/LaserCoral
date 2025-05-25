@@ -546,11 +546,16 @@ vsd <- vsd %>% rowwise() %>%
   
 vsd_long <- vsd %>% pivot_longer(cols = c(Oral,Aboral),
                                       names_to = "Tissue",
-                                      values_to = "tissue_vst_mean")
+                                      values_to = "tissue_vst_mean") %>%
+                    mutate(Tissue= factor(Tissue,levels = c("Oral", "Aboral")))
+
+vsd_long %>% ggplot(aes(x = Tissue,y = tissue_vst_mean, fill = Tissue)) + geom_boxplot() + theme_minimal() +  
+  labs(x = "Tissue", y = "VST Expression", 
+       title = "VST expression of all expressed genes by tissue type") 
 ```
 
 ```{r}
-plot_data_tissue <- merge(percent_meth_long, vsd_long, by = c("gene_id", "Tissue"))
+plot_data_tissue <- merge(percent_meth_long, vsd_long, by = c("gene_id", "Tissue")) %>% mutate(Tissue= factor(Tissue,levels = c("Oral", "Aboral")))
 
 ggplot(plot_data_tissue, aes(y = tissue_vst_mean, x = tissue_percent_meth, color=Tissue)) +
   geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
@@ -597,6 +602,100 @@ summary(full_model)
 summary(interaction_model)
 anova(full_model, interaction_model)
 ```
+
+### Above but only for DEGS
+
+
+RNA metadata:
+
+```{r}
+vsd_de <- vsd %>% filter(gene_id %in% DE_05_OralEpi$query)
+vsd_de_long <- vsd_de %>% pivot_longer(cols = c(Oral,Aboral),
+                                      names_to = "Tissue",
+                                      values_to = "tissue_vst_mean")
+```
+
+```{r}
+plot_data_tissue <- merge(percent_meth_long, vsd_long, by = c("gene_id", "Tissue")) %>% filter(gene_id %in% DE_05$query)
+
+ggplot(plot_data_tissue, aes(y = tissue_vst_mean, x = tissue_percent_meth, color=Tissue)) +
+  geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
+  labs(x = "Average CpG % methylation of gene", y = "VST Expression", 
+       title = "Differentially Expressed Genes (ALL): Gene Methylation vs Expression") +
+  theme_minimal()
+
+plot_data <- merge(percent_meth, vsd, by = c("gene_id"))
+
+ggplot(plot_data, aes(y = vst_mean, x = percent_meth_ALL)) +
+  geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
+  labs(x = "Average CpG % methylation of gene", y = "VST Expression", 
+       title = "Differentially Expressed Genes (ALL): Gene Methylation vs Expression") +
+  theme_minimal()
+
+plot_data_tissue <- merge(percent_meth_long, vsd_long, by = c("gene_id", "Tissue")) %>% filter(gene_id %in% DE_05_OralEpi$query)
+
+ggplot(plot_data_tissue, aes(y = tissue_vst_mean, x = tissue_percent_meth, color=Tissue)) +
+  geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
+  labs(x = "Average CpG % methylation of gene", y = "VST Expression", 
+       title = "Differentially Expressed Genes (Higher in Oral): Gene Methylation vs Expression") +
+  theme_minimal()
+
+plot_data <- merge(percent_meth, vsd, by = c("gene_id"))
+
+ggplot(plot_data, aes(y = vst_mean, x = percent_meth_ALL)) +
+  geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
+  labs(x = "Average CpG % methylation of gene", y = "VST Expression", 
+       title = "Differentially Expressed Genes (Higher in Oral): Gene Methylation vs Expression") +
+  theme_minimal()
+
+plot_data_tissue <- merge(percent_meth_long, vsd_long, by = c("gene_id", "Tissue")) %>% filter(gene_id %in% DE_05_Aboral$query)
+
+ggplot(plot_data_tissue, aes(y = tissue_vst_mean, x = tissue_percent_meth, color=Tissue)) +
+  geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
+  labs(x = "Average CpG % methylation of gene", y = "VST Expression", 
+       title = "Differentially Expressed Genes (Higher in Aboral): Gene Methylation vs Expression") +
+  theme_minimal()
+
+plot_data <- merge(percent_meth, vsd, by = c("gene_id"))
+
+ggplot(plot_data, aes(y = vst_mean, x = percent_meth_ALL)) +
+  geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
+  labs(x = "Average CpG % methylation of gene", y = "VST Expression", 
+       title = "Differentially Expressed Genes (Higher in Aboral): Gene Methylation vs Expression") +
+  theme_minimal()
+```
+
+
+```{r}
+model <- lm(tissue_vst_mean ~ tissue_percent_meth * Tissue, data = plot_data_tissue)
+
+summary(model)
+```
+```{r}
+# Full model
+full_model <- lm(vst_mean ~ percent_meth_ALL, data = plot_data)
+
+# Per-tissue models
+oral_model <- lm(tissue_vst_mean ~ tissue_percent_meth, data = filter(plot_data_tissue, Tissue == "Oral"))
+aboral_model <- lm(tissue_vst_mean ~ tissue_percent_meth, data = filter(plot_data_tissue, Tissue == "Aboral"))
+
+summary(full_model)$r.squared
+summary(oral_model)$r.squared
+summary(aboral_model)$r.squared
+```
+
+```{r}
+# Model 1: simple model, no tissue info
+full_model <- lm(tissue_vst_mean ~ tissue_percent_meth, data = plot_data_tissue)
+
+# Model 2: interaction model, includes tissue and interaction term
+interaction_model <- lm(tissue_vst_mean ~ tissue_percent_meth * Tissue, data = plot_data_tissue)
+
+summary(full_model)
+summary(interaction_model)
+anova(full_model, interaction_model)
+```
+
 ### Extracting table of genes
 
 ```{r}
