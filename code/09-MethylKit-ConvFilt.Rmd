@@ -56,11 +56,6 @@ save_ggplot <- function(plot, filename, width = 7, height = 5, units = "in", dpi
   # Save plot
   ggsave(filename = paste0(filename, ".png"), plot = plot, width = width, height = height, units = units, dpi = dpi)
 }
-
-# Specify colors
-ann_colors = list(
-    Tissue = c(Oral = "palegreen3" ,Aboral = "mediumpurple1")
-)
 ```
 
 ```{r}
@@ -206,7 +201,7 @@ positive_count <- sum(significant_dmg$meth.diff > 0)
 negative_count <- sum(significant_dmg$meth.diff < 0)
 
 # Plot with counts added to the quadrants
-ggplot(plot_data, aes(x = start, y = meth.diff)) +
+DML_direction <- ggplot(plot_data, aes(x = start, y = meth.diff)) +
   geom_point(alpha = 0.5) +  # Set alpha to reduce point transparency
   theme_minimal() +
   labs(title = "Significant Differentially Methylated Regions (q-value < 0.05)",
@@ -219,11 +214,13 @@ ggplot(plot_data, aes(x = start, y = meth.diff)) +
   annotate("text", x = Inf, y = -Inf, label = paste("Negative:", negative_count), 
            hjust = 1.1, vjust = -0.1, size = 4, color = "red")
 
+save_ggplot(DML_direction, "../output_WGBS/figures/6_DML_direction")
+
 
 dml_df <- as.data.frame(DMLStats_Tissue)
 
 # Volcano plot
-ggplot(dml_df, aes(x = meth.diff, y = -log10(qvalue))) +
+DML_volcano <- ggplot(dml_df, aes(x = meth.diff, y = -log10(qvalue))) +
   geom_point(alpha = 0.5) +
   geom_vline(xintercept = c(-5, 5), linetype = "dashed", color = "red") +
   geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "blue") +
@@ -231,6 +228,9 @@ ggplot(dml_df, aes(x = meth.diff, y = -log10(qvalue))) +
        x = "Methylation Difference (%)",
        y = "-log10(q-value)") +
   theme_minimal()
+
+save_ggplot(DML_volcano, "../output_WGBS/figures/7_DML_volcano")
+
 ```
 
 
@@ -247,6 +247,7 @@ length(DMLs_25$chr) #DML
 
 head(DMLs_25)
 ```
+
 ## Further look at genome wide methylation
 
 ```{r}
@@ -285,9 +286,9 @@ overlaps_transcripts <- findOverlaps(DML_all_grange, transcripts,ignore.strand =
 
 # Extract matching transcript information
 DML_transcript_annot_allCpg <- data.frame(
-  DML_chr = seqnames(DML_all_grange)[queryHits(overlaps_transcripts)],
-  DML_start = start(DML_all_grange)[queryHits(overlaps_transcripts)],
-  DML_end = end(DML_all_grange)[queryHits(overlaps_transcripts)],
+  chr = seqnames(DML_all_grange)[queryHits(overlaps_transcripts)],
+  start = start(DML_all_grange)[queryHits(overlaps_transcripts)],
+  end = end(DML_all_grange)[queryHits(overlaps_transcripts)],
   DML_qvalue = (DML_all_grange$qvalue)[queryHits(overlaps_transcripts)],
   DML_methdiff = (DML_all_grange$meth.diff)[queryHits(overlaps_transcripts)],
   transcript_chr = seqnames(transcripts)[subjectHits(overlaps_transcripts)],
@@ -566,11 +567,13 @@ vsd_long <- vsd %>% pivot_longer(cols = c(Oral,Aboral),
                                       values_to = "tissue_vst_mean") %>%
                     mutate(Tissue= factor(Tissue,levels = c("Oral", "Aboral")))
 
-VST_all <- vsd_long %>% ggplot(aes(x = Tissue,y = tissue_vst_mean, fill = Tissue)) + geom_boxplot() + theme_minimal() +  
-  labs(x = "Tissue", y = "VST Expression", 
-       title = "VST expression of all expressed genes by tissue type") 
+VST_all <- vsd_long %>% ggplot(aes(x = Tissue,y = tissue_vst_mean, fill = Tissue)) + 
+                        geom_boxplot() + theme_minimal() + scale_fill_manual(values = c("Aboral" = "mediumpurple1", "Oral" = "palegreen3")) +
+                        labs(x = "Tissue", y = "VST Expression", 
+                             title = "VST expression of all expressed genes by tissue type",
+                             caption = "n = 14,464 genes") 
 
-save_ggplot(VST_all, "../output_WGBS/figures/1_VST_all_boxplot")
+save_ggplot(VST_all, "../output_WGBS/figures/4_VST_all_boxplot")
 ```
 
 ```{r}
@@ -579,10 +582,10 @@ plot_data_tissue <- merge(percent_meth_long, vsd_long, by = c("gene_id", "Tissue
 vst_percmeth <- ggplot(plot_data_tissue, aes(y = tissue_vst_mean, x = tissue_percent_meth, color=Tissue)) +
   geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
   labs(x = "Average CpG % methylation of gene", y = "VST Expression", 
-       title = "Gene Methylation vs Expression") +
+       title = "Gene Methylation vs Expression") + scale_color_manual(values = c("Aboral" = "mediumpurple1", "Oral" = "palegreen4")) +
   theme_minimal()
 
-save_ggplot(vst_percmeth, "../output_WGBS/figures/2_VST_tissue_percentmeth")
+save_ggplot(vst_percmeth, "../output_WGBS/figures/5_VST_tissue_percentmeth")
 
 plot_data <- merge(percent_meth, vsd, by = c("gene_id"))
 
@@ -720,7 +723,7 @@ anova(full_model, interaction_model)
 ### Extracting table of genes
 
 ```{r}
-DML_info <- DML_transcript_annot %>% dplyr::select(DML_start,DML_end,DML_qvalue,DML_methdiff,gene_id)
+DML_info <- DML_transcript_annot %>% dplyr::select(start,end,DML_qvalue,DML_methdiff,gene_id)
 DML_info <- DML_info %>% group_by(gene_id) %>% summarise(n_DML = n(),
                                                          mean_methdiff = mean(DML_methdiff),
                                                          median_methdiff = median(DML_methdiff),
@@ -1027,5 +1030,89 @@ bar <- ggplot(all_CpGs, aes(y = region, x = percent_methylated, fill = region)) 
 save_ggplot(bar, "../output_WGBS/figures/3_cpgbar")
 ```
 
+### All DMLs boxplots
+
+```{r}
+percent_meth <- percMethylation(meth_filter_destrand)
+percent_meth <- as.data.frame(percent_meth)
+percent_meth$chr <- meth_filter_destrand$chr
+percent_meth$start <- meth_filter_destrand$start
+percent_meth$end <- meth_filter_destrand$end
+percent_meth$strand <- meth_filter_destrand$strand
+percent_meth <- percent_meth %>% select(c(chr,start,end,strand), everything())
+
+
+percent_meth_DML <- inner_join(percent_meth,DMLs) %>% 
+                                rename("DML_qvalue"=qvalue) %>% 
+                                rename("DML_pvalue"=pvalue)%>% 
+                                rename("DML_methdiff"=meth.diff)
+percent_meth_DML_ingene <- inner_join(percent_meth,DML_transcript_annot) 
+
+percent_meth_DML_tissue <- percent_meth_DML %>% rowwise() %>%
+  mutate(Oral = mean(c_across(meta$Sample[meta$Tissue=="OralEpi"]), na.rm = TRUE)) %>%
+  mutate(Aboral = mean(c_across(meta$Sample[meta$Tissue=="Aboral"]), na.rm = TRUE)) %>%
+  ungroup()
+
+percent_meth_DML_ingene_tissue <- percent_meth_DML_ingene %>% rowwise() %>%
+  mutate(Oral = mean(c_across(meta$Sample[meta$Tissue=="OralEpi"]), na.rm = TRUE)) %>%
+  mutate(Aboral = mean(c_across(meta$Sample[meta$Tissue=="Aboral"]), na.rm = TRUE)) %>%
+  ungroup()
+  
+percent_meth_DML_long <- percent_meth_DML %>%
+  pivot_longer(cols = starts_with("LCM_"), 
+               names_to = "Sample", 
+               values_to = "Percent_Methylation") %>%
+  left_join((meta %>% select(c(Sample,Tissue))), by = "Sample") %>%
+  filter(!is.na(Percent_Methylation)) %>% mutate(Tissue= factor(Tissue,levels = c("OralEpi", "Aboral")))
+
+boxplot_percmeth_DMLs <- ggplot(percent_meth_DML_long, aes(x = Tissue, y = Percent_Methylation, fill = Tissue)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(width = 0.2, alpha = 0.4, size = 1) +
+  labs(title = "Percent Methylation at DMLs by Tissue",
+       x = "Tissue Type", y = "Percent Methylation") +
+  theme_minimal() + scale_fill_manual(values = c("Aboral" = "mediumpurple1", "OralEpi" = "palegreen3"))+
+  theme(legend.position = "none") 
+
+save_ggplot(boxplot_percmeth_DMLs, "../output_WGBS/figures/8_boxplot_percmeth_DMLs")
+
+
+boxplot_percmeth_DMLs_LOG <- ggplot(percent_meth_DML_long, aes(x = Tissue, y = Percent_Methylation, fill = Tissue)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(width = 0.2, alpha = 0.4, size = 1) +scale_y_log10() +
+  labs(title = "Percent Methylation at DMLs by Tissue",
+       x = "Tissue Type", y = "Log10(Percent Methylation)") +
+  theme_minimal() + scale_fill_manual(values = c("Aboral" = "mediumpurple1", "OralEpi" = "palegreen3")) +
+  theme(legend.position = "none")
+
+save_ggplot(boxplot_percmeth_DMLs_LOG, "../output_WGBS/figures/9_boxplot_percmeth_DMLs_LOG")
+
+percent_meth_DML_ingene_long <- percent_meth_DML_ingene %>%
+  pivot_longer(cols = starts_with("LCM_"), 
+               names_to = "Sample", 
+               values_to = "Percent_Methylation") %>%
+  left_join((meta %>% select(c(Sample,Tissue))), by = "Sample") %>%
+  filter(!is.na(Percent_Methylation)) %>% mutate(Tissue= factor(Tissue,levels = c("OralEpi", "Aboral")))
+
+boxplot_percmeth_DMLs_ingenes <- ggplot(percent_meth_DML_ingene_long, aes(x = Tissue, y = Percent_Methylation, fill = Tissue)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(width = 0.2, alpha = 0.4, size = 1) +
+  labs(title = "DMLs in genes: Percent Methylation at DMLs by Tissue",
+       x = "Tissue Type", y = "Percent Methylation") +
+  theme_minimal() + scale_fill_manual(values = c("Aboral" = "mediumpurple1", "OralEpi" = "palegreen3")) +
+  theme(legend.position = "none")
+
+save_ggplot(boxplot_percmeth_DMLs_ingenes, "../output_WGBS/figures/10_boxplot_percmeth_DMLs_ingenes")
+
+
+boxplot_percmeth_DMLs_ingenes_LOG <- ggplot(percent_meth_DML_ingene_long, aes(x = Tissue, y = Percent_Methylation, fill = Tissue)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(width = 0.2, alpha = 0.4, size = 1) +scale_y_log10() +
+  labs(title = "DMLs in genes: Percent Methylation at DMLs by Tissue",
+       x = "Tissue Type", y = "Log10(Percent Methylation)") +
+  theme_minimal() + scale_fill_manual(values = c("Aboral" = "mediumpurple1", "OralEpi" = "palegreen3")) +
+  theme(legend.position = "none")
+
+save_ggplot(boxplot_percmeth_DMLs_ingenes_LOG, "../output_WGBS/figures/11_boxplot_percmeth_DMLs_ingenes_LOG")
+```
 
 
