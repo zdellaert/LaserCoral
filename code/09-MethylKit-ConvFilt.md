@@ -2294,3 +2294,37 @@ save_ggplot(boxplot_percmeth_DMLs_ingenes_LOG, "../output_WGBS/figures/11_boxplo
     ## (`stat_boxplot()`).
 
 ![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-46-4.png)<!-- -->
+
+``` r
+library(patchwork)
+
+# Combine non-log plots
+combined_boxplot_percmeth_DMLs <- boxplot_percmeth_DMLs + boxplot_percmeth_DMLs_ingenes +
+  plot_layout(ncol = 2, guides = "collect") &
+  theme(legend.position = "none")  # ensures consistent theme
+
+# Save non-log version
+ggsave("../output_WGBS/figures/12_combined_boxplot_percmeth_DMLs.png",
+       combined_boxplot_percmeth_DMLs, width = 10, height = 5, dpi = 300)
+
+# Combine log-transformed plots
+combined_boxplot_percmeth_DMLs_LOG <- boxplot_percmeth_DMLs_LOG + boxplot_percmeth_DMLs_ingenes_LOG +
+  plot_layout(ncol = 2, guides = "collect") &
+  theme(legend.position = "none")
+
+# Save log version
+ggsave("../output_WGBS/figures/13_combined_boxplot_percmeth_DMLs_LOG.png",
+       combined_boxplot_percmeth_DMLs_LOG, width = 10, height = 5, dpi = 300)
+```
+
+    ## Warning in scale_y_log10(): log-10 transformation introduced infinite values.
+    ## log-10 transformation introduced infinite values.
+
+    ## Warning: Removed 709 rows containing non-finite outside the scale range
+    ## (`stat_boxplot()`).
+
+    ## Warning in scale_y_log10(): log-10 transformation introduced infinite values.
+    ## log-10 transformation introduced infinite values.
+
+    ## Warning: Removed 333 rows containing non-finite outside the scale range
+    ## (`stat_boxplot()`).
