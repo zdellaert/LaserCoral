@@ -31,8 +31,10 @@ Zoe Dellaert
     expressed](#053-absolute-value-of-log2foldchange-relationship-between-overall-methylation-of-a-gene-and-whether-or-not-it-is-differentially-expressed)
   - [0.5.4 Read counts/vsd transformed
     counts](#054-read-countsvsd-transformed-counts)
-  - [0.5.5 Extracting table of genes](#055-extracting-table-of-genes)
+  - [0.5.5 Above but only for DEGS](#055-above-but-only-for-degs)
+  - [0.5.6 Extracting table of genes](#056-extracting-table-of-genes)
 - [0.6 Methylated CpG locations](#06-methylated-cpg-locations)
+  - [0.6.1 All DMLs boxplots](#061-all-dmls-boxplots)
 
 ## 0.1 MethylKit - Reads filtered for \>90% conversion efficiency
 
@@ -306,6 +308,16 @@ sessionInfo() #provides list of loaded packages and version of R.
     ## [97] crayon_1.5.3                rlang_1.1.5
 
 ``` r
+save_ggplot <- function(plot, filename, width = 7, height = 5, units = "in", dpi = 300) {
+  # Display plot
+  print(plot)
+  
+  # Save plot
+  ggsave(filename = paste0(filename, ".png"), plot = plot, width = width, height = height, units = units, dpi = dpi)
+}
+```
+
+``` r
 meta <- read.csv("../data_WGBS/LCM_WGBS_metadata.csv", sep = ",", header = TRUE) %>%
   mutate(Section_Date = as.character(Section_Date), LCM_Date = as.character(LCM_Date),DNA_Extraction_Date = as.character(DNA_Extraction_Date))
 
@@ -378,19 +390,19 @@ getMethylationStats(methylObj[[2]],plot=FALSE,both.strands=FALSE)
 getMethylationStats(methylObj[[2]],plot=TRUE,both.strands=FALSE)
 ```
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
 getCoverageStats(methylObj[[2]],plot=TRUE,both.strands=FALSE)
 ```
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-5-2.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
 
 ``` r
 getCoverageStats(methylObj[[2]],plot=TRUE,both.strands=TRUE)
 ```
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-5-3.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
 
 ### 0.3.1 Note: I changed the code below so that a CpG does not have to have 5X coverage in all samples to be analyzed, and only needs 5X coverage in 2 samples per group to be retained. This way we don’t remove CpGs that happen to have lower coverage in a few samples or one tissue.
 
@@ -431,7 +443,7 @@ clusterSamples(meth_filter, dist="correlation", method="ward", plot=TRUE)
 
     ## The "ward" method has been renamed to "ward.D"; note new "ward.D2"
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
     ## 
     ## Call:
@@ -447,7 +459,7 @@ clusterSamples(meth_filter_destrand, dist="correlation", method="ward", plot=TRU
 
     ## The "ward" method has been renamed to "ward.D"; note new "ward.D2"
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
 
     ## 
     ## Call:
@@ -461,13 +473,13 @@ clusterSamples(meth_filter_destrand, dist="correlation", method="ward", plot=TRU
 PCASamples(meth_filter)
 ```
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-7-3.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-8-3.png)<!-- -->
 
 ``` r
 PCASamples(meth_filter_destrand)
 ```
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-7-4.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-8-4.png)<!-- -->
 
 ``` r
 getCorrelation(meth_filter_destrand,plot=TRUE)
@@ -603,7 +615,7 @@ getCorrelation(meth_filter_destrand,plot=TRUE)
     ## Warning in par(usr): argument 1 does not name a graphical parameter
     ## Warning in par(usr): argument 1 does not name a graphical parameter
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ### 0.3.2 batch effects
 
@@ -626,7 +638,7 @@ sds=matrixStats::rowSds(pm)
 hist(sds, breaks = 100)
 ```
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 # keep only CpG with standard deviations larger than 2%
@@ -687,7 +699,7 @@ positive_count <- sum(significant_dmg$meth.diff > 0)
 negative_count <- sum(significant_dmg$meth.diff < 0)
 
 # Plot with counts added to the quadrants
-ggplot(plot_data, aes(x = start, y = meth.diff)) +
+DML_direction <- ggplot(plot_data, aes(x = start, y = meth.diff)) +
   geom_point(alpha = 0.5) +  # Set alpha to reduce point transparency
   theme_minimal() +
   labs(title = "Significant Differentially Methylated Regions (q-value < 0.05)",
@@ -699,15 +711,17 @@ ggplot(plot_data, aes(x = start, y = meth.diff)) +
            hjust = 1.1, vjust = 1.1, size = 4, color = "blue") +
   annotate("text", x = Inf, y = -Inf, label = paste("Negative:", negative_count), 
            hjust = 1.1, vjust = -0.1, size = 4, color = "red")
+
+save_ggplot(DML_direction, "../output_WGBS/figures/6_DML_direction")
 ```
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ``` r
 dml_df <- as.data.frame(DMLStats_Tissue)
 
 # Volcano plot
-ggplot(dml_df, aes(x = meth.diff, y = -log10(qvalue))) +
+DML_volcano <- ggplot(dml_df, aes(x = meth.diff, y = -log10(qvalue))) +
   geom_point(alpha = 0.5) +
   geom_vline(xintercept = c(-5, 5), linetype = "dashed", color = "red") +
   geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "blue") +
@@ -715,9 +729,11 @@ ggplot(dml_df, aes(x = meth.diff, y = -log10(qvalue))) +
        x = "Methylation Difference (%)",
        y = "-log10(q-value)") +
   theme_minimal()
+
+save_ggplot(DML_volcano, "../output_WGBS/figures/7_DML_volcano")
 ```
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-12-2.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-13-2.png)<!-- -->
 
 ``` r
 DMLs <- methylKit::getMethylDiff(DMLStats_Tissue, difference = 2, qvalue = 0.05) #Identify DML based on difference threshold
@@ -781,7 +797,7 @@ diffMethPerChr(DMLStats_Tissue, meth.cutoff = 2, qvalue.cutoff = 0.05,cex.names=
 
     ## Warning in eval(quote(list(...)), env): NAs introduced by coercion
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ### 0.4.1 Annotation
 
@@ -870,9 +886,9 @@ overlaps_transcripts <- findOverlaps(DML_all_grange, transcripts,ignore.strand =
 ``` r
 # Extract matching transcript information
 DML_transcript_annot_allCpg <- data.frame(
-  DML_chr = seqnames(DML_all_grange)[queryHits(overlaps_transcripts)],
-  DML_start = start(DML_all_grange)[queryHits(overlaps_transcripts)],
-  DML_end = end(DML_all_grange)[queryHits(overlaps_transcripts)],
+  chr = seqnames(DML_all_grange)[queryHits(overlaps_transcripts)],
+  start = start(DML_all_grange)[queryHits(overlaps_transcripts)],
+  end = end(DML_all_grange)[queryHits(overlaps_transcripts)],
   DML_qvalue = (DML_all_grange$qvalue)[queryHits(overlaps_transcripts)],
   DML_methdiff = (DML_all_grange$meth.diff)[queryHits(overlaps_transcripts)],
   transcript_chr = seqnames(transcripts)[subjectHits(overlaps_transcripts)],
@@ -888,27 +904,27 @@ DML_transcript_annot <- DML_transcript_annot_allCpg %>% filter(DML_qvalue < 0.05
 head(DML_transcript_annot)
 ```
 
-    ##                              DML_chr DML_start DML_end   DML_qvalue
-    ## 1 Pocillopora_acuta_HIv2___Sc0000002   4354140 4354140 3.077121e-02
-    ## 2 Pocillopora_acuta_HIv2___Sc0000002   4354519 4354519 5.236437e-03
-    ## 3 Pocillopora_acuta_HIv2___Sc0000002   4354790 4354790 2.477162e-06
-    ## 4 Pocillopora_acuta_HIv2___Sc0000002   9281328 9281328 3.837845e-02
-    ## 5 Pocillopora_acuta_HIv2___Sc0000003   2461240 2461240 3.643553e-02
-    ## 6 Pocillopora_acuta_HIv2___Sc0000003   8702392 8702392 1.725322e-02
-    ##   DML_methdiff                     transcript_chr transcript_start
-    ## 1     15.29412 Pocillopora_acuta_HIv2___Sc0000002          4352529
-    ## 2     22.64151 Pocillopora_acuta_HIv2___Sc0000002          4352529
-    ## 3     29.78723 Pocillopora_acuta_HIv2___Sc0000002          4352529
-    ## 4     23.07692 Pocillopora_acuta_HIv2___Sc0000002          9279157
-    ## 5    -35.00000 Pocillopora_acuta_HIv2___Sc0000003          2441368
-    ## 6     30.30303 Pocillopora_acuta_HIv2___Sc0000003          8696824
-    ##   transcript_end                             transcript_id
-    ## 1        4355343 Pocillopora_acuta_HIv2___RNAseq.g25038.t1
-    ## 2        4355343 Pocillopora_acuta_HIv2___RNAseq.g25038.t1
-    ## 3        4355343 Pocillopora_acuta_HIv2___RNAseq.g25038.t1
-    ## 4        9293249 Pocillopora_acuta_HIv2___RNAseq.g25453.t1
-    ## 5        2461336  Pocillopora_acuta_HIv2___RNAseq.g4860.t2
-    ## 6        8734794  Pocillopora_acuta_HIv2___RNAseq.g5465.t1
+    ##                                  chr   start     end   DML_qvalue DML_methdiff
+    ## 1 Pocillopora_acuta_HIv2___Sc0000002 4354140 4354140 3.077121e-02     15.29412
+    ## 2 Pocillopora_acuta_HIv2___Sc0000002 4354519 4354519 5.236437e-03     22.64151
+    ## 3 Pocillopora_acuta_HIv2___Sc0000002 4354790 4354790 2.477162e-06     29.78723
+    ## 4 Pocillopora_acuta_HIv2___Sc0000002 9281328 9281328 3.837845e-02     23.07692
+    ## 5 Pocillopora_acuta_HIv2___Sc0000003 2461240 2461240 3.643553e-02    -35.00000
+    ## 6 Pocillopora_acuta_HIv2___Sc0000003 8702392 8702392 1.725322e-02     30.30303
+    ##                       transcript_chr transcript_start transcript_end
+    ## 1 Pocillopora_acuta_HIv2___Sc0000002          4352529        4355343
+    ## 2 Pocillopora_acuta_HIv2___Sc0000002          4352529        4355343
+    ## 3 Pocillopora_acuta_HIv2___Sc0000002          4352529        4355343
+    ## 4 Pocillopora_acuta_HIv2___Sc0000002          9279157        9293249
+    ## 5 Pocillopora_acuta_HIv2___Sc0000003          2441368        2461336
+    ## 6 Pocillopora_acuta_HIv2___Sc0000003          8696824        8734794
+    ##                               transcript_id
+    ## 1 Pocillopora_acuta_HIv2___RNAseq.g25038.t1
+    ## 2 Pocillopora_acuta_HIv2___RNAseq.g25038.t1
+    ## 3 Pocillopora_acuta_HIv2___RNAseq.g25038.t1
+    ## 4 Pocillopora_acuta_HIv2___RNAseq.g25453.t1
+    ## 5  Pocillopora_acuta_HIv2___RNAseq.g4860.t2
+    ## 6  Pocillopora_acuta_HIv2___RNAseq.g5465.t1
     ##                                     gene_id
     ## 1 Pocillopora_acuta_HIv2___RNAseq.g25038.t1
     ## 2 Pocillopora_acuta_HIv2___RNAseq.g25038.t1
@@ -957,18 +973,18 @@ DE_05 <- DESeq %>% filter(padj < 0.05)
 DML_transcript_annot[DML_transcript_annot$transcript_id %in% DE_05$query,]
 ```
 
-    ##                                 DML_chr DML_start DML_end   DML_qvalue
-    ## 1    Pocillopora_acuta_HIv2___Sc0000002   4354140 4354140 3.077121e-02
-    ## 2    Pocillopora_acuta_HIv2___Sc0000002   4354519 4354519 5.236437e-03
-    ## 3    Pocillopora_acuta_HIv2___Sc0000002   4354790 4354790 2.477162e-06
-    ## 10   Pocillopora_acuta_HIv2___Sc0000006   5260722 5260722 2.225195e-02
-    ## 11   Pocillopora_acuta_HIv2___Sc0000007   1469599 1469599 1.443216e-02
-    ## 19   Pocillopora_acuta_HIv2___Sc0000009   1926284 1926284 4.300753e-02
-    ## 20   Pocillopora_acuta_HIv2___Sc0000009   1926297 1926297 3.564570e-02
-    ## 37 Pocillopora_acuta_HIv2___xfSc0000000   5400485 5400485 3.281083e-02
-    ## 63 Pocillopora_acuta_HIv2___xfSc0000009   1377935 1377935 1.383141e-02
-    ## 64 Pocillopora_acuta_HIv2___xfSc0000009   3043722 3043722 1.327307e-02
-    ## 74 Pocillopora_acuta_HIv2___xfSc0000024   2471817 2471817 2.468497e-03
+    ##                                     chr   start     end   DML_qvalue
+    ## 1    Pocillopora_acuta_HIv2___Sc0000002 4354140 4354140 3.077121e-02
+    ## 2    Pocillopora_acuta_HIv2___Sc0000002 4354519 4354519 5.236437e-03
+    ## 3    Pocillopora_acuta_HIv2___Sc0000002 4354790 4354790 2.477162e-06
+    ## 10   Pocillopora_acuta_HIv2___Sc0000006 5260722 5260722 2.225195e-02
+    ## 11   Pocillopora_acuta_HIv2___Sc0000007 1469599 1469599 1.443216e-02
+    ## 19   Pocillopora_acuta_HIv2___Sc0000009 1926284 1926284 4.300753e-02
+    ## 20   Pocillopora_acuta_HIv2___Sc0000009 1926297 1926297 3.564570e-02
+    ## 37 Pocillopora_acuta_HIv2___xfSc0000000 5400485 5400485 3.281083e-02
+    ## 63 Pocillopora_acuta_HIv2___xfSc0000009 1377935 1377935 1.383141e-02
+    ## 64 Pocillopora_acuta_HIv2___xfSc0000009 3043722 3043722 1.327307e-02
+    ## 74 Pocillopora_acuta_HIv2___xfSc0000024 2471817 2471817 2.468497e-03
     ##    DML_methdiff                       transcript_chr transcript_start
     ## 1     15.294118   Pocillopora_acuta_HIv2___Sc0000002          4352529
     ## 2     22.641509   Pocillopora_acuta_HIv2___Sc0000002          4352529
@@ -1048,7 +1064,7 @@ ggplot(plot_data, aes(x = DML_methdiff, y = log2FoldChange)) +
     ## Warning: ggrepel: 3 unlabeled data points (too many overlaps). Consider
     ## increasing max.overlaps
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
 
 ``` r
 # how many CpG sites are there after filtering?
@@ -1102,6 +1118,18 @@ hist <- ggplot(cpg_counts, aes(x = num_cpgs)) +
        y = "Count of genes") +
   theme_minimal()
 
+save_ggplot(hist, "../output_WGBS/figures/1_cpghist")
+```
+
+    ## Warning: Removed 2 rows containing missing values or values outside the scale range
+    ## (`geom_bar()`).
+
+    ## Warning: Removed 2 rows containing missing values or values outside the scale range
+    ## (`geom_bar()`).
+
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+
+``` r
 # Calculate summary stats
 summary_stats <- cpg_counts %>%
   summarise(
@@ -1136,7 +1164,7 @@ hist +
     ## Warning: Removed 2 rows containing missing values or values outside the scale range
     ## (`geom_bar()`).
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-21-2.png)<!-- -->
 
 ``` r
 # Find overlaps between methylated loci and transcripts, averaged by gene
@@ -1222,7 +1250,7 @@ ggplot(percent_meth, aes(x = percent_meth_ALL)) +
   labs(x = "(% gene body methylation", y = "Gene count")
 ```
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
 
 ### 0.5.1 BaseMean: Raw gene expression levels (skewed by highly expressed genes)
 
@@ -1237,7 +1265,7 @@ ggplot(plot_data, aes(y = baseMean, x = percent_meth_ALL)) +
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
 
 ``` r
 ggplot(plot_data, aes(y = baseMean, x = tissue_percent_meth,color=Tissue)) +
@@ -1250,7 +1278,7 @@ ggplot(plot_data, aes(y = baseMean, x = tissue_percent_meth,color=Tissue)) +
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-23-2.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-24-2.png)<!-- -->
 
 ### 0.5.2 Log2 of BaseMean: Transformed gene expression levels
 
@@ -1265,7 +1293,7 @@ ggplot(plot_data, aes(y = log2(baseMean), x = percent_meth_ALL)) +
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
 
 ``` r
 ggplot(plot_data, aes(y = log2(baseMean), x = tissue_percent_meth,color=Tissue)) +
@@ -1278,7 +1306,7 @@ ggplot(plot_data, aes(y = log2(baseMean), x = tissue_percent_meth,color=Tissue))
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-24-2.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-25-2.png)<!-- -->
 
 ### 0.5.3 Absolute value of Log2FoldChange: Relationship between overall methylation of a gene and whether or not it is differentially expressed
 
@@ -1293,7 +1321,7 @@ ggplot(plot_data, aes(y = abs(log2FoldChange), x = percent_meth_ALL)) +
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
 
 ``` r
 ggplot(plot_data, aes(y = abs(log2FoldChange), x = tissue_percent_meth,color=Tissue)) +
@@ -1306,7 +1334,7 @@ ggplot(plot_data, aes(y = abs(log2FoldChange), x = tissue_percent_meth,color=Tis
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-25-2.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-26-2.png)<!-- -->
 
 ``` r
 # Create the plot
@@ -1323,7 +1351,7 @@ ggplot(plot_data, aes(x = percent_meth_ALL, y = log2FoldChange)) +
   theme_minimal()
 ```
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-25-3.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-26-3.png)<!-- -->
 
 ### 0.5.4 Read counts/vsd transformed counts
 
@@ -1355,22 +1383,36 @@ vsd <- vsd %>% rowwise() %>%
   
 vsd_long <- vsd %>% pivot_longer(cols = c(Oral,Aboral),
                                       names_to = "Tissue",
-                                      values_to = "tissue_vst_mean")
+                                      values_to = "tissue_vst_mean") %>%
+                    mutate(Tissue= factor(Tissue,levels = c("Oral", "Aboral")))
+
+VST_all <- vsd_long %>% ggplot(aes(x = Tissue,y = tissue_vst_mean, fill = Tissue)) + 
+                        geom_boxplot() + theme_minimal() + scale_fill_manual(values = c("Aboral" = "mediumpurple1", "Oral" = "palegreen3")) +
+                        labs(x = "Tissue", y = "VST Expression", 
+                             title = "VST expression of all expressed genes by tissue type",
+                             caption = "n = 14,464 genes") 
+
+save_ggplot(VST_all, "../output_WGBS/figures/4_VST_all_boxplot")
 ```
 
-``` r
-plot_data_tissue <- merge(percent_meth_long, vsd_long, by = c("gene_id", "Tissue"))
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
 
-ggplot(plot_data_tissue, aes(y = tissue_vst_mean, x = tissue_percent_meth, color=Tissue)) +
+``` r
+plot_data_tissue <- merge(percent_meth_long, vsd_long, by = c("gene_id", "Tissue")) %>% mutate(Tissue= factor(Tissue,levels = c("Oral", "Aboral")))
+
+vst_percmeth <- ggplot(plot_data_tissue, aes(y = tissue_vst_mean, x = tissue_percent_meth, color=Tissue)) +
   geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
   labs(x = "Average CpG % methylation of gene", y = "VST Expression", 
-       title = "Gene Methylation vs Expression") +
+       title = "Gene Methylation vs Expression") + scale_color_manual(values = c("Aboral" = "mediumpurple1", "Oral" = "palegreen4")) +
   theme_minimal()
+
+save_ggplot(vst_percmeth, "../output_WGBS/figures/5_VST_tissue_percentmeth")
 ```
 
     ## `geom_smooth()` using formula = 'y ~ x'
+    ## `geom_smooth()` using formula = 'y ~ x'
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
 
 ``` r
 plot_data <- merge(percent_meth, vsd, by = c("gene_id"))
@@ -1384,7 +1426,7 @@ ggplot(plot_data, aes(y = vst_mean, x = percent_meth_ALL)) +
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-28-2.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-29-2.png)<!-- -->
 
 ``` r
 model <- lm(tissue_vst_mean ~ tissue_percent_meth * Tissue, data = plot_data_tissue)
@@ -1402,11 +1444,11 @@ summary(model)
     ## -4.7884 -1.7766 -0.2367  1.5714  8.7536 
     ## 
     ## Coefficients:
-    ##                                Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)                    7.679166   0.048148 159.491   <2e-16 ***
-    ## tissue_percent_meth            0.007577   0.002320   3.267   0.0011 ** 
-    ## TissueOral                     0.672722   0.067824   9.919   <2e-16 ***
-    ## tissue_percent_meth:TissueOral 0.002831   0.003356   0.844   0.3989    
+    ##                                   Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)                       8.351888   0.047769 174.840  < 2e-16 ***
+    ## tissue_percent_meth               0.010408   0.002426   4.291 1.81e-05 ***
+    ## TissueAboral                     -0.672722   0.067824  -9.919  < 2e-16 ***
+    ## tissue_percent_meth:TissueAboral -0.002831   0.003356  -0.844    0.399    
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
@@ -1482,11 +1524,11 @@ summary(interaction_model)
     ## -4.7884 -1.7766 -0.2367  1.5714  8.7536 
     ## 
     ## Coefficients:
-    ##                                Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)                    7.679166   0.048148 159.491   <2e-16 ***
-    ## tissue_percent_meth            0.007577   0.002320   3.267   0.0011 ** 
-    ## TissueOral                     0.672722   0.067824   9.919   <2e-16 ***
-    ## tissue_percent_meth:TissueOral 0.002831   0.003356   0.844   0.3989    
+    ##                                   Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)                       8.351888   0.047769 174.840  < 2e-16 ***
+    ## tissue_percent_meth               0.010408   0.002426   4.291 1.81e-05 ***
+    ## TissueAboral                     -0.672722   0.067824  -9.919  < 2e-16 ***
+    ## tissue_percent_meth:TissueAboral -0.002831   0.003356  -0.844    0.399    
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
@@ -1508,10 +1550,227 @@ anova(full_model, interaction_model)
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-### 0.5.5 Extracting table of genes
+### 0.5.5 Above but only for DEGS
+
+RNA metadata:
 
 ``` r
-DML_info <- DML_transcript_annot %>% dplyr::select(DML_start,DML_end,DML_qvalue,DML_methdiff,gene_id)
+vsd_de <- vsd %>% filter(gene_id %in% DE_05_OralEpi$query)
+vsd_de_long <- vsd_de %>% pivot_longer(cols = c(Oral,Aboral),
+                                      names_to = "Tissue",
+                                      values_to = "tissue_vst_mean")
+```
+
+``` r
+plot_data_tissue <- merge(percent_meth_long, vsd_long, by = c("gene_id", "Tissue")) %>% filter(gene_id %in% DE_05$query)
+
+ggplot(plot_data_tissue, aes(y = tissue_vst_mean, x = tissue_percent_meth, color=Tissue)) +
+  geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
+  labs(x = "Average CpG % methylation of gene", y = "VST Expression", 
+       title = "Differentially Expressed Genes (ALL): Gene Methylation vs Expression") +
+  theme_minimal()
+```
+
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
+
+``` r
+plot_data <- merge(percent_meth, vsd, by = c("gene_id"))
+
+ggplot(plot_data, aes(y = vst_mean, x = percent_meth_ALL)) +
+  geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
+  labs(x = "Average CpG % methylation of gene", y = "VST Expression", 
+       title = "Differentially Expressed Genes (ALL): Gene Methylation vs Expression") +
+  theme_minimal()
+```
+
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-34-2.png)<!-- -->
+
+``` r
+plot_data_tissue <- merge(percent_meth_long, vsd_long, by = c("gene_id", "Tissue")) %>% filter(gene_id %in% DE_05_OralEpi$query)
+
+ggplot(plot_data_tissue, aes(y = tissue_vst_mean, x = tissue_percent_meth, color=Tissue)) +
+  geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
+  labs(x = "Average CpG % methylation of gene", y = "VST Expression", 
+       title = "Differentially Expressed Genes (Higher in Oral): Gene Methylation vs Expression") +
+  theme_minimal()
+```
+
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-34-3.png)<!-- -->
+
+``` r
+plot_data <- merge(percent_meth, vsd, by = c("gene_id"))
+
+ggplot(plot_data, aes(y = vst_mean, x = percent_meth_ALL)) +
+  geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
+  labs(x = "Average CpG % methylation of gene", y = "VST Expression", 
+       title = "Differentially Expressed Genes (Higher in Oral): Gene Methylation vs Expression") +
+  theme_minimal()
+```
+
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-34-4.png)<!-- -->
+
+``` r
+plot_data_tissue <- merge(percent_meth_long, vsd_long, by = c("gene_id", "Tissue")) %>% filter(gene_id %in% DE_05_Aboral$query)
+
+ggplot(plot_data_tissue, aes(y = tissue_vst_mean, x = tissue_percent_meth, color=Tissue)) +
+  geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
+  labs(x = "Average CpG % methylation of gene", y = "VST Expression", 
+       title = "Differentially Expressed Genes (Higher in Aboral): Gene Methylation vs Expression") +
+  theme_minimal()
+```
+
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-34-5.png)<!-- -->
+
+``` r
+plot_data <- merge(percent_meth, vsd, by = c("gene_id"))
+
+ggplot(plot_data, aes(y = vst_mean, x = percent_meth_ALL)) +
+  geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
+  labs(x = "Average CpG % methylation of gene", y = "VST Expression", 
+       title = "Differentially Expressed Genes (Higher in Aboral): Gene Methylation vs Expression") +
+  theme_minimal()
+```
+
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-34-6.png)<!-- -->
+
+``` r
+model <- lm(tissue_vst_mean ~ tissue_percent_meth * Tissue, data = plot_data_tissue)
+
+summary(model)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = tissue_vst_mean ~ tissue_percent_meth * Tissue, 
+    ##     data = plot_data_tissue)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -4.8717 -1.6852 -0.4006  1.3858  7.1100 
+    ## 
+    ## Coefficients:
+    ##                                 Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)                    10.274036   0.171269  59.988   <2e-16 ***
+    ## tissue_percent_meth             0.024392   0.021265   1.147    0.252    
+    ## TissueOral                     -3.756490   0.240936 -15.591   <2e-16 ***
+    ## tissue_percent_meth:TissueOral  0.007016   0.033392   0.210    0.834    
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 2.241 on 398 degrees of freedom
+    ## Multiple R-squared:  0.4176, Adjusted R-squared:  0.4132 
+    ## F-statistic: 95.13 on 3 and 398 DF,  p-value: < 2.2e-16
+
+``` r
+# Full model
+full_model <- lm(vst_mean ~ percent_meth_ALL, data = plot_data)
+
+# Per-tissue models
+oral_model <- lm(tissue_vst_mean ~ tissue_percent_meth, data = filter(plot_data_tissue, Tissue == "Oral"))
+aboral_model <- lm(tissue_vst_mean ~ tissue_percent_meth, data = filter(plot_data_tissue, Tissue == "Aboral"))
+
+summary(full_model)$r.squared
+```
+
+    ## [1] 0.007249067
+
+``` r
+summary(oral_model)$r.squared
+```
+
+    ## [1] 0.007216146
+
+``` r
+summary(aboral_model)$r.squared
+```
+
+    ## [1] 0.006761669
+
+``` r
+# Model 1: simple model, no tissue info
+full_model <- lm(tissue_vst_mean ~ tissue_percent_meth, data = plot_data_tissue)
+
+# Model 2: interaction model, includes tissue and interaction term
+interaction_model <- lm(tissue_vst_mean ~ tissue_percent_meth * Tissue, data = plot_data_tissue)
+
+summary(full_model)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = tissue_vst_mean ~ tissue_percent_meth, data = plot_data_tissue)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -5.5992 -2.5663 -0.1971  2.4096  7.6626 
+    ## 
+    ## Coefficients:
+    ##                     Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)          8.35636    0.15664  53.347   <2e-16 ***
+    ## tissue_percent_meth  0.04183    0.02130   1.964   0.0502 .  
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 2.915 on 400 degrees of freedom
+    ## Multiple R-squared:  0.009554,   Adjusted R-squared:  0.007078 
+    ## F-statistic: 3.858 on 1 and 400 DF,  p-value: 0.05019
+
+``` r
+summary(interaction_model)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = tissue_vst_mean ~ tissue_percent_meth * Tissue, 
+    ##     data = plot_data_tissue)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -4.8717 -1.6852 -0.4006  1.3858  7.1100 
+    ## 
+    ## Coefficients:
+    ##                                 Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)                    10.274036   0.171269  59.988   <2e-16 ***
+    ## tissue_percent_meth             0.024392   0.021265   1.147    0.252    
+    ## TissueOral                     -3.756490   0.240936 -15.591   <2e-16 ***
+    ## tissue_percent_meth:TissueOral  0.007016   0.033392   0.210    0.834    
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 2.241 on 398 degrees of freedom
+    ## Multiple R-squared:  0.4176, Adjusted R-squared:  0.4132 
+    ## F-statistic: 95.13 on 3 and 398 DF,  p-value: < 2.2e-16
+
+``` r
+anova(full_model, interaction_model)
+```
+
+    ## Analysis of Variance Table
+    ## 
+    ## Model 1: tissue_vst_mean ~ tissue_percent_meth
+    ## Model 2: tissue_vst_mean ~ tissue_percent_meth * Tissue
+    ##   Res.Df    RSS Df Sum of Sq      F    Pr(>F)    
+    ## 1    400 3398.8                                  
+    ## 2    398 1998.5  2    1400.3 139.43 < 2.2e-16 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+### 0.5.6 Extracting table of genes
+
+``` r
+DML_info <- DML_transcript_annot %>% dplyr::select(start,end,DML_qvalue,DML_methdiff,gene_id)
 DML_info <- DML_info %>% group_by(gene_id) %>% summarise(n_DML = n(),
                                                          mean_methdiff = mean(DML_methdiff),
                                                          median_methdiff = median(DML_methdiff),
@@ -1829,7 +2088,7 @@ region_colors <- c(
   "Genic"      = "#808080"    # gray (for inner ring genic portion)
 )
 
-ggplot() +
+venn <- ggplot() +
   # Outer ring (Exonic, Intronic, Intergenic)
   geom_rect(data = outer_data, aes(
     ymin = ymin, ymax = ymax,
@@ -1860,9 +2119,11 @@ ggplot() +
   scale_fill_manual(values = region_colors) +
   ggtitle("Nested Donut: Methylated CpGs by Genomic Region") +
   theme(legend.position = "none")
+
+save_ggplot(venn, "../output_WGBS/figures/2_cpgvenn")
 ```
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-44-1.png)<!-- -->
 
 ``` r
 all_CpGs <- data.frame(
@@ -1884,7 +2145,7 @@ region_colors <- c(
 )
 
 # Plot
-ggplot(all_CpGs, aes(y = region, x = percent_methylated, fill = region)) +
+bar <- ggplot(all_CpGs, aes(y = region, x = percent_methylated, fill = region)) +
   geom_col(width = 0.6) +
   geom_text(aes(label = paste0(round(percent_methylated, 1), "%")),
             hjust = -0.1, size = 5) +
@@ -1897,6 +2158,139 @@ ggplot(all_CpGs, aes(y = region, x = percent_methylated, fill = region)) +
   ) +
   theme_minimal(base_size = 14) +
   theme(legend.position = "none")
+
+save_ggplot(bar, "../output_WGBS/figures/3_cpgbar")
 ```
 
-![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-39-1.png)<!-- -->
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-45-1.png)<!-- -->
+
+### 0.6.1 All DMLs boxplots
+
+``` r
+percent_meth <- percMethylation(meth_filter_destrand)
+percent_meth <- as.data.frame(percent_meth)
+percent_meth$chr <- meth_filter_destrand$chr
+percent_meth$start <- meth_filter_destrand$start
+percent_meth$end <- meth_filter_destrand$end
+percent_meth$strand <- meth_filter_destrand$strand
+percent_meth <- percent_meth %>% select(c(chr,start,end,strand), everything())
+
+
+percent_meth_DML <- inner_join(percent_meth,DMLs) %>% 
+                                rename("DML_qvalue"=qvalue) %>% 
+                                rename("DML_pvalue"=pvalue)%>% 
+                                rename("DML_methdiff"=meth.diff)
+```
+
+    ## Joining with `by = join_by(chr, start, end, strand)`
+
+``` r
+percent_meth_DML_ingene <- inner_join(percent_meth,DML_transcript_annot) 
+```
+
+    ## Joining with `by = join_by(chr, start, end)`
+
+``` r
+percent_meth_DML_tissue <- percent_meth_DML %>% rowwise() %>%
+  mutate(Oral = mean(c_across(meta$Sample[meta$Tissue=="OralEpi"]), na.rm = TRUE)) %>%
+  mutate(Aboral = mean(c_across(meta$Sample[meta$Tissue=="Aboral"]), na.rm = TRUE)) %>%
+  ungroup()
+
+percent_meth_DML_ingene_tissue <- percent_meth_DML_ingene %>% rowwise() %>%
+  mutate(Oral = mean(c_across(meta$Sample[meta$Tissue=="OralEpi"]), na.rm = TRUE)) %>%
+  mutate(Aboral = mean(c_across(meta$Sample[meta$Tissue=="Aboral"]), na.rm = TRUE)) %>%
+  ungroup()
+  
+percent_meth_DML_long <- percent_meth_DML %>%
+  pivot_longer(cols = starts_with("LCM_"), 
+               names_to = "Sample", 
+               values_to = "Percent_Methylation") %>%
+  left_join((meta %>% select(c(Sample,Tissue))), by = "Sample") %>%
+  filter(!is.na(Percent_Methylation)) %>% mutate(Tissue= factor(Tissue,levels = c("OralEpi", "Aboral")))
+
+boxplot_percmeth_DMLs <- ggplot(percent_meth_DML_long, aes(x = Tissue, y = Percent_Methylation, fill = Tissue)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(width = 0.2, alpha = 0.4, size = 1) +
+  labs(title = "Percent Methylation at DMLs by Tissue",
+       x = "Tissue Type", y = "Percent Methylation") +
+  theme_minimal() + scale_fill_manual(values = c("Aboral" = "mediumpurple1", "OralEpi" = "palegreen3"))+
+  theme(legend.position = "none") 
+
+save_ggplot(boxplot_percmeth_DMLs, "../output_WGBS/figures/8_boxplot_percmeth_DMLs")
+```
+
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-46-1.png)<!-- -->
+
+``` r
+boxplot_percmeth_DMLs_LOG <- ggplot(percent_meth_DML_long, aes(x = Tissue, y = Percent_Methylation, fill = Tissue)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(width = 0.2, alpha = 0.4, size = 1) +scale_y_log10() +
+  labs(title = "Percent Methylation at DMLs by Tissue",
+       x = "Tissue Type", y = "Log10(Percent Methylation)") +
+  theme_minimal() + scale_fill_manual(values = c("Aboral" = "mediumpurple1", "OralEpi" = "palegreen3")) +
+  theme(legend.position = "none")
+
+save_ggplot(boxplot_percmeth_DMLs_LOG, "../output_WGBS/figures/9_boxplot_percmeth_DMLs_LOG")
+```
+
+    ## Warning in scale_y_log10(): log-10 transformation introduced infinite values.
+    ## log-10 transformation introduced infinite values.
+
+    ## Warning: Removed 709 rows containing non-finite outside the scale range
+    ## (`stat_boxplot()`).
+
+    ## Warning in scale_y_log10(): log-10 transformation introduced infinite values.
+    ## log-10 transformation introduced infinite values.
+
+    ## Warning: Removed 709 rows containing non-finite outside the scale range
+    ## (`stat_boxplot()`).
+
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-46-2.png)<!-- -->
+
+``` r
+percent_meth_DML_ingene_long <- percent_meth_DML_ingene %>%
+  pivot_longer(cols = starts_with("LCM_"), 
+               names_to = "Sample", 
+               values_to = "Percent_Methylation") %>%
+  left_join((meta %>% select(c(Sample,Tissue))), by = "Sample") %>%
+  filter(!is.na(Percent_Methylation)) %>% mutate(Tissue= factor(Tissue,levels = c("OralEpi", "Aboral")))
+
+boxplot_percmeth_DMLs_ingenes <- ggplot(percent_meth_DML_ingene_long, aes(x = Tissue, y = Percent_Methylation, fill = Tissue)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(width = 0.2, alpha = 0.4, size = 1) +
+  labs(title = "DMLs in genes: Percent Methylation at DMLs by Tissue",
+       x = "Tissue Type", y = "Percent Methylation") +
+  theme_minimal() + scale_fill_manual(values = c("Aboral" = "mediumpurple1", "OralEpi" = "palegreen3")) +
+  theme(legend.position = "none")
+
+save_ggplot(boxplot_percmeth_DMLs_ingenes, "../output_WGBS/figures/10_boxplot_percmeth_DMLs_ingenes")
+```
+
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-46-3.png)<!-- -->
+
+``` r
+boxplot_percmeth_DMLs_ingenes_LOG <- ggplot(percent_meth_DML_ingene_long, aes(x = Tissue, y = Percent_Methylation, fill = Tissue)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(width = 0.2, alpha = 0.4, size = 1) +scale_y_log10() +
+  labs(title = "DMLs in genes: Percent Methylation at DMLs by Tissue",
+       x = "Tissue Type", y = "Log10(Percent Methylation)") +
+  theme_minimal() + scale_fill_manual(values = c("Aboral" = "mediumpurple1", "OralEpi" = "palegreen3")) +
+  theme(legend.position = "none")
+
+save_ggplot(boxplot_percmeth_DMLs_ingenes_LOG, "../output_WGBS/figures/11_boxplot_percmeth_DMLs_ingenes_LOG")
+```
+
+    ## Warning in scale_y_log10(): log-10 transformation introduced infinite values.
+
+    ## Warning in scale_y_log10(): log-10 transformation introduced infinite values.
+
+    ## Warning: Removed 333 rows containing non-finite outside the scale range
+    ## (`stat_boxplot()`).
+
+    ## Warning in scale_y_log10(): log-10 transformation introduced infinite values.
+    ## log-10 transformation introduced infinite values.
+
+    ## Warning: Removed 333 rows containing non-finite outside the scale range
+    ## (`stat_boxplot()`).
+
+![](09-MethylKit-ConvFilt_files/figure-gfm/unnamed-chunk-46-4.png)<!-- -->
