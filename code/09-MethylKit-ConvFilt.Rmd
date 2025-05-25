@@ -49,6 +49,21 @@ sessionInfo() #provides list of loaded packages and version of R.
 
 
 ```{r}
+save_ggplot <- function(plot, filename, width = 7, height = 5, units = "in", dpi = 300) {
+  # Display plot
+  print(plot)
+  
+  # Save plot
+  ggsave(filename = paste0(filename, ".png"), plot = plot, width = width, height = height, units = units, dpi = dpi)
+}
+
+# Specify colors
+ann_colors = list(
+    Tissue = c(Oral = "palegreen3" ,Aboral = "mediumpurple1")
+)
+```
+
+```{r}
 meta <- read.csv("../data_WGBS/LCM_WGBS_metadata.csv", sep = ",", header = TRUE) %>%
   mutate(Section_Date = as.character(Section_Date), LCM_Date = as.character(LCM_Date),DNA_Extraction_Date = as.character(DNA_Extraction_Date))
 
@@ -365,6 +380,8 @@ hist <- ggplot(cpg_counts, aes(x = num_cpgs)) +
        y = "Count of genes") +
   theme_minimal()
 
+save_ggplot(hist, "../output_WGBS/figures/1_cpghist")
+
 # Calculate summary stats
 summary_stats <- cpg_counts %>%
   summarise(
@@ -549,19 +566,23 @@ vsd_long <- vsd %>% pivot_longer(cols = c(Oral,Aboral),
                                       values_to = "tissue_vst_mean") %>%
                     mutate(Tissue= factor(Tissue,levels = c("Oral", "Aboral")))
 
-vsd_long %>% ggplot(aes(x = Tissue,y = tissue_vst_mean, fill = Tissue)) + geom_boxplot() + theme_minimal() +  
+VST_all <- vsd_long %>% ggplot(aes(x = Tissue,y = tissue_vst_mean, fill = Tissue)) + geom_boxplot() + theme_minimal() +  
   labs(x = "Tissue", y = "VST Expression", 
        title = "VST expression of all expressed genes by tissue type") 
+
+save_ggplot(VST_all, "../output_WGBS/figures/1_VST_all_boxplot")
 ```
 
 ```{r}
 plot_data_tissue <- merge(percent_meth_long, vsd_long, by = c("gene_id", "Tissue")) %>% mutate(Tissue= factor(Tissue,levels = c("Oral", "Aboral")))
 
-ggplot(plot_data_tissue, aes(y = tissue_vst_mean, x = tissue_percent_meth, color=Tissue)) +
+vst_percmeth <- ggplot(plot_data_tissue, aes(y = tissue_vst_mean, x = tissue_percent_meth, color=Tissue)) +
   geom_point(alpha = 0.5) + geom_smooth(method = "lm") + stat_poly_eq(use_label("eq", "R2"))+
   labs(x = "Average CpG % methylation of gene", y = "VST Expression", 
        title = "Gene Methylation vs Expression") +
   theme_minimal()
+
+save_ggplot(vst_percmeth, "../output_WGBS/figures/2_VST_tissue_percentmeth")
 
 plot_data <- merge(percent_meth, vsd, by = c("gene_id"))
 
@@ -933,7 +954,7 @@ region_colors <- c(
   "Genic"      = "#808080"    # gray (for inner ring genic portion)
 )
 
-ggplot() +
+venn <- ggplot() +
   # Outer ring (Exonic, Intronic, Intergenic)
   geom_rect(data = outer_data, aes(
     ymin = ymin, ymax = ymax,
@@ -965,6 +986,7 @@ ggplot() +
   ggtitle("Nested Donut: Methylated CpGs by Genomic Region") +
   theme(legend.position = "none")
 
+save_ggplot(venn, "../output_WGBS/figures/2_cpgvenn")
 ```
 
 
@@ -988,7 +1010,7 @@ region_colors <- c(
 )
 
 # Plot
-ggplot(all_CpGs, aes(y = region, x = percent_methylated, fill = region)) +
+bar <- ggplot(all_CpGs, aes(y = region, x = percent_methylated, fill = region)) +
   geom_col(width = 0.6) +
   geom_text(aes(label = paste0(round(percent_methylated, 1), "%")),
             hjust = -0.1, size = 5) +
@@ -1001,6 +1023,8 @@ ggplot(all_CpGs, aes(y = region, x = percent_methylated, fill = region)) +
   ) +
   theme_minimal(base_size = 14) +
   theme(legend.position = "none")
+
+save_ggplot(bar, "../output_WGBS/figures/3_cpgbar")
 ```
 
 
