@@ -236,16 +236,16 @@ volcano_plain <- EnhancedVolcano(dml_df,
     lab = NA,
     x = 'meth.diff',
     y = 'qvalue',
+    xlab = "Percent Methylation Difference",
     pCutoff = 0.05,
     title="",
     subtitle="",
     drawConnectors = TRUE,
     widthConnectors = 0.75,
     pointSize = 1,
-    labSize = 2,boxedLabels = TRUE,max.overlaps = 60)
+    labSize = 2,boxedLabels = TRUE,max.overlaps = 60) + annotate("text", x = 50, y = 20, label = paste0("Total = ", nrow(dml_df), " CpGs"), hjust = 0)
 
 save_ggplot(volcano_plain, "../output_WGBS/figures/7_DML_volcano_enhanced")
-volcano_plain
 ```
 
 
