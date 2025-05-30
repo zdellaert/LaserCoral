@@ -389,10 +389,12 @@ He_etal_Nvec$def_short <- gsub("Homeobox protein", "Hox", He_etal_Nvec$Descripti
 He_etal_Nvec$def_short <- gsub("homeobox protein", "Hox", He_etal_Nvec$def_short)
 
 DuBuc_etal_Nvec <- read.csv("../output_RNA/marker_genes/Wnt_nematostella.csv") %>% dplyr::rename("query" = Pacuta_gene) %>% select(-c(X))
+
+HeatStressGenes <- read.csv("../output_RNA/marker_genes/HeatStressGenes_Pacuta.csv") %>% dplyr::rename("query" = Pacuta_gene) %>% select(-c(X))
 ```
 
 ```{r}
-Biomin <- read.csv("../output_RNA/marker_genes/Pacuta_Biomin.csv") %>% dplyr::rename("query" = Pocillopora_acuta_best_hit) %>% select(-c(accessionnumber.geneID, Ref))
+Biomin <- read.csv("../output_RNA/marker_genes/Pacuta_Biomin_Blast.csv") %>% dplyr::rename("query" = Pocillopora_acuta_best_hit) %>% select(-c(accessionnumber.geneID, Ref))
 Biomin_broc <- read.csv("../output_RNA/marker_genes/Pacuta_Biomin_Spis_ortholog.csv") %>% dplyr::rename("query" = Pacuta_gene) %>% select(-c(X,accessionnumber_gene_id, ref))
 
 Biomin <- Biomin %>%
@@ -432,8 +434,13 @@ DE_05_marker <- DE_05 %>% left_join(MarkerGenes) %>% select(query,everything()) 
 DE_05_marker_broc <- DE_05 %>% left_join(MarkerGenes_broc) %>% select(query,everything())  %>% drop_na()
 
 DE_05_Hox <- DE_05 %>% left_join(HoxGenes_Nvec) %>% select(query,everything())  %>% drop_na()
+DESeq_Hox <- HoxGenes_Nvec %>% left_join(as.data.frame(resOrdered), by="query") %>% select(query,everything()) %>% drop_na()
+
 DE_05_He_etal <- DE_05 %>% left_join(He_etal_Nvec) %>% select(query,everything())  %>% drop_na()
 DE_05_DuBuc_etal <- DE_05 %>% left_join(DuBuc_etal_Nvec) %>% select(query,everything())  %>% drop_na()
+
+DE_05_HeatStressGenes <- HeatStressGenes %>% left_join(DE_05, by="query") %>% select(query,everything()) %>% drop_na(baseMean)
+DESeq_HeatStressGenes <- HeatStressGenes %>% left_join(as.data.frame(resOrdered), by="query") %>% select(query,everything())  %>% drop_na(baseMean)
 
 write.csv(as.data.frame(DE_05_biomin), 
           file="../output_RNA/differential_expression/DE_05_biomin_annotation.csv")
@@ -452,9 +459,6 @@ markers_all_res <- as.data.frame(resLFC) %>% mutate(query = rownames(resLFC)) %>
 
 broc_markers_all_counts <- as.data.frame(counts(dds)) %>% mutate(query = rownames(dds)) %>% select(query,everything()) %>% left_join(MarkerGenes_broc) 
 broc_markers_all_res <- as.data.frame(resLFC) %>% mutate(query = rownames(resLFC)) %>% select(query,everything()) %>% left_join(MarkerGenes_broc) 
-
-Hox_all_res <- as.data.frame(resLFC) %>% mutate(query = rownames(resLFC)) %>% select(query,everything()) %>% left_join(HoxGenes_Nvec) 
-Hox_all_res %>% drop_na()
 ```
 
 ```{r}
@@ -1349,9 +1353,9 @@ save_ggplot(top50_DE, "../output_RNA/differential_expression/clusters_clean/Hox_
 
 #### all
 ```{r}
-labels <- Hox_all_res %>% drop_na() %>% pull(def_short)
+labels <- DESeq_Hox %>% drop_na() %>% pull(def_short)
 
-select <- Hox_all_res %>% drop_na() %>% pull(query)
+select <- DESeq_Hox %>% drop_na() %>% pull(query)
 
 z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
 top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
@@ -1698,6 +1702,129 @@ save_ggplot(transporters_heat, "../output_RNA/differential_expression/clusters_c
 
 ```
 
+### Heat Stress Genes
+
+#### differentially expressed
+
+```{r}
+select <- DE_05_HeatStressGenes %>% select(query,gene_name,response_type) %>% unique()
+rownames(select) <- select$query
+
+z_scores <- t(scale(t(assay(vsd)[select$query, ]), center = TRUE, scale = TRUE))
+top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=(df%>% select(Tissue)), annotation_row = (select %>% select(response_type)), annotation_colors = ann_colors,
+         labels_row = select$gene_name, fontsize_row = 8, cutree_rows = 2)
+top50_DE
+save_ggplot(top50_DE, "../output_RNA/differential_expression/HeatStress_DE_SwissProt")
+
+# Perform clustering
+# Perform clustering
+row_clusters <- hclust(dist(z_scores))
+cluster_assignments <- cutree(row_clusters, k = 2) # Adjust k for the number of clusters
+
+# Create a dataframe for clustering and label management
+clustered_data <- data.frame(
+  query = select$query,
+  Heatmap_Label = select$gene_name,
+  cluster = cluster_assignments
+)
+
+# Reorder rows within each cluster alphabetically by their labels
+clustered_data <- clustered_data %>%
+  arrange(cluster, Heatmap_Label)
+
+# Reorder the z_scores matrix and labels based on the new order
+z_scores <- z_scores[match(clustered_data$query, rownames(z_scores)), ]
+ordered_labels <- clustered_data$Heatmap_Label
+
+# Ensure there is only 1 gap between clusters
+#row_breaks <- which(cluster_assignments != cluster_assignments[1])  # Only where cluster switches
+
+# Generate the heatmap with reordered rows and labels
+top50_DE <- pheatmap(
+  z_scores,
+  color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200),
+  cluster_rows = FALSE,  # Disable clustering since rows are pre-ordered
+  cluster_cols = TRUE,
+  cutree_cols = 2,
+  annotation_col = (df %>% select(Tissue)),
+  annotation_colors = ann_colors,
+  labels_row = ordered_labels,
+  annotation_row = (select %>% select(response_type)),
+  fontsize_row = 8,
+  borders_color = "white",  # Optional border around clusters
+  cutree_rows = 2,  # Keep row clustering if desired
+  gaps_row = 4  # Add breaks only between clusters
+)
+
+
+# Save the heatmap
+save_ggplot(top50_DE, "../output_RNA/differential_expression/clusters_clean/HeatStress_DE_SwissProt")
+```
+
+
+#### all
+```{r}
+select <- DESeq_HeatStressGenes %>% select(query,gene_name,response_type) %>%
+    group_by(query) %>% #collapse duplicate rows
+  summarise(
+    gene_name = paste(unique(gene_name), collapse = "; "),
+    response_type = paste(unique(response_type), collapse = "; "),
+    .groups = "drop"
+  )
+select <- data.frame(select)
+rownames(select) <- select$query
+
+z_scores <- t(scale(t(assay(vsd)[select$query, ]), center = TRUE, scale = TRUE))
+top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=(df%>% select(Tissue)), annotation_row = (select %>% select(response_type)), annotation_colors = ann_colors,
+         labels_row = select$gene_name, fontsize_row = 8, cutree_rows = 2)
+top50_DE
+save_ggplot(top50_DE, "../output_RNA/differential_expression/HeatStress_all_SwissProt")
+
+# Perform clustering
+row_clusters <- hclust(dist(z_scores))
+cluster_assignments <- cutree(row_clusters, k = 2) # Adjust k for the number of clusters
+
+# Create a dataframe for clustering and label management
+clustered_data <- data.frame(
+  query = select$query,
+  Heatmap_Label = select$gene_name,
+  cluster = cluster_assignments
+)
+
+# Reorder rows within each cluster alphabetically by their labels
+clustered_data <- clustered_data %>%
+  arrange(cluster, Heatmap_Label)
+
+# Reorder the z_scores matrix and labels based on the new order
+z_scores <- z_scores[match(clustered_data$query, rownames(z_scores)), ]
+ordered_labels <- clustered_data$Heatmap_Label
+
+# Ensure there is only 1 gap between clusters
+#row_breaks <- which(cluster_assignments != cluster_assignments[1])  # Only where cluster switches
+
+# Generate the heatmap with reordered rows and labels
+top50_DE <- pheatmap(
+  z_scores,
+  color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200),
+  cluster_rows = FALSE,  # Disable clustering since rows are pre-ordered
+  cluster_cols = TRUE,
+  cutree_cols = 2,
+  annotation_col = (df %>% select(Tissue)),
+  annotation_colors = ann_colors,
+  labels_row = ordered_labels,
+  annotation_row = (select %>% select(response_type)),
+  fontsize_row = 8,
+  borders_color = "white",  # Optional border around clusters
+  cutree_rows = 2,  # Keep row clustering if desired
+  gaps_row = 4  # Add breaks only between clusters
+)
+
+# Save the heatmap
+save_ggplot(top50_DE, "../output_RNA/differential_expression/clusters_clean/HeatStress_all_SwissProt")
+``` 
+
 ### random
 ```{r}
 # Create annotation data frame
@@ -1840,7 +1967,7 @@ larval_oral_enriched <- read_excel("../output_RNA/marker_genes/RamonMateu_Pdam_l
 Manual_Pdam_uporal <- Manual_Pdam %>% filter(log2FoldChange < 0)
 inner_join(larval_oral_enriched, Manual_Pdam_uporal, by=c("gene ID"="protein_id")) %>% dim()
 
-inner_join(larval_oral_enriched, Manual_Pdam_uporal, by=c("gene ID"="protein_id")) %>% View()
+inner_join(larval_oral_enriched, Manual_Pdam_uporal, by=c("gene ID"="protein_id")) %>% print()
 
 #only 6/83 genes overlap
 
