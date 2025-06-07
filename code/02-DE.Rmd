@@ -398,6 +398,26 @@ MarkerGenes$def_short <- ifelse(nchar(MarkerGenes$definition) > 20,
                             MarkerGenes$definition)
 ```
 
+### My marker genes (p compressa)
+
+```{r}
+Pcomp_MarkerGenes_broc <- read.csv("../output_RNA/marker_genes/combined_Pcomp_markers.csv") %>% select(protein_id_spA,cluster_guess_std,protein_id_spB) %>% dplyr::rename("Pcomp_gene" = protein_id_spA,"query" = protein_id_spB, "List" = cluster_guess_std) 
+
+Pcomp_MarkerGenes_broc <- Pcomp_MarkerGenes_broc %>% filter(grepl("Pocillopora",query)&!grepl("unidentified",List)) %>% distinct() 
+
+Pcomp_MarkerGenes_broc_all_res <- as.data.frame(resLFC) %>% mutate(query = rownames(resLFC)) %>% select(query,everything()) %>% left_join(Pcomp_MarkerGenes_broc) 
+
+Pcomp_MarkerGenes_broc_all_res_Pcomp <- Pcomp_MarkerGenes_broc_all_res %>%
+  group_by(Pcomp_gene) %>%
+  slice_min(order_by = padj, with_ties = FALSE) %>%
+  ungroup()
+
+Pcomp_MarkerGenes_broc_all_res_Pacuta <- Pcomp_MarkerGenes_broc_all_res %>% group_by(query,baseMean,log2FoldChange,lfcSE,pvalue,padj) %>% summarize(List = paste(List, collapse = ";"), .groups="drop")
+
+write.csv(Pcomp_MarkerGenes_broc_all_res_Pcomp, "../output_RNA/differential_expression/Pcomp_snRNA_marker_expr_PacutaLCM.csv")
+```
+
+
 ### Biomineralization toolkit
 ```{r}
 Biomin <- read.csv("../output_RNA/marker_genes/Pacuta_Biomin_Blast.csv") %>% dplyr::rename("query" = Pocillopora_acuta_best_hit) %>% select(-c(accessionnumber.geneID, Ref))
@@ -427,16 +447,20 @@ write.csv(Biomin_filtered_counts, "../output_RNA/differential_expression/Biomin_
 ```
 
 ### Additional gene lists
+
+He_etal_Nvec = He, S., Shao, W., Chen, S. (Cynthia), Wang, T. and Gibson, M. C. (2023). Spatial transcriptomics reveals a cnidarian segment polarity program in Nematostella vectensis. Current Biology 33, 2678-2689.e5.
+
+DuBuc_etal_Nvec = DuBuc, T. Q., Stephenson, T. B., Rock, A. Q. and Martindale, M. Q. (2018). Hox and Wnt pattern the primary body axis of an anthozoan cnidarian before gastrulation. Nat Commun 9, 2007.
+
+- oral/aboral patterning markers in nematostella
+
 ```{r}
-HoxGenes_Nvec <- read.csv("../output_RNA/marker_genes/Hox_nematostella.csv") %>% dplyr::rename("query" = Pacuta_gene) %>% select(-c(X))
-
-HoxGenes_Nvec$def_short <- gsub("Homeobox protein", "Hox", HoxGenes_Nvec$Description, ignore.case = TRUE)
-
 He_etal_Nvec <- read.csv("../output_RNA/marker_genes/He_etal_nematostella.csv") %>% dplyr::rename("query" = Pacuta_gene) %>% select(-c(X))
 
 He_etal_Nvec$def_short <- gsub("Homeobox protein", "Hox", He_etal_Nvec$Description, ignore.case = TRUE)
 
 DuBuc_etal_Nvec <- read.csv("../output_RNA/marker_genes/Wnt_nematostella.csv") %>% dplyr::rename("query" = Pacuta_gene) %>% select(-c(X))
+DuBuc_etal_Nvec$def_short <- DuBuc_etal_Nvec$Gene_Name
 
 HeatStressGenes <- read.csv("../output_RNA/marker_genes/HeatStressGenes_Pacuta.csv") %>% dplyr::rename("query" = Pacuta_gene) %>% select(-c(X))
 ```
@@ -450,14 +474,13 @@ join_genes_of_interest <- function(df, gene_set) {
   df %>%
     left_join(gene_set, by = "query") %>%
     select(query, everything()) %>%
-    drop_na()
+    drop_na() %>% distinct()
 }
 
 DE_05_biomin         <- join_genes_of_interest(DE_05, Biomin)
 DE_05_Biomin_broc    <- join_genes_of_interest(DE_05, Biomin_broc)
 DE_05_marker         <- join_genes_of_interest(DE_05, MarkerGenes)
 DE_05_marker_broc    <- join_genes_of_interest(DE_05, MarkerGenes_broc)
-DE_05_Hox            <- join_genes_of_interest(DE_05, HoxGenes_Nvec)
 DE_05_He_etal        <- join_genes_of_interest(DE_05, He_etal_Nvec)
 DE_05_DuBuc_etal     <- join_genes_of_interest(DE_05, DuBuc_etal_Nvec)
 
@@ -465,11 +488,9 @@ DESeq_biomin         <- join_genes_of_interest(as.data.frame(resOrdered), Biomin
 DESeq_Biomin_broc    <- join_genes_of_interest(as.data.frame(resOrdered), Biomin_broc)
 DESeq_marker         <- join_genes_of_interest(as.data.frame(resOrdered), MarkerGenes)
 DESeq_marker_broc    <- join_genes_of_interest(as.data.frame(resOrdered), MarkerGenes_broc)
-DESeq_Hox            <- join_genes_of_interest(as.data.frame(resOrdered), HoxGenes_Nvec)
 DESeq_He_etal        <- join_genes_of_interest(as.data.frame(resOrdered), He_etal_Nvec)
 DESeq_DuBuc_etal     <- join_genes_of_interest(as.data.frame(resOrdered), DuBuc_etal_Nvec)
 
-DESeq_Hox <- HoxGenes_Nvec %>% left_join(as.data.frame(resOrdered), by="query") %>% select(query,everything()) %>% drop_na()
 DE_05_HeatStressGenes <- HeatStressGenes %>% left_join(DE_05, by="query") %>% select(query,everything()) %>% drop_na(baseMean)
 DESeq_HeatStressGenes <- HeatStressGenes %>% left_join(as.data.frame(resOrdered), by="query") %>% select(query,everything())  %>% drop_na(baseMean)
 
@@ -532,7 +553,7 @@ save_ggplot(DE_05_marker_grouped_plot, "DE_05_marker_grouped")
 z_scores <- t(scale(t(assay(vsd)[DE_05_marker_broc$query, ]), center = TRUE, scale = TRUE))
 DE_marker <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,cutree_rows = 5,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
-         labels_row = DE_05_marker_broc$List, fontsize_row = 4)
+         labels_row = DE_05_marker_broc$List, fontsize_row = 2)
 DE_marker
 save_ggplot(DE_marker, "DE_marker_broc")
 
@@ -541,7 +562,7 @@ DE_05_marker_broc_grouped <- DE_05_marker_broc %>% arrange(List) %>% mutate(List
 z_scores <- t(scale(t(assay(vsd)[DE_05_marker_broc_grouped$quer, ]), center = TRUE, scale = TRUE))
 DE_05_marker_broc_grouped_plot <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=FALSE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
-         labels_row = DE_05_marker_broc_grouped$List, fontsize_row = 5)
+         labels_row = DE_05_marker_broc_grouped$List, fontsize_row = 3)
 
 DE_05_marker_broc_grouped_plot
 save_ggplot(DE_05_marker_broc_grouped_plot, "DE_05_marker_broc_grouped")
@@ -951,7 +972,10 @@ save_ggplot(up_OralEpi, "up_OralEpi_Blast2GO")
 ### Combined annotations manually
 
 ```{r}
-Manual <- read.csv(paste0(outdir,"/DE_05_Manual_annotation.csv")) %>% dplyr::rename("query" = 2, "definition" = 3) %>% arrange(X) 
+Manual <- read.csv(paste0(outdir,"/DE_05_Manual_annotation.csv")) %>% arrange(X) 
+
+Manual$Heatmap_Label <- gsub("Homeobox protein", "Hox", Manual$Heatmap_Label, ignore.case = TRUE)
+Manual$Heatmap_Label <- gsub("Protein Wnt", "Wnt", Manual$Heatmap_Label, ignore.case = TRUE)
 
 gene_labels <- Manual %>% 
   select(query,Heatmap_Label) %>%
@@ -1233,10 +1257,11 @@ DE_Biomin_broc <- pheatmap(
 save_ggplot(DE_Biomin_broc, "clusters_clean/DE_Biomin_broc")
 ```
 
-###wnt and hox
+### wnt and hox
 
 ```{r}
 WNT <- Manual %>% filter(grepl("wnt", Heatmap_Label, ignore.case = TRUE)|grepl("frizzle", Heatmap_Label, ignore.case = TRUE)|grepl("homeobox", Heatmap_Label, ignore.case = TRUE)|grepl("hox", Heatmap_Label, ignore.case = TRUE)|grepl("forkhead", Heatmap_Label, ignore.case = TRUE))#|grepl("wnt", BiologicalProcess, ignore.case = TRUE))
+
 select <- WNT$query
 
 z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
@@ -1281,8 +1306,7 @@ top50_DE <- pheatmap(
   labels_row = ordered_labels,
   fontsize_row = 8,
   borders_color = "white",  # Optional border around clusters
-  cutree_rows = 2,  # Keep row clustering if desired
-  gaps_row = 24  # Add breaks only between clusters
+  gaps_row = 26  # Add breaks only between clusters
 )
 
 
@@ -1647,22 +1671,34 @@ Wnt_chr_heatmap <- ggplot() +
   ) +scale_y_discrete(expand = expansion(mult = c(1, 0)))+
   labs(x = "Genomic position")
 
-save_ggplot(Wnt_chr_heatmap, "Hox_chromosome_expression_length_preserved",width = 25, height = 20)
+save_ggplot_big <- function(plot, filename, width = 10, height = 7, units = "in", dpi = 300) {
+  png_path <- file.path(outdir, paste0(filename, ".png"))
+  pdf_dir <- file.path(outdir, "pdf_figs")
+  pdf_path <- file.path(pdf_dir, paste0(filename, ".pdf"))
+  
+  # Ensure the pdf_figs directory exists
+  if (!dir.exists(pdf_dir)) dir.create(pdf_dir, recursive = TRUE)
+  
+  # Save plots
+  ggsave(filename = png_path, plot = plot, width = width, height = height, units = units, dpi = dpi,limitsize = FALSE)
+  ggsave(filename = pdf_path, plot = plot, width = width, height = height, units = units, dpi = dpi,limitsize = FALSE)
+}
+
+save_ggplot_big(Wnt_chr_heatmap, "Hox_chromosome_expression_length_preserved",width = 15, height = 25)
 ```
 
-
-### Hox genes Nematostella
+### He et al 2023 TFs/genes of interest Nematostella (NOTE! I confirmed the DE_05 ones are all represented above )
 
 #### differentially expressed
 ```{r}
-select <- DE_05_Hox$query
+select <- unique(DE_05_He_etal$query)
 
 z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
 top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
          labels_row = gene_labels[match(select,(gene_labels$query)),2], fontsize_row = 8, cutree_rows = 2)
 top50_DE
-save_ggplot(top50_DE, "Hox_Nvec_DE_SwissProt")
+save_ggplot(top50_DE, "He_etal_Nvec_DE_SwissProt")
 
 # Perform clustering
 # Perform clustering
@@ -1699,28 +1735,24 @@ top50_DE <- pheatmap(
   labels_row = ordered_labels,
   fontsize_row = 8,
   borders_color = "white",  # Optional border around clusters
-  cutree_rows = 2,  # Keep row clustering if desired
+  
   gaps_row = 4  # Add breaks only between clusters
 )
 
-
 # Save the heatmap
-save_ggplot(top50_DE, "clusters_clean/Hox_Nvec_DE_SwissProt")
+save_ggplot(top50_DE, "clusters_clean/He_etal_Nvec_DE_SwissProt")
 ```
-
-
 #### all
 ```{r}
-labels <- DESeq_Hox %>% drop_na() %>% pull(def_short)
-
-select <- DESeq_Hox %>% drop_na() %>% pull(query)
+labels <- DESeq_He_etal$def_short
+select <- DESeq_He_etal$query
 
 z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
 top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
          labels_row = labels, fontsize_row = 8, cutree_rows = 2)
 top50_DE
-save_ggplot(top50_DE, "Hox_Nvec_all_SwissProt")
+save_ggplot(top50_DE, "He_etal_Nvec_all_SwissProt")
 
 # Perform clustering
 row_clusters <- hclust(dist(z_scores))
@@ -1756,19 +1788,20 @@ top50_DE <- pheatmap(
   labels_row = ordered_labels,
   fontsize_row = 8,
   borders_color = "white",  # Optional border around clusters
-  cutree_rows = 2,  # Keep row clustering if desired
+  
   gaps_row = 9  # Add breaks only between clusters
 )
 
 
 # Save the heatmap
-save_ggplot(top50_DE, "clusters_clean/Hox_Nvec_all_SwissProt")
+save_ggplot(top50_DE, "clusters_clean/He_etal_Nvec_all_SwissProt")
 ```
+
 
 ```{r}
 gene_layout <- gff_transcripts %>%
   filter(query %in% select) %>%
-  arrange(chromosome, start) %>% left_join(DESeq_Hox) %>% distinct() 
+  arrange(chromosome, start) %>% left_join(DESeq_He_etal) %>% distinct() 
 
 expr_df <- assay(vsd)[select, ] %>%
   as.data.frame() %>%
@@ -1843,68 +1876,10 @@ Hox_chr_heatmap <- ggplot() +
   ) +
   labs(x = "Genomic position")
 
-save_ggplot(Hox_chr, "Hox_Nvec_all_SwissProt_chromosome")
-save_ggplot(Hox_chr_heatmap, "Hox_Nvec_all_SwissProt_chromosome_expression")
+save_ggplot_big(Hox_chr, "He_etal_Nvec_all_SwissProt_chromosome", width = 20, height = 40)
+save_ggplot_big(Hox_chr_heatmap, "He_etal_Nvec_all_SwissProt_chromosome_expression", width = 20, height = 40)
 ```
 
-
-
-
-### He et al 2023 TFs/genes of interest Nematostella
-
-#### differentially expressed
-```{r}
-select <- unique(DE_05_He_etal$query)
-
-z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
-top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
-         cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
-         labels_row = gene_labels[match(select,(gene_labels$query)),2], fontsize_row = 8, cutree_rows = 2)
-top50_DE
-save_ggplot(top50_DE, "He_etal_Nvec_DE_SwissProt")
-
-# Perform clustering
-# Perform clustering
-row_clusters <- hclust(dist(z_scores))
-cluster_assignments <- cutree(row_clusters, k = 2) # Adjust k for the number of clusters
-
-# Create a dataframe for clustering and label management
-clustered_data <- data.frame(
-  query = select,
-  Heatmap_Label = gene_labels[match(select, gene_labels$query), 2],
-  cluster = cluster_assignments
-)
-
-# Reorder rows within each cluster alphabetically by their labels
-clustered_data <- clustered_data %>%
-  arrange(cluster, Heatmap_Label)
-
-# Reorder the z_scores matrix and labels based on the new order
-z_scores <- z_scores[match(clustered_data$query, rownames(z_scores)), ]
-ordered_labels <- clustered_data$Heatmap_Label
-
-# Ensure there is only 1 gap between clusters
-#row_breaks <- which(cluster_assignments != cluster_assignments[1])  # Only where cluster switches
-
-# Generate the heatmap with reordered rows and labels
-top50_DE <- pheatmap(
-  z_scores,
-  color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200),
-  cluster_rows = FALSE,  # Disable clustering since rows are pre-ordered
-  cluster_cols = TRUE,
-  cutree_cols = 2,
-  annotation_col = (heatmap_metadata %>% select(Tissue)),
-  annotation_colors = ann_colors,
-  labels_row = ordered_labels,
-  fontsize_row = 8,
-  borders_color = "white",  # Optional border around clusters
-  cutree_rows = 2,  # Keep row clustering if desired
-  gaps_row = 4  # Add breaks only between clusters
-)
-
-# Save the heatmap
-save_ggplot(top50_DE, "clusters_clean/He_etal_Nvec_DE_SwissProt")
-```
 ### DuBuc et al 2018 Wnt/Aboral-Oral Patterning Genes, interest Nematostella
 
 #### differentially expressed
@@ -1952,13 +1927,163 @@ top50_DE <- pheatmap(
   annotation_colors = ann_colors,
   labels_row = ordered_labels,
   fontsize_row = 8,
-  borders_color = "white"#,  # Optional border around clusters
-  #cutree_rows = 2,  # Keep row clustering if desired
-  #gaps_row = 4  # Add breaks only between clusters
+  borders_color = "white"
 )
 
 # Save the heatmap
 save_ggplot(top50_DE, "clusters_clean/DuBuc_etal_Nvec_DE_SwissProt")
+```
+
+
+### combine hox and WNT lists
+
+```{r}
+DESeq_He_etal$source <- "He_etal_2023"
+DESeq_DuBuc_etal$source <- "DuBuc_etal_2018"
+
+Hox_Literature <- rbind(DESeq_He_etal,DESeq_DuBuc_etal)
+
+DESeq_Hox_Literature_collapsed <- Hox_Literature %>%
+  group_by(query, baseMean, log2FoldChange, lfcSE, pvalue, padj) %>%
+  summarize(
+    Gene_Name = paste(unique(Gene_Name), collapse = "; "),
+    Description = paste(unique(Description), collapse = "; "),
+    def_short = paste(unique(def_short), collapse = "; "),
+    source = paste(unique(source), collapse = "; "),
+    .groups = "drop"
+  )
+
+DE_05_Hox_Literature_collapsed <- DESeq_Hox_Literature_collapsed %>% filter(padj<0.05)
+
+WNT_HOX_MAN <- Manual %>% select(-X) %>% filter(grepl("wnt", Heatmap_Label, ignore.case = TRUE)|grepl("frizzle", Heatmap_Label, ignore.case = TRUE)|grepl("homeobox", Heatmap_Label, ignore.case = TRUE)|grepl("hox", Heatmap_Label, ignore.case = TRUE)|grepl("forkhead", Heatmap_Label, ignore.case = TRUE)) %>% select(-c(blast_hit,evalue,ProteinNames,BiologicalProcess,GeneOntologyIDs))# %>% rename(Description = Heatmap_Label)
+
+COMBINED_HOX_WNT_all <-  full_join(DESeq_Hox_Literature_collapsed,WNT_HOX_MAN,by=c("query")) %>%
+  mutate(
+    baseMean = coalesce(baseMean.x, baseMean.y),
+    log2FoldChange = coalesce(log2FoldChange.x, log2FoldChange.y),
+    lfcSE = coalesce(lfcSE.x, lfcSE.y),
+    pvalue = coalesce(pvalue.x, pvalue.y),
+    padj = coalesce(padj.x, padj.y)
+  ) %>%
+  select(-ends_with(".x"), -ends_with(".y"))
+
+COMBINED_HOX_WNT_DE05 <-  full_join(DE_05_Hox_Literature_collapsed,WNT_HOX_MAN,by=c("query")) %>%
+  mutate(
+    baseMean = coalesce(baseMean.x, baseMean.y),
+    log2FoldChange = coalesce(log2FoldChange.x, log2FoldChange.y),
+    lfcSE = coalesce(lfcSE.x, lfcSE.y),
+    pvalue = coalesce(pvalue.x, pvalue.y),
+    padj = coalesce(padj.x, padj.y)
+  ) %>%
+  select(-ends_with(".x"), -ends_with(".y"))
+```
+
+
+```{r}
+select <- unique(COMBINED_HOX_WNT_DE05$query)
+
+z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
+top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
+         labels_row = gene_labels[match(select,(gene_labels$query)),2], fontsize_row = 8, cutree_rows = 2)
+top50_DE
+save_ggplot(top50_DE, "Hox_All_DE")
+
+# Perform clustering
+# Perform clustering
+row_clusters <- hclust(dist(z_scores))
+cluster_assignments <- cutree(row_clusters, k = 2) # Adjust k for the number of clusters
+
+# Create a dataframe for clustering and label management
+clustered_data <- data.frame(
+  query = select,
+  Heatmap_Label = gene_labels[match(select, gene_labels$query), 2],
+  cluster = cluster_assignments
+)
+
+# Reorder rows within each cluster alphabetically by their labels
+clustered_data <- clustered_data %>%
+  arrange(cluster, Heatmap_Label)
+
+# Reorder the z_scores matrix and labels based on the new order
+z_scores <- z_scores[match(clustered_data$query, rownames(z_scores)), ]
+ordered_labels <- clustered_data$Heatmap_Label
+
+# Ensure there is only 1 gap between clusters
+#row_breaks <- which(cluster_assignments != cluster_assignments[1])  # Only where cluster switches
+
+# Generate the heatmap with reordered rows and labels
+top50_DE <- pheatmap(
+  z_scores,
+  color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200),
+  cluster_rows = FALSE,  # Disable clustering since rows are pre-ordered
+  cluster_cols = TRUE,
+  cutree_cols = 2,
+  annotation_col = (heatmap_metadata %>% select(Tissue)),
+  annotation_colors = ann_colors,
+  labels_row = ordered_labels,
+  fontsize_row = 8,
+  borders_color = "white",  
+  gaps_row = c(3,6,18,26,28,37) 
+)
+
+# Save the heatmap
+save_ggplot(top50_DE, "clusters_clean/Hox_All_DE")
+```
+
+```{r}
+COMBINED_HOX_WNT_all <- COMBINED_HOX_WNT_all %>%  mutate(Heatmap_Label = coalesce(Heatmap_Label, def_short))
+COMBINED_HOX_WNT_all$Heatmap_Label <- gsub("Protein Wnt", "Wnt", COMBINED_HOX_WNT_all$Heatmap_Label, ignore.case = TRUE)
+
+select <- unique(COMBINED_HOX_WNT_all$query)
+
+z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
+top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
+         labels_row = COMBINED_HOX_WNT_all$Heatmap_Label, fontsize_row = 8, cutree_rows = 2)
+top50_DE
+save_ggplot(top50_DE, "Hox_All")
+
+# Perform clustering
+# Perform clustering
+row_clusters <- hclust(dist(z_scores))
+cluster_assignments <- cutree(row_clusters, k = 2) # Adjust k for the number of clusters
+
+# Create a dataframe for clustering and label management
+clustered_data <- data.frame(
+  query = select,
+  Heatmap_Label = COMBINED_HOX_WNT_all$Heatmap_Label,
+  cluster = cluster_assignments
+)
+
+# Reorder rows within each cluster alphabetically by their labels
+clustered_data <- clustered_data %>%
+  arrange(cluster, Heatmap_Label)
+
+# Reorder the z_scores matrix and labels based on the new order
+z_scores <- z_scores[match(clustered_data$query, rownames(z_scores)), ]
+ordered_labels <- clustered_data$Heatmap_Label
+
+# Ensure there is only 1 gap between clusters
+#row_breaks <- which(cluster_assignments != cluster_assignments[1])  # Only where cluster switches
+
+# Generate the heatmap with reordered rows and labels
+top50_DE <- pheatmap(
+  z_scores,
+  color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200),
+  cluster_rows = FALSE,  # Disable clustering since rows are pre-ordered
+  cluster_cols = TRUE,
+  cutree_cols = 2,
+  annotation_col = (heatmap_metadata %>% select(Tissue)),
+  annotation_colors = ann_colors,
+  labels_row = ordered_labels,
+  fontsize_row = 8,
+  borders_color = "white",  
+  gaps_row = c(3,6,22,30,32,43) 
+)
+
+# Save the heatmap
+save_ggplot(top50_DE, "clusters_clean/Hox_All")
 ```
 
 ### bacteria genes
@@ -2005,9 +2130,8 @@ mucins <- pheatmap(
   annotation_colors = ann_colors,
   labels_row = ordered_labels,
   fontsize_row = 8,
-  borders_color = "white",  # Optional border around clusters
-  cutree_rows = 2,  # Keep row clustering if desired
-  gaps_row = c(24,38)  # Add breaks only between clusters
+  borders_color = "white",  
+  gaps_row = c(24,38) 
 )
 
 # Save the heatmap
@@ -2059,9 +2183,8 @@ transporters_heat <- pheatmap(
   annotation_colors = ann_colors,
   labels_row = ordered_labels,
   fontsize_row = 8,
-  borders_color = "white",  # Optional border around clusters
-  cutree_rows = 2,  # Keep row clustering if desired
-  gaps_row = c(16)  # Add breaks only between clusters
+  borders_color = "white", 
+  gaps_row = c(16) 
 )
 
 # Save the heatmap
@@ -2117,7 +2240,7 @@ transporters_heat <- pheatmap(
   labels_row = ordered_labels,
   fontsize_row = 8,
   borders_color = "white",  # Optional border around clusters
-  cutree_rows = 2,  # Keep row clustering if desired
+  
   gaps_row = c(10,18)  # Add breaks only between clusters
 )
 
@@ -2177,7 +2300,7 @@ top50_DE <- pheatmap(
   annotation_row = (select %>% select(response_type)),
   fontsize_row = 8,
   borders_color = "white",  # Optional border around clusters
-  cutree_rows = 2,  # Keep row clustering if desired
+  
   gaps_row = 4  # Add breaks only between clusters
 )
 
@@ -2241,7 +2364,7 @@ top50_DE <- pheatmap(
   annotation_row = (select %>% select(response_type)),
   fontsize_row = 8,
   borders_color = "white",  # Optional border around clusters
-  cutree_rows = 2,  # Keep row clustering if desired
+  
   gaps_row = 4  # Add breaks only between clusters
 )
 
