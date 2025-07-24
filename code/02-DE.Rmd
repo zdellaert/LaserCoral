@@ -45,7 +45,7 @@ sessionInfo() #provides list of loaded packages and version of R.
 #set standard output directory for figures
 outdir <- "../output_RNA/differential_expression"
 
-save_ggplot <- function(plot, filename, width = 10, height = 7, units = "in", dpi = 300) {
+save_ggplot <- function(plot, filename, width = 10, height = 7, units = "in", dpi = 300,bg=NULL) {
   print(plot)
 
   png_path <- file.path(outdir, paste0(filename, ".png"))
@@ -56,8 +56,8 @@ save_ggplot <- function(plot, filename, width = 10, height = 7, units = "in", dp
   if (!dir.exists(pdf_dir)) dir.create(pdf_dir, recursive = TRUE)
   
   # Save plots
-  ggsave(filename = png_path, plot = plot, width = width, height = height, units = units, dpi = dpi)
-  ggsave(filename = pdf_path, plot = plot, width = width, height = height, units = units, dpi = dpi)
+  ggsave(filename = png_path, plot = plot, width = width, height = height, units = units, dpi = dpi,bg = bg)
+  ggsave(filename = pdf_path, plot = plot, width = width, height = height, units = units, dpi = dpi,bg = bg)
 }
 
 # Specify colors
@@ -415,6 +415,42 @@ Pcomp_MarkerGenes_broc_all_res_Pcomp <- Pcomp_MarkerGenes_broc_all_res %>%
 Pcomp_MarkerGenes_broc_all_res_Pacuta <- Pcomp_MarkerGenes_broc_all_res %>% group_by(query,baseMean,log2FoldChange,lfcSE,pvalue,padj) %>% summarize(List = paste(List, collapse = ";"), .groups="drop")
 
 write.csv(Pcomp_MarkerGenes_broc_all_res_Pcomp, "../output_RNA/differential_expression/Pcomp_snRNA_marker_expr_PacutaLCM.csv")
+```
+
+```{r}
+Pdam_MarkerGenes_broc <- read.csv("../output_RNA/marker_genes/combined_Pdam_markers.csv") %>% select(protein_id_spA,Standardized_Name_spA,protein_id_spB) %>% dplyr::rename("Pdam_gene" = protein_id_spA,"query" = protein_id_spB, "List" = Standardized_Name_spA) 
+
+Pdam_MarkerGenes_broc <- Pdam_MarkerGenes_broc %>% filter(grepl("Pocillopora",query)&!grepl("unidentified",List)) %>% distinct() 
+
+Pdam_MarkerGenes_broc_all_res <- as.data.frame(resLFC) %>% mutate(query = rownames(resLFC)) %>% 
+  select(query,everything()) %>% left_join(Pdam_MarkerGenes_broc) 
+
+Pdam_MarkerGenes_broc_all_res_Pdam <- Pdam_MarkerGenes_broc_all_res %>%
+  group_by(Pdam_gene) %>%
+  slice_min(order_by = padj, with_ties = FALSE) %>%
+  ungroup()
+
+Pdam_MarkerGenes_broc_all_res_Pacuta <- Pdam_MarkerGenes_broc_all_res %>% group_by(query,baseMean,log2FoldChange,lfcSE,pvalue,padj) %>% summarize(List = paste(List, collapse = ";"), .groups="drop")
+
+write.csv(Pdam_MarkerGenes_broc_all_res_Pdam, "../output_RNA/differential_expression/Pdam_snRNA_marker_expr_PacutaLCM.csv")
+```
+
+```{r}
+Mcap_MarkerGenes_broc <- read.csv("../output_RNA/marker_genes/combined_Mcap_markers.csv") %>% select(protein_id_spA,cluster_guess_std,protein_id_spB) %>% dplyr::rename("Mcap_gene" = protein_id_spA,"query" = protein_id_spB, "List" = cluster_guess_std) 
+
+Mcap_MarkerGenes_broc <- Mcap_MarkerGenes_broc %>% filter(grepl("Pocillopora",query)&!grepl("unidentified",List)) %>% distinct() 
+
+Mcap_MarkerGenes_broc_all_res <- as.data.frame(resLFC) %>% mutate(query = rownames(resLFC)) %>% 
+  select(query,everything()) %>% left_join(Mcap_MarkerGenes_broc) 
+
+Mcap_MarkerGenes_broc_all_res_Mcap <- Mcap_MarkerGenes_broc_all_res %>%
+  group_by(Mcap_gene) %>%
+  slice_min(order_by = padj, with_ties = FALSE) %>%
+  ungroup()
+
+Mcap_MarkerGenes_broc_all_res_Pacuta <- Mcap_MarkerGenes_broc_all_res %>% group_by(query,baseMean,log2FoldChange,lfcSE,pvalue,padj) %>% summarize(List = paste(List, collapse = ";"), .groups="drop")
+
+write.csv(Mcap_MarkerGenes_broc_all_res_Mcap, "../output_RNA/differential_expression/Mcap_snRNA_marker_expr_PacutaLCM.csv")
 ```
 
 
@@ -1257,6 +1293,20 @@ DE_Biomin_broc <- pheatmap(
 save_ggplot(DE_Biomin_broc, "clusters_clean/DE_Biomin_broc")
 ```
 
+```{r}
+vst_counts <- assay(vsd)["Pocillopora_acuta_HIv2___RNAseq.g15280.t1", ]
+df <- as.data.frame(colData(dds))
+df$expression <- vst_counts
+
+library(ggplot2)
+ggplot(df, aes(x=Tissue, y=expression, group=Fragment, color=Fragment)) +
+  geom_point(size=3) +
+  geom_line() +
+  theme_minimal() +
+  labs(title="VST Expression by Tissue", y="VST normalized expression")
+```
+
+
 ### wnt and hox
 
 ```{r}
@@ -2090,8 +2140,10 @@ save_ggplot(top50_DE, "clusters_clean/Hox_All")
 
 ```{r}
 mucin <- Manual %>% filter(grepl("mucin", ProteinNames, ignore.case = TRUE)|grepl("toll-", ProteinNames, ignore.case = TRUE)|grepl("ZP", ProteinNames, ignore.case = TRUE)|grepl("lectin", ProteinNames, ignore.case = TRUE)|grepl("nitric", Heatmap_Label, ignore.case = TRUE)) %>% filter(Heatmap_Label !="Cnidocyte marker protein (Collectin-11)")
-select <- mucin$query
 
+select <- unique(mucin$query)
+select <-  select[(select %in% rownames(vsd))]
+  
 z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
 top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
