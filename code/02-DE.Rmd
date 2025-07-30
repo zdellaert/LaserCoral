@@ -145,7 +145,7 @@ res <- resLFC
 
 resOrdered <- res[order(res$pvalue),]# save differentially expressed genes
 
-DE_05 <- as.data.frame(resOrdered) %>% filter(padj < 0.05)
+DE_05 <- as.data.frame(resOrdered) %>% filter(padj < 0.05 & abs(log2FoldChange) > 1)
 DE_05_Up <- DE_05 %>% filter(log2FoldChange > 0) #Higher in Aboral, Lower in OralEpi
 DE_05_Down <- DE_05 %>% filter(log2FoldChange < 0) #Lower in Aboral, Higher in OralEpi
 
@@ -1009,6 +1009,7 @@ save_ggplot(up_OralEpi, "up_OralEpi_Blast2GO")
 
 ```{r}
 Manual <- read.csv(paste0(outdir,"/DE_05_Manual_annotation.csv")) %>% arrange(X) 
+Manual <- Manual %>% filter(abs(log2FoldChange) > 1)
 
 Manual$Heatmap_Label <- gsub("Homeobox protein", "Hox", Manual$Heatmap_Label, ignore.case = TRUE)
 Manual$Heatmap_Label <- gsub("Protein Wnt", "Wnt", Manual$Heatmap_Label, ignore.case = TRUE)
@@ -2008,7 +2009,7 @@ DESeq_Hox_Literature_collapsed <- Hox_Literature %>%
     .groups = "drop"
   )
 
-DE_05_Hox_Literature_collapsed <- DESeq_Hox_Literature_collapsed %>% filter(padj<0.05)
+DE_05_Hox_Literature_collapsed <- DESeq_Hox_Literature_collapsed %>% filter(padj<0.05) %>% filter(abs(log2FoldChange) >1)
 
 WNT_HOX_MAN <- Manual %>% select(-X) %>% filter(grepl("wnt", Heatmap_Label, ignore.case = TRUE)|grepl("frizzle", Heatmap_Label, ignore.case = TRUE)|grepl("homeobox", Heatmap_Label, ignore.case = TRUE)|grepl("hox", Heatmap_Label, ignore.case = TRUE)) %>% select(-c(blast_hit,evalue,ProteinNames,BiologicalProcess,GeneOntologyIDs))# %>% rename(Description = Heatmap_Label)
 
@@ -2065,7 +2066,7 @@ z_scores <- z_scores[match(clustered_data$query, rownames(z_scores)), ]
 ordered_labels <- clustered_data$Heatmap_Label
 
 # Ensure there is only 1 gap between clusters
-#row_breaks <- which(cluster_assignments != cluster_assignments[1])  # Only where cluster switches
+row_breaks <- which(cluster_assignments != cluster_assignments[1])  # Only where cluster switches
 
 # Generate the heatmap with reordered rows and labels
 top50_DE <- pheatmap(
@@ -2079,7 +2080,7 @@ top50_DE <- pheatmap(
   labels_row = ordered_labels,
   fontsize_row = 8,
   borders_color = "white",  
-  gaps_row = c(3,6,18,26,28,37) 
+  gaps_row = c(2,5,12,14,19,25) 
 )
 
 # Save the heatmap
@@ -2134,7 +2135,7 @@ top50_DE <- pheatmap(
   labels_row = ordered_labels,
   fontsize_row = 8,
   borders_color = "white",  
-  gaps_row = c(3,6,22,30,32,43) 
+  gaps_row = c(2,5,16,18,19,24,33) 
 )
 
 # Save the heatmap
@@ -2188,7 +2189,7 @@ mucins <- pheatmap(
   labels_row = ordered_labels,
   fontsize_row = 8,
   borders_color = "white",  
-  gaps_row = c(24,38) 
+  gaps_row = c(20,33,38,41) 
 )
 
 # Save the heatmap
@@ -2241,13 +2242,11 @@ transporters_heat <- pheatmap(
   labels_row = ordered_labels,
   fontsize_row = 8,
   borders_color = "white", 
-  gaps_row = c(16) 
+  gaps_row = c(13) 
 )
 
 # Save the heatmap
 save_ggplot(transporters_heat, "clusters_clean/transport_DE_SwissProt")
-
-
 ```
 
 ### temp and light sensing
@@ -2261,13 +2260,13 @@ select <- sensors$query
 z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
 top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
-         labels_row = gene_labels[match(select,(gene_labels$query)),2], fontsize_row = 8, cutree_rows = 3)
+         labels_row = gene_labels[match(select,(gene_labels$query)),2], fontsize_row = 8, cutree_rows = 2)
 top50_DE
 save_ggplot(top50_DE, "sensors_DE_SwissProt")
 
 # Perform clustering
 row_clusters <- hclust(dist(z_scores))
-cluster_assignments <- cutree(row_clusters, k = 3) # Adjust k for the number of clusters
+cluster_assignments <- cutree(row_clusters, k = 2) # Adjust k for the number of clusters
 
 # Create a dataframe for clustering and label management
 clustered_data <- data.frame(
@@ -2298,7 +2297,7 @@ transporters_heat <- pheatmap(
   fontsize_row = 8,
   borders_color = "white",  # Optional border around clusters
   
-  gaps_row = c(10,18)  # Add breaks only between clusters
+  gaps_row = c(7)  # Add breaks only between clusters
 )
 
 # Save the heatmap
