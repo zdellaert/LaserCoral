@@ -3,6 +3,7 @@ title: "Semantic Enrichment"
 author: "Zoe Dellaert"
 date: "2025-01-11"
 output:
+  html_document: default
   github_document:
     toc: true
     toc_depth: 3
@@ -50,7 +51,7 @@ In the next chunk I am loading in my DESeq data. These results are ordered by ad
 #load in DESeq results
 DESeq <- read.csv("../output_RNA/differential_expression/DESeq_results.csv", header = TRUE) %>% dplyr::rename("query" ="X")
 
-#make dataframes of just differentially expressed genes for each LFC direction
+#make dataframes of just differentially expressed genes for each LFC direction - filtering a little more stringent, abs(LFC) >2
 DE_05_Aboral <- DESeq %>% filter(padj < 0.05 & log2FoldChange > 2)
 DE_05_OralEpi <- DESeq %>% filter(padj < 0.05& log2FoldChange < -2)
 
@@ -490,7 +491,7 @@ library(clusterProfiler)
 library(enrichplot)
 library(GO.db)
 
-DE_05_Aboral <- DESeq %>% filter(padj < 0.05 & log2FoldChange > 1)
+DE_05_Aboral <- DESeq %>% filter(padj < 0.05 & log2FoldChange > 2)
 
 # Create TERM2GENE data.frame
 TERM2GENE <- Custom_GOs_valid %>%
@@ -519,7 +520,7 @@ treeplot(pairwise_termsim(ego_aboral))
 
 ########
 
-DE_05_OralEpi <- DESeq %>% filter(padj < 0.05& log2FoldChange < 0)
+DE_05_OralEpi <- DESeq %>% filter(padj < 0.05& log2FoldChange < -2)
 gene_list_oral <- DE_05_OralEpi$query
 
 ego_oral <- enricher(
@@ -527,7 +528,7 @@ ego_oral <- enricher(
   pAdjustMethod="none",
   TERM2GENE = TERM2GENE,
   pvalueCutoff = 0.05,
-  qvalueCutoff = 1
+  qvalueCutoff = 0.1
 )
 ego_oral
 ego_oral@result$Description <- Term(ego_oral@result$ID)
