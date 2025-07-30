@@ -1202,7 +1202,7 @@ save_ggplot(top50_DE, "TRP_SwissProt")
 ### biomin de heatmap nice
 
 ```{r}
-DE_05_biomin_filtered <- DE_05_biomin %>% left_join(Manual,by="query" ) %>% filter(!(Heatmap_Label %in% c("Myosin-9", "Actin, cytoplasmic")))
+DE_05_biomin_filtered <- DE_05_biomin %>% left_join(Manual,by="query" ) #%>% filter(!(Heatmap_Label %in% c("Myosin-9", "Actin, cytoplasmic")))
   
 select <- DE_05_biomin_filtered$query
 z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
@@ -1310,7 +1310,7 @@ ggplot(df, aes(x=Tissue, y=expression, group=Fragment, color=Fragment)) +
 ### wnt and hox
 
 ```{r}
-WNT <- Manual %>% filter(grepl("wnt", Heatmap_Label, ignore.case = TRUE)|grepl("frizzle", Heatmap_Label, ignore.case = TRUE)|grepl("homeobox", Heatmap_Label, ignore.case = TRUE)|grepl("hox", Heatmap_Label, ignore.case = TRUE)|grepl("forkhead", Heatmap_Label, ignore.case = TRUE))#|grepl("wnt", BiologicalProcess, ignore.case = TRUE))
+WNT <- Manual %>% filter(grepl("wnt", Heatmap_Label, ignore.case = TRUE)|grepl("frizzle", Heatmap_Label, ignore.case = TRUE)|grepl("homeobox", Heatmap_Label, ignore.case = TRUE)|grepl("hox", Heatmap_Label, ignore.case = TRUE))#|grepl("wnt", BiologicalProcess, ignore.case = TRUE))
 
 select <- WNT$query
 
@@ -1368,7 +1368,12 @@ save_ggplot(top50_DE, "clusters_clean/WNT_Hox_DE_SwissProt")
 
 #### wnt chromosome
 ```{r}
+WNT_all <- Manual %>% filter(grepl("wnt", Heatmap_Label, ignore.case = TRUE)|grepl("frizzle", Heatmap_Label, ignore.case = TRUE)|grepl("homeobox", Heatmap_Label, ignore.case = TRUE)|grepl("hox", Heatmap_Label, ignore.case = TRUE))#|grepl("wnt", BiologicalProcess, ignore.case = TRUE))
+
 WNT <- Manual %>% filter(grepl("wnt", Heatmap_Label, ignore.case = TRUE))
+FRZ <- Manual %>% filter(grepl("frizzle", Heatmap_Label, ignore.case = TRUE))
+HOX <- Manual %>% filter(grepl("hox", Heatmap_Label, ignore.case = TRUE)|grepl("homeobox", Heatmap_Label, ignore.case = TRUE))
+
 select <- WNT$query
 
 gene_layout <- gff_transcripts %>%
@@ -1524,12 +1529,12 @@ save_ggplot(Wnt_chr_heatmap, "Wnt_chromosome_expression_length_preserved",width 
 #### Hox 
 
 ```{r}
-WNT <- Manual %>% filter(grepl("homeobox", Heatmap_Label, ignore.case = TRUE)|grepl("hox", Heatmap_Label, ignore.case = TRUE)|grepl("forkhead", Heatmap_Label, ignore.case = TRUE))
-select <- WNT$query
+HOX <- Manual %>% filter(grepl("homeobox", Heatmap_Label, ignore.case = TRUE)|grepl("hox", Heatmap_Label, ignore.case = TRUE))
+select <- HOX$query
 
 gene_layout <- gff_transcripts %>%
   filter(query %in% select) %>%
-  arrange(chromosome, start) %>% left_join(WNT) %>% distinct() 
+  arrange(chromosome, start) %>% left_join(HOX) %>% distinct() 
 
 expr_df <- assay(vsd)[select, ] %>%
   as.data.frame() %>%
@@ -1575,7 +1580,7 @@ heat_df <- heat_df %>%
 library(gggenes)
 library(ggnewscale)
 
-Wnt_chr <- ggplot(plot_df[1:6,], aes(xmin = start, xmax = end, y = "Hox genes", forward = strand == "+",
+HOX_chr <- ggplot(plot_df[1:6,], aes(xmin = start, xmax = end, y = "Hox genes", forward = strand == "+",
                     fill = highest_expr_tissue)) +
   geom_gene_arrow(arrowhead_height = unit(3, "mm"), arrowhead_width = unit(1.5, "mm")) +
   geom_label(aes(x = (start + end)/2, y = "_Genes_ ", label = Heatmap_Label),
@@ -1587,10 +1592,10 @@ Wnt_chr <- ggplot(plot_df[1:6,], aes(xmin = start, xmax = end, y = "Hox genes", 
         axis.title.y = element_blank(),
         panel.spacing = unit(2, "lines")) +
   labs(x = "Genomic position", fill = "Higher expression in")
-Wnt_chr
- save_ggplot(Wnt_chr, "Hox_chromosome")
+HOX_chr
+ save_ggplot(HOX_chr, "Hox_chromosome")
  
- Wnt_chr <- ggplot(plot_df[7:12,], aes(xmin = start, xmax = end, y = "Hox genes", forward = strand == "+",
+ HOX_chr <- ggplot(plot_df[7:12,], aes(xmin = start, xmax = end, y = "Hox genes", forward = strand == "+",
                     fill = highest_expr_tissue)) +
   geom_gene_arrow(arrowhead_height = unit(3, "mm"), arrowhead_width = unit(1.5, "mm")) +
   geom_label(aes(x = (start + end)/2, y = "_Genes_ ", label = Heatmap_Label),
@@ -1602,10 +1607,10 @@ Wnt_chr
         axis.title.y = element_blank(),
         panel.spacing = unit(2, "lines")) +
   labs(x = "Genomic position", fill = "Higher expression in")
-Wnt_chr
- save_ggplot(Wnt_chr, "Hox_chromosome2")
+HOX_chr
+ save_ggplot(HOX_chr, "Hox_chromosome2")
  
-  Wnt_chr <- ggplot(plot_df[13:19,], aes(xmin = start, xmax = end, y = "Hox genes", forward = strand == "+",
+  HOX_chr <- ggplot(plot_df[13:19,], aes(xmin = start, xmax = end, y = "Hox genes", forward = strand == "+",
                     fill = highest_expr_tissue)) +
   geom_gene_arrow(arrowhead_height = unit(3, "mm"), arrowhead_width = unit(1.5, "mm")) +
   geom_label(aes(x = (start + end)/2, y = "_Genes_ ", label = Heatmap_Label),
@@ -1617,10 +1622,10 @@ Wnt_chr
         axis.title.y = element_blank(),
         panel.spacing = unit(2, "lines")) +
   labs(x = "Genomic position", fill = "Higher expression in")
-Wnt_chr
- save_ggplot(Wnt_chr, "Hox_chromosome3")
+HOX_chr
+ save_ggplot(HOX_chr, "Hox_chromosome3")
  
-   Wnt_chr <- ggplot(plot_df[20:24,], aes(xmin = start, xmax = end, y = "Hox genes", forward = strand == "+",
+   HOX_chr <- ggplot(plot_df[20:24,], aes(xmin = start, xmax = end, y = "Hox genes", forward = strand == "+",
                     fill = highest_expr_tissue)) +
   geom_gene_arrow(arrowhead_height = unit(3, "mm"), arrowhead_width = unit(1.5, "mm")) +
   geom_label(aes(x = (start + end)/2, y = "_Genes_ ", label = Heatmap_Label),
@@ -1632,12 +1637,12 @@ Wnt_chr
         axis.title.y = element_blank(),
         panel.spacing = unit(2, "lines")) +
   labs(x = "Genomic position", fill = "Higher expression in")
-Wnt_chr
- save_ggplot(Wnt_chr, "Hox_chromosome4")
+HOX_chr
+ save_ggplot(HOX_chr, "Hox_chromosome4")
 ```
 
 ```{r}
-Wnt_chr_heatmap <- ggplot() +
+HOX_chr_heatmap <- ggplot() +
   # Heatmap tiles
   geom_tile(data = heat_df,
             aes(x = midpoint, y = tissue, fill = expression,width = width),colour="black",
@@ -1669,7 +1674,7 @@ Wnt_chr_heatmap <- ggplot() +
   ) +#scale_y_discrete(expand = expansion(mult = c(1, 0)))+
   labs(x = "Genomic position")
 
-save_ggplot(Wnt_chr_heatmap, "Hox_chromosome_expression",width = 20, height = 5)
+save_ggplot(HOX_chr_heatmap, "Hox_chromosome_expression",width = 20, height = 5)
 ```
 
 ```{r}
@@ -1689,7 +1694,7 @@ heat_df_shifted <- plot_df_shifted %>%
   pivot_longer(cols = c(OralEpi, Aboral), names_to = "tissue", values_to = "expression") %>%
   mutate(midpoint = (start_shifted + end_shifted) / 2)  # for positioning tile center
 
-Wnt_chr_heatmap <- ggplot() +
+HOX_chr_heatmap <- ggplot() +
   # Heatmap tiles
   geom_tile(data = heat_df_shifted,
             aes(x = midpoint, y = tissue, fill = expression,width = width),colour="black",
@@ -1734,7 +1739,7 @@ save_ggplot_big <- function(plot, filename, width = 10, height = 7, units = "in"
   ggsave(filename = pdf_path, plot = plot, width = width, height = height, units = units, dpi = dpi,limitsize = FALSE)
 }
 
-save_ggplot_big(Wnt_chr_heatmap, "Hox_chromosome_expression_length_preserved",width = 15, height = 25)
+save_ggplot_big(HOX_chr_heatmap, "Hox_chromosome_expression_length_preserved",width = 15, height = 25)
 ```
 
 ### He et al 2023 TFs/genes of interest Nematostella (NOTE! I confirmed the DE_05 ones are all represented above )
@@ -2005,7 +2010,7 @@ DESeq_Hox_Literature_collapsed <- Hox_Literature %>%
 
 DE_05_Hox_Literature_collapsed <- DESeq_Hox_Literature_collapsed %>% filter(padj<0.05)
 
-WNT_HOX_MAN <- Manual %>% select(-X) %>% filter(grepl("wnt", Heatmap_Label, ignore.case = TRUE)|grepl("frizzle", Heatmap_Label, ignore.case = TRUE)|grepl("homeobox", Heatmap_Label, ignore.case = TRUE)|grepl("hox", Heatmap_Label, ignore.case = TRUE)|grepl("forkhead", Heatmap_Label, ignore.case = TRUE)) %>% select(-c(blast_hit,evalue,ProteinNames,BiologicalProcess,GeneOntologyIDs))# %>% rename(Description = Heatmap_Label)
+WNT_HOX_MAN <- Manual %>% select(-X) %>% filter(grepl("wnt", Heatmap_Label, ignore.case = TRUE)|grepl("frizzle", Heatmap_Label, ignore.case = TRUE)|grepl("homeobox", Heatmap_Label, ignore.case = TRUE)|grepl("hox", Heatmap_Label, ignore.case = TRUE)) %>% select(-c(blast_hit,evalue,ProteinNames,BiologicalProcess,GeneOntologyIDs))# %>% rename(Description = Heatmap_Label)
 
 COMBINED_HOX_WNT_all <-  full_join(DESeq_Hox_Literature_collapsed,WNT_HOX_MAN,by=c("query")) %>%
   mutate(
