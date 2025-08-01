@@ -23,7 +23,8 @@ Zoe Dellaert
   - [0.10.1 MF](#0101-mf)
   - [0.10.2 CC](#0102-cc)
 - [0.11 Custom plots](#011-custom-plots)
-  - [0.11.1 continuous by LFC](#0111-continuous-by-lfc)
+  - [0.11.1 MF](#0111-mf)
+  - [0.11.2 CC](#0112-cc)
 
 ## 0.1 Gene Ontology Analysis analysis of LCM RNA Data
 
@@ -854,9 +855,85 @@ head(results[[1]])
     ## 0/42 cytosolic large ribosomal subunit 3.320561e-06         1      purple
     ## 22/209 transporter complex             7.044911e-03         0 forestgreen
 
+#### 0.10.2.2 extracting representative GOs
+
+``` r
+# this module chooses GO terms that best represent *independent* groups of significant GO terms
+
+pcut=1e-2 # adjusted pvalue cutoff for representative GO
+hcut=0.9 # height at which cut the GO terms tree to get "independent groups". 
+
+# plotting the GO tree with the cut level (un-remark the next two lines to plot)
+ plot(results[[2]],cex=0.1)
+ abline(h=hcut,col="red")
+```
+
+![](05-Enrichment_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+
+``` r
+# cutting
+ct=cutree(results[[2]],h=hcut)
+annots=c();ci=1
+for (ci in unique(ct)) {
+  message(ci)
+    rn=names(ct)[ct==ci]
+    obs=grep("obsolete",rn)
+    if(length(obs)>0) { rn=rn[-obs] }
+    if (length(rn)==0) {next}
+    rr=results[[1]][rn,]
+    bestrr=rr[which(rr$pval==min(rr$pval)),]
+    best=1
+    if(nrow(bestrr)>1) {
+        nns=sub(" .+","",row.names(bestrr))
+        fr=c()
+        for (i in 1:length(nns)) { fr=c(fr,eval(parse(text=nns[i]))) }
+        best=which(fr==max(fr))
+    }
+    if (bestrr$pval[best]<=pcut) { annots=c(annots,sub("\\d+\\/\\d+ ","",row.names(bestrr)[best]))}
+}
+```
+
+    ## 1
+
+    ## 2
+
+    ## 3
+
+    ## 4
+
+    ## 5
+
+    ## 6
+
+    ## 7
+
+``` r
+setwd("go_mwu")
+mwus=read.table(paste("MWU",goDivision,input,sep="_"),header=T)
+bestGOs=mwus[mwus$name %in% annots,]
+bestGOs
+```
+
+    ##     delta.rank         pval level nseqs                             term
+    ## 83         853 5.907086e-15     2   492                       GO:0005615
+    ## 129       -787 2.921512e-05     4   159                       GO:0005759
+    ## 138        754 3.696110e-08     2   306 GO:0005773;GO:0005764;GO:0000323
+    ## 179       -707 1.552787e-06     3   264                       GO:0005874
+    ## 276       2036 2.170301e-08     3    42                       GO:0022625
+    ## 403      -1724 1.427659e-04     2    27                       GO:0032420
+    ## 451       -769 8.949240e-05     2   146                       GO:0034702
+    ##                                  name        p.adj
+    ## 83                extracellular space 4.518921e-12
+    ## 129              mitochondrial matrix 2.031779e-03
+    ## 138                           vacuole 4.712541e-06
+    ## 179                       microtubule 1.484852e-04
+    ## 276 cytosolic large ribosomal subunit 3.320561e-06
+    ## 403                      stereocilium 6.825994e-03
+    ## 451    monoatomic ion channel complex 4.890121e-03
+
 ## 0.11 Custom plots
 
-### 0.11.1 continuous by LFC
+### 0.11.1 MF
 
 ``` r
 MWU_MF_DE_LFC <- read.table("go_mwu/MWU_MF_DE_LFC.csv", header = TRUE)
@@ -881,7 +958,7 @@ MWU_MF_DE_LFC %>% dplyr::filter(p.adj<0.05 & delta.rank > 0) %>%
 
     ## ✔ save_plot: saved to '../output_RNA/differential_expression/enrichment/GO_MWU_MF_UpAboral.png'
 
-![](05-Enrichment_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+![](05-Enrichment_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
 
 ``` r
 MWU_MF_DE_LFC %>% dplyr::filter(p.adj<0.05 & delta.rank < 0) %>% 
@@ -901,7 +978,7 @@ MWU_MF_DE_LFC %>% dplyr::filter(p.adj<0.05 & delta.rank < 0) %>%
 
     ## ✔ save_plot: saved to '../output_RNA/differential_expression/enrichment/GO_MWU_MF_UpOralEpi.png'
 
-![](05-Enrichment_files/figure-gfm/unnamed-chunk-20-2.png)<!-- -->
+![](05-Enrichment_files/figure-gfm/unnamed-chunk-21-2.png)<!-- -->
 
 ``` r
 MWU_MF_DE_LFC %>% dplyr::filter(p.adj<0.05) %>% 
@@ -922,7 +999,7 @@ MWU_MF_DE_LFC %>% dplyr::filter(p.adj<0.05) %>%
 
     ## ✔ save_plot: saved to '../output_RNA/differential_expression/enrichment/GO_MWU.png'
 
-![](05-Enrichment_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+![](05-Enrichment_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
 
 ``` r
 MWU_MF_DE_LFC %>% dplyr::filter(p.adj<0.05) %>% 
@@ -947,7 +1024,7 @@ MWU_MF_DE_LFC %>% dplyr::filter(p.adj<0.05) %>%
 
     ## ✔ save_plot: saved to '../output_RNA/differential_expression/enrichment/GO_MWU_MF_dots.png'
 
-![](05-Enrichment_files/figure-gfm/unnamed-chunk-21-2.png)<!-- -->
+![](05-Enrichment_files/figure-gfm/unnamed-chunk-22-2.png)<!-- -->
 
 ``` r
 MWU_MF_DE_LFC %>% dplyr::filter(p.adj<0.05) %>% 
@@ -972,7 +1049,7 @@ MWU_MF_DE_LFC %>% dplyr::filter(p.adj<0.05) %>%
 
     ## ✔ save_plot: saved to '../output_RNA/differential_expression/enrichment/GO_MWU_MF_dots_nseq.png'
 
-![](05-Enrichment_files/figure-gfm/unnamed-chunk-21-3.png)<!-- -->
+![](05-Enrichment_files/figure-gfm/unnamed-chunk-22-3.png)<!-- -->
 
 ``` r
 MWU_MF_DE_LFC %>% dplyr::filter(p.adj<0.05) %>% 
@@ -995,4 +1072,145 @@ MWU_MF_DE_LFC %>% dplyr::filter(p.adj<0.05) %>%
 
     ## ✔ save_plot: saved to '../output_RNA/differential_expression/enrichment/GO_MWU_MF_bubble.png'
 
-![](05-Enrichment_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
+![](05-Enrichment_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+
+### 0.11.2 CC
+
+``` r
+MWU_CC_DE_LFC <- read.table("go_mwu/MWU_CC_DE_LFC.csv", header = TRUE)
+CC_DE_LFC <- read.table("go_mwu/CC_DE_LFC.csv", header = TRUE)
+```
+
+``` r
+MWU_CC_DE_LFC %>% dplyr::filter(p.adj<0.05 & delta.rank > 0) %>% 
+  mutate(log10padj = -log10(p.adj)) %>%
+  tidyplot(y = name, x = nseqs, fill = log10padj) %>%
+  adjust_size(height = NA, width=NA) %>%
+  theme_minimal_x(fontsize=9) %>%
+  add_sum_bar() %>% adjust_colors(new_colors = colors_continuous_turbo) %>%
+  sort_y_axis_labels(delta.rank) %>%
+  adjust_padding(right = 0.1) %>%
+  add_data_labels(delta.rank, label_position = c("right")) %>%
+  adjust_legend_title("$-log10~(Adjusted~p-value)$") %>%
+  add_title("Enriched GO terms by GO_MWU, Up in Aboral Tissue, padj < 0.05") %>%
+  save_plot("../output_RNA/differential_expression/enrichment/GO_MWU_CC_UpAboral.png",
+            width = 8, height = 6, units="in",bg = "transparent") 
+```
+
+    ## ✔ save_plot: saved to '../output_RNA/differential_expression/enrichment/GO_MWU_CC_UpAboral.png'
+
+![](05-Enrichment_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
+
+``` r
+MWU_CC_DE_LFC %>% dplyr::filter(p.adj<0.05 & delta.rank < 0) %>% 
+  mutate(log10padj = -log10(p.adj)) %>%
+  tidyplot(y = name, x = nseqs, fill = log10padj) %>%
+  adjust_size(height = NA, width=NA) %>%
+  theme_minimal_x(fontsize=9) %>%
+  add_sum_bar() %>% adjust_colors(new_colors = colors_continuous_turbo) %>%
+  sort_y_axis_labels(-delta.rank) %>%
+  adjust_padding(right = 0.1) %>%
+  add_data_labels(delta.rank, label_position = c("right")) %>%
+  adjust_legend_title("$-log10~(Adjusted~p-value)$") %>%
+  add_title("Enriched GO terms by GO_MWU, Up in Oral Epidermis Tissue, padj < 0.05")  %>%
+  save_plot("../output_RNA/differential_expression/enrichment/GO_MWU_CC_UpOralEpi.png",
+            width = 8, height = 4, units="in",bg = "transparent")
+```
+
+    ## ✔ save_plot: saved to '../output_RNA/differential_expression/enrichment/GO_MWU_CC_UpOralEpi.png'
+
+![](05-Enrichment_files/figure-gfm/unnamed-chunk-25-2.png)<!-- -->
+
+``` r
+MWU_CC_DE_LFC %>% dplyr::filter(p.adj<0.05) %>% 
+  mutate(log10padj = -log10(p.adj)) %>%
+  tidyplot(y = name, x = delta.rank, color = log10padj) %>%
+  adjust_size(height = NA, width=NA) %>%
+  theme_minimal_x(fontsize=8) %>%
+  add_sum_bar() %>% #add_sum_dot() %>% 
+  adjust_colors(new_colors = colors_continuous_turbo) %>%
+  sort_y_axis_labels(delta.rank) %>%
+  adjust_padding(right = 0.1, left = 0.1) %>%
+  #add_data_labels(delta.rank, label_position = c("right")) %>%
+  adjust_legend_title("$-log10~(Adjusted~p-value)$") %>%
+  add_title("Enriched GO terms by GO_MWU, padj < 0.05") %>%
+  save_plot("../output_RNA/differential_expression/enrichment/GO_MWU.png",
+            width = 8, height = 6, units="in",bg = "transparent")
+```
+
+    ## ✔ save_plot: saved to '../output_RNA/differential_expression/enrichment/GO_MWU.png'
+
+![](05-Enrichment_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
+
+``` r
+MWU_CC_DE_LFC %>% dplyr::filter(p.adj<0.05) %>% 
+  mutate(log10padj = -log10(p.adj)) %>%
+  tidyplot(y = name, x = delta.rank) %>%
+  adjust_size(height = NA, width=NA) %>%
+  theme_minimal_x(fontsize=8) %>%
+  add_sum_bar(width=0.2, data = filter_rows(delta.rank < 0), fill = "palegreen4") %>%
+  add_sum_bar(width=0.2, data = filter_rows(delta.rank > 0), fill = "mediumpurple") %>%
+  add(ggplot2::stat_summary(data = filter_rows(delta.rank < 0),fun = identity,geom = "point",
+                            aes(size = log10padj), color="palegreen4", alpha=0.5)) %>%
+  add(ggplot2::stat_summary(data = filter_rows(delta.rank > 0),fun = identity,geom = "point",
+                            aes(size = log10padj), color="mediumpurple", alpha=0.5)) %>%
+  sort_y_axis_labels(delta.rank) %>%
+  adjust_padding(right = 0.1, left = 0.1) %>%
+  #add(ggplot2::scale_size_continuous(name = "$-log10~(Adjusted~p-value)$", range=c(0,6))) %>%
+  adjust_legend_title("$-log10~(Adjusted~p-value)$") %>%
+  add_title("Enriched GO terms by GO_MWU, padj < 0.05") %>%
+  save_plot("../output_RNA/differential_expression/enrichment/GO_MWU_CC_dots.png",
+            width = 8, height = 6, units="in",bg = "transparent")
+```
+
+    ## ✔ save_plot: saved to '../output_RNA/differential_expression/enrichment/GO_MWU_CC_dots.png'
+
+![](05-Enrichment_files/figure-gfm/unnamed-chunk-26-2.png)<!-- -->
+
+``` r
+MWU_CC_DE_LFC %>% dplyr::filter(p.adj<0.05) %>% 
+  mutate(log10padj = -log10(p.adj)) %>%
+  tidyplot(y = name, x = delta.rank) %>%
+  adjust_size(height = NA, width=NA) %>%
+  theme_minimal_x(fontsize=8) %>%
+  add_sum_bar(width=0.2, data = filter_rows(delta.rank < 0), fill = "palegreen4") %>%
+  add_sum_bar(width=0.2, data = filter_rows(delta.rank > 0), fill = "mediumpurple") %>%
+  add(ggplot2::stat_summary(data = filter_rows(delta.rank < 0),fun = identity,geom = "point",
+                            aes(size = nseqs), color="palegreen4", alpha=0.5)) %>%
+  add(ggplot2::stat_summary(data = filter_rows(delta.rank > 0),fun = identity,geom = "point",
+                            aes(size = nseqs), color="mediumpurple", alpha=0.5)) %>%
+  sort_y_axis_labels(delta.rank) %>%
+  adjust_padding(right = 0.1, left = 0.1) %>%
+  #add(ggplot2::scale_size_continuous(name = "$-log10~(Adjusted~p-value)$", range=c(0,6))) %>%
+  adjust_legend_title("Number of sequences") %>%
+  add_title("Enriched GO terms by GO_MWU, padj < 0.05") %>%
+  save_plot("../output_RNA/differential_expression/enrichment/GO_MWU_CC_dots_nseq.png",
+            width = 8, height = 6, units="in",bg = "transparent")
+```
+
+    ## ✔ save_plot: saved to '../output_RNA/differential_expression/enrichment/GO_MWU_CC_dots_nseq.png'
+
+![](05-Enrichment_files/figure-gfm/unnamed-chunk-26-3.png)<!-- -->
+
+``` r
+MWU_CC_DE_LFC %>% dplyr::filter(p.adj<0.05) %>% 
+  mutate(log10padj = -log10(p.adj)) %>%
+  tidyplot(y = name, x = delta.rank, color = log10padj) %>%
+  adjust_size(height = NA, width=NA) %>%
+  theme_minimal_x(fontsize=8) %>%
+  add_sum_bar(width=0.2, fill="gray") %>% 
+  add(ggplot2::stat_summary(fun = identity,geom = "point",
+                            aes(size = nseqs), alpha=0.8)) %>%
+  #adjust_colors(new_colors = c("#0000FF", "#CA0088", "#FF0000")) %>%
+  adjust_colors(rev(colors_continuous_mako)) %>%
+  sort_y_axis_labels(delta.rank) %>%
+  adjust_padding(right = 0.1, left = 0.1) %>%
+  adjust_legend_title("$-log10~(Adjusted~p-value)$") %>%
+  add_title("Enriched GO terms by GO_MWU, padj < 0.05") %>%
+  save_plot("../output_RNA/differential_expression/enrichment/GO_MWU_CC_bubble.png",
+            width = 8, height = 6, units="in",bg = "transparent")
+```
+
+    ## ✔ save_plot: saved to '../output_RNA/differential_expression/enrichment/GO_MWU_CC_bubble.png'
+
+![](05-Enrichment_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
