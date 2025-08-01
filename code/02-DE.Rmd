@@ -890,7 +890,9 @@ annot_tab <- left_join(bltabl, spgo, by = c("V3" = "Entry")) %>%
     evalue = V13,
     ProteinNames = Protein.names,
     BiologicalProcess = Gene.Ontology..biological.process.,
-    GeneOntologyIDs = Gene.Ontology.IDs
+    GeneOntologyIDs = Gene.Ontology.IDs,
+    CellularComponent = Gene.Ontology..cellular.component.,
+    MolecularFunction = Gene.Ontology..molecular.function.,
   )
 
 head(annot_tab)
