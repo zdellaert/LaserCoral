@@ -102,7 +102,7 @@ stopifnot(all(meta$Sample == colnames(counts_raw))) #are they the same in the sa
 ## pOverA filtering to reduce dataset
 
 ```{r}
-ffun<-filterfun(pOverA(0.5,10))  # Keep genes expressed at 10+ counts in at least 50% of samples
+ffun<-filterfun(pOverA(0.49,10))  # Keep genes expressed at 10+ counts in at least 50% of samples
 counts_filt_poa <- genefilter((counts_raw), ffun) #apply filter
 
 filtered_counts <- counts_raw[counts_filt_poa,] #keep only rows that passed filter
@@ -165,8 +165,8 @@ write.csv(DE_05,
 ### Visualizing Differential Expression
 
 ```{r}
-EnhancedVolcano(resLFC, 
-    lab = ifelse(resLFC$padj < 0.05, rownames(resLFC), ""),
+EnhancedVolcano(res, 
+    lab = ifelse(res$padj < 0.05, rownames(res), ""),
     x = "log2FoldChange", 
     y = "pvalue"
 )
@@ -175,7 +175,7 @@ EnhancedVolcano(resLFC,
 ## Plots
 ```{r}
 plotMA(results(dds, contrast = c("Tissue","Aboral","OralEpi")), ylim=c(-20,20))
-plotMA(resLFC, ylim=c(-20,20))
+plotMA(res, ylim=c(-20,20))
 ```
 
 ### Log2 Fold Change Comparison
@@ -189,7 +189,7 @@ resAsh <- lfcShrink(dds, coef="Tissue_Aboral_vs_OralEpi", type="ashr")
 
 par(mfrow=c(1,3), mar=c(4,4,2,1))
 xlim <- c(1,1e5); ylim <- c(-20,20)
-plotMA(resLFC, xlim=xlim, ylim=ylim, main="apeglm")
+plotMA(res, xlim=xlim, ylim=ylim, main="apeglm")
 plotMA(resNorm, xlim=xlim, ylim=ylim, main="normal")
 plotMA(resAsh, xlim=xlim, ylim=ylim, main="ashr")
 ```
@@ -405,7 +405,7 @@ Pcomp_MarkerGenes_broc <- read.csv("../output_RNA/marker_genes/combined_Pcomp_ma
 
 Pcomp_MarkerGenes_broc <- Pcomp_MarkerGenes_broc %>% filter(grepl("Pocillopora",query)&!grepl("unidentified",List)) %>% distinct() 
 
-Pcomp_MarkerGenes_broc_all_res <- as.data.frame(resLFC) %>% mutate(query = rownames(resLFC)) %>% select(query,everything()) %>% left_join(Pcomp_MarkerGenes_broc) 
+Pcomp_MarkerGenes_broc_all_res <- as.data.frame(res) %>% mutate(query = rownames(res)) %>% select(query,everything()) %>% left_join(Pcomp_MarkerGenes_broc) 
 
 Pcomp_MarkerGenes_broc_all_res_Pcomp <- Pcomp_MarkerGenes_broc_all_res %>%
   group_by(Pcomp_gene) %>%
@@ -422,7 +422,7 @@ Pdam_MarkerGenes_broc <- read.csv("../output_RNA/marker_genes/combined_Pdam_mark
 
 Pdam_MarkerGenes_broc <- Pdam_MarkerGenes_broc %>% filter(grepl("Pocillopora",query)&!grepl("unidentified",List)) %>% distinct() 
 
-Pdam_MarkerGenes_broc_all_res <- as.data.frame(resLFC) %>% mutate(query = rownames(resLFC)) %>% 
+Pdam_MarkerGenes_broc_all_res <- as.data.frame(res) %>% mutate(query = rownames(res)) %>% 
   select(query,everything()) %>% left_join(Pdam_MarkerGenes_broc) 
 
 Pdam_MarkerGenes_broc_all_res_Pdam <- Pdam_MarkerGenes_broc_all_res %>%
@@ -440,7 +440,7 @@ Mcap_MarkerGenes_broc <- read.csv("../output_RNA/marker_genes/combined_Mcap_mark
 
 Mcap_MarkerGenes_broc <- Mcap_MarkerGenes_broc %>% filter(grepl("Pocillopora",query)&!grepl("unidentified",List)) %>% distinct() 
 
-Mcap_MarkerGenes_broc_all_res <- as.data.frame(resLFC) %>% mutate(query = rownames(resLFC)) %>% 
+Mcap_MarkerGenes_broc_all_res <- as.data.frame(res) %>% mutate(query = rownames(res)) %>% 
   select(query,everything()) %>% left_join(Mcap_MarkerGenes_broc) 
 
 Mcap_MarkerGenes_broc_all_res_Mcap <- Mcap_MarkerGenes_broc_all_res %>%
@@ -534,16 +534,16 @@ write.csv(as.data.frame(DE_05_biomin), file=paste0(outdir,"/DE_05_biomin_annotat
 write.csv(as.data.frame(DE_05_marker), file=paste0(outdir,"/DE_05_markergene_annotation.csv"))
 
 biomin_all_counts <- as.data.frame(counts(dds)) %>% mutate(query = rownames(dds)) %>% select(query,everything()) %>% left_join(Biomin) 
-biomin_all_res <- as.data.frame(resLFC) %>% mutate(query = rownames(resLFC)) %>% select(query,everything()) %>% left_join(Biomin) 
+biomin_all_res <- as.data.frame(res) %>% mutate(query = rownames(res)) %>% select(query,everything()) %>% left_join(Biomin) 
 
 Biomin_broc_all_counts <- as.data.frame(counts(dds)) %>% mutate(query = rownames(dds)) %>% select(query,everything()) %>% left_join(Biomin_broc) 
-Biomin_broc_all_res <- as.data.frame(resLFC) %>% mutate(query = rownames(resLFC)) %>% select(query,everything()) %>% left_join(Biomin_broc) 
+Biomin_broc_all_res <- as.data.frame(res) %>% mutate(query = rownames(res)) %>% select(query,everything()) %>% left_join(Biomin_broc) 
 
 markers_all_counts <- as.data.frame(counts(dds)) %>% mutate(query = rownames(dds)) %>% select(query,everything()) %>% left_join(MarkerGenes) 
-markers_all_res <- as.data.frame(resLFC) %>% mutate(query = rownames(resLFC)) %>% select(query,everything()) %>% left_join(MarkerGenes) 
+markers_all_res <- as.data.frame(res) %>% mutate(query = rownames(res)) %>% select(query,everything()) %>% left_join(MarkerGenes) 
 
 broc_markers_all_counts <- as.data.frame(counts(dds)) %>% mutate(query = rownames(dds)) %>% select(query,everything()) %>% left_join(MarkerGenes_broc) 
-broc_markers_all_res <- as.data.frame(resLFC) %>% mutate(query = rownames(resLFC)) %>% select(query,everything()) %>% left_join(MarkerGenes_broc) 
+broc_markers_all_res <- as.data.frame(res) %>% mutate(query = rownames(res)) %>% select(query,everything()) %>% left_join(MarkerGenes_broc) 
 ```
 
 ```{r}
@@ -667,12 +667,12 @@ Marker_volcano <- EnhancedVolcano(broc_markers_all_res,
 
 save_ggplot(Marker_volcano, "Marker_volcano_broc")
 
-EnhancedVolcano(resLFC, 
-    lab = rownames(resLFC),
+EnhancedVolcano(res, 
+    lab = rownames(res),
     x = 'log2FoldChange',
     y = 'pvalue')
 
-volcano_plain <- EnhancedVolcano(resLFC, 
+volcano_plain <- EnhancedVolcano(res, 
     lab = NA,
     x = 'log2FoldChange',
     y = 'padj',
@@ -905,6 +905,7 @@ write.table(annot_tab,
             row.names = FALSE, 
             quote = FALSE)
 
+DESeq_SwissProt <- as.data.frame(resOrdered) %>% left_join(annot_tab) %>% select(query,everything()) 
 DE_05_SwissProt <- DE_05 %>% left_join(annot_tab) %>% select(query,everything()) 
 
 write.csv(as.data.frame(DE_05_SwissProt), file=paste0(outdir,"/DE_05_SwissProt_annotation.csv"))
@@ -2203,7 +2204,16 @@ save_ggplot(mucins, "clusters_clean/bacteria_DE_SwissProt")
 ### Symbiont related transporters
 
 ```{r}
-transport <- Manual %>% filter(grepl("amino acid transport", BiologicalProcess, ignore.case = TRUE)|grepl("ammonium transmembrane transport", BiologicalProcess, ignore.case = TRUE))
+transport <- Manual %>% filter(grepl("amino acid transport", BiologicalProcess, ignore.case = TRUE)|
+                                 grepl("ammonium transmembrane transport", BiologicalProcess, ignore.case = TRUE)|
+                                 grepl("carbohydrate transport", BiologicalProcess, ignore.case = TRUE)|
+                                 grepl("glycerol transmembrane transport", BiologicalProcess, ignore.case = TRUE)|
+                                 grepl("cholesterol transport", BiologicalProcess, ignore.case = TRUE)) %>% 
+                                 filter(!grepl("neurotransmitter", BiologicalProcess, ignore.case = TRUE)) %>% 
+                                 filter(!grepl("synaptic", BiologicalProcess, ignore.case = TRUE)) %>% 
+                                 filter(!grepl("pigmentation", BiologicalProcess, ignore.case = TRUE))# %>% 
+                                 #filter(!grepl("Solute carrier", ProteinNames, ignore.case = TRUE))
+
 select <- transport$query
 
 z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
@@ -2244,11 +2254,198 @@ transporters_heat <- pheatmap(
   labels_row = ordered_labels,
   fontsize_row = 8,
   borders_color = "white", 
-  gaps_row = c(13) 
+  gaps_row = c(10) 
 )
 
 # Save the heatmap
 save_ggplot(transporters_heat, "clusters_clean/transport_DE_SwissProt")
+```
+
+### Solute Carrier (SLC) Family genes
+
+```{r}
+solute_all <- DESeq_SwissProt %>% filter(grepl("Solute carrier", ProteinNames, ignore.case = TRUE))
+solute_all <- solute_all %>%
+  mutate(SLC_family = str_extract(ProteinNames, "Solute carrier family \\d+")) %>%
+  mutate(SLC_family = str_replace(SLC_family,"Solute carrier family ", "SLC")) 
+
+nrow(solute_all)
+
+solute_de <- Manual %>% filter(grepl("Solute carrier", ProteinNames, ignore.case = TRUE))
+solute_de <- solute_de %>%
+  mutate(SLC_family = str_extract(ProteinNames, "Solute carrier family \\d+")) %>%
+  mutate(SLC_family = str_replace(SLC_family,"Solute carrier family ", "SLC")) 
+
+
+solute_de_upAboral <- solute_de %>% filter(log2FoldChange > 1)
+nrow(solute_de_upAboral)
+
+solute_de_upOral <- solute_de %>% filter(log2FoldChange < -1)
+nrow(solute_de_upOral)
+
+length(unique(solute_all$SLC_family))
+
+length(unique(solute_de_upAboral$SLC_family))
+length(unique(solute_de_upOral$SLC_family))
+table(solute_de$SLC_family)
+```
+```{r}
+#Basing my annotations on: https://re-solute.eu/knowledgebase/slcfamily and https://slc.bioparadigms.org/
+
+slc_map <- data.frame(
+  SLC_family = c(
+    "SLC1",
+    "SLC12",
+    "SLC15",
+    "SLC16",
+    "SLC22",
+    "SLC23",
+    "SLC24",
+    "SLC25",
+    "SLC30",
+    "SLC32",
+    "SLC35",
+    "SLC46",
+    "SLC6",
+    "SLC7"
+  ),
+  Function = c(
+    "High-affinity glutamate and neutral amino acid transporter family",
+    "Electroneutral cation-coupled Cl cotransporter family",
+    "Proton oligopeptide cotransporter family",
+    "Monocarboxylate transporter family",
+    "Organic cation/anion/zwitterion transporter family",
+    "Sodium-dependent ascorbic acid transporter family",
+    "Na+/(Ca2+-K+) exchanger family",
+    "Mitochondrial carrier family",
+    "Zinc transporter family",
+    "Vesicular inhibitory amino acid transporter family",
+    "Nucleoside-sugar transporter family",
+    "Folate transporter family",
+    "Sodium- and chloride-dependent neurotransmitter transporter family",
+    "Cationic amino acid transporter/glycoprotein-associated family"
+  ),
+  Role = c(
+    "Neurotransmission, Glu metabolism, development, aa homeostasis",
+    "cell volume, chloride concentration, blood pressure regulation",
+    "Immunity, homeostasis of neuropeptides, peptide absoption",
+    "glucose homeostasis / metabolism, lipid metabolism",
+    "Drug uptake, endocytosis",
+    "Absortion and distribution of ascorbic acid",
+        "Skin/hair/eye pigmentation, vision, olfaction",
+    "Apoptosis, Glucose/Lipid/Amino acid/Urea, metab., ATP synthesis",
+    "Zinc homestasis, development, body weight, glucose metabolism",
+    "Development, neurotransmission",
+    "Virus infection, development, autophagy, cell proliferation",
+    "Folate metabolism, Immunity, Drug uptake",
+    "Cell differentiation, neurotransmission",
+    "Nitric oxide synthesis, redox balance, aa homeostasis"
+  ),
+  Substrate_Specific = c(
+    "Glutamate as Neurotransmitter, anionic, neutral amino acids",
+    "Chloride, sodium, potassium",
+    "Dipeptides, oligopeptides",
+    "Ketone bodies, Lactate, Pyruvate, creatine, aromatic amino acids, T2,T3,T4",
+    "Drugs, neurotransmitters, purine and pyrimidine nucleosides, niacin, steroid, carnitine, carnitine derivatives, organic anions",
+    "Ascorbic acid",
+    "Calcium, Potassium, Sodium",
+    "Amino acids, Di- tricarboxylic ions, Co-A, Carnitine/acyl-carnitines, H+, metals, nucleotides",
+    "Zinc, Managnese, Lead",
+    "GABA, Glycine",
+    "Purines, pyrimidines, Thiamine, nuclotide-sugars",
+    "Folic acid, Heme, Methotrexate",
+    "Neurotransmitters, basic, neutral amino acids",
+    "Amino acids"
+  ),
+  Substrate_Broad = c(
+    "amino acids",
+    "inorganic ions",
+    "peptides",
+    "energy metabolites",
+    "organic ions",
+    "ascorbic acid",
+    "inorganic ions",
+    "mitochondrial",
+    "transition element cations",
+    "amino acids; neurotransmitter",
+    "nucleosides, nucleotides and nucleotide-sugars",
+    "organic ions",
+    "neurotransmitter",
+    "amino acids"
+  )
+)
+```
+
+```{r}
+solute_de_annot <- solute_de %>%
+  left_join(slc_map, by = "SLC_family") %>%
+  mutate(Direction = ifelse(log2FoldChange > 1, "upAboral",
+                            ifelse(log2FoldChange < -1, "upOral", "noChange")))
+
+# Summarize counts by family and direction
+plot_data <- solute_de_annot %>%
+  filter(Direction != "noChange") %>%
+  group_by(SLC_family, Substrate_Broad, Direction) %>%
+  summarise(n = n(), .groups = "drop")
+
+ggplot(plot_data, aes(x = SLC_family, y = n, fill = Direction)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~Substrate_Broad, scales = "free_x") +
+  scale_fill_manual(values = c("upOral" = "darkgreen", "upAboral" = "purple")) +
+  theme_minimal() +
+  labs(title = "Differentially Expressed SLC Genes by Family",
+       x = "SLC Family", y = "Number of DE Genes") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+
+```{r}
+select <- solute_de$query
+
+z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
+top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
+         labels_row = gene_labels[match(select,(gene_labels$query)),2], fontsize_row = 8, cutree_rows = 2)
+top50_DE
+save_ggplot(top50_DE, "SLC_DE_SwissProt")
+
+# Perform clustering
+row_clusters <- hclust(dist(z_scores))
+cluster_assignments <- cutree(row_clusters, k = 2) # Adjust k for the number of clusters
+
+# Create a dataframe for clustering and label management
+clustered_data <- data.frame(
+  query = select,
+  Heatmap_Label = gene_labels[match(select, gene_labels$query), 2],
+  cluster = cluster_assignments
+)
+
+# Reorder rows within each cluster alphabetically by their labels
+clustered_data <- clustered_data %>%
+  arrange(cluster, Heatmap_Label)
+
+# Reorder the z_scores matrix and labels based on the new order
+z_scores <- z_scores[match(clustered_data$query, rownames(z_scores)), ]
+ordered_labels <- clustered_data$Heatmap_Label
+
+# Generate the heatmap with reordered rows and labels
+SLC <- pheatmap(
+  z_scores,
+  color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200),
+  cluster_rows = FALSE,  # Disable clustering since rows are pre-ordered
+  cluster_cols = TRUE,
+  cutree_cols = 2,
+  annotation_col = (heatmap_metadata %>% select(Tissue)),
+  annotation_colors = ann_colors,
+  labels_row = ordered_labels,
+  fontsize_row = 8,
+  borders_color = "white", 
+  gaps_row = c(21) 
+)
+
+# Save the heatmap
+save_ggplot(SLC, "clusters_clean/SLC_DE_SwissProt")
 ```
 
 ### temp and light sensing
@@ -2256,6 +2453,9 @@ save_ggplot(transporters_heat, "clusters_clean/transport_DE_SwissProt")
 ```{r}
 sensors <- Manual %>% filter(grepl("TRP", Heatmap_Label, ignore.case = TRUE)|grepl("cellular response to light stimulus", BiologicalProcess, ignore.case = TRUE)|grepl("detection of mechanical stimulus involved in sensory perception", BiologicalProcess, ignore.case = TRUE))
 
+gene_labels <- Manual %>% 
+  select(query,Heatmap_Label) %>%
+  mutate_all(~ ifelse(is.na(.), "", .)) #replace NAs with "" for labelling purposes
 
 select <- sensors$query
 

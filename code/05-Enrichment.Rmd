@@ -219,7 +219,7 @@ head(results[[1]])
 # this module chooses GO terms that best represent *independent* groups of significant GO terms
 
 pcut=1e-2 # adjusted pvalue cutoff for representative GO
-hcut=0.9 # height at which cut the GO terms tree to get "independent groups". 
+hcut=0.6 # height at which cut the GO terms tree to get "independent groups". 
 
 # plotting the GO tree with the cut level (un-remark the next two lines to plot)
  plot(results[[2]],cex=0.1)
@@ -455,6 +455,45 @@ dev.off()
  
 # text representation of results, with actual adjusted p-values
 head(results[[1]])
+```
+
+#### extracting representative GOs
+
+```{r}
+# this module chooses GO terms that best represent *independent* groups of significant GO terms
+
+pcut=1e-2 # adjusted pvalue cutoff for representative GO
+hcut=0.4 # height at which cut the GO terms tree to get "independent groups". 
+
+# plotting the GO tree with the cut level (un-remark the next two lines to plot)
+ plot(results[[2]],cex=0.1)
+ abline(h=hcut,col="red")
+
+# cutting
+ct=cutree(results[[2]],h=hcut)
+annots=c();ci=1
+for (ci in unique(ct)) {
+  message(ci)
+	rn=names(ct)[ct==ci]
+	obs=grep("obsolete",rn)
+	if(length(obs)>0) { rn=rn[-obs] }
+	if (length(rn)==0) {next}
+	rr=results[[1]][rn,]
+	bestrr=rr[which(rr$pval==min(rr$pval)),]
+	best=1
+	if(nrow(bestrr)>1) {
+		nns=sub(" .+","",row.names(bestrr))
+		fr=c()
+		for (i in 1:length(nns)) { fr=c(fr,eval(parse(text=nns[i]))) }
+		best=which(fr==max(fr))
+	}
+	if (bestrr$pval[best]<=pcut) { annots=c(annots,sub("\\d+\\/\\d+ ","",row.names(bestrr)[best]))}
+}
+
+setwd("go_mwu")
+mwus=read.table(paste("MWU",goDivision,input,sep="_"),header=T)
+bestGOs=mwus[mwus$name %in% annots,]
+bestGOs
 ```
 
 ### CC
