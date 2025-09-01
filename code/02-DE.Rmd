@@ -1360,6 +1360,8 @@ DE_marker_broc <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n =
                       labels_row = paste0(DE_05_marker_broc$List,": ", gene_labels[match(select,(gene_labels$query)),2]), fontsize_row = 6)
 DE_marker_broc
 save_ggplot(DE_marker_broc, "DE_marker_broc_3",height=9)
+
+DE_05_marker_broc <- DE_05_marker_broc %>% left_join(Manual,by=c("query")) %>% select(!ends_with(".y"))
 ```
 
 
@@ -1378,6 +1380,8 @@ mucin <- Manual %>% filter(grepl("mucin", ProteinNames, ignore.case = TRUE)|
                              grepl("nitric", ProteinNames, ignore.case = TRUE)|
                              grepl("sulfotransferase", ProteinNames, ignore.case = TRUE)|
                              grepl("Complement ", ProteinNames, ignore.case = TRUE)|
+                             grepl("toll-like receptor", BiologicalProcess, ignore.case = TRUE)|
+                             grepl("NF-kappaB", BiologicalProcess, ignore.case = TRUE)|
                              grepl("complement activation", BiologicalProcess, ignore.case = TRUE)|
                              grepl("3'-phosphoadenosine 5'-phosphosulfate", BiologicalProcess, ignore.case = TRUE)) %>% 
   filter(Heatmap_Label !="Cnidocyte marker protein (Collectin-11)")
