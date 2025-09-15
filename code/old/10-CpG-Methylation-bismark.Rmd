@@ -1,0 +1,125 @@
+---
+title: "10-CpG-Methylation-Bismark"
+author: "Zoe Dellaert"
+date: "2025-02-17"
+output:
+  github_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    html_preview: true
+always_allow_html: true
+---
+
+## CpG Methylation analysis
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  fig.width = 8,  
+  fig.height = 6, 
+  dpi = 300   
+)
+```
+
+## Managing Packages Using Renv
+
+To run this code in my project using the renv environment, run the following lines of code
+
+```{r, eval=FALSE}
+install.packages("renv") #install the package on the new computer (may not be necessary if renv bootstraps itself as expected)
+renv::restore() #reinstall all the package versions in the renv lockfile
+```
+
+## Load packages
+
+```{r packages}
+require("tidyverse")
+require("ggplot2")
+require("gtools")
+
+sessionInfo() #provides list of loaded packages and version of R.
+```
+
+
+```{r}
+meta <- read.csv("../data_WGBS/LCM_WGBS_metadata.csv", sep = ",", header = TRUE) %>%
+  mutate(Section_Date = as.character(Section_Date), LCM_Date = as.character(LCM_Date),DNA_Extraction_Date = as.character(DNA_Extraction_Date))
+
+meta_simple <- meta %>% select(Sample, Fragment, Tissue, PCR_ReAmp_Cycles)
+```
+
+## Calculate based on methylation extraction stats
+
+(based on this code: https://github.com/hputnam/Meth_Compare/blob/f1b3f771862cbaf81ae5903dd33e0b9bc53de79e/code/00.05-FormatMultiQC.Rmd#L82)
+
+```{r}
+multiqc_extract_orig <- data.table::fread("../output_WGBS/dedup_V3/multiqc_data/multiqc_bismark_methextract.txt", header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+
+multiqc <- multiqc_extract_orig %>% mutate(Sample = str_extract(Sample, "LCM_\\d+"))
+
+#create tot_cpg, tot_chh, tot_chg columns
+
+#calculate the total chg counts by summing unmeth chg counts and meth chg counts
+multiqc$tot_chg <- multiqc$meth_chg + multiqc$unmeth_chg
+
+#calculate the total chh counts by summing unmeth chh counts and meth chh counts
+multiqc$tot_chh <- multiqc$meth_chh + multiqc$unmeth_chh
+
+#calculate the total cpg counts by summing unmeth cpg counts and meth cpg counts
+multiqc$tot_cpg <- multiqc$meth_cpg + multiqc$unmeth_cpg
+
+#calculate the unmeht chg + chh counts by summing unmeth chg counts and unmeth chh counts
+multiqc$unmeth_chg_chh <- multiqc$unmeth_chg + multiqc$unmeth_chh
+
+#calculate the total chg + chh counts by summing total chg counts and total chh counts
+multiqc$tot_chg_chh <- multiqc$tot_chg + multiqc$tot_chh
+
+#calculate percent conversion efficiency by dividing the unmethylated chg + chh counts by the total (meth + unmeth) chg + chh counts
+multiqc$conversion_efficiency <- (multiqc$unmeth_chg_chh/multiqc$tot_chg_chh)
+
+#write out table
+write.csv(multiqc, "../output_WGBS/dedup_V3/extracted_alignments_descriptive_stats.csv", row.names = FALSE, quote = FALSE)
+```
+
+Analyze and plot:
+
+```{r}
+multiqc <- read.csv( "../output_WGBS/dedup_V3/extracted_alignments_descriptive_stats.csv", sep = ",", header = TRUE) 
+
+conversion_eff_data <- multiqc %>% dplyr::select(c(Sample, conversion_efficiency,percent_cpg_meth)) %>%
+  left_join(meta_simple,by = join_by(Sample)) 
+
+print(conversion_eff_data)
+
+conversion_eff_data <- conversion_eff_data %>% mutate(Sample = fct_relevel(Sample, conversion_eff_data$Sample[mixedorder(conversion_eff_data$Sample)])) 
+conversion_eff_data$conversion_efficiency <- as.numeric(conversion_eff_data$conversion_efficiency)
+  
+ggplot(conversion_eff_data, aes(x=Sample, y=conversion_efficiency, fill=Tissue)) +
+  geom_bar(stat="identity", color="black") +
+  theme_minimal() +
+  facet_grid(~Fragment, scales = "free") +
+  labs(title="Bisulfite Conversion Efficiency per Sample", y="Conversion Efficiency", x="Sample") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ylim(0, 1) 
+
+ggplot(conversion_eff_data, aes(x=Sample, y=conversion_efficiency, fill=PCR_ReAmp_Cycles)) +
+  geom_bar(stat="identity", color="black") +
+  theme_minimal() +
+  facet_grid(~Fragment, scales = "free") +
+  labs(title="Bisulfite Conversion Efficiency per Sample", y="Conversion Efficiency", x="Sample") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ylim(0, 1) 
+
+ggplot(conversion_eff_data, aes(x=percent_cpg_meth, y=conversion_efficiency, color=Fragment, label=Sample)) +
+  geom_point() +
+    geom_text(nudge_x = -2.5) + 
+  #geom_smooth() +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(y="bisulfite conversion efficiency")
+```
+
+## VERY IMPORTANT NOTE:
+
+THIS IS NOT COVERAGE FILTERED AND ALSO THE MAPPING RATE WAS VERY LOW. I would not trust this efficiency estimate.

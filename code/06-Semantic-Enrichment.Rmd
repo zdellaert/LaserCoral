@@ -30,9 +30,10 @@ renv::restore() #reinstall all the package versions in the renv lockfile
 ## Load packages
 
 ```{r packages}
-require("ViSEAGO")
+library("ViSEAGO")
 require("topGO")
 require("tidyverse")
+#BiocManager::install("GO.db")
 
 sessionInfo() #provides list of loaded packages and version of R.
 ```
@@ -45,15 +46,15 @@ I am following this vignette: [http://bioconductor.unipi.it/packages/devel/bioc/
 
 ## Load in reference files and differential expression data
 
-In the next chunk I am loading in my DESeq data. These results are ordered by adjusted p-value. As a reminder, negative LFC = higher in Aboral tissue, and positive LFC = higher in Oral tissue.
+In the next chunk I am loading in my DESeq data. These results are ordered by adjusted p-value. As a reminder, negative LFC = higher in Oral tissue, and positive LFC = higher in Aboral tissue.
 
 ```{r load_data}
 #load in DESeq results
 DESeq <- read.csv("../output_RNA/differential_expression/DESeq_results.csv", header = TRUE) %>% dplyr::rename("query" ="X")
 
 #make dataframes of just differentially expressed genes for each LFC direction - filtering a little more stringent, abs(LFC) >2
-DE_05_Aboral <- DESeq %>% filter(padj < 0.05 & log2FoldChange > 2)
-DE_05_OralEpi <- DESeq %>% filter(padj < 0.05& log2FoldChange < -2)
+DE_05_Aboral <- DESeq %>% filter(padj < 0.05 & log2FoldChange > 1)
+DE_05_OralEpi <- DESeq %>% filter(padj < 0.05& log2FoldChange < -1)
 
 #load in annotation data 
 annot_tab <- read.delim("../references/annotation/protein-GO.tsv") %>% dplyr::rename(GOs = GeneOntologyIDs)
@@ -79,9 +80,9 @@ sum(annot_tab$query %in% DE_05_OralEpi$query)
 sum(annot_tab$query %in% DE_05_OralEpi$query)/nrow(DE_05_OralEpi)
 ```
 
-545/804 genes that are significantly upregulated in the Aboral tissue have annotation information. That is 68% of the genes.
+379/558 genes that are significantly upregulated in the Aboral tissue have annotation information. That is 68% of the genes.
 
-1979/2802 genes that are significantly upregulated in the Oral Epidermis tissue have annotation information. That is 71% of the genes.
+796/1216 genes that are significantly upregulated in the Oral Epidermis tissue have annotation information. That is 71% of the genes.
 
 ## Create custom GO annotation file for ViSEAGO
 
@@ -114,7 +115,7 @@ length(unique(Custom_GOs$gene_id))
 length(unique(Custom_GOs_valid$gene_id))
 ```
 
-We seem to have lost one gene when filtering for valid GO terms, so I need to aMFount for that below.
+We seem to have lost one gene when filtering for valid GO terms, so I need to account for that below.
 
 ### load the file into ViSEAGO
 
@@ -126,7 +127,7 @@ myGENE2GO_Pacuta <- ViSEAGO::annotate(
     Custom_Pacuta
 )
 ```
-
+    
 ## Create gene lists for enrichment
 
 ```{r}
@@ -169,28 +170,42 @@ classic_Oral <- topGO::runTest(
     statistic = "fisher"
 )
 
-BP_Results <- ViSEAGO::merge_enrich_terms(
-    Input = list(Oral = c("BP_Oral", "classic_Oral"))
+# perform TopGO test using elim algorithm
+elim_Oral <- topGO::runTest(
+    BP_Oral,
+    algorithm ="elim",
+    statistic = "fisher"
 )
 
-BP_Results
+BP_Results <- ViSEAGO::merge_enrich_terms(
+    Input = list(#Oral_classic = c("BP_Oral", "classic_Oral"),
+                 Oral_elim = c("BP_Oral", "elim_Oral"))
+)
 ```
+
 
 ### Visualize and save initial results
 
 ```{r}
 # display the merged table
+BP_Results
 ViSEAGO::show_table(BP_Results)
 
 # print the merged table in a file
 ViSEAGO::show_table(
     BP_Results,
-    "../output_RNA/differential_expression/semantic-enrichment/DE_05_Oral_Fisher.csv"
+    "../output_RNA/differential_expression/semantic-enrichment/DE_05_Oral.csv"
 )
 ```
 
+ - enrichment pvalue cutoff:
+        Oral_classic : 0.01
+        Oral_elim : 0.01
+- enrich GOs (in at least one list): 171 GO terms of 2 conditions.
+        Oral_classic : 171 terms
+        Oral_elim : 58 terms
 
-## Semantic similarity
+### Semantic similarity --> Cluster: Use Wang graph-based method to identify similarity between GO terms
 
 ```{r}
 # initialize 
@@ -199,18 +214,15 @@ myGOs<-ViSEAGO::build_GO_SS(
     enrich_GO_terms=BP_Results
 )
 
-# compute all available Semantic Similarity (SS) measures
 myGOs <- ViSEAGO::compute_SS_distances(
     myGOs,
-    distance="Wang"
+   distance=c("Wang")
 )
 
 myGOs
 ```
 
-## Visualization
-
-### Multi Dimensional Scaling
+#### Multi Dimensional Scaling Plot of the GO-terms based on semantic similarity
 
 ```{r}
 # display MDSplot
@@ -218,46 +230,33 @@ ViSEAGO::MDSplot(myGOs,
                  "GOterms")
 ```
 
-### Heatmap
+#### Heatmap + table of GO terms, with clusters aggregated by hclust with ward.D2 method
 
 ```{r}
 # GOterms heatmap with the default parameters
-Wang_clusters_wardD2<-ViSEAGO::GOterms_heatmap(
-    myGOs,
-    showIC=TRUE,
-    showGOlabels=TRUE,
-    GO.tree=list(
-        tree=list(
-            distance="Wang",
-            aggreg.method="ward.D2"
-        ),
-        cut=list(
-            dynamic=list(
-                pamStage=TRUE,
-                pamRespectsDendro=TRUE,
-                deepSplit=2,
-                minClusterSize =2
-            )
-        )
-    ),
-    samples.tree=NULL
+Wang_clusters_wardD2 <- ViSEAGO::GOterms_heatmap(
+  myGOs,
+  showIC = TRUE,
+  showGOlabels = TRUE,
+  GO.tree = list(
+    tree = list(distance = "Wang", aggreg.method = "ward.D2"),
+    cut = list(
+      dynamic = list(
+        pamStage = TRUE,
+        pamRespectsDendro = TRUE,
+        deepSplit = 2,
+        minClusterSize = 2
+      )
+    )
+  ),
+  samples.tree = NULL
 )
-```
 
-```{r}
 # Display the clusters-heatmap
 ViSEAGO::show_heatmap(
     Wang_clusters_wardD2,
-    "GOterms"
-)
-
-ViSEAGO::show_heatmap(
-    Wang_clusters_wardD2,
     "GOterms")
-```
 
-
-```{r}
 # Display the clusters-heatmap table
 ViSEAGO::show_table(Wang_clusters_wardD2)
 
@@ -268,7 +267,7 @@ ViSEAGO::show_table(
 )
 ```
 
-### MDS
+#### Multi Dimensional Scaling Plot of the enriched GO-terms based on semantic similarity, colored by cluster
 
 ```{r}
 # display colored MDSplot
@@ -277,10 +276,10 @@ ViSEAGO::MDSplot(
     "GOterms")
 ```
 
-## Visualization and interpretation of GO clusters
+### Further summarizing the Semantic Similarity-based clusters
 
 ```{r}
-# calculate semantic similarites between clusters of GO terms
+# calculate semantic similarities between clusters of GO terms
 Wang_clusters_wardD2<-ViSEAGO::compute_SS_distances(
     Wang_clusters_wardD2,
     distance=c("max", "avg","rcmax", "BMA")
@@ -288,7 +287,7 @@ Wang_clusters_wardD2<-ViSEAGO::compute_SS_distances(
 ```
 
 ```{r}
-# build and highlight in an interactive MDSplot grouped clusters for one distance object
+# MDSplot - one point per cluster
 ViSEAGO::MDSplot(
     Wang_clusters_wardD2,
     "GOclusters")
@@ -303,17 +302,14 @@ Wang_clusters_wardD2<-ViSEAGO::GOclusters_heatmap(
         aggreg.method="ward.D2"
     )
 )
-```
 
-
-```{r}
 # display the GOClusters heatmap
 ViSEAGO::show_heatmap(
     Wang_clusters_wardD2,
     "GOclusters")
 ```
 
-## Aboral Tissue:
+## Aboral Epidermis:
 
 ### create topGO objects and perform enrichment using topGO wrapped by ViSEAGO
 
@@ -337,28 +333,42 @@ classic_Aboral <- topGO::runTest(
     statistic = "fisher"
 )
 
-BP_Results <- ViSEAGO::merge_enrich_terms(
-    Input = list(Aboral = c("BP_Aboral", "classic_Aboral"))
+# perform TopGO test using elim algorithm
+elim_Aboral <- topGO::runTest(
+    BP_Aboral,
+    algorithm ="elim",
+    statistic = "fisher"
 )
 
-BP_Results
+BP_Results <- ViSEAGO::merge_enrich_terms(
+    Input = list(#Aboral_classic = c("BP_Aboral", "classic_Aboral"),
+                 Aboral_elim = c("BP_Aboral", "elim_Aboral"))
+)
 ```
+
 
 ### Visualize and save initial results
 
 ```{r}
 # display the merged table
+BP_Results
 ViSEAGO::show_table(BP_Results)
 
 # print the merged table in a file
 ViSEAGO::show_table(
     BP_Results,
-    "../output_RNA/differential_expression/semantic-enrichment/DE_05_Aboral_Fisher.csv"
+    "../output_RNA/differential_expression/semantic-enrichment/DE_05_Aboral.csv"
 )
 ```
 
+ - enrichment pvalue cutoff:
+        Aboral_classic : 0.01
+        Aboral_elim : 0.01
+- enrich GOs (in at least one list): 347 GO terms of 2 conditions.
+        Aboral_classic : 347 terms
+        Aboral_elim : 118 terms
 
-## Semantic similarity
+### Semantic similarity --> Cluster: Use Wang graph-based method to identify similarity between GO terms
 
 ```{r}
 # initialize 
@@ -367,64 +377,49 @@ myGOs<-ViSEAGO::build_GO_SS(
     enrich_GO_terms=BP_Results
 )
 
-# compute all available Semantic Similarity (SS) measures
 myGOs <- ViSEAGO::compute_SS_distances(
     myGOs,
-    distance="Wang"
+   distance=c("Wang")
 )
 
 myGOs
 ```
 
-## Visualization
-
-### Multi Dimensional Scaling
+#### Multi Dimensional Scaling Plot of the GO-terms based on semantic similarity
 
 ```{r}
 # display MDSplot
-ViSEAGO::MDSplot(myGOs,"GOterms")
+ViSEAGO::MDSplot(myGOs,
+                 "GOterms")
 ```
 
-### Heatmap
+#### Heatmap + table of GO terms, with clusters aggregated by hclust with ward.D2 method
 
 ```{r}
 # GOterms heatmap with the default parameters
-Wang_clusters_wardD2<-ViSEAGO::GOterms_heatmap(
-    myGOs,
-    showIC=TRUE,
-    showGOlabels=TRUE,
-    GO.tree=list(
-        tree=list(
-            distance="Wang",
-            aggreg.method="ward.D2"
-        ),
-        cut=list(
-            dynamic=list(
-                pamStage=TRUE,
-                pamRespectsDendro=TRUE,
-                deepSplit=2,
-                minClusterSize =2
-            )
-        )
-    ),
-    samples.tree=NULL
+Wang_clusters_wardD2 <- ViSEAGO::GOterms_heatmap(
+  myGOs,
+  showIC = TRUE,
+  showGOlabels = TRUE,
+  GO.tree = list(
+    tree = list(distance = "Wang", aggreg.method = "ward.D2"),
+    cut = list(
+      dynamic = list(
+        pamStage = TRUE,
+        pamRespectsDendro = TRUE,
+        deepSplit = 2,
+        minClusterSize = 2
+      )
+    )
+  ),
+  samples.tree = NULL
 )
-```
 
-```{r}
 # Display the clusters-heatmap
 ViSEAGO::show_heatmap(
     Wang_clusters_wardD2,
-    "GOterms"
-)
-
-ViSEAGO::show_heatmap(
-    Wang_clusters_wardD2,
     "GOterms")
-```
 
-
-```{r}
 # Display the clusters-heatmap table
 ViSEAGO::show_table(Wang_clusters_wardD2)
 
@@ -435,7 +430,7 @@ ViSEAGO::show_table(
 )
 ```
 
-### MDS
+#### Multi Dimensional Scaling Plot of the enriched GO-terms based on semantic similarity, colored by cluster
 
 ```{r}
 # display colored MDSplot
@@ -444,10 +439,10 @@ ViSEAGO::MDSplot(
     "GOterms")
 ```
 
-## Visualization and interpretation of GO clusters
+### Further summarizing the Semantic Similarity-based clusters
 
 ```{r}
-# calculate semantic similarites between clusters of GO terms
+# calculate semantic similarities between clusters of GO terms
 Wang_clusters_wardD2<-ViSEAGO::compute_SS_distances(
     Wang_clusters_wardD2,
     distance=c("max", "avg","rcmax", "BMA")
@@ -455,7 +450,7 @@ Wang_clusters_wardD2<-ViSEAGO::compute_SS_distances(
 ```
 
 ```{r}
-# build and highlight in an interactive MDSplot grouped clusters for one distance object
+# MDSplot - one point per cluster
 ViSEAGO::MDSplot(
     Wang_clusters_wardD2,
     "GOclusters")
@@ -470,79 +465,269 @@ Wang_clusters_wardD2<-ViSEAGO::GOclusters_heatmap(
         aggreg.method="ward.D2"
     )
 )
-```
 
-
-```{r}
 # display the GOClusters heatmap
 ViSEAGO::show_heatmap(
     Wang_clusters_wardD2,
     "GOclusters")
 ```
 
+## Both tissues together:
 
-
-
-
-## clusterprofiler
+### create topGO objects and perform enrichment using topGO wrapped by ViSEAGO
 
 ```{r}
-library(clusterProfiler)
-library(enrichplot)
-library(GO.db)
+BP_Results <- ViSEAGO::merge_enrich_terms(
+    Input = list(Oral_elim = c("BP_Oral", "elim_Oral"),
+                 Aboral_elim = c("BP_Aboral", "elim_Aboral"))
+)
+```
 
-DE_05_Aboral <- DESeq %>% filter(padj < 0.05 & log2FoldChange > 2)
 
-# Create TERM2GENE data.frame
-TERM2GENE <- Custom_GOs_valid %>%
-  dplyr::select(GOID, gene_id) %>%
-  dplyr::distinct()  # remove potential duplicates
+### Visualize and save initial results
 
-gene_list_aboral <- DE_05_Aboral$query
+```{r}
+# display the merged table
+BP_Results
+ViSEAGO::show_table(BP_Results)
 
-ego_aboral <- enricher(
-  gene = gene_list_aboral,
-  TERM2GENE = TERM2GENE,
-  pvalueCutoff = 0.05,
-  qvalueCutoff = 0.05
+# print the merged table in a file
+ViSEAGO::show_table(
+    BP_Results,
+    "../output_RNA/differential_expression/semantic-enrichment/DE_05.csv"
+)
+```
+
+ - enrichment pvalue cutoff:
+        Oral_elim : 0.01
+        Aboral_elim : 0.01
+- enrich GOs (in at least one list): 176 GO terms of 2 conditions.
+        Oral_elim : 58 terms
+        Aboral_elim : 118 terms
+
+### Semantic similarity --> Cluster: Use Wang graph-based method to identify similarity between GO terms
+
+```{r}
+# initialize 
+myGOs<-ViSEAGO::build_GO_SS(
+    gene2GO=myGENE2GO_Pacuta,
+    enrich_GO_terms=BP_Results
 )
 
-ego_aboral@result$Description <- Term(ego_aboral@result$ID)
-
-dotplot(ego_aboral, showCategory = 20)
-barplot(ego_aboral, showCategory = 20, title = "GO Barplot (Aboral)")
-
-# Clean ego_aboral@result$geneID
-ego_aboral@result$geneID <- gsub("Pocillopora_acuta_HIv2___", "", ego_aboral@result$geneID)
-ego_aboral@result$geneID <- gsub("\\.t1[a-z]*", "", ego_aboral@result$geneID)
-
-treeplot(pairwise_termsim(ego_aboral))
-
-########
-
-DE_05_OralEpi <- DESeq %>% filter(padj < 0.05& log2FoldChange < -2)
-gene_list_oral <- DE_05_OralEpi$query
-
-ego_oral <- enricher(
-  gene = gene_list_oral,
-  pAdjustMethod="none",
-  TERM2GENE = TERM2GENE,
-  pvalueCutoff = 0.05,
-  qvalueCutoff = 0.1
+myGOs <- ViSEAGO::compute_SS_distances(
+    myGOs,
+   distance=c("Wang")
 )
-ego_oral
-ego_oral@result$Description <- Term(ego_oral@result$ID)
 
-upsetplot(ego_oral)
+myGOs
+```
+#### Multi Dimensional Scaling Plot of the GO-terms based on semantic similarity
 
-dotplot(ego_oral, showCategory = 20)
-barplot(ego_oral, showCategory = 20, title = "GO Barplot (oral)")
+```{r}
+# display MDSplot
+ViSEAGO::MDSplot(myGOs,
+                 "GOterms")
+```
 
-# Clean ego_oral@result$geneID
-ego_oral@result$geneID <- gsub("Pocillopora_acuta_HIv2___", "", ego_oral@result$geneID)
-ego_oral@result$geneID <- gsub("\\.t1[a-z]*", "", ego_oral@result$geneID)
+#### Heatmap + table of GO terms, with clusters aggregated by hclust with ward.D2 method
 
-treeplot(pairwise_termsim(ego_oral), hclust_method = "ward.D2",nwords=2)
+```{r}
+# GOterms heatmap with the default parameters
+Wang_clusters_wardD2 <- ViSEAGO::GOterms_heatmap(
+  myGOs,
+  showIC = TRUE,
+  showGOlabels = TRUE,
+  GO.tree = list(
+    tree = list(distance = "Wang", aggreg.method = "ward.D2"),
+    cut = list(
+      dynamic = list(
+        pamStage = TRUE,
+        pamRespectsDendro = TRUE,
+        deepSplit = 2,
+        minClusterSize = 4
+      )
+    )
+  ),
+  samples.tree = NULL
+)
+
+# Display the clusters-heatmap
+ViSEAGO::show_heatmap(
+    Wang_clusters_wardD2,
+    "GOterms")
+
+# Display the clusters-heatmap table
+ViSEAGO::show_table(Wang_clusters_wardD2)
+
+# Print the clusters-heatmap table
+ViSEAGO::show_table(
+    Wang_clusters_wardD2,
+    "../output_RNA/differential_expression/semantic-enrichment/DE_05_cluster_heatmap_Wang_wardD2.csv"
+)
+```
+
+#### Multi Dimensional Scaling Plot of the enriched GO-terms based on semantic similarity, colored by cluster
+
+```{r}
+# display colored MDSplot
+ViSEAGO::MDSplot(
+    Wang_clusters_wardD2,
+    "GOterms")
+```
+
+### Further summarizing the Semantic Similarity-based clusters
+
+```{r}
+# calculate semantic similarities between clusters of GO terms
+Wang_clusters_wardD2<-ViSEAGO::compute_SS_distances(
+    Wang_clusters_wardD2,
+    distance=c("max", "avg","rcmax", "BMA")
+)
+```
+
+```{r}
+# MDSplot - one point per cluster
+ViSEAGO::MDSplot(
+    Wang_clusters_wardD2,
+    "GOclusters")
+```
+
+
+```{r}
+# GOclusters heatmap
+Wang_clusters_wardD2<-ViSEAGO::GOclusters_heatmap(
+    Wang_clusters_wardD2,
+    tree=list(
+        distance="BMA",
+        aggreg.method="ward.D2"
+    )
+)
+
+# display the GOClusters heatmap
+ViSEAGO::show_heatmap(
+    Wang_clusters_wardD2,
+    "GOclusters")
+```
+
+## Custom plotting of results
+
+```{r}
+clustered_allDEGs_enrichedGO <- as.data.frame(Wang_clusters_wardD2@enrich_GOs@data)
+
+cluster_map <- data.frame(cluster_full = rownames(as.matrix(slot(Wang_clusters_wardD2,"clusters_dist")[["BMA"]])))
+cluster_map <- cluster_map %>% 
+  mutate(
+    cluster = str_extract(cluster_full, "\\d+"),
+    Cluster.name = str_replace(cluster_full,".*?_.*?_","")
+  ) %>%
+  mutate(Cluster.name = paste0("Cluster ", cluster, ": ", Cluster.name)) %>%
+  select(cluster, Cluster.name)
+
+cluster_map
+```
+
+### Manually fix cluster names based on GO terms inside each cluster
+
+```{r}
+cluster_map_fixed <- cluster_map %>%
+  mutate(Cluster.name = str_replace(Cluster.name, "Cluster 2: developmental process", "Cluster 2: cell fate determination"),
+         Cluster.name = str_replace(Cluster.name, "Cluster 4: anatomical structure development", "Cluster 4: regeneration & tissue morphogenesis"),
+         Cluster.name = str_replace(Cluster.name, "Cluster 5: multicellular organism development", "Cluster 5: multicellular organism pattern formation"),
+         Cluster.name = str_replace(Cluster.name, "Cluster 9: transport", "Cluster 9: metal ion transmembrane transport"),
+         Cluster.name = str_replace(Cluster.name, "Cluster 10: transport", "Cluster 10: amino acid & small molecule transmembrane transport"),
+        Cluster.name = str_replace(Cluster.name, "Cluster 12: nervous system process", "Cluster 12: sensory perception"),
+        Cluster.name = str_replace(Cluster.name, "Cluster 16: biological_process", "Cluster 16: regeneration & wound healing"),
+        Cluster.name = str_replace(Cluster.name, "Cluster 18: secretion by cell", "Cluster 18: neurotransmitter and hormone secretion"),
+        Cluster.name = str_replace(Cluster.name, "Cluster 24: external encapsulating structure organization", "Cluster 24: extracellular matrix organization"),
+        Cluster.name = str_replace(Cluster.name, "Cluster 25: biological_process", "Cluster 25: cell organization and homeostasis")
+         )
+```
+
+
+```{r}
+clustered_allDEGs_enrichedGO <- clustered_allDEGs_enrichedGO %>%
+  left_join(cluster_map_fixed, by = c("GO.cluster" = "cluster"))
+
+write.csv(clustered_allDEGs_enrichedGO,"../output_RNA/differential_expression/semantic-enrichment/DE_05_clusters_named.csv")
+
+library(DT)
+
+# Interactive table with scrolling
+datatable(clustered_allDEGs_enrichedGO,
+          options = list(
+            pageLength = 10,   # rows per page
+            scrollX = TRUE,    # horizontal scroll if wide
+            scrollY = "400px"  # vertical scroll
+          ))
+```
+
+### Plot
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+# Create bidirectional data
+cluster_data <- clustered_allDEGs_enrichedGO %>%
+  select(Cluster.name, Oral_elim.Significant_genes, Aboral_elim.Significant_genes) %>%
+  mutate(
+    # Clean cluster names
+    Cluster.name = gsub("^Cluster \\d+:\\s*", "", Cluster.name),
+    Oral_terms = ifelse(!is.na(Oral_elim.Significant_genes), 1, 0),
+    Aboral_terms = ifelse(!is.na(Aboral_elim.Significant_genes), 1, 0)
+  ) %>%
+  group_by(Cluster.name) %>%
+  summarise(
+    Oral_terms = sum(Oral_terms),
+    Aboral_terms = sum(Aboral_terms),
+    .groups = "drop"
+  ) %>%
+  filter(Oral_terms + Aboral_terms > 0) %>%
+  mutate(
+    deviation = Oral_terms - Aboral_terms,
+    Aboral_terms = -Aboral_terms  # Make negative for bidirectional plot
+  ) %>%
+  pivot_longer(cols = c("Oral_terms", "Aboral_terms"), 
+               names_to = "Tissue", values_to = "n_terms") %>%
+  mutate(Tissue = ifelse(Tissue == "Oral_terms", "Oral epidermis", "Aboral"))
+
+# Calculate transition points for dashed lines
+transition_data <- cluster_data %>%
+  distinct(Cluster.name, deviation) %>%
+  arrange(deviation)
+
+aboral_to_equal <- sum(transition_data$deviation < 0) + 0.5
+equal_to_oral <- sum(transition_data$deviation <= 0) + 0.5
+
+# Plot
+p <- ggplot(cluster_data, aes(x = reorder(Cluster.name, deviation), y = n_terms, fill = Tissue)) +
+  geom_col(width = 0.7, alpha = 0.8) +
+  geom_hline(yintercept = 0, color = "black", linewidth = 0.8) +
+  geom_vline(xintercept = c(aboral_to_equal, equal_to_oral), 
+             color = "grey60", linetype = "dashed", linewidth = 0.6) +
+  scale_fill_manual(values = c("Oral epidermis" = "#2E8B57", "Aboral" = "#9370DB")) +
+  coord_flip() +
+  theme_minimal() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.position = "bottom",
+    legend.title = element_text(face = "bold"),
+    axis.title = element_text(face = "bold"),
+    axis.text = element_text(color = "black"),
+    axis.text.x = element_text(size = 11)
+  ) +
+  scale_y_continuous(labels = abs) +
+  labs(
+    x = "Gene clusters",
+    y = "Number of enriched GO terms",
+    title = "Tissue-specific GO term enrichment patterns",
+    subtitle = "Clusters ordered by net enrichment (Oral vs. Aboral)"
+  )
+
+ggsave("../output_RNA/differential_expression/semantic-enrichment/GO_enrichment_bidirectional.png", p, width = 10, height = 8, dpi = 300)
+print(p)
 ```
 
 
