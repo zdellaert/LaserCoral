@@ -25,18 +25,18 @@ renv::restore() #reinstall all the package versions in the renv lockfile
 ## Load packages
 
 ```{r packages}
-require("genefilter")
-require("DESeq2")
-require("apeglm")
-require("ashr")
-require("ggplot2")
-require("vsn")
-require("hexbin")
-require("pheatmap")
-require("RColorBrewer")
-require("EnhancedVolcano")
-require("rtracklayer")
-require("tidyverse")
+library("genefilter")
+library("DESeq2")
+library("apeglm")
+library("ashr")
+library("ggplot2")
+library("vsn")
+library("hexbin")
+library("pheatmap")
+library("RColorBrewer")
+library("EnhancedVolcano")
+library("rtracklayer")
+library("tidyverse")
 
 sessionInfo() #provides list of loaded packages and version of R.
 ```
@@ -61,7 +61,7 @@ save_ggplot <- function(plot, filename, width = 10, height = 7, units = "in", dp
 }
 
 # Specify colors
-ann_colors = list(Tissue = c(OralEpi = "palegreen3" ,Aboral = "mediumpurple1"))
+ann_colors = list(Tissue = c(OralEpi = "#FD8D3C" ,Aboral = "mediumpurple1"))
 ```
 
 
@@ -267,7 +267,7 @@ pcaData <- plotPCA(vsd, intgroup=c("Tissue", "Fragment"), returnData=TRUE, ntop 
 percentVar <- round(100 * attr(pcaData, "percentVar"))
 PCA <- ggplot(pcaData, aes(PC1, PC2, color=Tissue, shape=Fragment)) +
   geom_point(size=2) +
-  scale_color_manual(values = c("Aboral" = "mediumpurple1", "OralEpi" = "palegreen3"))+
+  scale_color_manual(values = c("Aboral" = "mediumpurple1", "OralEpi" = "#FD8D3C"))+
   xlab(paste0("PC1: ",percentVar[1],"% variance")) +
   ylab(paste0("PC2: ",percentVar[2],"% variance")) + 
   coord_fixed() + theme_bw()
@@ -276,7 +276,7 @@ save_ggplot(PCA, "PCA_allgenes")
 
 PCA_small <- ggplot(pcaData, aes(PC1, PC2, color=Tissue)) +
   geom_point(size=2) +
-  scale_color_manual(values = c("Aboral" = "mediumpurple1", "OralEpi" = "palegreen3"))+
+  scale_color_manual(values = c("Aboral" = "mediumpurple1", "OralEpi" = "#FD8D3C"))+
   xlab(paste0("PC1: ",percentVar[1],"% variance")) +
   ylab(paste0("PC2: ",percentVar[2],"% variance")) + 
   coord_fixed() + theme_bw()
@@ -290,7 +290,7 @@ pcaData <- plotPCA(vsd, intgroup=c("Tissue", "Fragment"), returnData=TRUE)
 percentVar <- round(100 * attr(pcaData, "percentVar"))
 PCA <- ggplot(pcaData, aes(PC1, PC2, color=Tissue, shape=Fragment)) +
   geom_point(size=2) +
-  scale_color_manual(values = c("Aboral" = "mediumpurple1", "OralEpi" = "palegreen3"))+
+  scale_color_manual(values = c("Aboral" = "mediumpurple1", "OralEpi" = "#FD8D3C"))+
   xlab(paste0("PC1: ",percentVar[1],"% variance")) +
   ylab(paste0("PC2: ",percentVar[2],"% variance")) + 
   coord_fixed() + theme_bw()
@@ -299,7 +299,7 @@ save_ggplot(PCA, "PCA")
 
 PCA_small <- ggplot(pcaData, aes(PC1, PC2, color=Tissue)) +
   geom_point(size=2) +
-  scale_color_manual(values = c("Aboral" = "mediumpurple1", "OralEpi" = "palegreen3"))+
+  scale_color_manual(values = c("Aboral" = "mediumpurple1", "OralEpi" = "#FD8D3C"))+
   xlab(paste0("PC1: ",percentVar[1],"% variance")) +
   ylab(paste0("PC2: ",percentVar[2],"% variance")) + 
   coord_fixed() + theme_bw()
@@ -457,7 +457,7 @@ write.csv(Mcap_MarkerGenes_broc_all_res_Mcap, "../output_RNA/differential_expres
 ### Biomineralization toolkit
 ```{r}
 Biomin <- read.csv("../output_RNA/marker_genes/Pacuta_Biomin_Blast.csv") %>% dplyr::rename("query" = Pocillopora_acuta_best_hit) %>% select(-c(accessionnumber.geneID, Ref))
-Biomin_broc <- read.csv("../output_RNA/marker_genes/Pacuta_Biomin_Spis_ortholog.csv") %>% dplyr::rename("query" = Pacuta_gene) %>% select(-c(X,accessionnumber_gene_id, ref))
+Biomin_broc <- read.csv("../output_RNA/marker_genes/Pacuta_Biomin_Spis_ortholog.csv") %>% dplyr::rename("query" = Pacuta_gene) #%>% select(-c(X,accessionnumber_gene_id, ref))
 
 Biomin <- Biomin %>%
   group_by(query,List) %>%
@@ -517,6 +517,9 @@ DE_05_biomin         <- join_genes_of_interest(DE_05, Biomin)
 DE_05_Biomin_broc    <- join_genes_of_interest(DE_05, Biomin_broc)
 DE_05_marker         <- join_genes_of_interest(DE_05, MarkerGenes)
 DE_05_marker_broc    <- join_genes_of_interest(DE_05, MarkerGenes_broc)
+DE_05_marker_broc_Pcomp    <- join_genes_of_interest(DE_05, Pcomp_MarkerGenes_broc)
+DE_05_marker_broc_Pdam    <- join_genes_of_interest(DE_05, Pdam_MarkerGenes_broc)
+DE_05_marker_broc_Mcap   <- join_genes_of_interest(DE_05, Mcap_MarkerGenes_broc)
 DE_05_He_etal        <- join_genes_of_interest(DE_05, He_etal_Nvec)
 DE_05_DuBuc_etal     <- join_genes_of_interest(DE_05, DuBuc_etal_Nvec)
 
@@ -1164,7 +1167,6 @@ as.data.frame(resOrdered)[YinYangs,]
 
 Okay! None of these genes are differentially expressed between the tissues. That is interesting and good to know. Pocillopora_acuta_HIv2___RNAseq.g25242.t1 has the highest basal expression of all the potential isoforms of this transcription factor.
 
-
 ### TRP Channels
 
 ```{r}
@@ -1363,6 +1365,80 @@ save_ggplot(DE_marker_broc, "DE_marker_broc_3",height=9)
 
 DE_05_marker_broc <- DE_05_marker_broc %>% left_join(Manual,by=c("query")) %>% select(!ends_with(".y"))
 ```
+
+```{r}
+#view marker genes that are differentially expressed
+select <- unique(DE_05_marker_broc_Pdam$query)
+z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
+DE_marker_broc <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), 
+                      cluster_rows=TRUE, show_rownames=TRUE,
+                      cluster_cols=TRUE, cutree_cols = 2, cutree_rows = 5,
+                      annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
+                      labels_row = DE_05_marker_broc_Pdam$List, fontsize_row = 7)
+DE_marker_broc
+save_ggplot(DE_marker_broc, "DE_marker_broc_Pdam",height=20)
+
+#view marker genes that are differentially expressed
+select <- unique(DE_05_marker_broc_Pdam$query)
+z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
+DE_marker_broc <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), 
+                      cluster_rows=TRUE, show_rownames=TRUE,
+                      cluster_cols=TRUE, cutree_cols = 2, cutree_rows = 5,
+                      annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
+                      labels_row = paste0(DE_05_marker_broc_Pdam$List,": ", gene_labels[match(select,(gene_labels$query)),2]), fontsize_row = 6)
+DE_marker_broc
+save_ggplot(DE_marker_broc, "DE_marker_broc_Pdam2",height=20)
+```
+
+```{r}
+#view marker genes that are differentially expressed
+select <- unique(DE_05_marker_broc_Pcomp$query)
+z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
+DE_marker_broc <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), 
+                      cluster_rows=TRUE, show_rownames=TRUE,
+                      cluster_cols=TRUE, cutree_cols = 2, cutree_rows = 5,
+                      annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
+                      labels_row = DE_05_marker_broc_Pcomp$List, fontsize_row = 7)
+DE_marker_broc
+save_ggplot(DE_marker_broc, "DE_marker_broc_Pcomp",height=30)
+
+#view marker genes that are differentially expressed
+select <- unique(DE_05_marker_broc_Pcomp$query)
+z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
+DE_marker_broc <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), 
+                      cluster_rows=TRUE, show_rownames=TRUE,
+                      cluster_cols=TRUE, cutree_cols = 2, cutree_rows = 5,
+                      annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
+                      labels_row = paste0(DE_05_marker_broc_Pcomp$List,": ", gene_labels[match(select,(gene_labels$query)),2]), fontsize_row = 6)
+DE_marker_broc
+save_ggplot(DE_marker_broc, "DE_marker_broc_Pcomp2",height=30)
+```
+
+```{r}
+#view marker genes that are differentially expressed
+select <- unique(DE_05_marker_broc_Mcap$query)
+z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
+DE_marker_broc <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), 
+                      cluster_rows=TRUE, show_rownames=TRUE,
+                      cluster_cols=TRUE, cutree_cols = 2, cutree_rows = 5,
+                      annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
+                      labels_row = DE_05_marker_broc_Mcap$List, fontsize_row = 7)
+DE_marker_broc
+save_ggplot(DE_marker_broc, "DE_marker_broc_Mcap",height=25)
+
+#view marker genes that are differentially expressed
+select <- unique(DE_05_marker_broc_Mcap$query)
+z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
+DE_marker_broc <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), 
+                      cluster_rows=TRUE, show_rownames=TRUE,
+                      cluster_cols=TRUE, cutree_cols = 2, cutree_rows = 5,
+                      annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
+                      labels_row = paste0(DE_05_marker_broc_Mcap$List,": ", gene_labels[match(select,(gene_labels$query)),2]), fontsize_row = 6)
+DE_marker_broc
+save_ggplot(DE_marker_broc, "DE_marker_broc_Mcap2",height=25)
+```
+
+
 
 
 ### bacteria genes
@@ -1626,7 +1702,7 @@ plot_data <- solute_de_annot %>%
 ggplot(plot_data, aes(x = SLC_family, y = n, fill = Direction)) +
   geom_bar(stat = "identity") +
   facet_wrap(~Substrate_Broad, scales = "free_x") +
-  scale_fill_manual(values = c("upOral" = "darkgreen", "upAboral" = "purple")) +
+  scale_fill_manual(values = c("upOral" = "#FD8D3C", "upAboral" = "mediumpurple1")) +
   theme_minimal() +
   labs(title = "Differentially Expressed SLC Genes by Family",
        x = "SLC Family", y = "Number of DE Genes") +
@@ -1888,12 +1964,15 @@ top50_DE <- pheatmap(
 save_ggplot(top50_DE, "clusters_clean/HeatStress_all_SwissProt")
 ``` 
 
+
+
+
 ### wnt and hox
 
 ```{r}
-WNT <- Manual %>% filter(grepl("wnt", Heatmap_Label, ignore.case = TRUE)|grepl("frizzle", Heatmap_Label, ignore.case = TRUE)|grepl("homeobox", Heatmap_Label, ignore.case = TRUE)|grepl("hox", Heatmap_Label, ignore.case = TRUE))#|grepl("wnt", BiologicalProcess, ignore.case = TRUE))
+Wnt_Hox_all <- Manual %>% filter(grepl("wnt", Heatmap_Label, ignore.case = TRUE)|grepl("frizzle", Heatmap_Label, ignore.case = TRUE)|grepl("homeobox", Heatmap_Label, ignore.case = TRUE)|grepl("hox", Heatmap_Label, ignore.case = TRUE))
 
-select <- WNT$query
+select <- Wnt_Hox_all$query
 
 z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
 top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
@@ -1940,387 +2019,8 @@ top50_DE <- pheatmap(
   gaps_row = 26  # Add breaks only between clusters
 )
 
-
 # Save the heatmap
 save_ggplot(top50_DE, "clusters_clean/WNT_Hox_DE_SwissProt")
-
-```
-
-
-#### wnt chromosome
-```{r}
-WNT_all <- Manual %>% filter(grepl("wnt", Heatmap_Label, ignore.case = TRUE)|grepl("frizzle", Heatmap_Label, ignore.case = TRUE)|grepl("homeobox", Heatmap_Label, ignore.case = TRUE)|grepl("hox", Heatmap_Label, ignore.case = TRUE))#|grepl("wnt", BiologicalProcess, ignore.case = TRUE))
-
-WNT <- Manual %>% filter(grepl("wnt", Heatmap_Label, ignore.case = TRUE))
-FRZ <- Manual %>% filter(grepl("frizzle", Heatmap_Label, ignore.case = TRUE))
-HOX <- Manual %>% filter(grepl("hox", Heatmap_Label, ignore.case = TRUE)|grepl("homeobox", Heatmap_Label, ignore.case = TRUE))
-
-select <- WNT$query
-
-gene_layout <- gff_transcripts %>%
-  filter(query %in% select) %>%
-  arrange(chromosome, start) %>% left_join(WNT) %>% distinct() 
-
-expr_df <- assay(vsd)[select, ] %>%
-  as.data.frame() %>%
-  rownames_to_column("query") %>%
-  pivot_longer(-query, names_to = "Sample", values_to = "vsd_expr") %>%
-  left_join(as.data.frame(colData(vsd)), by = "Sample") %>%
-  group_by(query, Tissue) %>%
-  summarise(mean_expr = mean(vsd_expr), .groups = "drop") %>%
-  pivot_wider(names_from = Tissue, values_from = mean_expr)
-
-plot_df <- gene_layout %>%
-  left_join(expr_df, by = "query")
-
-plot_df <- plot_df %>%
-  mutate(highest_expr_tissue = case_when(
-    OralEpi > Aboral ~ "OralEpi",
-    Aboral > OralEpi ~ "Aboral",
-    TRUE ~ "equal"
-  ))
-
-plot_df <- plot_df %>%
-  mutate(chromosome_split = case_when(
-    chromosome == "Pocillopora_acuta_HIv2___xfSc0000014" & start < 3.6e6 ~ "xfSc0000014_A",
-    chromosome == "Pocillopora_acuta_HIv2___xfSc0000014" & start >= 3.65e6 ~ "xfSc0000014_B",
-    TRUE ~ chromosome
-  ))
-
-plot_df$Heatmap_Label <- gsub("Protein ","",plot_df$Heatmap_Label)
-
-heat_df <- plot_df %>%
-  select(query, start, end, width,chromosome, OralEpi, Aboral) %>%
-  pivot_longer(cols = c(OralEpi, Aboral), names_to = "tissue", values_to = "expression") %>%
-  mutate(midpoint = (start + end) / 2)  # for positioning tile center
-
-heat_df <- heat_df %>%
-  left_join(plot_df %>% select(query, chromosome_split), by = "query") %>%
-  mutate(chromosome = chromosome_split)
-
-library(gggenes)
-library(ggnewscale)
-
-Wnt_chr <- ggplot(plot_df, aes(xmin = start, xmax = end, y = "Hox genes", forward = strand == "+",
-                    fill = highest_expr_tissue)) +
-  geom_gene_arrow(arrowhead_height = unit(3, "mm"), arrowhead_width = unit(1.5, "mm")) +
-  geom_label(data = plot_df,
-           aes(x = (start + end)/2, y = "_Genes_ ", label = Heatmap_Label),
-           vjust = -1.75, size = 2, fill = "lightgrey", label.size = 0.1,fontface="bold")+
-  scale_fill_manual(values = c("OralEpi" = "palegreen3", "Aboral" = "mediumpurple1", "equal" = "grey")) +
-  theme_minimal() +
-  facet_wrap(~ chromosome_split, scales = "free_x")+
-  theme(axis.text.y = element_blank(),
-        axis.title.y = element_blank(),
-        panel.spacing = unit(2, "lines")) +
-  labs(x = "Genomic position", fill = "Higher expression in")
-Wnt_chr
-save_ggplot(Wnt_chr, "Wnt_chromosome")
-```
-
-
-```{r}
-Wnt_chr_heatmap <- ggplot() +
-  # Heatmap tiles
-  geom_tile(data = heat_df,
-            aes(x = midpoint, y = tissue, fill = expression,width = width),colour="black",
-            height = 0.5) +
-  
-  # Color for heatmap (expression level)
-  scale_fill_gradient(low = "white", high = "firebrick", name = "Expression") +
-  new_scale_fill() +
-  
-  # Gene arrows
-  geom_gene_arrow(data = plot_df,
-                  aes(xmin = start, xmax = end, y = "_Genes_",
-                      forward = strand == "+", fill = highest_expr_tissue),
-                  arrowhead_height = unit(3, "mm"),
-                  arrowhead_width = unit(1.5, "mm")) +
-    geom_label(data = plot_df,
-           aes(x = (start + end)/2, y = "_Genes_", label = Heatmap_Label),
-           vjust = 1.5, size = 4, fill = "lightgrey", label.size = 0.1,fontface="bold")+
-
-  scale_fill_manual(values = c("OralEpi" = "palegreen3", "Aboral" = "mediumpurple1", "equal" = "grey"),
-                    name = "Higher expression in") +
-
-  facet_wrap(~ chromosome_split, scales = "free_x") +
-  theme_minimal() +
-  theme(
-    axis.text.y = element_text(size = 10),
-    axis.title.y = element_blank(),
-    panel.spacing = unit(.1, "lines")
-  ) +scale_y_discrete(expand = expansion(mult = c(1, 0)))+
-  labs(x = "Genomic position")
-
-save_ggplot(Wnt_chr_heatmap, "Wnt_chromosome_expression",width = 20, height = 5)
-```
-
-```{r}
-# Shift gene coordinates within each chromosome
-plot_df_shifted <- plot_df %>%
-  group_by(chromosome) %>%
-  mutate(
-    chr_start = min(start),
-    start_shifted = start - chr_start + 10,  # +10 if you want to avoid 0
-    end_shifted   = end - chr_start + 10
-  ) %>%
-  ungroup()
-
-
-heat_df_shifted <- plot_df_shifted %>%
-  select(query, start_shifted, end_shifted, width,chromosome, OralEpi, Aboral) %>%
-  pivot_longer(cols = c(OralEpi, Aboral), names_to = "tissue", values_to = "expression") %>%
-  mutate(midpoint = (start_shifted + end_shifted) / 2)  # for positioning tile center
-
-Wnt_chr_heatmap <- ggplot() +
-  # Heatmap tiles
-  geom_tile(data = heat_df_shifted,
-            aes(x = midpoint, y = tissue, fill = expression,width = width),colour="black",
-            height = 0.5) +
-  
-  # Color for heatmap (expression level)
-  scale_fill_gradient(low = "white", high = "firebrick", name = "Expression") +
-  new_scale_fill() +
-  
-  # Gene arrows
-  geom_gene_arrow(data = plot_df_shifted,
-                  aes(xmin = start_shifted, xmax = end_shifted, y = "_Genes_",
-                      forward = strand == "+", fill = highest_expr_tissue),
-                  arrowhead_height = unit(3, "mm"),
-                  arrowhead_width = unit(1.5, "mm")) +
-    geom_label(data = plot_df_shifted,
-           aes(x = (start_shifted + end_shifted)/2, y = "_Genes_", label = Heatmap_Label),
-           vjust = 1.5, size = 4, fill = "lightgrey", label.size = 0.1,fontface="bold")+
-
-  scale_fill_manual(values = c("OralEpi" = "palegreen3", "Aboral" = "mediumpurple1", "equal" = "grey"),
-                    name = "Higher expression in") +
-
-  facet_wrap(~ chromosome, scales = "fixed",ncol=1) +
-  theme_minimal() +
-  theme(
-    axis.text.y = element_text(size = 10),
-    axis.title.y = element_blank(),
-    panel.spacing = unit(.1, "lines")
-  ) +scale_y_discrete(expand = expansion(mult = c(1, 0)))+
-  labs(x = "Genomic position")
-
-save_ggplot(Wnt_chr_heatmap, "Wnt_chromosome_expression_length_preserved",width = 30, height = 5)
-```
-
-#### Hox 
-
-```{r}
-HOX <- Manual %>% filter(grepl("homeobox", Heatmap_Label, ignore.case = TRUE)|grepl("hox", Heatmap_Label, ignore.case = TRUE))
-select <- HOX$query
-
-gene_layout <- gff_transcripts %>%
-  filter(query %in% select) %>%
-  arrange(chromosome, start) %>% left_join(HOX) %>% distinct() 
-
-expr_df <- assay(vsd)[select, ] %>%
-  as.data.frame() %>%
-  rownames_to_column("query") %>%
-  pivot_longer(-query, names_to = "Sample", values_to = "vsd_expr") %>%
-  left_join(as.data.frame(colData(vsd)), by = "Sample") %>%
-  group_by(query, Tissue) %>%
-  summarise(mean_expr = mean(vsd_expr), .groups = "drop") %>%
-  pivot_wider(names_from = Tissue, values_from = mean_expr)
-
-plot_df <- gene_layout %>%
-  left_join(expr_df, by = "query")
-
-plot_df <- plot_df %>%
-  mutate(highest_expr_tissue = case_when(
-    OralEpi > Aboral ~ "OralEpi",
-    Aboral > OralEpi ~ "Aboral",
-    TRUE ~ "equal"
-  ))
-
-plot_df <- plot_df %>%
-  mutate(chromosome_split = case_when(
-    chromosome == "Pocillopora_acuta_HIv2___xfSc0000002" & start < 2.2e6 ~ "xfSc0000002_A",
-    chromosome == "Pocillopora_acuta_HIv2___xfSc0000002" & start >= 6.4e6 ~ "xfSc0000002_B",
-      chromosome == "Pocillopora_acuta_HIv2___Sc0000011" & start < 2e6 ~ "Sc0000011_A",
-      chromosome == "Pocillopora_acuta_HIv2___Sc0000011" & start >= 2e6 ~ "Sc0000011_B",
-    chromosome == "Pocillopora_acuta_HIv2___Sc0000024" & start < 420000 ~ "Sc0000024_A",
-    chromosome == "Pocillopora_acuta_HIv2___Sc0000024" & start >= 2300000 ~ "Sc0000024_B",
-          chromosome == "Pocillopora_acuta_HIv2___xfSc0000008" & start < 2e6 ~ "xfSc0000008_A",
-      chromosome == "Pocillopora_acuta_HIv2___xfSc0000008" & start >= 2e6 ~ "xfSc0000008_B",
-    TRUE ~ chromosome
-  ))
-
-heat_df <- plot_df %>%
-  select(query, start, end, width,chromosome, OralEpi, Aboral) %>%
-  pivot_longer(cols = c(OralEpi, Aboral), names_to = "tissue", values_to = "expression") %>%
-  mutate(midpoint = (start + end) / 2)  # for positioning tile center
-
-heat_df <- heat_df %>%
-  left_join(plot_df %>% select(query, chromosome_split), by = "query") %>%
-  mutate(chromosome = chromosome_split)
-
-library(gggenes)
-library(ggnewscale)
-
-HOX_chr <- ggplot(plot_df[1:6,], aes(xmin = start, xmax = end, y = "Hox genes", forward = strand == "+",
-                    fill = highest_expr_tissue)) +
-  geom_gene_arrow(arrowhead_height = unit(3, "mm"), arrowhead_width = unit(1.5, "mm")) +
-  geom_label(aes(x = (start + end)/2, y = "_Genes_ ", label = Heatmap_Label),
-           vjust = -1.75, size = 2, fill = "lightgrey", label.size = 0.1,fontface="bold")+
-  scale_fill_manual(values = c("OralEpi" = "palegreen3", "Aboral" = "mediumpurple1", "equal" = "grey")) +
-  theme_minimal() +
-  facet_wrap(~ chromosome_split, scales = "free_x",ncol=1)+
-  theme(axis.text.y = element_blank(),
-        axis.title.y = element_blank(),
-        panel.spacing = unit(2, "lines")) +
-  labs(x = "Genomic position", fill = "Higher expression in")
-HOX_chr
- save_ggplot(HOX_chr, "Hox_chromosome")
- 
- HOX_chr <- ggplot(plot_df[7:12,], aes(xmin = start, xmax = end, y = "Hox genes", forward = strand == "+",
-                    fill = highest_expr_tissue)) +
-  geom_gene_arrow(arrowhead_height = unit(3, "mm"), arrowhead_width = unit(1.5, "mm")) +
-  geom_label(aes(x = (start + end)/2, y = "_Genes_ ", label = Heatmap_Label),
-           vjust = -1.75, size = 2, fill = "lightgrey", label.size = 0.1,fontface="bold")+
-  scale_fill_manual(values = c("OralEpi" = "palegreen3", "Aboral" = "mediumpurple1", "equal" = "grey")) +
-  theme_minimal() +
-  facet_wrap(~ chromosome_split, scales = "free_x",ncol=1)+
-  theme(axis.text.y = element_blank(),
-        axis.title.y = element_blank(),
-        panel.spacing = unit(2, "lines")) +
-  labs(x = "Genomic position", fill = "Higher expression in")
-HOX_chr
- save_ggplot(HOX_chr, "Hox_chromosome2")
- 
-  HOX_chr <- ggplot(plot_df[13:19,], aes(xmin = start, xmax = end, y = "Hox genes", forward = strand == "+",
-                    fill = highest_expr_tissue)) +
-  geom_gene_arrow(arrowhead_height = unit(3, "mm"), arrowhead_width = unit(1.5, "mm")) +
-  geom_label(aes(x = (start + end)/2, y = "_Genes_ ", label = Heatmap_Label),
-           vjust = -1.75, size = 2, fill = "lightgrey", label.size = 0.1,fontface="bold")+
-  scale_fill_manual(values = c("OralEpi" = "palegreen3", "Aboral" = "mediumpurple1", "equal" = "grey")) +
-  theme_minimal() +
-  facet_wrap(~ chromosome_split, scales = "free_x",ncol=1)+
-  theme(axis.text.y = element_blank(),
-        axis.title.y = element_blank(),
-        panel.spacing = unit(2, "lines")) +
-  labs(x = "Genomic position", fill = "Higher expression in")
-HOX_chr
- save_ggplot(HOX_chr, "Hox_chromosome3")
- 
-   HOX_chr <- ggplot(plot_df[20:24,], aes(xmin = start, xmax = end, y = "Hox genes", forward = strand == "+",
-                    fill = highest_expr_tissue)) +
-  geom_gene_arrow(arrowhead_height = unit(3, "mm"), arrowhead_width = unit(1.5, "mm")) +
-  geom_label(aes(x = (start + end)/2, y = "_Genes_ ", label = Heatmap_Label),
-           vjust = -1.75, size = 2, fill = "lightgrey", label.size = 0.1,fontface="bold")+
-  scale_fill_manual(values = c("OralEpi" = "palegreen3", "Aboral" = "mediumpurple1", "equal" = "grey")) +
-  theme_minimal() +
-  facet_wrap(~ chromosome_split, scales = "free_x",ncol=1)+
-  theme(axis.text.y = element_blank(),
-        axis.title.y = element_blank(),
-        panel.spacing = unit(2, "lines")) +
-  labs(x = "Genomic position", fill = "Higher expression in")
-HOX_chr
- save_ggplot(HOX_chr, "Hox_chromosome4")
-```
-
-```{r}
-HOX_chr_heatmap <- ggplot() +
-  # Heatmap tiles
-  geom_tile(data = heat_df,
-            aes(x = midpoint, y = tissue, fill = expression,width = width),colour="black",
-            height = 0.5) +
-  
-  # Color for heatmap (expression level)
-  scale_fill_gradient(low = "white", high = "firebrick", name = "Expression") +
-  new_scale_fill() +
-  
-  # Gene arrows
-  geom_gene_arrow(data = plot_df,
-                  aes(xmin = start, xmax = end, y = "_Genes_",
-                      forward = strand == "+", fill = highest_expr_tissue),
-                  arrowhead_height = unit(3, "mm"),
-                  arrowhead_width = unit(1.5, "mm")) +
-    geom_label(data = plot_df,
-           aes(x = (start + end)/2, y = "_Genes_", label = Heatmap_Label),
-           vjust = 1.5, size = 2 , fill = "lightgrey", label.size = 0.1,fontface="bold")+
-
-  scale_fill_manual(values = c("OralEpi" = "palegreen3", "Aboral" = "mediumpurple1", "equal" = "grey"),
-                    name = "Higher expression in") +
-
-  facet_wrap(~ chromosome_split, scales = "free_x") +
-  theme_minimal() +
-  theme(
-    axis.text.y = element_text(size = 5),
-    axis.title.y = element_blank(),
-    panel.spacing = unit(.1, "lines")
-  ) +#scale_y_discrete(expand = expansion(mult = c(1, 0)))+
-  labs(x = "Genomic position")
-
-save_ggplot(HOX_chr_heatmap, "Hox_chromosome_expression",width = 20, height = 5)
-```
-
-```{r}
-# Shift gene coordinates within each chromosome
-plot_df_shifted <- plot_df %>%
-  group_by(chromosome_split) %>%
-  mutate(
-    chr_start = min(start),
-    start_shifted = start - chr_start + 10,  # +10 if you want to avoid 0
-    end_shifted   = end - chr_start + 10
-  ) %>%
-  ungroup()
-
-
-heat_df_shifted <- plot_df_shifted %>%
-  select(query, start_shifted, end_shifted, width,chromosome_split, OralEpi, Aboral) %>%
-  pivot_longer(cols = c(OralEpi, Aboral), names_to = "tissue", values_to = "expression") %>%
-  mutate(midpoint = (start_shifted + end_shifted) / 2)  # for positioning tile center
-
-HOX_chr_heatmap <- ggplot() +
-  # Heatmap tiles
-  geom_tile(data = heat_df_shifted,
-            aes(x = midpoint, y = tissue, fill = expression,width = width),colour="black",
-            height = 1) +
-  
-  # Color for heatmap (expression level)
-  scale_fill_gradient(low = "white", high = "firebrick", name = "Expression") +
-  new_scale_fill() +
-  
-  # Gene arrows
-  geom_gene_arrow(data = plot_df_shifted,
-                  aes(xmin = start_shifted, xmax = end_shifted, y = "_Genes_",
-                      forward = strand == "+", fill = highest_expr_tissue),
-                  arrowhead_height = unit(3, "mm"),
-                  arrowhead_width = unit(1.5, "mm")) +
-    geom_label(data = plot_df_shifted,
-           aes(x = (start_shifted + end_shifted)/2, y = "_Genes_", label = Heatmap_Label),
-           vjust = 1.5, size = 4, fill = "lightgrey", label.size = 0.1,fontface="bold")+
-
-  scale_fill_manual(values = c("OralEpi" = "palegreen3", "Aboral" = "mediumpurple1", "equal" = "grey"),
-                    name = "Higher expression in") +
-
-  facet_wrap(~ chromosome_split, scales = "fixed",ncol=1) +
-  theme_minimal() +
-  theme(
-    axis.text.y = element_text(size = 10),
-    axis.title.y = element_blank(),
-    panel.spacing = unit(.1, "lines")
-  ) +scale_y_discrete(expand = expansion(mult = c(1, 0)))+
-  labs(x = "Genomic position")
-
-save_ggplot_big <- function(plot, filename, width = 10, height = 7, units = "in", dpi = 300) {
-  png_path <- file.path(outdir, paste0(filename, ".png"))
-  pdf_dir <- file.path(outdir, "pdf_figs")
-  pdf_path <- file.path(pdf_dir, paste0(filename, ".pdf"))
-  
-  # Ensure the pdf_figs directory exists
-  if (!dir.exists(pdf_dir)) dir.create(pdf_dir, recursive = TRUE)
-  
-  # Save plots
-  ggsave(filename = png_path, plot = plot, width = width, height = height, units = units, dpi = dpi,limitsize = FALSE)
-  ggsave(filename = pdf_path, plot = plot, width = width, height = height, units = units, dpi = dpi,limitsize = FALSE)
-}
-
-save_ggplot_big(HOX_chr_heatmap, "Hox_chromosome_expression_length_preserved",width = 15, height = 25)
 ```
 
 ### He et al 2023 TFs/genes of interest Nematostella (NOTE! I confirmed the DE_05 ones are all represented above )
@@ -2431,89 +2131,6 @@ top50_DE <- pheatmap(
 
 # Save the heatmap
 save_ggplot(top50_DE, "clusters_clean/He_etal_Nvec_all_SwissProt")
-```
-
-
-```{r}
-gene_layout <- gff_transcripts %>%
-  filter(query %in% select) %>%
-  arrange(chromosome, start) %>% left_join(DESeq_He_etal) %>% distinct() 
-
-expr_df <- assay(vsd)[select, ] %>%
-  as.data.frame() %>%
-  rownames_to_column("query") %>%
-  pivot_longer(-query, names_to = "Sample", values_to = "vsd_expr") %>%
-  left_join(as.data.frame(colData(vsd)), by = "Sample") %>%
-  group_by(query, Tissue) %>%
-  summarise(mean_expr = mean(vsd_expr), .groups = "drop") %>%
-  pivot_wider(names_from = Tissue, values_from = mean_expr)
-
-plot_df <- gene_layout %>%
-  left_join(expr_df, by = "query")
-
-plot_df <- plot_df %>%
-  mutate(highest_expr_tissue = case_when(
-    OralEpi > Aboral ~ "OralEpi",
-    Aboral > OralEpi ~ "Aboral",
-    TRUE ~ "equal"
-  ))
-
-heat_df <- plot_df %>%
-  select(query, start, end, width,chromosome, OralEpi, Aboral) %>%
-  pivot_longer(cols = c(OralEpi, Aboral), names_to = "tissue", values_to = "expression") %>%
-  mutate(midpoint = (start + end) / 2)  # for positioning tile center
-
-
-library(gggenes)
-library(ggnewscale)
-
-Hox_chr <- ggplot(plot_df, aes(xmin = start, xmax = end, y = "Hox genes", forward = strand == "+",
-                    fill = highest_expr_tissue)) +
-  geom_gene_arrow(arrowhead_height = unit(3, "mm"), arrowhead_width = unit(1.5, "mm")) +
-  geom_gene_label(aes(label = Gene_Name), size = 50) +
-  scale_fill_manual(values = c("OralEpi" = "palegreen3", "Aboral" = "mediumpurple1", "equal" = "grey")) +
-  theme_minimal() +
-  facet_wrap(~ chromosome, scales = "free_x", ncol = 1)+
-  theme(axis.text.y = element_blank(),
-        axis.title.y = element_blank(),
-        panel.spacing = unit(.1, "lines")) +
-  labs(x = "Genomic position", fill = "Higher expression in")
-
-
-Hox_chr_heatmap <- ggplot() +
-  # Heatmap tiles
-  geom_tile(data = heat_df,
-            aes(x = midpoint, y = tissue, fill = expression),colour="black",
-            height = 0.4) +
-  
-  # Color for heatmap (expression level)
-  scale_fill_gradient(low = "white", high = "firebrick", name = "Expression") +
-  new_scale_fill() +
-  
-  # Gene arrows
-  geom_gene_arrow(data = plot_df,
-                  aes(xmin = start, xmax = end, y = "_Genes_",
-                      forward = strand == "+", fill = highest_expr_tissue),
-                  arrowhead_height = unit(3, "mm"),
-                  arrowhead_width = unit(1.5, "mm")) +
-
-  geom_gene_label(data = plot_df,
-                  aes(xmin = start, xmax = end, y = "_Genes_", label = Gene_Name),
-                  size = 50) +
-
-  scale_fill_manual(values = c("OralEpi" = "palegreen3", "Aboral" = "mediumpurple1", "equal" = "grey"),
-                    name = "Higher expression in") +
-  facet_wrap(~ chromosome, scales = "free_x", ncol = 1) +
-  theme_minimal() +
-  theme(
-    axis.text.y = element_text(size = 10),
-    axis.title.y = element_blank(),
-    panel.spacing = unit(.1, "lines")
-  ) +
-  labs(x = "Genomic position")
-
-save_ggplot_big(Hox_chr, "He_etal_Nvec_all_SwissProt_chromosome", width = 20, height = 40)
-save_ggplot_big(Hox_chr_heatmap, "He_etal_Nvec_all_SwissProt_chromosome_expression", width = 20, height = 40)
 ```
 
 ### DuBuc et al 2018 Wnt/Aboral-Oral Patterning Genes, interest Nematostella
