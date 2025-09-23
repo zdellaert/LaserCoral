@@ -34,10 +34,7 @@ sessionInfo() #provides list of loaded packages and version of R.
 ## Load in differential expression data
 
 ```{r load_data}
-DE_05 <- read.csv("../output_RNA/differential_expression/DE_05_SwissProt_annotation.csv", header = TRUE) %>% select(-X)
 DESeq_allgenes <- read.csv("../output_RNA/differential_expression/DESeq_results.csv", header = TRUE) %>% dplyr::rename("query" ="X")
-
-uniprot_ids <- DE_05$blast_hit[!is.na(DE_05$blast_hit)]
 ```
 
 ## BLAST Pacuta genes to Pdam genome (in bash)
@@ -93,39 +90,50 @@ Annot_Pdam <- read.csv("../references/annotation/blastp_Pdam_out.tab", sep = '\t
 Annot_Pdam <- left_join(Annot_Pdam, Pdam_gtf_proteins)
 ```
 
+Join to all genes data:
+```{r join_all}
+allgenes_Pdam <- left_join(DESeq_allgenes, Annot_Pdam)
+
+# remove rows for duplicate values in the column gene_id, keep one with largest abs(log2foldchange)
+
+allgenes_Pdam <- allgenes_Pdam %>%
+  group_by(gene_id) %>%
+  slice_max(order_by = abs(log2FoldChange), n = 1) %>%
+  ungroup() %>% drop_na() %>% 
+  mutate(numeric_gene = gsub("LOC", "", gene_id) %>% as.numeric())
+
+LFC_allgenes <- setNames(allgenes_Pdam$log2FoldChange, allgenes_Pdam$numeric_gene)
+```
+
 Join to DE data:
 ```{r join_de}
-DE_05_Pdam <- left_join(DE_05, Annot_Pdam)
+DE_05_Pdam <- allgenes_Pdam %>% filter(padj <0.05 & abs(log2FoldChange) > 1)
 
-# make gene data matrix
-gene_data <- DE_05_Pdam %>% select(gene_id,log2FoldChange) %>% drop_na() 
-gene_data$gene_id <- gsub("LOC", "", gene_data$gene_id) %>% as.numeric()
-
-gene.data <- setNames(gene_data$log2FoldChange, gene_data$gene_id)
+DE_05_LFC <- setNames(DE_05_Pdam$log2FoldChange, DE_05_Pdam$numeric_gene)
 ```
 
 What pathways are common in our DE genes?
 ```{r de_pathways}
 pdam_pathways <- keggLink("pathway", "pdam")
 pdam_pathways <- data.frame(pdam_pathways, names(pdam_pathways)) 
-pdam_pathways <- pdam_pathways %>% dplyr::rename("gene_id" = "names.pdam_pathways.")
-pdam_pathways$gene_id <- gsub("pdam:", "", pdam_pathways$gene_id) %>% as.numeric()
+pdam_pathways <- pdam_pathways %>% dplyr::rename("numeric_gene" = "names.pdam_pathways.")
+pdam_pathways$numeric_gene <- gsub("pdam:", "", pdam_pathways$numeric_gene) %>% as.numeric()
 
-DE_05_Pdam_pathways <- left_join(gene_data, pdam_pathways, relationship = "many-to-many") %>% drop_na() %>% dplyr::count(pdam_pathways) %>% arrange(-n)
+DE_05_Pdam_pathways <- left_join(DE_05_Pdam, pdam_pathways, relationship = "many-to-many") %>% drop_na()
 
-head(DE_05_Pdam_pathways)
-```
+DE_05_Pdam_pathways_count <- DE_05_Pdam_pathways %>% dplyr::count(pdam_pathways) %>% arrange(-n)
 
+head(DE_05_Pdam_pathways_count)
 
-Join to all genes data:
-```{r join_all}
-allgenes_Pdam <- left_join(DESeq_allgenes, Annot_Pdam)
+DE_05_Pdam_pathways_count <- left_join(allgenes_Pdam, pdam_pathways, relationship = "many-to-many") %>% drop_na() %>% dplyr::count(pdam_pathways) %>% arrange(-n)
 
-# make gene data matrix
-gene_data_allgenes <- allgenes_Pdam %>% select(gene_id,log2FoldChange) %>% drop_na() 
-gene_data_allgenes$gene_id <- gsub("LOC", "", gene_data_allgenes$gene_id) %>% as.numeric()
+head(DE_05_Pdam_pathways_count)
 
-gene.data_allgenes <- setNames(gene_data_allgenes$log2FoldChange, gene_data_allgenes$gene_id)
+UpOral_Pdam_pathways_count <- DE_05_Pdam_pathways %>% filter(log2FoldChange <0) %>% dplyr::count(pdam_pathways) %>% arrange(-n)
+UpAboral_Pdam_pathways_count <- DE_05_Pdam_pathways %>% filter(log2FoldChange >0) %>% dplyr::count(pdam_pathways) %>% arrange(-n)
+
+head(UpOral_Pdam_pathways_count)
+head(UpAboral_Pdam_pathways_count)
 ```
 
 ## Visualize KEGG Pathways of interest
@@ -144,9 +152,9 @@ gene.data_allgenes <- setNames(gene_data_allgenes$log2FoldChange, gene_data_allg
 ```{r pathview}
 setwd("../output_RNA/differential_expression/KEGG")
 
-pathview_plot <- function(pathway_id, suffix, gene.data) {
+pathview_plot <- function(pathway_id, suffix, LFC_vector) {
   pathview(
-    gene.data = gene.data,
+    gene.data = LFC_vector,
     pathway.id = pathway_id,
     species = "pdam",
     gene.idtype = "KEGG",
@@ -158,14 +166,46 @@ pathview_plot <- function(pathway_id, suffix, gene.data) {
 }
 
 # Specify pathways of interest
-pathways <- c("pdam04310", "pdam04150", "pdam04080", "pdam04814", "pdam04142", "pdam04820")
+pathways <- c("pdam04310", "pdam04150", "pdam04080", "pdam04814", "pdam04142", "pdam04820","pdam04082","pdam04512","pdam04145")
 
 # Visualize for DE_05 data and all genes
 for (pathway in pathways) {
-  pathview_plot(pathway, "DE_05", gene.data)
-  pathview_plot(pathway, "allgenes", gene.data_allgenes)
+  pathview_plot(pathway, "DE_05", DE_05_LFC)
+  pathview_plot(pathway, "allgenes", LFC_allgenes)
 }
 ```
+
+```{r}
+library(clusterProfiler)
+library(enrichplot)
+
+kk_aboral <- enrichKEGG(gene         = names(DE_05_LFC)[DE_05_LFC > 1],
+                 organism     = 'pdam',
+                 pAdjustMethod = "none",
+                 pvalueCutoff = 0.01)
+
+kk_oral <- enrichKEGG(gene         = names(DE_05_LFC)[DE_05_LFC < -1],
+                 organism     = 'pdam',
+                 pAdjustMethod = "none",
+                 pvalueCutoff = 0.01)
+
+kegg_gene_list <- sort(LFC_allgenes, decreasing = TRUE)
+
+kk_gse <- gseKEGG(geneList     = kegg_gene_list,
+               organism     = "pdam",
+               pvalueCutoff = 0.05,
+               pAdjustMethod = "none",
+               maxGSSize =150)
+```
+
+```{r}
+dotplot(kk_aboral, showCategory = 10, title = "Enriched Pathways")
+dotplot(kk_oral, showCategory = 10, title = "Enriched Pathways")
+
+dotplot(kk_gse, showCategory = 10, title = "Enriched Pathways" , split=".sign") + facet_grid(.~.sign)
+ridgeplot(kk_gse) + labs(x = "enrichment distribution")
+```
+
 
 ## Updating Renv environment:
 
