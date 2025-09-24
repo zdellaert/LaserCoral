@@ -1991,9 +1991,9 @@ COMBINED_HOX_WNT_all <-  full_join(DESeq_Hox_Literature_collapsed,WNT_HOX_MAN,by
   ) %>%
   select(-ends_with(".x"), -ends_with(".y"))
 
-COMBINED_HOX_WNT_all <- COMBINED_HOX_WNT_all %>%  mutate(Heatmap_Label = coalesce(Heatmap_Label, def_short))
-COMBINED_HOX_WNT_all$Heatmap_Label <- gsub("Protein Wnt", "Wnt", COMBINED_HOX_WNT_all$Heatmap_Label, ignore.case = TRUE)
-
+COMBINED_HOX_WNT_all <- COMBINED_HOX_WNT_all %>%  mutate(Heatmap_Label = coalesce(Heatmap_Label, def_short)) %>%
+                              mutate(Heatmap_Label = gsub("Protein Wnt", "Wnt", Heatmap_Label, ignore.case = TRUE)) %>% 
+                              mutate(pathway = ifelse(grepl("ox",Heatmap_Label)|grepl("Six",Heatmap_Label), "HOX", "WNT"))
 COMBINED_HOX_WNT_DE05 <-  COMBINED_HOX_WNT_all %>% filter(padj<0.05) %>% filter(abs(log2FoldChange) >1)
 ```
 
@@ -2016,12 +2016,13 @@ cluster_assignments <- cutree(row_clusters, k = 2) # Adjust k for the number of 
 clustered_data <- data.frame(
   query = select,
   Heatmap_Label = COMBINED_HOX_WNT_DE05$Heatmap_Label,
-  cluster = cluster_assignments
+  cluster = cluster_assignments,
+  pathway = COMBINED_HOX_WNT_DE05$pathway
 )
 
 # Reorder rows within each cluster alphabetically by their labels
 clustered_data <- clustered_data %>%
-  arrange(cluster, Heatmap_Label)
+  arrange(cluster, pathway, Heatmap_Label)
 
 # Reorder the z_scores matrix and labels based on the new order
 z_scores <- z_scores[match(clustered_data$query, rownames(z_scores)), ]
@@ -2042,7 +2043,7 @@ top50_DE <- pheatmap(
   labels_row = ordered_labels,
   fontsize_row = 8,
   borders_color = "white",  
-  gaps_row = c(2,5,12,14,19,25) 
+  gaps_row = c(9,14,19,25) 
 )
 
 # Save the heatmap
@@ -2060,7 +2061,6 @@ top50_DE
 save_ggplot(top50_DE, "Hox_All")
 
 # Perform clustering
-# Perform clustering
 row_clusters <- hclust(dist(z_scores))
 cluster_assignments <- cutree(row_clusters, k = 2) # Adjust k for the number of clusters
 
@@ -2068,12 +2068,13 @@ cluster_assignments <- cutree(row_clusters, k = 2) # Adjust k for the number of 
 clustered_data <- data.frame(
   query = select,
   Heatmap_Label = COMBINED_HOX_WNT_all$Heatmap_Label,
-  cluster = cluster_assignments
+  cluster = cluster_assignments,
+  pathway = COMBINED_HOX_WNT_all$pathway
 )
 
 # Reorder rows within each cluster alphabetically by their labels
 clustered_data <- clustered_data %>%
-  arrange(cluster, Heatmap_Label)
+  arrange(cluster, pathway, Heatmap_Label)
 
 # Reorder the z_scores matrix and labels based on the new order
 z_scores <- z_scores[match(clustered_data$query, rownames(z_scores)), ]
@@ -2094,7 +2095,7 @@ top50_DE <- pheatmap(
   labels_row = ordered_labels,
   fontsize_row = 8,
   borders_color = "white",  
-  gaps_row = c(2,5,16,18,19,24,33) 
+  gaps_row = c(14,19,24,33) 
 )
 
 # Save the heatmap
