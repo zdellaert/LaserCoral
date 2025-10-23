@@ -1017,8 +1017,46 @@ gene_labels <- Manual %>%
 ```
 
 ```{r}
+### Zona pellucida domain
+
 PFAM_ZP_domain <- annot_all %>% filter(grepl("Zona_pellucida",Short.name,ignore.case=TRUE))  %>% pull(query) %>% unique()
 
+#### He et al 2023 TFs/genes of interest Nematostella (NOTE! I confirmed the DE_05 ones are all represented above ) + DuBuc et al 2018 Wnt/Aboral-Oral Patterning Genes, interest Nematostella
+
+DESeq_He_etal$source <- "He_etal_2023"
+DESeq_DuBuc_etal$source <- "DuBuc_etal_2018"
+
+Hox_Literature <- rbind(DESeq_He_etal,DESeq_DuBuc_etal)
+
+DESeq_Hox_Literature_collapsed <- Hox_Literature %>%
+  group_by(query, baseMean, log2FoldChange, lfcSE, pvalue, padj) %>%
+  summarize(
+    Gene_Name = paste(unique(Gene_Name), collapse = "; "),
+    Description = paste(unique(Description), collapse = "; "),
+    def_short = paste(unique(def_short), collapse = "; "),
+    source = paste(unique(source), collapse = "; "),
+    .groups = "drop"
+  )
+
+WNT_HOX_MAN <- Manual %>% select(-X) %>% filter(grepl("wnt", Heatmap_Label, ignore.case = TRUE)|grepl("frizzle", Heatmap_Label, ignore.case = TRUE)|grepl("homeobox", Heatmap_Label, ignore.case = TRUE)|grepl("hox", Heatmap_Label, ignore.case = TRUE)) %>% select(-c(blast_hit,evalue,ProteinNames,BiologicalProcess,GeneOntologyIDs))# %>% rename(Description = Heatmap_Label)
+
+COMBINED_HOX_WNT_all <-  full_join(DESeq_Hox_Literature_collapsed,WNT_HOX_MAN,by=c("query")) %>%
+  mutate(
+    baseMean = coalesce(baseMean.x, baseMean.y),
+    log2FoldChange = coalesce(log2FoldChange.x, log2FoldChange.y),
+    lfcSE = coalesce(lfcSE.x, lfcSE.y),
+    pvalue = coalesce(pvalue.x, pvalue.y),
+    padj = coalesce(padj.x, padj.y)
+  ) %>%
+  select(-ends_with(".x"), -ends_with(".y"))
+
+COMBINED_HOX_WNT_all <- COMBINED_HOX_WNT_all %>%  mutate(Heatmap_Label = coalesce(Heatmap_Label, def_short)) %>%
+                              mutate(Heatmap_Label = gsub("Protein Wnt", "Wnt", Heatmap_Label, ignore.case = TRUE)) %>% 
+                              mutate(pathway = ifelse(grepl("ox",Heatmap_Label)|grepl("Six",Heatmap_Label), "HOX", "WNT"))
+COMBINED_HOX_WNT_DE05 <-  COMBINED_HOX_WNT_all %>% filter(padj<0.05) %>% filter(abs(log2FoldChange) >1)
+```
+
+```{r}
 library(purrr)
 
 DESeq_SwissProt_categorized <- DESeq_SwissProt %>% rowwise() %>%
@@ -2766,44 +2804,6 @@ save_ggplot(top50_DE, "clusters_clean/HeatStress_all_SwissProt")
 
 
 ### wnt and hox
-
-#### He et al 2023 TFs/genes of interest Nematostella (NOTE! I confirmed the DE_05 ones are all represented above )
-
-#### DuBuc et al 2018 Wnt/Aboral-Oral Patterning Genes, interest Nematostella
-
-```{r}
-DESeq_He_etal$source <- "He_etal_2023"
-DESeq_DuBuc_etal$source <- "DuBuc_etal_2018"
-
-Hox_Literature <- rbind(DESeq_He_etal,DESeq_DuBuc_etal)
-
-DESeq_Hox_Literature_collapsed <- Hox_Literature %>%
-  group_by(query, baseMean, log2FoldChange, lfcSE, pvalue, padj) %>%
-  summarize(
-    Gene_Name = paste(unique(Gene_Name), collapse = "; "),
-    Description = paste(unique(Description), collapse = "; "),
-    def_short = paste(unique(def_short), collapse = "; "),
-    source = paste(unique(source), collapse = "; "),
-    .groups = "drop"
-  )
-
-WNT_HOX_MAN <- Manual %>% select(-X) %>% filter(grepl("wnt", Heatmap_Label, ignore.case = TRUE)|grepl("frizzle", Heatmap_Label, ignore.case = TRUE)|grepl("homeobox", Heatmap_Label, ignore.case = TRUE)|grepl("hox", Heatmap_Label, ignore.case = TRUE)) %>% select(-c(blast_hit,evalue,ProteinNames,BiologicalProcess,GeneOntologyIDs))# %>% rename(Description = Heatmap_Label)
-
-COMBINED_HOX_WNT_all <-  full_join(DESeq_Hox_Literature_collapsed,WNT_HOX_MAN,by=c("query")) %>%
-  mutate(
-    baseMean = coalesce(baseMean.x, baseMean.y),
-    log2FoldChange = coalesce(log2FoldChange.x, log2FoldChange.y),
-    lfcSE = coalesce(lfcSE.x, lfcSE.y),
-    pvalue = coalesce(pvalue.x, pvalue.y),
-    padj = coalesce(padj.x, padj.y)
-  ) %>%
-  select(-ends_with(".x"), -ends_with(".y"))
-
-COMBINED_HOX_WNT_all <- COMBINED_HOX_WNT_all %>%  mutate(Heatmap_Label = coalesce(Heatmap_Label, def_short)) %>%
-                              mutate(Heatmap_Label = gsub("Protein Wnt", "Wnt", Heatmap_Label, ignore.case = TRUE)) %>% 
-                              mutate(pathway = ifelse(grepl("ox",Heatmap_Label)|grepl("Six",Heatmap_Label), "HOX", "WNT"))
-COMBINED_HOX_WNT_DE05 <-  COMBINED_HOX_WNT_all %>% filter(padj<0.05) %>% filter(abs(log2FoldChange) >1)
-```
 
 
 ```{r}
