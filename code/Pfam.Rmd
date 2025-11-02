@@ -89,7 +89,7 @@ colnames(interpro) <- c(
 
 domains_plot <- interpro %>%
   filter(analysis == "Pfam") %>%
-  select(query, hit_ID, hit_name, start, stop, seq_length) %>%
+  select(query, hit_name, start, stop, seq_length) %>%
   distinct() %>%
   mutate(
     midpoint = (start + stop) / 2,
@@ -98,11 +98,71 @@ domains_plot <- interpro %>%
 
 domains <- interpro %>% arrange(query,hit_ID) %>%
   filter(analysis == "Pfam") %>%
-  select(query, hit_ID, hit_name) %>%
+  select(query, hit_name) %>%
   distinct() 
 
 head(domains)
 ```
+
+### enrichment code based on levy et al 2025 -- testing for similarity of results
+
+```{r}
+#gsa_enrichment_load_pfam_list = function(pfam_architecture_file, do_unique = TRUE, do_remove_empty = TRUE, architecture_sep = " ") {
+	
+# load pfam species i
+	pfm_i = read.table("~/Downloads/Pocdam_long.pep.pfamscan_archs.csv", col.names = c("gene","architecture"), sep = "\t")
+
+pfm_i_l = lapply(pfm_i$architecture, function(v) unique(unlist(strsplit(v, split = " "))) )
+names(pfm_i_l) = pfm_i$gene
+
+pfm_i_l = pfm_i_l [ lengths(pfm_i_l) > 0 ]
+
+```
+
+
+```{r}
+DE_05_OralEpi_top500 <- DE_05_OralEpi %>% arrange(log2FoldChange) %>% slice_head(n = 500)
+annotation <- interpro %>%
+  filter(analysis == "Pfam") %>%
+  select(query, hit_name) %>%
+  mutate(hit_name = str_replace_all(hit_name, " ", "_")) %>%
+  group_by(query) %>%
+  summarise(hit_names = list(unique(hit_name))) %>%
+  deframe()  # converts to named list
+
+genes_fg <- interpro %>% filter(query %in% DE_05_OralEpi_top500$query) %>% pull(query) %>% unique()
+genes_bg <- names(annotation)
+
+	# count distributions in background and foreground list
+	dist_fg = as.data.frame(table(unlist(annotation [ genes_fg ])))
+	dist_bg = as.data.frame(table(unlist(annotation)))
+	
+		# prepare table
+		tab_in_all  = merge(dist_fg, dist_bg, by.x = "Var1", by.y = "Var1", all.x = TRUE, all.y = FALSE)
+		tab_in_all  = tab_in_all[apply(tab_in_all!=0, 1, all),]
+		colnames(tab_in_all) = c("annot","freq_in_fg","freq_in_bg")
+		tab_in_all$total_annot_in_fg = length(genes_fg )
+		tab_in_all$total_annot_in_bg = length(annotation)
+		tab_in_all$fraction_in_fg = tab_in_all$freq_in_fg / tab_in_all$total_annot_in_fg
+		tab_in_all$fraction_in_bg = tab_in_all$freq_in_bg / tab_in_all$total_annot_in_bg
+		
+		# hypergeometric test
+		tab_in_all$pval = phyper(
+			tab_in_all$freq_in_fg - 1,
+			tab_in_all$freq_in_bg,
+			tab_in_all$total_annot_in_bg - tab_in_all$freq_in_bg,
+			tab_in_all$total_annot_in_fg,
+			lower.tail = FALSE)
+		
+		# pvalue adjustment
+		tab_in_all$pval_adj = p.adjust(tab_in_all$pval, method = "BH")
+		
+		# sort result by pvalue
+		tab_in_all = tab_in_all [ order(tab_in_all$pval_adj) , ]
+```
+
+
+###  my enrichment code
 
 ```{r}
 annotated_genes <- unique(domains$query)
@@ -113,11 +173,12 @@ length(annotated_genes_de)
 
 domain_counts <- domains %>%
   mutate(is_DE = query %in% annotated_genes_de) %>%
-  group_by(hit_ID, hit_name, is_DE) %>%
+  group_by(hit_name, is_DE) %>%
   summarize(n_genes = n_distinct(query), .groups = "drop") %>%
   pivot_wider(names_from = is_DE, values_from = n_genes, values_fill = 0) %>%
   rename(DE = `TRUE`, NonDE = `FALSE`) %>%
-  mutate(Background = DE + NonDE) 
+  mutate(Background = DE + NonDE) %>%
+  filter(DE != 0)
 
 # Hypergeometric enrichment
 M <- length(annotated_genes)          # total annotated genes
@@ -128,7 +189,11 @@ domain_enrichment <- domain_counts %>%
   mutate(
     k = DE,                     # number of DE genes with this domain
     K = Background,              # total number of genes with this domain
-    p_value = phyper(q = k - 1, m = K, n = M - K, k = N, lower.tail = FALSE)
+    p_value = phyper(q = DE - 1,
+                     m = Background,
+                     n = M - Background,
+                     k = N,
+                     lower.tail = FALSE)
   ) %>%
   ungroup() %>%
   mutate(padj = p.adjust(p_value, method = "BH")) %>%
@@ -175,11 +240,12 @@ length(annotated_genes_de)
 
 domain_counts <- domains %>%
   mutate(is_DE = query %in% annotated_genes_de) %>%
-  group_by(hit_ID, hit_name, is_DE) %>%
+  group_by(hit_name, is_DE) %>%
   summarize(n_genes = n_distinct(query), .groups = "drop") %>%
   pivot_wider(names_from = is_DE, values_from = n_genes, values_fill = 0) %>%
   rename(DE = `TRUE`, NonDE = `FALSE`) %>%
-  mutate(Background = DE + NonDE) 
+  mutate(Background = DE + NonDE) %>%
+  filter(DE != 0)
 
 # Hypergeometric enrichment
 M <- length(annotated_genes)          # total annotated genes
@@ -190,7 +256,11 @@ domain_enrichment <- domain_counts %>%
   mutate(
     k = DE,                     # number of DE genes with this domain
     K = Background,              # total number of genes with this domain
-    p_value = phyper(q = k - 1, m = K, n = M - K, k = N, lower.tail = FALSE)
+    p_value = phyper(q = DE - 1,
+                     m = Background,
+                     n = M - Background,
+                     k = N,
+                     lower.tail = FALSE)
   ) %>%
   ungroup() %>%
   mutate(padj = p.adjust(p_value, method = "BH")) %>%
@@ -237,11 +307,12 @@ length(annotated_genes_de)
 
 domain_counts <- domains %>%
   mutate(is_DE = query %in% annotated_genes_de) %>%
-  group_by(hit_ID, hit_name, is_DE) %>%
+  group_by(hit_name, is_DE) %>%
   summarize(n_genes = n_distinct(query), .groups = "drop") %>%
   pivot_wider(names_from = is_DE, values_from = n_genes, values_fill = 0) %>%
   rename(DE = `TRUE`, NonDE = `FALSE`) %>%
-  mutate(Background = DE + NonDE) 
+  mutate(Background = DE + NonDE) %>%
+  filter(DE != 0)
 
 # Hypergeometric enrichment
 M <- length(annotated_genes)          # total annotated genes
@@ -252,7 +323,11 @@ domain_enrichment <- domain_counts %>%
   mutate(
     k = DE,                     # number of DE genes with this domain
     K = Background,              # total number of genes with this domain
-    p_value = phyper(q = k - 1, m = K, n = M - K, k = N, lower.tail = FALSE)
+    p_value = phyper(q = DE - 1,
+                     m = Background,
+                     n = M - Background,
+                     k = N,
+                     lower.tail = FALSE)
   ) %>%
   ungroup() %>%
   mutate(padj = p.adjust(p_value, method = "BH")) %>%
@@ -290,111 +365,58 @@ ggplot(top_domains, aes(x = factor(hit_name, levels = rev(hit_name)), y = enrich
   )
 ```
 
-```{r}
-annotated_genes <- unique(domains$query)
-length(annotated_genes)
 
-DE_05_OralEpi_top500 <- DE_05_OralEpi %>% arrange(log2FoldChange) %>% slice_head(n = 300)
-
-annotated_genes_de <- domains %>% filter(query %in% DE_05_OralEpi_top500$query) %>% pull(query) %>% unique()
-length(annotated_genes_de)
-
-domain_counts <- domains %>%
-  mutate(is_DE = query %in% annotated_genes_de) %>%
-  group_by(hit_ID, hit_name, is_DE) %>%
-  summarize(n_genes = n_distinct(query), .groups = "drop") %>%
-  pivot_wider(names_from = is_DE, values_from = n_genes, values_fill = 0) %>%
-  rename(DE = `TRUE`, NonDE = `FALSE`) %>%
-  mutate(Background = DE + NonDE) 
-
-# Hypergeometric enrichment
-M <- length(annotated_genes)          # total annotated genes
-N <- length(annotated_genes_de)           # number of DE genes
-
-domain_enrichment <- domain_counts %>%
-  rowwise() %>%
-  mutate(
-    k = DE,                     # number of DE genes with this domain
-    K = Background,              # total number of genes with this domain
-    p_value = phyper(q = k - 1, m = K, n = M - K, k = N, lower.tail = FALSE)
-  ) %>%
-  ungroup() %>%
-  mutate(padj = p.adjust(p_value, method = "BH")) %>%
-  arrange(padj)
-
-# Add enrichment ratio for interpretation
-domain_enrichment <- domain_enrichment %>%
-  mutate(
-    DE_ratio = DE / N,
-    Background_ratio = Background / M,
-    enrichment_ratio = (DE / N) / (Background / M)
-  )
-
-# Filter significant or top N domains
-top_domains <- domain_enrichment %>%
-  filter(padj < 0.05, DE > 0) %>%
-  arrange(padj) %>%
-  slice_head(n = 20)
-
-# Plot
-ggplot(top_domains, aes(x = factor(hit_name, levels = rev(hit_name)), y = enrichment_ratio, color = -log10(padj),size = DE)) +
-  geom_point() +
-  coord_flip() +
-  scale_fill_gradient(low = "skyblue", high = "darkblue") +
-  labs(
-    x = "Pfam Domain",
-    y = "Enrichment Ratio (DE / Background)",
-    fill = "-log10(padj)",
-    title = "Pfam Domain Enrichment in Differentially Expressed Genes"
-  ) +
-  theme_minimal(base_size = 13) +
-  theme(
-    panel.grid.major.y = element_blank(),
-    axis.text.y = element_text(size = 10)
-  )
-```
 
 ```{r}
-DE_05_top20 <- DE_05_OralEpi %>% arrange(-abs(log2FoldChange)) %>% slice_head(n = 20)
+DE_05_OralEpi_top20 <- DE_05_OralEpi %>% arrange(-abs(log2FoldChange)) %>% slice_head(n = 10)
+DE_05_Aboral_top20 <- DE_05_Aboral %>% arrange(-abs(log2FoldChange)) %>% slice_head(n = 10)
+ZP_genes <- domains_plot %>% right_join(DESeq %>% select(query, log2FoldChange)) %>%
+    filter(grepl("ZP-", hit_name))
+  
+gene_lists <- list(DE_05_OralEpi_top20,DE_05_Aboral_top20,ZP_genes)
 
-plotting <- domains_plot %>%
-  right_join(DE_05_top20 %>% select(query, log2FoldChange)) %>%
-  arrange(-abs(log2FoldChange)) %>%
-  mutate(query = factor(query, levels = unique(query)))
-
-domain_colors <- createPalette(N = length(unique(plotting$hit_name)),
-                               seedcolors = c("#4477AA", "#228833", "#EE6677", "#CCBB44", "#66CCEE", "#AA3377", "#BBBBBB"))
-
-domain_colors <- setNames(domain_colors, unique(plotting$hit_name))
-
-Oral_intepro <- ggplot(plotting, aes(y = fct_rev(factor(query)))) +
-  geom_segment(aes(x = 0, xend = seq_length, yend = fct_rev(factor(query))),
-               color = "gray90", linewidth = 1) +
-  geom_rect(aes(
-    xmin = start, xmax = stop,
-    ymin = as.numeric(fct_rev(factor(query))) - 0.25,
-    ymax = as.numeric(fct_rev(factor(query))) + 0.25,
-    fill = hit_name
-  ), color = "gray40", linewidth = 0.2) +
-  scale_fill_manual(values = domain_colors) +
-  scale_x_continuous(expand = expansion(mult = c(0.01, 0.05))) +
-  labs(
-    x = "Protein position (amino acids)",
-    y = NULL,
-    fill = "Pfam domain",
-    title = "Domain architectures of top differentially expressed proteins in Oral Tissue (sorted by log2 fold change)"
-  ) +
-  theme_minimal(base_size = 7) +
-  theme(
-    panel.grid = element_blank(),
-    axis.text.y = element_text(size = 5.5, face = "bold"),
-    axis.text.x = element_text(size = 6),
-    plot.title = element_text(size = 8, face = "bold", hjust = 0),
-    legend.position = "bottom",
-    legend.key.size = unit(0.3, "cm"),
-    legend.text = element_text(size = 5)
-  )
-
+for (list in gene_lists){
+  
+    plotting <- domains_plot %>%
+      right_join(list %>% select(query, log2FoldChange)) %>%
+      arrange(-abs(log2FoldChange)) %>%
+      mutate(query = factor(query, levels = unique(query)))
+    
+    domain_colors <- createPalette(N = length(unique(plotting$hit_name[!is.na(plotting$hit_name)])),
+                                   seedcolors = c("#4477AA", "#228833", "#EE6677", "#CCBB44", "#66CCEE", "#AA3377", "#BBBBBB"))
+    
+    domain_colors <- setNames(domain_colors, unique(plotting$hit_name[!is.na(plotting$hit_name)]))
+    
+    plot <- ggplot(plotting, aes(y = fct_rev(factor(query)))) +
+      geom_segment(aes(x = 0, xend = seq_length, yend = fct_rev(factor(query))),
+                   color = "gray90", linewidth = 1) +
+      geom_rect(aes(
+        xmin = start, xmax = stop,
+        ymin = as.numeric(fct_rev(factor(query))) - 0.25,
+        ymax = as.numeric(fct_rev(factor(query))) + 0.25,
+        fill = hit_name
+      ), color = "gray40", linewidth = 0.2) +
+      scale_fill_manual(values = domain_colors) +
+      scale_x_continuous(expand = expansion(mult = c(0.01, 0.05))) +
+      labs(
+        x = "Protein position (amino acids)",
+        y = NULL,
+        fill = "Pfam domain",
+        title = "Domain architectures of top differentially expressed proteins in Oral Tissue (sorted by log2 fold change)"
+      ) +
+      theme_minimal(base_size = 7) +
+      theme(
+        panel.grid = element_blank(),
+        axis.text.y = element_text(size = 5.5, face = "bold"),
+        axis.text.x = element_text(size = 6),
+        plot.title = element_text(size = 8, face = "bold", hjust = 0),
+        legend.position = "bottom",
+        legend.key.size = unit(0.3, "cm"),
+        legend.text = element_text(size = 5)
+      )
+    
+    print(plot)
+}
 
 plotting <- domains_plot %>%
   right_join(DESeq %>% select(query, log2FoldChange)) %>%
@@ -402,84 +424,6 @@ plotting <- domains_plot %>%
   arrange(-abs(log2FoldChange)) %>%
   mutate(query = factor(query, levels = unique(query)))
 
-domain_colors <- createPalette(N = length(unique(plotting$hit_name)),
-                               seedcolors = c("#4477AA", "#228833", "#EE6677", "#CCBB44", "#66CCEE", "#AA3377", "#BBBBBB"))
-
-domain_colors <- setNames(domain_colors, unique(plotting$hit_name))
-
-All_ZP <- ggplot(plotting, aes(y = fct_rev(factor(query)))) +
-  geom_segment(aes(x = 0, xend = seq_length, yend = fct_rev(factor(query))),
-               color = "gray90", linewidth = 1) +
-  geom_rect(aes(
-    xmin = start, xmax = stop,
-    ymin = as.numeric(fct_rev(factor(query))) - 0.25,
-    ymax = as.numeric(fct_rev(factor(query))) + 0.25,
-    fill = hit_name
-  ), color = "gray40", linewidth = 0.2) +
-  scale_fill_manual(values = domain_colors) +
-  scale_x_continuous(expand = expansion(mult = c(0.01, 0.05))) +
-  labs(
-    x = "Protein position (amino acids)",
-    y = NULL,
-    fill = "Pfam domain",
-    title = "Domain architectures of top differentially expressed proteins in Oral Tissue (sorted by log2 fold change)"
-  ) +
-  theme_minimal(base_size = 7) +
-  theme(
-    panel.grid = element_blank(),
-    axis.text.y = element_text(size = 5.5, face = "bold"),
-    axis.text.x = element_text(size = 6),
-    plot.title = element_text(size = 8, face = "bold", hjust = 0),
-    legend.position = "bottom",
-    legend.key.size = unit(0.3, "cm"),
-    legend.text = element_text(size = 5)
-  )
-
-
-DE_05_top20 <- DE_05_Aboral %>% arrange(-abs(log2FoldChange)) %>% slice_head(n = 20)
-
-plotting <- domains_plot %>%
-  right_join(DE_05_top20 %>% select(query, log2FoldChange)) %>%
-  arrange(-abs(log2FoldChange)) %>%
-  mutate(query = factor(query, levels = unique(query)))
-
-
-domain_colors <- createPalette(N = length(unique(plotting$hit_name)),
-                               seedcolors = c("#4477AA", "#228833", "#EE6677", "#CCBB44", "#66CCEE", "#AA3377", "#BBBBBB"))
-
-domain_colors <- setNames(domain_colors, unique(plotting$hit_name))
-
-Aboral_intepro <- ggplot(plotting, aes(y = fct_rev(factor(query)))) +
-  geom_segment(aes(x = 0, xend = seq_length, yend = fct_rev(factor(query))),
-               color = "gray90", linewidth = 1) +
-  geom_rect(aes(
-    xmin = start, xmax = stop,
-    ymin = as.numeric(fct_rev(factor(query))) - 0.25,
-    ymax = as.numeric(fct_rev(factor(query))) + 0.25,
-    fill = hit_name
-  ), color = "gray40", linewidth = 0.2) +
-  scale_fill_manual(values = domain_colors) +
-  scale_x_continuous(expand = expansion(mult = c(0.01, 0.05))) +
-  labs(
-    x = "Protein position (amino acids)",
-    y = NULL,
-    fill = "Pfam domain",
-    title = "Domain architectures of top differentially expressed proteins in Aboral Tissue (sorted by log2 fold change)"
-  ) +
-  theme_minimal(base_size = 7) +
-  theme(
-    panel.grid = element_blank(),
-    axis.text.y = element_text(size = 5.5, face = "bold"),
-    axis.text.x = element_text(size = 6),
-    plot.title = element_text(size = 8, face = "bold", hjust = 0),
-    legend.position = "bottom",
-    legend.key.size = unit(0.3, "cm"),
-    legend.text = element_text(size = 5)
-  )
-
-All_ZP
-Oral_intepro 
-Aboral_intepro
 ```
 
 
@@ -521,7 +465,7 @@ ZP_top20_bothdir <- ggplot(plotting, aes(y = fct_rev(factor(query)))) +
   labs(
     x = "Protein position (amino acids)",
     y = NULL,
-    title = "Highlighted Zona Pellucida domains in top DE Oral Tissue proteins"
+    title = "Highlighted Zona Pellucida domains in top DE Tissue proteins"
   ) +
   theme_minimal(base_size = 7) +
   theme(
