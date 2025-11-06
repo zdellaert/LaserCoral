@@ -1,0 +1,575 @@
+---
+title: "Figures Plotted"
+author: "Zoe Dellaert"
+date: "2025-11-05"
+output:
+  html_document: default
+  github_document: default
+---
+
+Work in progress to have one doc for centralized figure work
+
+
+```{r}
+
+```
+
+## Setup
+
+```{r}
+#set standard output directory for figures
+outdir <- "../output_RNA/differential_expression"
+
+save_ggplot <- function(plot, filename, width = 10, height = 7, units = "in", dpi = 300,bg=NULL) {
+  print(plot)
+
+  png_path <- file.path(outdir, paste0(filename, ".png"))
+  pdf_dir <- file.path(outdir, "pdf_figs")
+  pdf_path <- file.path(pdf_dir, paste0(filename, ".pdf"))
+  
+  # Ensure the pdf_figs directory exists
+  if (!dir.exists(pdf_dir)) dir.create(pdf_dir, recursive = TRUE)
+  
+  # Save plots
+  ggsave(filename = png_path, plot = plot, width = width, height = height, units = units, dpi = dpi,bg = bg)
+  ggsave(filename = pdf_path, plot = plot, width = width, height = height, units = units, dpi = dpi,bg = bg)
+}
+
+# Specify colors
+ann_colors = list(Tissue = c(OralEpi = "#FD8D3C" ,Aboral = "mediumpurple1"))
+```
+
+## Load in Data
+
+### Combined annotations manually
+
+```{r}
+Manual <- read.csv(paste0(outdir,"/DE_05_Manual_annotation.csv")) %>% arrange(X) 
+Manual <- Manual %>% filter(abs(log2FoldChange) > 1)
+
+Manual$Heatmap_Label <- gsub("Homeobox protein", "Hox", Manual$Heatmap_Label, ignore.case = TRUE)
+Manual$Heatmap_Label <- gsub("Protein Wnt", "Wnt", Manual$Heatmap_Label, ignore.case = TRUE)
+
+gene_labels <- Manual %>% 
+  select(query,Heatmap_Label) %>%
+  mutate_all(~ ifelse(is.na(.), "", .)) #replace NAs with "" for labelling purposes
+```
+
+```{r}
+### Zona pellucida domain
+
+PFAM_ZP_domain <- annot_all %>% filter(grepl("Zona_pellucida",Short.name,ignore.case=TRUE))  %>% pull(query) %>% unique()
+
+#### He et al 2023 TFs/genes of interest Nematostella (NOTE! I confirmed the DE_05 ones are all represented above ) + DuBuc et al 2018 Wnt/Aboral-Oral Patterning Genes, interest Nematostella
+
+DESeq_He_etal$source <- "He_etal_2023"
+DESeq_DuBuc_etal$source <- "DuBuc_etal_2018"
+
+Hox_Literature <- rbind(DESeq_He_etal,DESeq_DuBuc_etal)
+
+DESeq_Hox_Literature_collapsed <- Hox_Literature %>%
+  group_by(query, baseMean, log2FoldChange, lfcSE, pvalue, padj) %>%
+  summarize(
+    Gene_Name = paste(unique(Gene_Name), collapse = "; "),
+    Description = paste(unique(Description), collapse = "; "),
+    def_short = paste(unique(def_short), collapse = "; "),
+    source = paste(unique(source), collapse = "; "),
+    .groups = "drop"
+  )
+
+WNT_HOX_MAN <- Manual %>% select(-X) %>% filter(grepl("wnt", Heatmap_Label, ignore.case = TRUE)|grepl("frizzle", Heatmap_Label, ignore.case = TRUE)|grepl("homeobox", Heatmap_Label, ignore.case = TRUE)|grepl("hox", Heatmap_Label, ignore.case = TRUE)) %>% select(-c(blast_hit,evalue,ProteinNames,BiologicalProcess,GeneOntologyIDs))# %>% rename(Description = Heatmap_Label)
+
+COMBINED_HOX_WNT_all <-  full_join(DESeq_Hox_Literature_collapsed,WNT_HOX_MAN,by=c("query")) %>%
+  mutate(
+    baseMean = coalesce(baseMean.x, baseMean.y),
+    log2FoldChange = coalesce(log2FoldChange.x, log2FoldChange.y),
+    lfcSE = coalesce(lfcSE.x, lfcSE.y),
+    pvalue = coalesce(pvalue.x, pvalue.y),
+    padj = coalesce(padj.x, padj.y)
+  ) %>%
+  select(-ends_with(".x"), -ends_with(".y"))
+
+COMBINED_HOX_WNT_all <- COMBINED_HOX_WNT_all %>%  mutate(Heatmap_Label = coalesce(Heatmap_Label, def_short)) %>%
+                              mutate(Heatmap_Label = gsub("Protein Wnt", "Wnt", Heatmap_Label, ignore.case = TRUE)) %>% 
+                              mutate(pathway = ifelse(grepl("ox",Heatmap_Label)|grepl("Six",Heatmap_Label), "HOX", "WNT"))
+COMBINED_HOX_WNT_DE05 <-  COMBINED_HOX_WNT_all %>% filter(padj<0.05) %>% filter(abs(log2FoldChange) >1)
+```
+
+```{r}
+library(purrr)
+
+DESeq_SwissProt_categorized <- DESeq_SwissProt %>% rowwise() %>%
+  mutate(category = list(
+    c(if (query %in% DESeq_Biomin_broc$query & !grepl("Myosin|Actin|cytoplasmic", ProteinNames, ignore.case = TRUE)) "Biomineralization",
+      if (grepl("transient", ProteinNames, ignore.case = TRUE)) "TRP Channel",
+      if ((grepl("mucin|lectin|toll-|nitric|sulfotransferase|Complement", ProteinNames, ignore.case = TRUE) |
+           grepl("toll-like receptor|NF-kappaB|complement activation|3'-phosphoadenosine 5'-phosphosulfate",
+                 BiologicalProcess, ignore.case = TRUE)) & !grepl("Collectin", ProteinNames)) "Mucus- and Bacteria-related",
+      if (grepl("amino acid transport|ammonium transmembrane transport|carbohydrate transport|
+                glycerol transmembrane transport|cholesterol transport", BiologicalProcess, ignore.case = TRUE) &
+          !grepl("neurotransmitter|synaptic|pigmentation", BiologicalProcess, ignore.case = TRUE)) "Transport",
+      if (grepl("Solute carrier", ProteinNames, ignore.case = TRUE)) "Solute Carrier (SLC Family)",
+      if (grepl("cellular response to light stimulus|detection of mechanical stimulus|
+                thermoception [GO:0050955]", BiologicalProcess, ignore.case = TRUE) &
+          !grepl("Solute carrier", ProteinNames, ignore.case = TRUE)) "Sensors",
+      if (grepl("stereocilium", CellularComponent, ignore.case = TRUE)) "Stereocillium",
+      if (query %in% PFAM_ZP_domain) "Zona Pellucida",
+      if (query %in% COMBINED_HOX_WNT_all$query) "Hox/Wnt Developmental Signaling"
+    )
+  )) %>%
+  ungroup()
+
+DESeq_SwissProt_categorized_collapsed <- DESeq_SwissProt_categorized %>%
+  mutate(category = sapply(category, function(x) paste(x, collapse = "; "))) %>%
+  relocate(category, .after = ProteinNames)
+
+category_annotation <- DESeq_SwissProt_categorized_collapsed %>%
+  select(query, category) %>%
+  column_to_rownames("query")
+```
+
+
+## Figure 1
+
+### Panel B: PCA
+
+### Panel C
+
+### Panel D
+
+```{r}
+ann_colors = list(Tissue = c(OralEpi = "#FD8D3C" ,Aboral = "mediumpurple1"))
+
+colorRampPalette(c("mediumpurple1", "white", "#FD8D3C"))(5)
+
+LFC_colors <- ifelse(DESeq_SwissProt$padj < 0.05 & DESeq_SwissProt$log2FoldChange < -1, '#FD8D3C',
+                  ifelse(DESeq_SwissProt$padj < 0.05 & DESeq_SwissProt$log2FoldChange < 0 , '#FEC69D',
+                         ifelse(DESeq_SwissProt$padj < 0.05 & DESeq_SwissProt$log2FoldChange > 1, '#AB82FF',
+                                ifelse(DESeq_SwissProt$padj < 0.05 & DESeq_SwissProt$log2FoldChange > 0, '#D4C0FF',
+                                       'grey'))))
+
+
+LFC_colors[is.na(LFC_colors)] <- 'grey'
+  names(LFC_colors)[LFC_colors == '#FD8D3C'] <- 'Up_Oral_LFC_sig'
+  names(LFC_colors)[LFC_colors == '#FEC69D'] <- 'Up_Oral'
+  names(LFC_colors)[LFC_colors == 'grey'] <- 'n.s.'
+  names(LFC_colors)[LFC_colors == '#AB82FF'] <- 'Up_Aboral_LFC_sig'
+  names(LFC_colors)[LFC_colors == '#D4C0FF'] <- 'Up_Aboral'
+  
+  
+DESeq_SwissProt$short_name <- ifelse(nchar(DESeq_SwissProt$ProteinNames) > 25, 
+                            paste0(substr(DESeq_SwissProt$ProteinNames, 1, 22), "..."), 
+                            DESeq_SwissProt$ProteinNames)
+ 
+plot <- EnhancedVolcano(DESeq_SwissProt, 
+    lab = ifelse(DESeq_SwissProt$padj < 0.05 & abs(DESeq_SwissProt$log2FoldChange) > 10, DESeq_SwissProt$short_name, ""),
+    xlim = c(min(DESeq_SwissProt[["log2FoldChange"]], na.rm = TRUE) - 5, max(DESeq_SwissProt[["log2FoldChange"]], na.rm = TRUE) + 5),
+  #ylim = c(0, max(-log10(toptable[[y]]), na.rm = TRUE) + 5),
+    labSize = 3,
+    axisLabSize = 8,
+    captionLabSize = 4,
+    x = "log2FoldChange", 
+    y = "padj",
+    pCutoff = 0.05,
+    colCustom = LFC_colors, colAlpha = .7,
+    title = NULL, subtitle = NULL, 
+    legendPosition = "bottom",
+    legendLabSize = 8,
+    pointSize = 1,
+    legendIconSize = 3,
+    drawConnectors = TRUE,
+    widthConnectors = 0.5,
+    directionConnectors = "x",
+    border = 'full',
+    max.overlaps = Inf,
+    maxoverlapsConnectors = 0,
+    arrowheads =FALSE,
+    min.segment.length = 0,
+    gridlines.major = FALSE,
+  gridlines.minor = FALSE
+) #+ coord_flip() + scale_x_reverse()
+
+plot
+
+plot <- EnhancedVolcano(DESeq_SwissProt, 
+    lab = ifelse(DESeq_SwissProt$padj < 0.05 & abs(DESeq_SwissProt$log2FoldChange) > 10, DESeq_SwissProt$short_name, ""),
+    xlim = c(min(DESeq_SwissProt[["log2FoldChange"]], na.rm = TRUE) - .5, max(DESeq_SwissProt[["log2FoldChange"]], na.rm = TRUE) + .5),
+  ylim = c(0, max(-log10(DESeq_SwissProt[["padj"]]), na.rm = TRUE) + .5),
+    labSize = 3,
+    axisLabSize = 12,
+    captionLabSize = 4,
+    x = "log2FoldChange", 
+    y = "padj",
+    pCutoff = 0.05,
+    colCustom = LFC_colors, colAlpha = .7,
+    title = NULL, subtitle = NULL, 
+    legendPosition = "bottom",
+    legendLabSize = 8,
+    pointSize = 1,
+    legendIconSize = 3,
+    drawConnectors = TRUE,
+    widthConnectors = 0.5,
+    directionConnectors = "x",
+    border = 'full',
+    max.overlaps = Inf,
+    maxoverlapsConnectors = 0,
+    arrowheads =FALSE,
+    min.segment.length = 0,
+    gridlines.major = FALSE,
+  gridlines.minor = FALSE
+) #+ coord_flip() + scale_x_reverse()
+
+plot
+save_ggplot(plot, "Volcano_simple", width = 10, height = 5.25)
+
+#DESeq_SwissProt_categorized_collapsed
+```
+
+## Figure 2
+
+### Theme
+
+```{r}
+library(ggplot2)
+library(patchwork)
+library(dplyr)
+library(stringr)
+library(tidyr)
+library(scales)
+
+theme_custom <- theme_bw(base_size = 9) +
+  theme(
+    text = element_text(family = "sans"),
+    axis.text = element_text(color = "black", size = 6),
+    axis.title = element_text(size = 8, face = "bold"),
+    strip.text = element_text(face = "bold", size = 6),
+    panel.border = element_rect(color = "grey60", linewidth = 0.4),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_line(color = "grey90", linewidth = 0.3),
+    legend.title = element_text(size = 5, face = "bold"),
+    legend.text = element_text(size = 5),
+    legend.key.size = unit(0.4, "cm"),
+    plot.margin = margin(0,0,0,0)
+  )
+```
+
+
+### Panel A: Sensory
+
+#### Prepare
+```{r}
+sensors <- Manual %>% filter(query %in% (category_annotation %>% filter(grepl("Sensor",category)|grepl("Stereo",category)) %>% rownames()))
+
+gene_labels <- DE_05_SwissProt %>% 
+  select(query,ProteinNames) %>%
+  mutate(
+        short_name = str_replace(ProteinNames, "\\s*\\(.*", ""),
+        short_name = str_replace(short_name, "\\s*\\[.*", ""),
+        short_name = str_trunc(short_name, 50),
+        # Create multi-line labels by inserting line breaks
+        short_name = str_wrap(short_name, width = 25)
+      ) %>%
+  mutate_all(~ ifelse(is.na(.), "", .)) #replace NAs with "" for labelling purposes
+
+select <- sensors$query
+
+z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
+norm_counts <- assay(vsd)[select, ]
+
+heatmap_meta_df <- heatmap_metadata %>%
+  tibble::rownames_to_column("sample")
+
+z_df <- as.data.frame(z_scores) %>%
+  rownames_to_column("query") %>%
+  pivot_longer(-query, names_to = "Sample", values_to = "Zscore") %>%
+  left_join(heatmap_meta_df %>% select(sample, Tissue), 
+            by = c("Sample" = "sample"))
+
+counts_df <- as.data.frame(norm_counts) %>%
+  rownames_to_column("query") %>%
+  pivot_longer(-query, names_to = "Sample", values_to = "NormCount") %>%
+  left_join(heatmap_meta_df %>% select(sample, Tissue), 
+            by = c("Sample" = "sample"))
+
+combined_df <- z_df %>%
+  left_join(counts_df, by = c("query", "Sample", "Tissue")) %>%
+  left_join(gene_labels, by = "query") %>%
+  left_join(sensors %>% select(query, BiologicalProcess), by = "query")
+
+combined_df <- combined_df %>%
+  mutate(Modality = case_when(
+    grepl("stereo", BiologicalProcess, ignore.case = TRUE) ~ "Stereocilia",
+    grepl("light", BiologicalProcess, ignore.case = TRUE) ~ "Light",
+    grepl("thermo", BiologicalProcess, ignore.case = TRUE) ~ "Temperature",
+    grepl("mechanical", BiologicalProcess, ignore.case = TRUE) ~ "Mechanosensory",
+    TRUE ~ "Other"
+  ))
+
+combined_df$Modality <- factor(combined_df$Modality, 
+                        levels = c("Light", "Temperature", "Mechanosensory", "Stereocilia","Other"))
+
+plot_df <- combined_df %>%
+  group_by(Tissue, query, short_name, Modality) %>%
+  summarize(mean_z = mean(Zscore),mean_count = mean(NormCount), .groups = "drop")
+
+gene_order_df <- plot_df %>%
+  pivot_wider(names_from = Tissue, values_from = c(mean_z, mean_count)) %>%
+  mutate(diff = mean_z_OralEpi - mean_z_Aboral) %>%
+  arrange(Modality, desc(diff))
+
+gene_order <- gene_order_df$query
+plot_df$query <- factor(plot_df$query, levels = gene_order)
+gene_labels_vec <- setNames(gene_order_df$short_name, gene_order_df$query)
+```
+
+#### Plotting
+```{r}
+gene_labels_vec[grep("Thrombospondin-type\nlaminin G domain",gene_labels_vec)] <- "TSP-EAR"
+
+gene_labels_vec[grep("Transient receptor\npotential cation channel",gene_labels_vec)] <- "TRP A1"
+
+p_sensory <- ggplot(plot_df, aes(x = Tissue, y = query)) +
+  geom_point(aes(size = mean_count, fill = mean_z), 
+             shape = 21, color = "grey20", stroke = 0.3) +
+  scale_fill_distiller(palette = "RdBu", direction = -1, name = "Mean\nZ-score") +
+  scale_size_continuous(range = c(0.5, 5), name = "Expression\nlevel") +
+  scale_y_discrete(labels = gene_labels_vec) +
+  facet_grid(rows = vars(Modality), scales = "free_y", space = "free_y") +
+  labs(x = NULL, y = NULL) +
+  theme_custom +
+  theme(
+    strip.text.y.right = element_text(angle = 90, face = "bold", size = 6),
+    strip.background = element_blank(),
+    strip.placement = "outside",
+    panel.grid.major.y = element_blank(),
+    axis.text.x = element_text(size = 6, face = "bold"),
+    legend.position = "bottom",
+    legend.box = "vertical",
+    legend.box.just = "center",
+    legend.title =  element_text(hjust = 1,vjust=1),
+    legend.spacing.y = unit(0, "pt"),
+    legend.text = element_text(margin = margin(l=0,t=1)),
+    legend.key.spacing.x = unit(2, "pt"),
+  legend.margin = margin(t = 1, b = 1, l=1,r=1)
+  )
+
+
+ggsave("../output_RNA/differential_expression/sensors_dotplot.png", p_sensory, 
+       width = 2.5, height = 5, units = "in")
+```
+
+### Panel B
+
+#### Prepare
+
+```{r}
+plot_data <- solute_de %>%
+  left_join(slc_map, by = "SLC_family") %>%
+  mutate(Direction = ifelse(log2FoldChange > 1, "upAboral",
+                            ifelse(log2FoldChange < -1, "upOral", "noChange"))) 
+# Summarize counts by family and direction
+plot_data <- plot_data %>%
+  filter(Direction != "noChange") %>%
+  group_by(SLC_family, Substrate_Broad, Direction) %>%
+  summarise(n = n(), .groups = "drop")
+
+ggplot(plot_data, aes(x = SLC_family, y = n, fill = Direction)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~Substrate_Broad, scales = "free_x") +
+  scale_fill_manual(values = c("upOral" = "#FD8D3C", "upAboral" = "mediumpurple1")) +
+  theme_minimal() +
+  labs(title = "Differentially Expressed SLC Genes by Family",
+       x = "SLC Family", y = "Number of DE Genes") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+category_order <- plot_data %>%
+  group_by(Substrate_Broad) %>%
+  summarize(
+    oral_total = sum(n[Direction == "upOral"], na.rm = TRUE),
+    aboral_total = sum(n[Direction == "upAboral"], na.rm = TRUE),
+    net_oral = oral_total - aboral_total
+  ) %>%
+  arrange(desc(net_oral)) %>%
+  pull(Substrate_Broad)
+
+plot_data$Substrate_Broad <- factor(plot_data$Substrate_Broad, levels = category_order)
+
+# Order SLC families within each category by oral enrichment
+family_order <- plot_data %>%
+  group_by(SLC_family) %>%
+  summarize(
+    oral_n = sum(n[Direction == "upOral"], na.rm = TRUE),
+    aboral_n = sum(n[Direction == "upAboral"], na.rm = TRUE),
+    net_oral = oral_n - aboral_n,
+    substrate = dplyr::first(category_order)
+  ) %>%
+  arrange(substrate, desc(net_oral)) %>%
+  pull(SLC_family)
+       
+plot_data$SLC_family <- factor(plot_data$SLC_family, levels = family_order)
+```
+
+#### Plotting
+```{r}
+p_slc <- ggplot(plot_data, aes(x = SLC_family, y = n, fill = Direction)) +
+  geom_bar(stat = "identity", position = "stack", width = 0.7,
+           color = "grey20", linewidth = 0.3) +
+  scale_fill_manual(values = c("upOral" = "#FD8D3C", "upAboral" = "mediumpurple1"),name = "Tissue\nenrichment") +
+  facet_grid(cols = vars(Substrate_Broad), scales = "free_x", space = "free_x") +
+  labs(y = "Number of DE genes", x = NULL) +
+  theme_custom +
+  theme(
+    strip.background = element_blank(),
+    strip.text = element_text(size = 5,margin = margin(0.15, 0.15, 0.15, 0.15, "pt")), 
+    axis.text.x = element_text(size = 7, angle = 45, hjust = 1, vjust = 1),
+    legend.position = "bottom",
+    panel.grid.major.x = element_blank(),
+    panel.grid.major.y = element_line(color = "grey90", linewidth = 0.3),
+    panel.spacing.x = unit(0.1, "lines")
+  )
+
+ggsave("../output_RNA/differential_expression/slc_barchart_multipanel.png", p_slc, 
+       width = 6, height = 3, units = "in")
+
+p_slc
+```
+
+### Panel C
+
+```{r}
+library(scales)
+
+enrichment_combined <-read.csv("../output_RNA/differential_expression/interpro/Pfam_enrichment_results.csv")
+enrichment_combined$hit_name[
+  enrichment_combined$hit_name == "ATP:guanido phosphotransferase, C-terminal catalytic domain"
+] <- "ATP:guanido phosphotransferase,\nC-terminal catalytic domain"
+
+enrichmentplot_bidirectional_v2 <- function(enrichment_combined, n_top = 20) {
+  enrichment_combined_long <- enrichment_combined %>%
+    mutate(
+      sig_level_Oral = case_when(
+        padj_Oral < 0.001 ~ "padj < 0.001",
+        padj_Oral < 0.01  ~ "padj < 0.01",
+        padj_Oral < 0.05  ~ "padj < 0.05",
+        TRUE ~ "ns"),
+      sig_level_Aboral = case_when(
+        padj_Aboral < 0.001 ~ "padj < 0.001",
+        padj_Aboral < 0.01  ~ "padj < 0.01",
+        padj_Aboral < 0.05  ~ "padj < 0.05",
+        TRUE ~ "ns")) %>%
+    select(
+      hit_name, nonDE_Oral,nonDE_Aboral,
+      DE_Oral,
+      enrichment_ratio_Oral,
+      padj_Oral,
+      sig_level_Oral,
+      DE_Aboral,
+      enrichment_ratio_Aboral,
+      padj_Aboral,
+      sig_level_Aboral) %>%
+    pivot_longer(
+      cols = -hit_name,
+      names_to = c(".value", "Tissue"),
+      names_pattern = "(.*)_(Oral|Aboral)")
+  
+  top_oral <- enrichment_combined_long %>%
+    filter(Tissue == "Oral") %>%
+    arrange(padj) %>%
+    slice_head(n = n_top) %>%
+    arrange(desc(enrichment_ratio)) %>%
+    pull(hit_name)
+  
+  top_aboral <- enrichment_combined_long %>%
+    filter(Tissue == "Aboral") %>%
+    arrange(padj) %>%
+    slice_head(n = n_top) %>%
+    arrange(enrichment_ratio) %>%
+    pull(hit_name)
+  
+  top_domains_both <- enrichment_combined_long %>%
+    filter(hit_name %in% union(top_oral, top_aboral)) %>%
+    mutate(enrichment_ratio = ifelse(Tissue == "Oral", -enrichment_ratio, enrichment_ratio),
+      sig_tissue = paste(Tissue, sig_level),
+      hit_name = factor(hit_name, levels = rev(c(top_oral, setdiff(top_aboral, top_oral)))))
+  
+  max_val <- ceiling(max(top_domains_both$enrichment_ratio[top_domains_both$enrichment_ratio>0])/5) * 5
+  min_val <- ceiling(max(abs(top_domains_both$enrichment_ratio[top_domains_both$enrichment_ratio<0]))/5) * 5
+  
+  # Plot both tissues with facetting
+  p <-  ggplot(top_domains_both, aes(x = hit_name, y = enrichment_ratio)) +
+    geom_hline(yintercept = 0, color = "black", linewidth = 0.6, linetype = "dashed") +
+    geom_segment(aes(xend = hit_name, y = 0, yend = enrichment_ratio),
+                 color = "grey85", linewidth = 0.6) +
+    geom_point(aes(size = DE, fill = sig_tissue),shape = 21,alpha = 0.9) +
+    geom_text(aes(label = ifelse(DE == 0, "", DE)),size = 2.5,color = "black",fontface = "bold") +
+    geom_text(aes(y = -min_val-2, label = nonDE),size = 2.5,color = "black") +
+    annotate("text", x = length(unique(top_domains_both$hit_name)) + 0.5,
+             y = -min_val - 2, label = "# of non-\nDE genes",
+             vjust = -0.5, hjust = 0.5, size = 2.25, fontface = "bold", 
+             color = "black", lineheight = 0.9) +
+  coord_flip(clip = "off") + 
+    scale_fill_manual(
+      name = "Adj. p-value",
+      values = c(
+        "Oral padj < 0.001" = "#FD8D3C",
+        "Oral padj < 0.01"  = "#FDAE6B",
+        "Oral padj < 0.05"  = "#FEC69D",
+        "Aboral padj < 0.001" = "mediumpurple1",
+        "Aboral padj < 0.01"  = "#CBA7F8",
+        "Aboral padj < 0.05"  = "#D4C0FF",
+        "Oral ns" = "gray80",
+        "Aboral ns" = "gray80" )) +
+    scale_y_continuous(
+      labels = function(x) abs(x),
+      breaks = seq(-min_val, max_val, by = 5),
+      limits = c(-min_val - 2, max_val)) +
+   scale_size_continuous(range = c(3, 10), name = "DE genes") +
+    labs(x = NULL, y = "Enrichment Ratio (Domains DE / Domains in Background)") +
+    theme_custom +
+    theme(
+      legend.position = c(0.9, 0.95),       # move legend inside
+    legend.justification = c("right","top"),
+    legend.background = element_rect(fill = alpha("white", 0.7), color = NA),
+    legend.box.background = element_rect(color = "grey70", size = 0.3),
+    legend.key.size = unit(0.35, "cm"),
+      panel.grid.major.y = element_blank(),
+      panel.grid.major.x = element_line(color = "grey90", linewidth = 0.3),
+      axis.text.y = element_text(size = 6)
+    )
+  
+  print(p)
+}
+
+Pfam_plot <- enrichmentplot_bidirectional_v2(enrichment_combined, n_top = 10)
+
+ggsave(filename = "../output_RNA/differential_expression/Pfam_enriched_top10.png", plot = Pfam_plot, width = 6, height = 4, units = "in", dpi = 300,bg=NULL)
+ggsave(filename = "../output_RNA/differential_expression/pdf_figs/Pfam_enriched_top10.png.pdf", plot = Pfam_plot, width = 6, height = 4, units = "in", dpi = 300,bg=NULL)
+```
+
+### Patchwork
+
+```{r}
+library(patchwork)
+
+layout <- "
+AACCCC
+AACCCC
+AACCCC
+BBBBBB
+"
+
+final_fig <- free(p_sensory) + p_slc + Pfam_plot +
+  plot_layout(design = layout) +
+  plot_annotation(tag_levels = "A",
+                  theme = theme(text = element_text(size = 10, face = "bold")))
+
+# Save outputs
+ggsave("../output_RNA/differential_expression/Figure2.png",
+       final_fig, width = 6.9, height = 9, units = "in", dpi = 600, bg = "white")
+
+ggsave("../output_RNA/differential_expression/Figure2.pdf",
+       final_fig, width = 6.9, height = 9, units = "in", dpi = 600, 
+       device = cairo_pdf, bg = "white")
+
+```
+
