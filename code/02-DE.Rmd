@@ -161,6 +161,20 @@ EnhancedVolcano(res,
     x = "log2FoldChange", 
     y = "pvalue"
 )
+
+volcano_plain <- EnhancedVolcano(res, 
+    lab = NA,
+    x = 'log2FoldChange',
+    y = 'padj',
+    pCutoff = 0.05,
+    title="",
+    subtitle="",
+    drawConnectors = TRUE,
+    widthConnectors = 0.75,
+    pointSize = 1,
+    labSize = 2,boxedLabels = TRUE,max.overlaps = 60)
+
+save_ggplot(volcano_plain, "volcano_plain",width = 4, height = 6, units = "in", dpi = 300)
 ```
 
 ## Plots
@@ -353,8 +367,6 @@ top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, na
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
          labels_row =gene_labels[select,"PFAMs"], fontsize_row = 5)
 top50_DE
-save_ggplot(top50_DE, "top50_DE")
-
 #view genes Higher in Aboral, Lower in OralEpi, ordered by log2FoldChange
 select <- order(res$log2FoldChange,decreasing = TRUE)[1:50]
 
@@ -363,7 +375,6 @@ up_Aboral <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, n
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
          labels_row =gene_labels[select,"PFAMs"], fontsize_row = 5)
 up_Aboral
-save_ggplot(up_Aboral, "up_Aboral")
 
 #view genes Lower in Aboral, Higher in OralEpi, ordered by log2FoldChange
 select <- order(res$log2FoldChange)[1:50]
@@ -373,7 +384,6 @@ up_OralEpi <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, 
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
          labels_row =gene_labels[select,"PFAMs"], fontsize_row = 5)
 up_OralEpi
-save_ggplot(up_OralEpi, "up_OralEpi")
 ```
 
 ## Genes of Interest
@@ -388,62 +398,6 @@ MarkerGenes$def_short <- ifelse(nchar(MarkerGenes$definition) > 20,
                             paste0(substr(MarkerGenes$definition, 1, 17), "..."), 
                             MarkerGenes$definition)
 ```
-
-### My marker genes (p compressa)
-
-```{r}
-Pcomp_MarkerGenes_broc <- read.csv("../output_RNA/marker_genes/combined_Pcomp_markers.csv") %>% select(protein_id_spA,cluster_guess_std,protein_id_spB) %>% dplyr::rename("Pcomp_gene" = protein_id_spA,"query" = protein_id_spB, "List" = cluster_guess_std) 
-
-Pcomp_MarkerGenes_broc <- Pcomp_MarkerGenes_broc %>% filter(grepl("Pocillopora",query)&!grepl("unidentified",List)) %>% distinct() 
-
-Pcomp_MarkerGenes_broc_all_res <- as.data.frame(res) %>% mutate(query = rownames(res)) %>% select(query,everything()) %>% left_join(Pcomp_MarkerGenes_broc) 
-
-Pcomp_MarkerGenes_broc_all_res_Pcomp <- Pcomp_MarkerGenes_broc_all_res %>%
-  group_by(Pcomp_gene) %>%
-  slice_min(order_by = padj, with_ties = FALSE) %>%
-  ungroup()
-
-Pcomp_MarkerGenes_broc_all_res_Pacuta <- Pcomp_MarkerGenes_broc_all_res %>% group_by(query,baseMean,log2FoldChange,lfcSE,pvalue,padj) %>% summarize(List = paste(List, collapse = ";"), .groups="drop")
-
-write.csv(Pcomp_MarkerGenes_broc_all_res_Pcomp, "../output_RNA/differential_expression/Pcomp_snRNA_marker_expr_PacutaLCM.csv")
-```
-
-```{r}
-Pdam_MarkerGenes_broc <- read.csv("../output_RNA/marker_genes/combined_Pdam_markers.csv") %>% select(protein_id_spA,Standardized_Name_spA,protein_id_spB) %>% dplyr::rename("Pdam_gene" = protein_id_spA,"query" = protein_id_spB, "List" = Standardized_Name_spA) 
-
-Pdam_MarkerGenes_broc <- Pdam_MarkerGenes_broc %>% filter(grepl("Pocillopora",query)&!grepl("unidentified",List)) %>% distinct() 
-
-Pdam_MarkerGenes_broc_all_res <- as.data.frame(res) %>% mutate(query = rownames(res)) %>% 
-  select(query,everything()) %>% left_join(Pdam_MarkerGenes_broc) 
-
-Pdam_MarkerGenes_broc_all_res_Pdam <- Pdam_MarkerGenes_broc_all_res %>%
-  group_by(Pdam_gene) %>%
-  slice_min(order_by = padj, with_ties = FALSE) %>%
-  ungroup()
-
-Pdam_MarkerGenes_broc_all_res_Pacuta <- Pdam_MarkerGenes_broc_all_res %>% group_by(query,baseMean,log2FoldChange,lfcSE,pvalue,padj) %>% summarize(List = paste(List, collapse = ";"), .groups="drop")
-
-write.csv(Pdam_MarkerGenes_broc_all_res_Pdam, "../output_RNA/differential_expression/Pdam_snRNA_marker_expr_PacutaLCM.csv")
-```
-
-```{r}
-Mcap_MarkerGenes_broc <- read.csv("../output_RNA/marker_genes/combined_Mcap_markers.csv") %>% select(protein_id_spA,cluster_guess_std,protein_id_spB) %>% dplyr::rename("Mcap_gene" = protein_id_spA,"query" = protein_id_spB, "List" = cluster_guess_std) 
-
-Mcap_MarkerGenes_broc <- Mcap_MarkerGenes_broc %>% filter(grepl("Pocillopora",query)&!grepl("unidentified",List)) %>% distinct() 
-
-Mcap_MarkerGenes_broc_all_res <- as.data.frame(res) %>% mutate(query = rownames(res)) %>% 
-  select(query,everything()) %>% left_join(Mcap_MarkerGenes_broc) 
-
-Mcap_MarkerGenes_broc_all_res_Mcap <- Mcap_MarkerGenes_broc_all_res %>%
-  group_by(Mcap_gene) %>%
-  slice_min(order_by = padj, with_ties = FALSE) %>%
-  ungroup()
-
-Mcap_MarkerGenes_broc_all_res_Pacuta <- Mcap_MarkerGenes_broc_all_res %>% group_by(query,baseMean,log2FoldChange,lfcSE,pvalue,padj) %>% summarize(List = paste(List, collapse = ";"), .groups="drop")
-
-write.csv(Mcap_MarkerGenes_broc_all_res_Mcap, "../output_RNA/differential_expression/Mcap_snRNA_marker_expr_PacutaLCM.csv")
-```
-
 
 ### Biomineralization toolkit
 ```{r}
@@ -492,7 +446,6 @@ DuBuc_etal_Nvec$def_short <- DuBuc_etal_Nvec$Gene_Name
 HeatStressGenes <- read.csv("../output_RNA/marker_genes/HeatStressGenes_Pacuta.csv") %>% dplyr::rename("query" = Pacuta_gene) %>% select(-c(X))
 ```
 
-
 ```{r}
 DE_05$query <- rownames(DE_05)
 resOrdered$query <- rownames(resOrdered)
@@ -508,9 +461,6 @@ DE_05_biomin         <- join_genes_of_interest(DE_05, Biomin)
 DE_05_Biomin_broc    <- join_genes_of_interest(DE_05, Biomin_broc)
 DE_05_marker         <- join_genes_of_interest(DE_05, MarkerGenes)
 DE_05_marker_broc    <- join_genes_of_interest(DE_05, MarkerGenes_broc)
-DE_05_marker_broc_Pcomp    <- join_genes_of_interest(DE_05, Pcomp_MarkerGenes_broc)
-DE_05_marker_broc_Pdam    <- join_genes_of_interest(DE_05, Pdam_MarkerGenes_broc)
-DE_05_marker_broc_Mcap   <- join_genes_of_interest(DE_05, Mcap_MarkerGenes_broc)
 DE_05_He_etal        <- join_genes_of_interest(DE_05, He_etal_Nvec)
 DE_05_DuBuc_etal     <- join_genes_of_interest(DE_05, DuBuc_etal_Nvec)
 
@@ -539,147 +489,6 @@ markers_all_res <- as.data.frame(res) %>% mutate(query = rownames(res)) %>% sele
 
 broc_markers_all_counts <- as.data.frame(counts(dds)) %>% mutate(query = rownames(dds)) %>% select(query,everything()) %>% left_join(MarkerGenes_broc) 
 broc_markers_all_res <- as.data.frame(res) %>% mutate(query = rownames(res)) %>% select(query,everything()) %>% left_join(MarkerGenes_broc) 
-```
-
-```{r}
-#view biomin genes that are differentially expressed
-
-z_scores <- t(scale(t(assay(vsd)[DE_05_biomin$query, ]), center = TRUE, scale = TRUE))
-DE_biomin <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
-         cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
-         labels_row = DE_05_biomin$def_short, fontsize_row = 5)
-DE_biomin
-save_ggplot(DE_biomin, "DE_biomin")
-
-#view biomin genes that are differentially expressed
-
-z_scores <- t(scale(t(assay(vsd)[DE_05_Biomin_broc$query, ]), center = TRUE, scale = TRUE))
-DE_Biomin_broc <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
-         cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
-         labels_row = DE_05_Biomin_broc$def_short, fontsize_row = 5)
-DE_Biomin_broc
-save_ggplot(DE_Biomin_broc, "DE_Biomin_broc")
-
-#view marker genes that are differentially expressed
-
-z_scores <- t(scale(t(assay(vsd)[DE_05_marker$query, ]), center = TRUE, scale = TRUE))
-DE_marker <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
-         cluster_cols=TRUE, cutree_cols = 2,cutree_rows = 5,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
-         labels_row = DE_05_marker$List, fontsize_row = 4)
-DE_marker
-save_ggplot(DE_marker, "DE_marker")
-
-DE_05_marker_grouped <- DE_05_marker %>% arrange(List) %>% mutate(List = as.factor(List))
-
-z_scores <- t(scale(t(assay(vsd)[DE_05_marker_grouped$quer, ]), center = TRUE, scale = TRUE))
-DE_05_marker_grouped_plot <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=FALSE, show_rownames=TRUE,
-         cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
-         labels_row = DE_05_marker_grouped$List, fontsize_row = 5)
-
-DE_05_marker_grouped_plot
-save_ggplot(DE_05_marker_grouped_plot, "DE_05_marker_grouped")
-
-#view marker genes that are differentially expressed
-
-z_scores <- t(scale(t(assay(vsd)[DE_05_marker_broc$query, ]), center = TRUE, scale = TRUE))
-DE_marker <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
-         cluster_cols=TRUE, cutree_cols = 2,cutree_rows = 5,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
-         labels_row = DE_05_marker_broc$List, fontsize_row = 2)
-DE_marker
-save_ggplot(DE_marker, "DE_marker_broc")
-
-DE_05_marker_broc_grouped <- DE_05_marker_broc %>% arrange(List) %>% mutate(List = as.factor(List))
-
-z_scores <- t(scale(t(assay(vsd)[DE_05_marker_broc_grouped$quer, ]), center = TRUE, scale = TRUE))
-DE_05_marker_broc_grouped_plot <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=FALSE, show_rownames=TRUE,
-         cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
-         labels_row = DE_05_marker_broc_grouped$List, fontsize_row = 3)
-
-DE_05_marker_broc_grouped_plot
-save_ggplot(DE_05_marker_broc_grouped_plot, "DE_05_marker_broc_grouped")
-```
-
-### Visualizing Differential Expression
-
-```{r}
-Biomin_volcano <- EnhancedVolcano(biomin_all_res, 
-    lab = biomin_all_res$def_short,
-    x = 'log2FoldChange',
-    y = 'padj',
-    pCutoff = 0.01,
-    drawConnectors = TRUE,
-    widthConnectors = 0.75,
-    pointSize = 1,
-    labSize = 2,boxedLabels = TRUE,max.overlaps = 40)
-
-save_ggplot(Biomin_volcano, "Biomin_volcano")
-
-Biomin_broc_volcano <- EnhancedVolcano(Biomin_broc_all_res, 
-    lab = Biomin_broc_all_res$def_short,
-    x = 'log2FoldChange',
-    y = 'padj',
-    pCutoff = 0.01,
-    drawConnectors = TRUE,
-    widthConnectors = 0.75,
-    pointSize = 1,
-    labSize = 2,boxedLabels = TRUE,max.overlaps = 40)
-
-save_ggplot(Biomin_broc_volcano, "Biomin_broc_volcano")
-
-Marker_volcano <- EnhancedVolcano(markers_all_res, 
-    lab = markers_all_res$List,
-    x = 'log2FoldChange',
-    y = 'padj',
-    pCutoff = 0.01,
-    drawConnectors = TRUE,
-    widthConnectors = 0.75,
-    pointSize = 1,
-    labSize = 2,boxedLabels = TRUE,max.overlaps = 60)
-
-save_ggplot(Marker_volcano, "Marker_volcano")
-
-Marker_volcano_names <- EnhancedVolcano(markers_all_res, 
-    lab = markers_all_res$def_short,
-    x = 'log2FoldChange',
-    y = 'padj',
-    pCutoff = 0.01,
-    drawConnectors = TRUE,
-    widthConnectors = 0.75,
-    pointSize = 1,
-    labSize = 2,boxedLabels = TRUE,max.overlaps = 60)
-
-save_ggplot(Marker_volcano_names, "Marker_volcano_names")
-
-Marker_volcano <- EnhancedVolcano(broc_markers_all_res, 
-    lab = broc_markers_all_res$List,
-    x = 'log2FoldChange',
-    y = 'padj',
-    pCutoff = 0.01,
-    drawConnectors = TRUE,
-    widthConnectors = 0.75,
-    pointSize = 1,
-    labSize = 2,boxedLabels = TRUE,max.overlaps = 60)
-
-save_ggplot(Marker_volcano, "Marker_volcano_broc")
-
-EnhancedVolcano(res, 
-    lab = rownames(res),
-    x = 'log2FoldChange',
-    y = 'pvalue')
-
-volcano_plain <- EnhancedVolcano(res, 
-    lab = NA,
-    x = 'log2FoldChange',
-    y = 'padj',
-    pCutoff = 0.05,
-    title="",
-    subtitle="",
-    drawConnectors = TRUE,
-    widthConnectors = 0.75,
-    pointSize = 1,
-    labSize = 2,boxedLabels = TRUE,max.overlaps = 60)
-
-save_ggplot(volcano_plain, "volcano_plain",width = 4, height = 6, units = "in", dpi = 300)
 ```
 
 ## Trying to annotate un-annotated DE genes:
@@ -715,80 +524,6 @@ grep -f ../output_RNA/differential_expression/expressed_genes_names.csv ../refer
 #grep each header with the protein sequence after ("-A 1") and save to a new file
 grep -A 1 -f ../output_RNA/differential_expression/expressed_genes_names.csv ../references/Pocillopora_acuta_HIv2.genes.pep.faa \
   | grep -v "^--$" > ../output_RNA/differential_expression/expressed_genes_seqs.txt
-```
-
-### nr database BLAST of DE_05 genes only
-
-On andromeda:
-
-Blastp-ing only the DE genes against the entire nr database (will take a while)
-
-```{bash eval=FALSE}
-cd ../scripts
-nano DEG_05_blast.sh
-```
-
-```{bash eval=FALSE}
-#!/bin/bash
-#SBATCH --job-name="DE_blast"
-#SBATCH -t 240:00:00
-#SBATCH --export=NONE
-#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
-#SBATCH --mail-user=zdellaert@uri.edu #your email to send notifications
-#SBATCH --mem=500GB
-#SBATCH --error=../scripts/outs_errs/"%x_error.%j" #write out slurm error reports
-#SBATCH --output=../scripts/outs_errs/"%x_output.%j" #write out any program outpus
-#SBATCH --account=putnamlab
-#SBATCH --nodes=2 --ntasks-per-node=24
-
-module load BLAST+/2.15.0-gompi-2023a
-
-cd ../output_RNA/differential_expression #set working directory
-mkdir blast
-cd blast
-
-#nr database location andromeda: /data/shared/ncbi-db/.ncbirc 
-# points to current location: cat /data/shared/ncbi-db/.ncbirc
-# [BLAST]
-# BLASTDB=/data/shared/ncbi-db/2024-11-10
-
-blastp -query ../DEG_05_seqs.txt -db nr -out DEG_05_blast_results.txt -outfmt 0 -evalue 1E-05 \
--num_threads 48 \
--max_target_seqs 10
-
-blastp -query ../DEG_05_seqs.txt -db nr -out DEG_05_blast_results_tab.txt -outfmt 6 -evalue 1E-05 \
--num_threads 48 \
--max_target_seqs 1 \
--max_hsps 1
-
-echo "Blast complete!" $(date)
-```
-
-```{bash, eval=FALSE}
-sbatch DEG_05_blast.sh
-```
-
-```{bash, eval=FALSE}
-cd ../output_RNA/differential_expression/blast
-
-wc -l DEG_05_blast_results_tab.txt #3537 of the 3606 genes were annotated
-
-#get just the NCBI database accession numbers for the blast results
-cut -f2 DEG_05_blast_results_tab.txt > DEG_05_blast_accessions.txt
-
-#remove any duplicates
-sort -u  DEG_05_blast_accessions.txt > unique_DEG_05_blast_accessions.txt
-
-wc -l unique_DEG_05_blast_accessions.txt #3404 of the 3537 annotations were unique
-
-while read acc; do
-  curl -s "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=$acc&rettype=gp&retmode=text" \
-  | grep "DEFINITION" | sed 's/DEFINITION  //g' | awk -v id="$acc" '{print id "\t" $0}'
-done < unique_DEG_05_blast_accessions.txt > DEG_05_blast_names.txt
-
-wc -l DEG_05_blast_names.txt #3396 ; unsure why 8 are missing.
-
-join -1 2 -2 1 -t $'\t' <(sort -k2 DEG_05_blast_results_tab.txt) <(sort DEG_05_blast_names.txt) > annotated_DEG_05_blast_results_tab.txt
 ```
 
 ### SwissProt of ALL genes
@@ -904,6 +639,7 @@ annot_tab <- left_join(bltabl, spgo, by = c("V3" = "Entry")) %>%
   )
 
 head(annot_tab)
+rm(spgo)
 ```
 
 ```{r}
@@ -914,7 +650,7 @@ write.table(annot_tab,
             quote = FALSE)
 
 DESeq_SwissProt <- as.data.frame(resOrdered) %>% left_join(annot_tab) %>% select(query,everything()) 
-DE_05_SwissProt <- DE_05 %>% left_join(annot_tab) %>% select(query,everything()) 
+DE_05_SwissProt <- DESeq_SwissProt %>% filter(query %in% DE_05$query)
 
 write.csv(as.data.frame(DESeq_SwissProt), file=paste0(outdir,"/DESeq_SwissProt_annotation.csv"))
 write.csv(as.data.frame(DE_05_SwissProt), file=paste0(outdir,"/DE_05_SwissProt_annotation.csv"))
@@ -939,7 +675,6 @@ top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, na
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
          labels_row = gene_labels[match(rownames(res)[select],(gene_labels$query)),2], fontsize_row = 6)
 top50_DE
-save_ggplot(top50_DE, "top50_DE_SwissProt")
 
 #view most significantly differentially expressed genes by LFC
 
@@ -951,8 +686,6 @@ top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, na
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
          labels_row = gene_labels[match(rownames(res)[select],(gene_labels$query)),2], fontsize_row = 6)
 top50_DE
-save_ggplot(top50_DE, "top50_LFC_DE_SwissProt")
-
 
 #view genes Higher in Aboral, Lower in OralEpi, ordered by log2FoldChange
 select <- order(res$log2FoldChange,decreasing = TRUE)[1:50]
@@ -962,7 +695,6 @@ up_Aboral <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, n
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
          labels_row = gene_labels[match(rownames(res)[select],(gene_labels$query)),2], fontsize_row = 5)
 up_Aboral
-save_ggplot(up_Aboral, "up_Aboral_SwissProt")
 
 #view genes Lower in Aboral, Higher in OralEpi, ordered by log2FoldChange
 select <- order(res$log2FoldChange)[1:50]
@@ -971,60 +703,25 @@ z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
 up_OralEpi <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=FALSE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
          labels_row =gene_labels[match(rownames(res)[select],(gene_labels$query)),2], fontsize_row = 5)
-up_OralEpi
-save_ggplot(up_OralEpi, "up_OralEpi_SwissProt")
+print(up_OralEpi)
 ```
 
-```{r}
-DE_05_SwissProt$short_GO <- ifelse(nchar(DE_05_SwissProt$BiologicalProcess) > 30, 
-                            paste0(substr(DE_05_SwissProt$BiologicalProcess, 1, 27), "..."), 
-                            DE_05_SwissProt$BiologicalProcess)
-
-gene_labels <- DE_05_SwissProt %>% select(query,short_GO) %>%
-  mutate_all(~ ifelse(is.na(.), "", .)) #replace NAs with "" for labelling purposes
-
-#view most significantly differentially expressed genes
-
-select <- order(res$padj)[1:50]
-
-z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
-top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=FALSE, show_rownames=TRUE,
-         cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
-         labels_row =gene_labels[match(rownames(res)[select],(gene_labels$query)),2], fontsize_row = 5)
-top50_DE
-save_ggplot(top50_DE, "top50_DE_Blast2GO")
-
-#view genes Higher in Aboral, Lower in OralEpi, ordered by log2FoldChange
-select <- order(res$log2FoldChange,decreasing = TRUE)[1:50]
-
-z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
-up_Aboral <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=FALSE, show_rownames=TRUE,
-         cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
-         labels_row =gene_labels[match(rownames(res)[select],(gene_labels$query)),2], fontsize_row = 5)
-up_Aboral
-save_ggplot(up_Aboral, "up_Aboral_Blast2GO")
-
-#view genes Lower in Aboral, Higher in OralEpi, ordered by log2FoldChange
-select <- order(res$log2FoldChange)[1:50]
-
-z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
-up_OralEpi <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=FALSE, show_rownames=TRUE,
-         cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
-         labels_row =gene_labels[match(rownames(res)[select],(gene_labels$query)),2], fontsize_row = 5)
-up_OralEpi
-save_ggplot(up_OralEpi, "up_OralEpi_Blast2GO")
-```
-
-
-
-### Combined annotations manually
+### Clean labels and try to categorize annotations
 
 ```{r}
-Manual <- read.csv(paste0(outdir,"/DE_05_Manual_annotation.csv")) %>% arrange(X) 
-Manual <- Manual %>% filter(abs(log2FoldChange) > 1)
+Manual_AllGenes <- DESeq_SwissProt %>% mutate(Heatmap_Label = ProteinNames) %>% relocate(Heatmap_Label, .after=evalue)
 
-Manual$Heatmap_Label <- gsub("Homeobox protein", "Hox", Manual$Heatmap_Label, ignore.case = TRUE)
-Manual$Heatmap_Label <- gsub("Protein Wnt", "Wnt", Manual$Heatmap_Label, ignore.case = TRUE)
+Manual_AllGenes$Heatmap_Label <- gsub("Homeobox protein", "Hox", Manual_AllGenes$Heatmap_Label, ignore.case = TRUE)
+Manual_AllGenes$Heatmap_Label <- gsub("Protein Wnt", "Wnt", Manual_AllGenes$Heatmap_Label, ignore.case = TRUE)
+
+Manual_AllGenes <- Manual_AllGenes %>% mutate(
+        Heatmap_Label = str_replace(Heatmap_Label, "\\s*\\(.*", ""),
+        Heatmap_Label = str_replace(Heatmap_Label, "\\s*\\[.*", ""),
+        Heatmap_Label_short = str_trunc(Heatmap_Label, 50),
+        Heatmap_Label_short = str_wrap(Heatmap_Label, width = 25)
+      )
+
+Manual <- Manual_AllGenes %>% filter(query %in% DE_05$query)
 
 gene_labels <- Manual %>% 
   select(query,Heatmap_Label) %>%
@@ -1033,7 +730,6 @@ gene_labels <- Manual %>%
 
 ```{r}
 ### Zona pellucida domain
-
 PFAM_ZP_domain <- annot_all %>% filter(grepl("Zona_pellucida",Short.name,ignore.case=TRUE))  %>% pull(query) %>% unique()
 
 #### He et al 2023 TFs/genes of interest Nematostella (NOTE! I confirmed the DE_05 ones are all represented above ) + DuBuc et al 2018 Wnt/Aboral-Oral Patterning Genes, interest Nematostella
@@ -1053,7 +749,7 @@ DESeq_Hox_Literature_collapsed <- Hox_Literature %>%
     .groups = "drop"
   )
 
-WNT_HOX_MAN <- Manual %>% select(-X) %>% filter(grepl("wnt", Heatmap_Label, ignore.case = TRUE)|grepl("frizzle", Heatmap_Label, ignore.case = TRUE)|grepl("homeobox", Heatmap_Label, ignore.case = TRUE)|grepl("hox", Heatmap_Label, ignore.case = TRUE)) %>% select(-c(blast_hit,evalue,ProteinNames,BiologicalProcess,GeneOntologyIDs))# %>% rename(Description = Heatmap_Label)
+WNT_HOX_MAN <- Manual_AllGenes %>% filter(grepl("wnt", Heatmap_Label, ignore.case = TRUE)|grepl("frizzle", Heatmap_Label, ignore.case = TRUE)|grepl("homeobox", Heatmap_Label, ignore.case = TRUE)|grepl("hox", Heatmap_Label, ignore.case = TRUE)) %>% select(-c(blast_hit,evalue,ProteinNames,BiologicalProcess,GeneOntologyIDs))# %>% rename(Description = Heatmap_Label)
 
 COMBINED_HOX_WNT_all <-  full_join(DESeq_Hox_Literature_collapsed,WNT_HOX_MAN,by=c("query")) %>%
   mutate(
@@ -1076,7 +772,7 @@ write.csv(COMBINED_HOX_WNT_all, file=paste0(outdir,"/HOX_Wnt_genes.csv"))
 ```{r}
 library(purrr)
 
-DESeq_SwissProt_categorized <- DESeq_SwissProt %>% rowwise() %>%
+DESeq_SwissProt_categorized <- Manual_AllGenes %>% rowwise() %>%
   mutate(category = list(
     c(if (query %in% DESeq_Biomin_broc$query & !grepl("Myosin|Actin|cytoplasmic", ProteinNames, ignore.case = TRUE)) "Biomineralization",
       if (grepl("transient", ProteinNames, ignore.case = TRUE)) "TRP Channel",
@@ -1104,14 +800,16 @@ DESeq_SwissProt_categorized_collapsed <- DESeq_SwissProt_categorized %>%
 category_annotation <- DESeq_SwissProt_categorized_collapsed %>%
   select(query, category) %>%
   column_to_rownames("query")
+
+write.csv(DESeq_SwissProt_categorized_collapsed, file=paste0(outdir,"/DESeq_SwissProt_annotation_categorized.csv"))
 ```
 
+### Test out new labels on heatmaps
 
 ```{r}
 #view most significantly differentially expressed genes
 
 select <- order(res$padj)[1:50]
-rownames(res)[select]
 
 z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
 top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=FALSE, show_rownames=TRUE,
@@ -1120,20 +818,20 @@ top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, na
          labels_row = gene_labels[match(rownames(res)[select],(gene_labels$query)),2], fontsize_row = 6)
 top50_DE
 save_ggplot(top50_DE, "top50_DE_Manual")
+dev.off()
 
 #view most significantly differentially expressed genes by LFC
 
 select <- order(abs(res$log2FoldChange),decreasing = TRUE)[1:50]
-rownames(res)[select]
 
 z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
-top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=FALSE, show_rownames=TRUE,
+top50_DE_LFC <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=FALSE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
-                  annotation_row=category_annotation,
+         annotation_row=category_annotation,
          labels_row = gene_labels[match(rownames(res)[select],(gene_labels$query)),2], fontsize_row = 6)
-top50_DE
-save_ggplot(top50_DE, "top50_LFC_DE_Manual")
-
+top50_DE_LFC
+save_ggplot(top50_DE_LFC, "top50_LFC_DE_Manual")
+dev.off()
 
 #view genes Higher in Aboral, Lower in OralEpi, ordered by log2FoldChange
 select <- order(res$log2FoldChange,decreasing = TRUE)[1:50]
@@ -1268,8 +966,6 @@ top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, na
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
          labels_row = gene_labels[match(select,(gene_labels$query)),2], fontsize_row = 12)
 top50_DE
-save_ggplot(top50_DE, "TRP_DE_SwissProt", width = 6.43, height = 4.25, units = "in", dpi = 300)
-
 annot_tab$short_name <- ifelse(nchar(annot_tab$ProteinNames) > 80, 
                             paste0(substr(annot_tab$ProteinNames, 1, 77), "..."), 
                             annot_tab$ProteinNames)
@@ -1288,7 +984,6 @@ top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, na
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
          labels_row = swissprot_labels[match(select1,swissprot_labels$query),2], fontsize_row = 6)
 top50_DE
-save_ggplot(top50_DE, "TRP_SwissProt")
 ```
 
 ### biomin de heatmap nice
@@ -1407,10 +1102,6 @@ ggplot(df, aes(x=Tissue, y=expression, group=Fragment, color=Fragment)) +
 ### Marker DE nice
 
 ```{r}
-gene_labels <- DE_05_SwissProt %>% 
-  select(query,short_name) %>%
-  mutate_all(~ ifelse(is.na(.), "", .)) #replace NAs with "" for labelling purposes
-
 #view marker genes that are differentially expressed
 select <- DE_05_marker$query
 z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
@@ -1420,7 +1111,6 @@ DE_marker <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, n
                       annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
                       labels_row = DE_05_marker$List, fontsize_row = 7)
 DE_marker
-save_ggplot(DE_marker, "DE_marker_2")
 
 #view marker genes that are differentially expressed
 select <- DE_05_marker$query
@@ -1431,7 +1121,6 @@ DE_marker <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, n
                       annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
                       labels_row = paste0(DE_05_marker$List,": ", gene_labels[match(select,(gene_labels$query)),2]), fontsize_row = 7)
 DE_marker
-save_ggplot(DE_marker, "DE_marker_3")
 
 #view marker genes that are differentially expressed
 select <- DE_05_marker_broc$query
@@ -1442,7 +1131,6 @@ DE_marker_broc <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n =
                       annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
                       labels_row = DE_05_marker_broc$List, fontsize_row = 7)
 DE_marker_broc
-save_ggplot(DE_marker_broc, "DE_marker_broc_2",height=9)
 
 #view marker genes that are differentially expressed
 select <- DE_05_marker_broc$query
@@ -1453,84 +1141,11 @@ DE_marker_broc <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n =
                       annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
                       labels_row = paste0(DE_05_marker_broc$List,": ", gene_labels[match(select,(gene_labels$query)),2]), fontsize_row = 6)
 DE_marker_broc
-save_ggplot(DE_marker_broc, "DE_marker_broc_3",height=9)
 
 DE_05_marker_broc <- DE_05_marker_broc %>% left_join(Manual,by=c("query")) %>% select(!ends_with(".y"))
 ```
 
-```{r}
-#view marker genes that are differentially expressed
-select <- unique(DE_05_marker_broc_Pdam$query)
-z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
-DE_marker_broc <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), 
-                      cluster_rows=TRUE, show_rownames=TRUE,
-                      cluster_cols=TRUE, cutree_cols = 2, cutree_rows = 5,
-                      annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
-                      labels_row = DE_05_marker_broc_Pdam$List, fontsize_row = 7)
-DE_marker_broc
-save_ggplot(DE_marker_broc, "DE_marker_broc_Pdam",height=20)
-
-#view marker genes that are differentially expressed
-select <- unique(DE_05_marker_broc_Pdam$query)
-z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
-DE_marker_broc <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), 
-                      cluster_rows=TRUE, show_rownames=TRUE,
-                      cluster_cols=TRUE, cutree_cols = 2, cutree_rows = 5,
-                      annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
-                      labels_row = paste0(DE_05_marker_broc_Pdam$List,": ", gene_labels[match(select,(gene_labels$query)),2]), fontsize_row = 6)
-DE_marker_broc
-save_ggplot(DE_marker_broc, "DE_marker_broc_Pdam2",height=20)
-```
-
-```{r}
-#view marker genes that are differentially expressed
-select <- unique(DE_05_marker_broc_Pcomp$query)
-z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
-DE_marker_broc <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), 
-                      cluster_rows=TRUE, show_rownames=TRUE,
-                      cluster_cols=TRUE, cutree_cols = 2, cutree_rows = 5,
-                      annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
-                      labels_row = DE_05_marker_broc_Pcomp$List, fontsize_row = 7)
-DE_marker_broc
-save_ggplot(DE_marker_broc, "DE_marker_broc_Pcomp",height=30)
-
-#view marker genes that are differentially expressed
-select <- unique(DE_05_marker_broc_Pcomp$query)
-z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
-DE_marker_broc <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), 
-                      cluster_rows=TRUE, show_rownames=TRUE,
-                      cluster_cols=TRUE, cutree_cols = 2, cutree_rows = 5,
-                      annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
-                      labels_row = paste0(DE_05_marker_broc_Pcomp$List,": ", gene_labels[match(select,(gene_labels$query)),2]), fontsize_row = 6)
-DE_marker_broc
-save_ggplot(DE_marker_broc, "DE_marker_broc_Pcomp2",height=30)
-```
-
-```{r}
-#view marker genes that are differentially expressed
-select <- unique(DE_05_marker_broc_Mcap$query)
-z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
-DE_marker_broc <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), 
-                      cluster_rows=TRUE, show_rownames=TRUE,
-                      cluster_cols=TRUE, cutree_cols = 2, cutree_rows = 5,
-                      annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
-                      labels_row = DE_05_marker_broc_Mcap$List, fontsize_row = 7)
-DE_marker_broc
-save_ggplot(DE_marker_broc, "DE_marker_broc_Mcap",height=25)
-
-#view marker genes that are differentially expressed
-select <- unique(DE_05_marker_broc_Mcap$query)
-z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
-DE_marker_broc <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), 
-                      cluster_rows=TRUE, show_rownames=TRUE,
-                      cluster_cols=TRUE, cutree_cols = 2, cutree_rows = 5,
-                      annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
-                      labels_row = paste0(DE_05_marker_broc_Mcap$List,": ", gene_labels[match(select,(gene_labels$query)),2]), fontsize_row = 6)
-DE_marker_broc
-save_ggplot(DE_marker_broc, "DE_marker_broc_Mcap2",height=25)
-```
-
-### Polar plot
+#### Polar plot
 
 ```{r}
 heatmap_meta_df <- heatmap_metadata %>%
@@ -2038,142 +1653,6 @@ dev.off()
 
 
 ```{r}
-tissue_cols <- setdiff(colnames(plot_df), c("Standardized_Name_spA", "gene"))
-
-# outer = OralEpi (t1), inner = Aboral (t2)
-t1 <- tissue_cols[1]
-t2 <- tissue_cols[2]
-
-# Sort sectors by total expression for better visual flow
-sector_totals <- plot_df %>%
-  group_by(Standardized_Name_spA) %>%
-  summarise(total_expr = sum(.data[[t1]] + .data[[t2]], na.rm = TRUE)) %>%
-  arrange(desc(total_expr))
-
-plot_df <- plot_df %>%
-  mutate(Standardized_Name_spA = factor(Standardized_Name_spA, 
-                                       levels = sector_totals$Standardized_Name_spA))
-
-gene_counts <- table(plot_df$Standardized_Name_spA)
-xlims <- cbind(rep(0, length(gene_counts)), as.numeric(gene_counts))
-maxval <- max(c(plot_df[[t1]], plot_df[[t2]]), na.rm = TRUE)
-maxval <- signif(maxval,0)
-
-# Create size mapping function
-# Scale expression values to reasonable dot sizes
-min_cex <- 1.0  # minimum dot size
-max_cex <- 3.0  # maximum dot size
-scale_to_cex <- function(values) {
-  if(max(values, na.rm = TRUE) == 0) return(rep(min_cex, length(values)))
-  scaled <- (values - min(values, na.rm = TRUE)) / (max(values, na.rm = TRUE) - min(values, na.rm = TRUE))
-  min_cex + scaled * (max_cex - min_cex)
-}
-
-png("../output_RNA/differential_expression/DE_05_brocmarker_circ_dots.png", width = 3000, height = 3000, res = 300)
-circos.clear()
-circos.par(start.degree = 90, gap.after = 2, cell.padding = c(0.01, 1, 0.01, 1))
-circos.initialize(factors = names(gene_counts), xlim = xlims)
-
-# Sector labels
-circos.track(
-  ylim = c(0, 1), 
-  track.height = 0.08, 
-  bg.border = NA,
-  panel.fun = function(x, y) {
-    sector <- CELL_META$sector.index
-    text_cex <- min(0.7, 10/nchar(sector))
-    circos.text(CELL_META$xcenter, 0.5, sector,
-                facing = "bending.inside", 
-                cex = text_cex,
-                font = 2)
-  }
-)
-
-# Outer track = OralEpi (dots)
-circos.trackPlotRegion(
-  ylim = c(0, 1),  
-  track.height = 0.05,
-  bg.border = "white",
-  panel.fun = function(x, y) {
-    sector <- CELL_META$sector.index
-    genes <- plot_df %>% filter(Standardized_Name_spA == sector) %>%
-                         arrange(desc(.data[[t1]]-.data[[t2]]))
-    
-    for (i in seq_len(nrow(genes))) {
-      dot_size <- scale_to_cex(genes[[t1]])[i]
-      circos.points(x = i - 0.5, 
-                    y = 0.5, 
-                    sector.index = sector,
-                    col = "#FD8D3C", 
-                    pch = 16, 
-                    cex = dot_size)
-    }
-  }
-)
-
-# Inner track = Aboral (dots)
-circos.trackPlotRegion(
-  ylim = c(0, 1),
-  track.height = 0.05,
-  bg.border = "white",
-  panel.fun = function(x, y) {
-    sector <- CELL_META$sector.index
-    genes <- plot_df %>% filter(Standardized_Name_spA == sector) %>%
-                         arrange(desc(.data[[t1]]-.data[[t2]]))
-    
-    for (i in seq_len(nrow(genes))) {
-      dot_size <- scale_to_cex(genes[[t2]])[i]
-      circos.points(x = i - 0.5, 
-                    y = 0.5, 
-                    sector.index = sector,  # ensure it plots in right sector
-                    col = "mediumpurple1", 
-                    pch = 16, 
-                    cex = dot_size)
-    }
-  }
-)
-
-# Create a size legend
-par(xpd = TRUE)
-
-# Tissue type legend
-legend("topright", 
-       legend = c(paste("Outer:", t1), paste("Inner:", t2)), 
-       fill = c("#FD8D3C", "mediumpurple1"),
-       border = "black",
-       bty = "o",  # Draw box around legend
-       cex = 1.0,
-       title = "Tissue Type",
-       title.cex = 1.1)
-
-# Size legend
-if(maxval > 0) {
-  legend_values <- seq(0, maxval, length.out = 5)
-  legend_sizes <- scale_to_cex(legend_values)
-  legend_labels <- sprintf("%.1f", legend_values)
-  
-  # Create a simple size legend
-  legend("bottomright",
-         legend = legend_labels,
-         pt.cex = legend_sizes,
-         pch = 16,
-         col = "gray60",
-         bty = "o",
-         title = "Expression Level",
-         title.cex = 1.1)
-}
-
-n_genes <- nrow(plot_df)
-n_sectors <- length(unique(plot_df$Standardized_Name_spA))
-mtext(sprintf("VST-normalized expression | %d genes across %d gene categories", 
-              n_genes, n_sectors),
-      side = 3, line = 0, cex = 0.9, col = "gray40")
-
-dev.off()
-```
-
-
-```{r}
 # Prepare data using existing DESeq results
 plot_df <- DE_05_marker_broc %>%
   select(query, Standardized_Name_spA, log2FoldChange.x) %>%
@@ -2298,10 +1777,6 @@ dev.off()
 ### bacteria genes
 
 ```{r}
-gene_labels <- Manual %>% 
-  select(query,Heatmap_Label) %>%
-  mutate_all(~ ifelse(is.na(.), "", .)) #replace NAs with "" for labelling purposes
-
 mucin <- Manual %>% filter(grepl("mucin", ProteinNames, ignore.case = TRUE)|
                              grepl("lectin", ProteinNames, ignore.case = TRUE)|
                              grepl("toll-", ProteinNames, ignore.case = TRUE)|
@@ -2563,79 +2038,6 @@ ggplot(plot_data, aes(x = SLC_family, y = n, fill = Direction)) +
   labs(title = "Differentially Expressed SLC Genes by Family",
        x = "SLC Family", y = "Number of DE Genes") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-category_order <- plot_data %>%
-  group_by(Substrate_Broad) %>%
-  summarize(
-    oral_total = sum(n[Direction == "upOral"], na.rm = TRUE),
-    aboral_total = sum(n[Direction == "upAboral"], na.rm = TRUE),
-    net_oral = oral_total - aboral_total
-  ) %>%
-  arrange(desc(net_oral)) %>%
-  pull(Substrate_Broad)
-
-plot_data$Substrate_Broad <- factor(plot_data$Substrate_Broad, levels = category_order)
-
-# Order SLC families within each category by oral enrichment
-family_order <- plot_data %>%
-  group_by(SLC_family) %>%
-  summarize(
-    oral_n = sum(n[Direction == "upOral"], na.rm = TRUE),
-    aboral_n = sum(n[Direction == "upAboral"], na.rm = TRUE),
-    net_oral = oral_n - aboral_n,
-    substrate = dplyr::first(category_order)
-  ) %>%
-  arrange(substrate, desc(net_oral)) %>%
-  pull(SLC_family)
-       
-plot_data$SLC_family <- factor(plot_data$SLC_family, levels = family_order)
-
-
-
-p_slc <- ggplot(plot_data, aes(x = SLC_family, y = n, fill = Direction)) +
-  geom_bar(stat = "identity", position = "stack", width = 0.7, color = "grey20", linewidth = 0.3) +
-  scale_fill_manual(
-    values = c("upOral" = "#FD8D3C", "upAboral" = "mediumpurple1"),
-    name = "Tissue\nenrichment"
-  ) +
-  facet_grid(cols = vars(Substrate_Broad), scales = "free_x", space = "free_x") +
-  theme_bw(base_size = 9) +
-  theme(
-    # Facet labels
-    strip.text.x = element_text(face = "bold", size = 7, angle = 0, hjust = 0.5, vjust = 0.5),
-    strip.background = element_rect(fill = "grey95", color = "grey60"),
-    
-    # Axis
-    axis.text.x = element_text(size = 7, color = "black", angle = 45, hjust = 1, vjust = 1),
-    axis.text.y = element_text(size = 8, color = "black"),
-    axis.title.x = element_blank(),
-    axis.title.y = element_text(size = 9, face = "bold"),
-    
-    # Grid
-    panel.grid.major.x = element_blank(),
-    panel.grid.major.y = element_line(color = "grey90", linewidth = 0.3),
-    panel.grid.minor = element_blank(),
-    
-    # Border
-    panel.border = element_rect(color = "grey60", linewidth = 0.5),
-    
-    # Legend
-    legend.title = element_text(size = 8, face = "bold"),
-    legend.text = element_text(size = 7),
-    legend.key.size = unit(0.4, "cm"),
-    legend.position = "top",
-    
-    # Spacing
-    panel.spacing.x = unit(0.5, "lines"),
-    plot.margin = margin(5, 5, 5, 5)
-  ) +
-  labs(y = "Number of DE genes")
-
-# Save with appropriate dimensions for multi-panel
-ggsave("../output_RNA/differential_expression/slc_barchart_multipanel.png", p_slc, 
-       width = 6, height = 3, units = "in")
-
-p_slc
 ```
 
 
@@ -2647,7 +2049,6 @@ top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, na
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
          labels_row = gene_labels[match(select,(gene_labels$query)),2], fontsize_row = 8, cutree_rows = 2)
 top50_DE
-save_ggplot(top50_DE, "SLC_DE_SwissProt")
 
 # Perform clustering
 row_clusters <- hclust(dist(z_scores))
@@ -2682,9 +2083,6 @@ SLC <- pheatmap(
   borders_color = "white", 
   gaps_row = c(21) 
 )
-
-# Save the heatmap
-save_ggplot(SLC, "clusters_clean/SLC_DE_SwissProt")
 ```
 
 ### temp and light sensing
@@ -2692,109 +2090,11 @@ save_ggplot(SLC, "clusters_clean/SLC_DE_SwissProt")
 ```{r}
 sensors <- Manual %>% filter(query %in% (category_annotation %>% filter(grepl("Sensor",category)|grepl("Stereo",category)) %>% rownames()))
 
-gene_labels <- DE_05_SwissProt %>% 
-  select(query,ProteinNames) %>%
-  mutate(
-        short_name = str_replace(ProteinNames, "\\s*\\(.*", ""),
-        short_name = str_replace(short_name, "\\s*\\[.*", ""),
-        short_name = str_trunc(short_name, 50),
-        # Create multi-line labels by inserting line breaks
-        short_name = str_wrap(short_name, width = 20)
-      ) %>%
-  mutate_all(~ ifelse(is.na(.), "", .)) #replace NAs with "" for labelling purposes
-
-select <- sensors$query
-
-z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
-norm_counts <- assay(vsd)[select, ]
-
-heatmap_meta_df <- heatmap_metadata %>%
-  tibble::rownames_to_column("sample")
-
-z_df <- as.data.frame(z_scores) %>%
-  rownames_to_column("query") %>%
-  pivot_longer(-query, names_to = "Sample", values_to = "Zscore") %>%
-  left_join(heatmap_meta_df %>% select(sample, Tissue), 
-            by = c("Sample" = "sample"))
-
-counts_df <- as.data.frame(norm_counts) %>%
-  rownames_to_column("query") %>%
-  pivot_longer(-query, names_to = "Sample", values_to = "NormCount") %>%
-  left_join(heatmap_meta_df %>% select(sample, Tissue), 
-            by = c("Sample" = "sample"))
-
-combined_df <- z_df %>%
-  left_join(counts_df, by = c("query", "Sample", "Tissue")) %>%
-  left_join(gene_labels, by = "query") %>%
-  left_join(sensors %>% select(query, BiologicalProcess), by = "query")
-
-combined_df <- combined_df %>%
-  mutate(Modality = case_when(
-    grepl("stereo", BiologicalProcess, ignore.case = TRUE) ~ "Stereocilia",
-    grepl("light", BiologicalProcess, ignore.case = TRUE) ~ "Light",
-    grepl("thermo", BiologicalProcess, ignore.case = TRUE) ~ "Temperature",
-    grepl("mechanical", BiologicalProcess, ignore.case = TRUE) ~ "Mechanosensory",
-    TRUE ~ "Other"
-  ))
-
-combined_df$Modality <- factor(combined_df$Modality, 
-                        levels = c("Light", "Temperature", "Mechanosensory", "Stereocilia","Other"))
-
-plot_df <- combined_df %>%
-  group_by(Tissue, query, short_name, Modality) %>%
-  summarize(mean_z = mean(Zscore),mean_count = mean(NormCount), .groups = "drop")
-
-gene_order_df <- plot_df %>%
-  pivot_wider(names_from = Tissue, values_from = c(mean_z, mean_count)) %>%
-  mutate(diff = mean_z_OralEpi - mean_z_Aboral) %>%
-  arrange(Modality, desc(diff))
-
-gene_order <- gene_order_df$query
-plot_df$query <- factor(plot_df$query, levels = gene_order)
-gene_labels_vec <- setNames(gene_order_df$short_name, gene_order_df$query)
-
-p_sensory <- ggplot(plot_df, aes(x = Tissue, y = query)) +
-  geom_point(aes(size = mean_count, fill = mean_z), 
-             shape = 21, color = "grey20", stroke = 0.3) +
-  scale_fill_distiller(palette = "RdBu", direction = -1, 
-                       name = "Mean\nZ-score") +
-  scale_size_continuous(range = c(0.5, 5), 
-                        name = "Expression\nlevel") +
-  scale_y_discrete(labels = gene_labels_vec) +
-  facet_grid(rows = vars(Modality), scales = "free_y", space = "free_y") +
-  theme_bw(base_size = 9) +
-  theme(
-    strip.text.y.right = element_text(angle = 90, hjust = 0.5, face = "bold", size = 5),
-    strip.background = element_blank(),
-    strip.placement = "outside",
-    axis.text.y = element_text(size = 5, color = "black"),
-    axis.text.x = element_text(size = 8, color = "black", face = "bold"),
-    axis.title = element_blank(),
-    panel.grid.major.y = element_blank(),
-    panel.grid.major.x = element_line(color = "grey90", linewidth = 0.3),
-    panel.grid.minor = element_blank(),
-    panel.border = element_rect(color = "grey60", linewidth = 0.5),
-    legend.title = element_text(size = 8),
-    legend.text = element_text(size = 7),
-    legend.key.size = unit(0.4, "cm"),
-    legend.position = "right",
-    legend.box = "vertical",
-    panel.spacing = unit(0.3, "lines"),
-    plot.margin = margin(5, 5, 5, 5)
-  ) +
-  labs(x = NULL, y = NULL)
-
-ggsave("../output_RNA/differential_expression/sensors_dotplot.png", p_sensory, 
-       width = 2.5, height = 5, units = "in")
-```
-
-```{r}
 z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
 top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
          labels_row = gene_labels[match(select,(gene_labels$query)),2], fontsize_row = 8, cutree_rows = 2)
 top50_DE
-save_ggplot(top50_DE, "sensors_DE_SwissProt")
 
 # Perform clustering
 row_clusters <- hclust(dist(z_scores))
@@ -2830,18 +2130,6 @@ transporters_heat <- pheatmap(
   borders_color = "white",
   gaps_row = c(20)
 )
-
-# Save the heatmap
-save_ggplot(transporters_heat, "clusters_clean/sensors_DE_SwissProt")
-
-```
-
-#### stereocilium
-
-```{r}
-stereo <- DE_05_SwissProt %>% filter(grepl("stereocilium", CellularComponent, ignore.case = TRUE))
-
-stereo
 ```
 
 ### Zona pellucida
@@ -2869,8 +2157,6 @@ top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, na
          cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_row = (select %>% select(response_type)), annotation_colors = ann_colors,
          labels_row = select$gene_name, fontsize_row = 8, cutree_rows = 2)
 top50_DE
-save_ggplot(top50_DE, "HeatStress_DE_SwissProt")
-
 
 # Perform clustering
 row_clusters <- hclust(dist(z_scores))
@@ -2910,10 +2196,6 @@ top50_DE <- pheatmap(
   
   gaps_row = 4  # Add breaks only between clusters
 )
-
-
-# Save the heatmap
-save_ggplot(top50_DE, "clusters_clean/HeatStress_DE_SwissProt")
 ```
 
 
@@ -2934,7 +2216,6 @@ top50_DE <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, na
          cluster_cols=TRUE, cutree_cols = 2, annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_row = (select %>% select(response_type)), annotation_colors = ann_colors,
          labels_row = select$gene_name, fontsize_row = 8, cutree_rows = 2)
 top50_DE
-save_ggplot(top50_DE, "HeatStress_all_SwissProt")
 
 # Perform clustering
 row_clusters <- hclust(dist(z_scores))
@@ -2974,17 +2255,9 @@ top50_DE <- pheatmap(
   
   gaps_row = 4  # Add breaks only between clusters
 )
-
-# Save the heatmap
-save_ggplot(top50_DE, "clusters_clean/HeatStress_all_SwissProt")
 ``` 
 
-
-
-
 ### wnt and hox
-
-
 ```{r}
 select <- unique(COMBINED_HOX_WNT_DE05$query)
 
