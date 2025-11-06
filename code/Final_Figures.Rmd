@@ -11,7 +11,12 @@ Work in progress to have one doc for centralized figure work
 
 
 ```{r}
-
+library(tidyverse)
+library(ggplot2)
+library(patchwork)
+library(stringr)
+library(scales)
+library(EnhancedVolcano)
 ```
 
 ## Setup
@@ -41,9 +46,27 @@ ann_colors = list(Tissue = c(OralEpi = "#FD8D3C" ,Aboral = "mediumpurple1"))
 
 ## Load in Data
 
+```{r}
+vsd <- read.csv(paste0(outdir,"/vsd_expression_matrix.csv"))
+vsd <- vsd %>% column_to_rownames(var = "X")
+```
+
+Read in metadata 
+```{r}
+meta <- read.csv("../data_RNA/LCM_RNA_metadata.csv") %>%
+            dplyr::arrange(Sample) %>%
+            mutate(across(c(Tissue, Fragment, Section_Date, LCM_Date), factor)) # Set variables as factors 
+
+meta$Tissue <- factor(meta$Tissue, levels = c("OralEpi","Aboral")) #we want OralEpi to be the baseline
+```
+
 ### Combined annotations manually
 
 ```{r}
+CDSearch <- read.delim("../references/Pocillopora_acuta_HIv2.genes.Conserved_Domain_Search_results.txt", quote = "") %>% dplyr::rename("query" = X.Query)
+EggNog <- read.delim("../references/Pocillopora_acuta_HIv2.genes.EggNog_results.txt") %>% dplyr::rename("query" = X.query)
+DESeq_SwissProt <- read.csv(file=paste0(outdir,"/DESeq_SwissProt_annotation.csv"))
+
 Manual <- read.csv(paste0(outdir,"/DE_05_Manual_annotation.csv")) %>% arrange(X) 
 Manual <- Manual %>% filter(abs(log2FoldChange) > 1)
 
@@ -58,41 +81,12 @@ gene_labels <- Manual %>%
 ```{r}
 ### Zona pellucida domain
 
-PFAM_ZP_domain <- annot_all %>% filter(grepl("Zona_pellucida",Short.name,ignore.case=TRUE))  %>% pull(query) %>% unique()
+PFAM_ZP_domain <- CDSearch %>% filter(grepl("Zona_pellucida",Short.name,ignore.case=TRUE))  %>% pull(query) %>% unique()
 
 #### He et al 2023 TFs/genes of interest Nematostella (NOTE! I confirmed the DE_05 ones are all represented above ) + DuBuc et al 2018 Wnt/Aboral-Oral Patterning Genes, interest Nematostella
 
-DESeq_He_etal$source <- "He_etal_2023"
-DESeq_DuBuc_etal$source <- "DuBuc_etal_2018"
-
-Hox_Literature <- rbind(DESeq_He_etal,DESeq_DuBuc_etal)
-
-DESeq_Hox_Literature_collapsed <- Hox_Literature %>%
-  group_by(query, baseMean, log2FoldChange, lfcSE, pvalue, padj) %>%
-  summarize(
-    Gene_Name = paste(unique(Gene_Name), collapse = "; "),
-    Description = paste(unique(Description), collapse = "; "),
-    def_short = paste(unique(def_short), collapse = "; "),
-    source = paste(unique(source), collapse = "; "),
-    .groups = "drop"
-  )
-
-WNT_HOX_MAN <- Manual %>% select(-X) %>% filter(grepl("wnt", Heatmap_Label, ignore.case = TRUE)|grepl("frizzle", Heatmap_Label, ignore.case = TRUE)|grepl("homeobox", Heatmap_Label, ignore.case = TRUE)|grepl("hox", Heatmap_Label, ignore.case = TRUE)) %>% select(-c(blast_hit,evalue,ProteinNames,BiologicalProcess,GeneOntologyIDs))# %>% rename(Description = Heatmap_Label)
-
-COMBINED_HOX_WNT_all <-  full_join(DESeq_Hox_Literature_collapsed,WNT_HOX_MAN,by=c("query")) %>%
-  mutate(
-    baseMean = coalesce(baseMean.x, baseMean.y),
-    log2FoldChange = coalesce(log2FoldChange.x, log2FoldChange.y),
-    lfcSE = coalesce(lfcSE.x, lfcSE.y),
-    pvalue = coalesce(pvalue.x, pvalue.y),
-    padj = coalesce(padj.x, padj.y)
-  ) %>%
-  select(-ends_with(".x"), -ends_with(".y"))
-
-COMBINED_HOX_WNT_all <- COMBINED_HOX_WNT_all %>%  mutate(Heatmap_Label = coalesce(Heatmap_Label, def_short)) %>%
-                              mutate(Heatmap_Label = gsub("Protein Wnt", "Wnt", Heatmap_Label, ignore.case = TRUE)) %>% 
-                              mutate(pathway = ifelse(grepl("ox",Heatmap_Label)|grepl("Six",Heatmap_Label), "HOX", "WNT"))
-COMBINED_HOX_WNT_DE05 <-  COMBINED_HOX_WNT_all %>% filter(padj<0.05) %>% filter(abs(log2FoldChange) >1)
+COMBINED_HOX_WNT_all <- read.csv(file=paste0(outdir,"/HOX_Wnt_genes.csv"))
+DESeq_Biomin_broc <- read.csv(file=paste0(outdir,"/DESeq_biomin_annotation.csv"))
 ```
 
 ```{r}
@@ -148,14 +142,12 @@ LFC_colors <- ifelse(DESeq_SwissProt$padj < 0.05 & DESeq_SwissProt$log2FoldChang
                                 ifelse(DESeq_SwissProt$padj < 0.05 & DESeq_SwissProt$log2FoldChange > 0, '#D4C0FF',
                                        'grey'))))
 
-
 LFC_colors[is.na(LFC_colors)] <- 'grey'
   names(LFC_colors)[LFC_colors == '#FD8D3C'] <- 'Up_Oral_LFC_sig'
   names(LFC_colors)[LFC_colors == '#FEC69D'] <- 'Up_Oral'
   names(LFC_colors)[LFC_colors == 'grey'] <- 'n.s.'
   names(LFC_colors)[LFC_colors == '#AB82FF'] <- 'Up_Aboral_LFC_sig'
   names(LFC_colors)[LFC_colors == '#D4C0FF'] <- 'Up_Aboral'
-  
   
 DESeq_SwissProt$short_name <- ifelse(nchar(DESeq_SwissProt$ProteinNames) > 25, 
                             paste0(substr(DESeq_SwissProt$ProteinNames, 1, 22), "..."), 
@@ -230,13 +222,6 @@ save_ggplot(plot, "Volcano_simple", width = 10, height = 5.25)
 ### Theme
 
 ```{r}
-library(ggplot2)
-library(patchwork)
-library(dplyr)
-library(stringr)
-library(tidyr)
-library(scales)
-
 theme_custom <- theme_bw(base_size = 9) +
   theme(
     text = element_text(family = "sans"),
@@ -260,7 +245,8 @@ theme_custom <- theme_bw(base_size = 9) +
 ```{r}
 sensors <- Manual %>% filter(query %in% (category_annotation %>% filter(grepl("Sensor",category)|grepl("Stereo",category)) %>% rownames()))
 
-gene_labels <- DE_05_SwissProt %>% 
+gene_labels <- DESeq_SwissProt %>% 
+  filter(padj < 0.05 & abs(log2FoldChange) > 1) %>%
   select(query,ProteinNames) %>%
   mutate(
         short_name = str_replace(ProteinNames, "\\s*\\(.*", ""),
@@ -273,23 +259,18 @@ gene_labels <- DE_05_SwissProt %>%
 
 select <- sensors$query
 
-z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
-norm_counts <- assay(vsd)[select, ]
-
-heatmap_meta_df <- heatmap_metadata %>%
-  tibble::rownames_to_column("sample")
+z_scores <- t(scale(t(vsd[select, ]), center = TRUE, scale = TRUE))
+norm_counts <- vsd[select, ]
 
 z_df <- as.data.frame(z_scores) %>%
   rownames_to_column("query") %>%
   pivot_longer(-query, names_to = "Sample", values_to = "Zscore") %>%
-  left_join(heatmap_meta_df %>% select(sample, Tissue), 
-            by = c("Sample" = "sample"))
+  left_join(meta %>% select(Sample, Tissue))
 
 counts_df <- as.data.frame(norm_counts) %>%
   rownames_to_column("query") %>%
   pivot_longer(-query, names_to = "Sample", values_to = "NormCount") %>%
-  left_join(heatmap_meta_df %>% select(sample, Tissue), 
-            by = c("Sample" = "sample"))
+  left_join(meta %>% select(Sample, Tissue))
 
 combined_df <- z_df %>%
   left_join(counts_df, by = c("query", "Sample", "Tissue")) %>%
@@ -363,12 +344,12 @@ ggsave("../output_RNA/differential_expression/sensors_dotplot.png", p_sensory,
 #### Prepare
 
 ```{r}
-plot_data <- solute_de %>%
-  left_join(slc_map, by = "SLC_family") %>%
-  mutate(Direction = ifelse(log2FoldChange > 1, "upAboral",
-                            ifelse(log2FoldChange < -1, "upOral", "noChange"))) 
+solute_de <- read.csv(file=paste0(outdir,"/DE_05_SLC_genes.csv")) 
+
 # Summarize counts by family and direction
-plot_data <- plot_data %>%
+plot_data <- solute_de %>%
+  mutate(Direction = ifelse(log2FoldChange > 1, "Aboral",
+                            ifelse(log2FoldChange < -1, "Oral", "noChange"))) %>%
   filter(Direction != "noChange") %>%
   group_by(SLC_family, Substrate_Broad, Direction) %>%
   summarise(n = n(), .groups = "drop")
@@ -376,7 +357,7 @@ plot_data <- plot_data %>%
 ggplot(plot_data, aes(x = SLC_family, y = n, fill = Direction)) +
   geom_bar(stat = "identity") +
   facet_wrap(~Substrate_Broad, scales = "free_x") +
-  scale_fill_manual(values = c("upOral" = "#FD8D3C", "upAboral" = "mediumpurple1")) +
+  scale_fill_manual(values = c("Oral" = "#FD8D3C", "Aboral" = "mediumpurple1")) +
   theme_minimal() +
   labs(title = "Differentially Expressed SLC Genes by Family",
        x = "SLC Family", y = "Number of DE Genes") +
@@ -385,8 +366,8 @@ ggplot(plot_data, aes(x = SLC_family, y = n, fill = Direction)) +
 category_order <- plot_data %>%
   group_by(Substrate_Broad) %>%
   summarize(
-    oral_total = sum(n[Direction == "upOral"], na.rm = TRUE),
-    aboral_total = sum(n[Direction == "upAboral"], na.rm = TRUE),
+    oral_total = sum(n[Direction == "Oral"], na.rm = TRUE),
+    aboral_total = sum(n[Direction == "Aboral"], na.rm = TRUE),
     net_oral = oral_total - aboral_total
   ) %>%
   arrange(desc(net_oral)) %>%
@@ -398,8 +379,8 @@ plot_data$Substrate_Broad <- factor(plot_data$Substrate_Broad, levels = category
 family_order <- plot_data %>%
   group_by(SLC_family) %>%
   summarize(
-    oral_n = sum(n[Direction == "upOral"], na.rm = TRUE),
-    aboral_n = sum(n[Direction == "upAboral"], na.rm = TRUE),
+    oral_n = sum(n[Direction == "Oral"], na.rm = TRUE),
+    aboral_n = sum(n[Direction == "Aboral"], na.rm = TRUE),
     net_oral = oral_n - aboral_n,
     substrate = dplyr::first(category_order)
   ) %>%
@@ -414,24 +395,25 @@ plot_data$SLC_family <- factor(plot_data$SLC_family, levels = family_order)
 p_slc <- ggplot(plot_data, aes(x = SLC_family, y = n, fill = Direction)) +
   geom_bar(stat = "identity", position = "stack", width = 0.7,
            color = "grey20", linewidth = 0.3) +
-  scale_fill_manual(values = c("upOral" = "#FD8D3C", "upAboral" = "mediumpurple1"),name = "Tissue\nenrichment") +
+  scale_fill_manual(values = c("Oral" = "#FD8D3C", "Aboral" = "mediumpurple1"),name = "Tissue\nenrichment") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
   facet_grid(cols = vars(Substrate_Broad), scales = "free_x", space = "free_x") +
   labs(y = "Number of DE genes", x = NULL) +
   theme_custom +
   theme(
     strip.background = element_blank(),
-    strip.text = element_text(size = 5,margin = margin(0.15, 0.15, 0.15, 0.15, "pt")), 
-    axis.text.x = element_text(size = 7, angle = 45, hjust = 1, vjust = 1),
-    legend.position = "bottom",
+    strip.text = element_text(size = 5.5), 
+    axis.text.x = element_text(size = 7,hjust = 0.5),
+    legend.position = c(0.925,0.775),  
     panel.grid.major.x = element_blank(),
     panel.grid.major.y = element_line(color = "grey90", linewidth = 0.3),
-    panel.spacing.x = unit(0.1, "lines")
+    panel.spacing.x = unit(0.25, "lines"),
+    plot.margin = margin(2, 2, 2, 2)
   )
+p_slc
 
 ggsave("../output_RNA/differential_expression/slc_barchart_multipanel.png", p_slc, 
        width = 6, height = 3, units = "in")
-
-p_slc
 ```
 
 ### Panel C
@@ -541,9 +523,6 @@ enrichmentplot_bidirectional_v2 <- function(enrichment_combined, n_top = 20) {
 }
 
 Pfam_plot <- enrichmentplot_bidirectional_v2(enrichment_combined, n_top = 10)
-
-ggsave(filename = "../output_RNA/differential_expression/Pfam_enriched_top10.png", plot = Pfam_plot, width = 6, height = 4, units = "in", dpi = 300,bg=NULL)
-ggsave(filename = "../output_RNA/differential_expression/pdf_figs/Pfam_enriched_top10.png.pdf", plot = Pfam_plot, width = 6, height = 4, units = "in", dpi = 300,bg=NULL)
 ```
 
 ### Patchwork
@@ -564,10 +543,10 @@ final_fig <- free(p_sensory) + p_slc + Pfam_plot +
                   theme = theme(text = element_text(size = 10, face = "bold")))
 
 # Save outputs
-ggsave("../output_RNA/differential_expression/Figure2.png",
+ggsave("../output_RNA/differential_expression/composite_figs/Figure2.png",
        final_fig, width = 6.9, height = 9, units = "in", dpi = 600, bg = "white")
 
-ggsave("../output_RNA/differential_expression/Figure2.pdf",
+ggsave("../output_RNA/differential_expression/composite_figs/Figure2.pdf",
        final_fig, width = 6.9, height = 9, units = "in", dpi = 600, 
        device = cairo_pdf, bg = "white")
 

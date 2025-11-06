@@ -524,7 +524,8 @@ DESeq_DuBuc_etal     <- join_genes_of_interest(as.data.frame(resOrdered), DuBuc_
 DE_05_HeatStressGenes <- HeatStressGenes %>% left_join(DE_05, by="query") %>% select(query,everything()) %>% drop_na(baseMean)
 DESeq_HeatStressGenes <- HeatStressGenes %>% left_join(as.data.frame(resOrdered), by="query") %>% select(query,everything())  %>% drop_na(baseMean)
 
-write.csv(as.data.frame(DE_05_biomin), file=paste0(outdir,"/DE_05_biomin_annotation.csv"))
+write.csv(as.data.frame(DESeq_Biomin_broc), file=paste0(outdir,"/DESeq_biomin_annotation.csv"))
+write.csv(as.data.frame(DE_05_Biomin_broc), file=paste0(outdir,"/DE_05_biomin_annotation.csv"))
 write.csv(as.data.frame(DE_05_marker), file=paste0(outdir,"/DE_05_markergene_annotation.csv"))
 
 biomin_all_counts <- as.data.frame(counts(dds)) %>% mutate(query = rownames(dds)) %>% select(query,everything()) %>% left_join(Biomin) 
@@ -915,6 +916,7 @@ write.table(annot_tab,
 DESeq_SwissProt <- as.data.frame(resOrdered) %>% left_join(annot_tab) %>% select(query,everything()) 
 DE_05_SwissProt <- DE_05 %>% left_join(annot_tab) %>% select(query,everything()) 
 
+write.csv(as.data.frame(DESeq_SwissProt), file=paste0(outdir,"/DESeq_SwissProt_annotation.csv"))
 write.csv(as.data.frame(DE_05_SwissProt), file=paste0(outdir,"/DE_05_SwissProt_annotation.csv"))
 ```
 
@@ -1067,6 +1069,8 @@ COMBINED_HOX_WNT_all <- COMBINED_HOX_WNT_all %>%  mutate(Heatmap_Label = coalesc
                               mutate(Heatmap_Label = gsub("Protein Wnt", "Wnt", Heatmap_Label, ignore.case = TRUE)) %>% 
                               mutate(pathway = ifelse(grepl("ox",Heatmap_Label)|grepl("Six",Heatmap_Label), "HOX", "WNT"))
 COMBINED_HOX_WNT_DE05 <-  COMBINED_HOX_WNT_all %>% filter(padj<0.05) %>% filter(abs(log2FoldChange) >1)
+
+write.csv(COMBINED_HOX_WNT_all, file=paste0(outdir,"/HOX_Wnt_genes.csv"))
 ```
 
 ```{r}
@@ -2537,8 +2541,12 @@ slc_map <- data.frame(
 ```
 
 ```{r}
+solute_de <- solute_de %>%
+  left_join(slc_map, by = "SLC_family") 
+
+write.csv(solute_de, file=paste0(outdir,"/DE_05_SLC_genes.csv"))
+
 plot_data <- solute_de %>%
-  left_join(slc_map, by = "SLC_family") %>%
   mutate(Direction = ifelse(log2FoldChange > 1, "upAboral",
                             ifelse(log2FoldChange < -1, "upOral", "noChange"))) 
 # Summarize counts by family and direction
@@ -3208,154 +3216,6 @@ plot
 save_ggplot(plot, "Volcano_simple", width = 10, height = 5.25)
 
 #DESeq_SwissProt_categorized_collapsed
-```
-
-```{r}
-enriched <- read.csv("../output_RNA/differential_expression/semantic-enrichment/DE_05_clusters_named.csv")
-head(enriched)
-
-heatmap_meta_df <- heatmap_metadata %>%
-  tibble::rownames_to_column("Sample")
-
-cluster_name <- "Cluster 12: sensory perception"
-
-cluster_df <- enriched %>%
-  filter(Cluster.name ==cluster_name) %>%
-  select(Cluster.name,term,GO.ID,Aboral_elim.Significant_genes, Oral_elim.Significant_genes) %>%
-  pivot_longer(c(Aboral_elim.Significant_genes, Oral_elim.Significant_genes),names_to = "Tissue_DE_Up", values_to = "GeneList") %>%
-  filter(!is.na(GeneList)) %>%
-  separate_rows(GeneList, sep = ";") %>%
-  mutate(GeneList = trimws(GeneList)) %>%
-  distinct(Cluster.name, GO.ID, term, GeneList) 
-  
-  
-cluster_df <- cluster_df %>% left_join(
-    DE_05_SwissProt %>%
-      select(query, log2FoldChange, padj, ProteinNames) %>%
-      mutate(
-        ProteinNames = str_replace(ProteinNames, "\\s*\\(.*", ""),
-         ProteinNames = str_replace(ProteinNames, "\\s*\\[.*", ""),
-        ProteinNames = str_trunc(ProteinNames, 45),
-        # Create multi-line labels by inserting line breaks
-        ProteinNames_wrapped = str_wrap(ProteinNames, width = 15)
-      ),
-    by = c("GeneList" = "query")
-  ) %>%
-  mutate(
-    term_label = paste0(term, " (", GO.ID, ")")
-  )
-  
-expr_long <- as.data.frame(assay(vsd)) %>%
-  rownames_to_column(var = "query") %>%
-  inner_join(cluster_df, by = c("query" = "GeneList")) %>%
-  pivot_longer(cols = starts_with("LCM_"), names_to = "Sample", values_to = "Expression") %>%
-  left_join(heatmap_meta_df, by = "Sample") %>% mutate(
-    query = fct_reorder(query, log2FoldChange))
-
-p <- ggplot(expr_long, aes(x = query, y = Expression, fill = Tissue)) +
-  geom_violin(alpha = 0.8, scale = "width", color = "gray40", linewidth = 0.25, trim =TRUE,position = position_dodge(width = 0.9)) +
-  geom_point(
-    aes(fill = Tissue),
-    size = 0.8, 
-    alpha = 0.5,
-    shape = 21,
-    stroke = 0.1,
-    position = position_jitterdodge(
-      jitter.width = 0.2,
-      dodge.width = 0.9
-    )
-  ) +
-  facet_wrap(~ term_label, scales = "free_x", nrow = 1) +
-  scale_fill_manual(values = c(OralEpi = "#FD8D3C", Aboral = "mediumpurple1")) +
-  scale_x_discrete(labels = function(x) {
-    expr_long %>%
-      distinct(query, ProteinNames_wrapped) %>%
-      filter(query %in% x) %>%
-      pull(ProteinNames_wrapped)
-  }) +
-  labs(
-    title = paste("Gene expression in", cluster_name),
-    x = NULL,
-    y = "Variance-stabilized expression",
-    fill = NULL
-  ) +
-    theme_minimal(base_size = 10, base_family = "Arial") +
-  theme(
-    # Panel styling
-    panel.grid.major.x = element_blank(),
-    panel.grid.minor = element_blank(),
-    panel.grid.major.y = element_line(color = "gray90", linewidth = 0.3),
-    panel.border = element_rect(color = "gray60", fill = NA, linewidth = 0.5),
-    panel.spacing = unit(1, "lines"),
-    
-    # Axis styling - horizontal, multi-line labels
-    axis.text.x = element_text(
-      angle = 0,  # Horizontal
-      hjust = 0.5, 
-      vjust = 1,
-      size = 5,
-      color = "gray20",
-      lineheight = 0.9
-    ),
-    axis.text.y = element_text(size = 8, color = "gray20"),
-    axis.title.y = element_text(
-      size = 9, 
-      face = "bold",
-      margin = margin(r = 8)
-    ),
-    axis.ticks = element_line(color = "gray60", linewidth = 0.3),
-    axis.ticks.length = unit(2, "pt"),
-    
-    # Strip (facet label) styling
-    strip.background = element_rect(fill = "gray95", color = "gray60", linewidth = 0.5),
-    strip.text = element_text(
-      face = "bold", 
-      size = 8, 
-      margin = margin(b = 4, t = 4),
-      color = "gray20"
-    ),
-    
-    # Legend styling
-    legend.position = "bottom",
-    legend.text = element_text(size = 9),
-    legend.key.size = unit(0.8, "lines"),
-    legend.box.spacing = unit(0.2, "lines"),
-    legend.margin = margin(t = 5),
-    
-    # Title styling
-    plot.title = element_text(
-      size = 11, 
-      face = "bold",
-      margin = margin(b = 8)
-    ),
-    plot.title.position = "plot",
-    plot.margin = margin(10, 10, 10, 10)
-  )
-
-# Display plot
-print(p)
-
-# Save high-resolution version for publication
-ggsave(
-  filename = "sensory_perception_expression_panel.pdf",
-  plot = p,
-  width = 20,
-  height = 4,
-  units = "in",
-  dpi = 600,
-  device = cairo_pdf
-)
-
-# Also save as high-res PNG
-ggsave(
-  filename = "sensory_perception_expression_panel.png",
-  plot = p,
-  width = 20,
-  height = 4,
-  units = "in",
-  dpi = 600,
-  bg = "white"
-)
 ```
 
 
