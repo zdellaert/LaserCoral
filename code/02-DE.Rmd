@@ -712,7 +712,7 @@ Biomin_broc_orig <- Biomin_broc
 ```
 
 
-```{r}
+```{r,eval =FALSE}
 broc_groups <- data.table::fread("../../multi-sp-snRNA/reference_genes/cnidarian_marker_genes/output/broccoli/dir_step3/table_OGs_protein_names.txt", header=T) %>% select(c("#OG_name","Pacu_proteins.faa"))  %>% filter(`Pacu_proteins.faa` != "") %>% rename(OG_name = "#OG_name")
 broc_groups_sep <- broc_groups %>% separate_longer_delim(cols = Pacu_proteins.faa, delim = " ")
 broc_groups_sep <- broc_groups_sep %>% rename(query = Pacu_proteins.faa)
@@ -737,7 +737,7 @@ DESeq_Biomin_broc    <- join_genes_of_interest(as.data.frame(resOrdered), Biomin
 ```
 
 ```{r}
-Biomin_broc <- Biomin_broc_orig_broc_expanded2_clean
+#Biomin_broc <- Biomin_broc_orig_broc_expanded2_clean
 
 keywords_manual_search_biomin_noortholog <- c("Collagen alpha", "hemicentin", "skeletal organic matrix", "carbonic anhydrase", "coadhesin", "Von Willebrand Factor D")
 
@@ -1130,7 +1130,7 @@ DE_Biomin_broc <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n =
          annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
          labels_row = gene_labels[match(select,(gene_labels$query)),2], fontsize_row = 8, cutree_rows = 2)
 DE_Biomin_broc
-save_ggplot(DE_Biomin_broc, "DE_Biomin_broc",height=16)
+save_ggplot(DE_Biomin_broc, "DE_Biomin_broc",height=10)
 
 # Perform clustering
 row_clusters <- hclust(dist(z_scores))
@@ -1160,11 +1160,14 @@ DE_Biomin_broc <- pheatmap(
   show_rownames = TRUE,
   cutree_cols = 2,
   annotation_col = (heatmap_metadata %>% select(Tissue)),
+  annotation_row=annotation_row,
   annotation_colors = ann_colors,
   labels_row = ordered_labels,
-  fontsize_row = 8
+  fontsize_row = 8,
+  borders_color = "white",  
+  gaps_row = c(53) 
 )
-save_ggplot(DE_Biomin_broc, "clusters_clean/DE_Biomin_broc",height=16)
+save_ggplot(DE_Biomin_broc, "clusters_clean/DE_Biomin_broc",height=10)
 ```
 
 
@@ -1187,7 +1190,7 @@ DE_Biomin_broc <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n =
          annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
          labels_row = labels_all[match(select,(labels_all$query)),2], fontsize_row = 8, cutree_rows = 2)
 DE_Biomin_broc
-save_ggplot(DE_Biomin_broc, "ALL_Biomin_broc",bg="white",height = 16)
+save_ggplot(DE_Biomin_broc, "ALL_Biomin_broc",bg="white",height = 18)
 
 # Perform clustering
 row_clusters <- hclust(dist(z_scores))
@@ -1222,9 +1225,9 @@ DE_Biomin_broc <- pheatmap(
   annotation_row=annotation_row,
   fontsize_row = 8,
   borders_color = "white",  
-  gaps_row = c(40) 
+  gaps_row = c(81) 
 )
-save_ggplot(DE_Biomin_broc, "clusters_clean/All_Biomin_broc",bg="white",height = 16)
+save_ggplot(DE_Biomin_broc, "clusters_clean/All_Biomin_broc",bg="white",height = 18)
 ```
 
 ```{r}
