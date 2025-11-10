@@ -46,7 +46,7 @@ sessionInfo() #provides list of loaded packages and version of R.
 #set standard output directory for figures
 outdir <- "../output_RNA/differential_expression"
 
-save_ggplot <- function(plot, filename, width = 10, height = 7, units = "in", dpi = 300,bg=NULL) {
+save_ggplot <- function(plot, filename, width = 10, height = 7, units = "in", dpi = 300, bg = "white") {
   print(plot)
 
   png_path <- file.path(outdir, paste0(filename, ".png"))
@@ -159,6 +159,7 @@ write.csv(DE_05,
 EnhancedVolcano(res, 
     lab = ifelse(res$padj < 0.05, rownames(res), ""),
     x = "log2FoldChange", 
+    shape=16,
     y = "pvalue"
 )
 
@@ -170,6 +171,7 @@ volcano_plain <- EnhancedVolcano(res,
     title="",
     subtitle="",
     drawConnectors = TRUE,
+    shape=16,
     widthConnectors = 0.75,
     pointSize = 1,
     labSize = 2,boxedLabels = TRUE,max.overlaps = 60)
@@ -423,8 +425,6 @@ Biomin_broc$def_short <- ifelse(nchar(Biomin_broc$definition) > 40,
                             Biomin_broc$definition)
 
 Biomin_broc_filtered_counts <- filtered_counts[(rownames(filtered_counts) %in% Biomin_broc$query),]
-
-write.csv(Biomin_filtered_counts, "../output_RNA/differential_expression/Biomin_filtered_counts.csv")
 ```
 
 ### Additional gene lists
@@ -705,6 +705,78 @@ up_OralEpi <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, 
          labels_row =gene_labels[match(rownames(res)[select],(gene_labels$query)),2], fontsize_row = 5)
 print(up_OralEpi)
 ```
+### Expand biomineralization gene list
+
+```{r}
+Biomin_broc_orig <- Biomin_broc
+```
+
+
+```{r}
+broc_groups <- data.table::fread("../../multi-sp-snRNA/reference_genes/cnidarian_marker_genes/output/broccoli/dir_step3/table_OGs_protein_names.txt", header=T) %>% select(c("#OG_name","Pacu_proteins.faa"))  %>% filter(`Pacu_proteins.faa` != "") %>% rename(OG_name = "#OG_name")
+broc_groups_sep <- broc_groups %>% separate_longer_delim(cols = Pacu_proteins.faa, delim = " ")
+broc_groups_sep <- broc_groups_sep %>% rename(query = Pacu_proteins.faa)
+
+head(broc_groups)
+head(broc_groups_sep)
+# 30744 genes are in the orthogroups 
+
+Biomin_broc_orig_broc_expanded <- Biomin_broc_orig %>% left_join(broc_groups_sep, by="query")
+
+Biomin_broc_orig_broc_expanded2 <- Biomin_broc_orig_broc_expanded %>% left_join(broc_groups_sep, by="OG_name", suffix = c(".orig", ""))
+
+Biomin_broc_orig_broc_expanded2_clean <- Biomin_broc_orig_broc_expanded2 %>% select(-query.orig) %>% distinct() %>% select(query,everything())
+
+Biomin_broc_orig_broc_expanded2_clean <- Biomin_broc_orig_broc_expanded2_clean %>%
+  group_by(query,List) %>%
+  summarize(definition = paste(unique(definition), collapse = ","),Classification = paste(unique(Classification), collapse = ","),def_short = paste(unique(def_short), collapse = ","))
+
+
+DE_05_Biomin_broc    <- join_genes_of_interest(DE_05, Biomin_broc_orig_broc_expanded2_clean)
+DESeq_Biomin_broc    <- join_genes_of_interest(as.data.frame(resOrdered), Biomin_broc_orig_broc_expanded2_clean)
+```
+
+```{r}
+Biomin_broc <- Biomin_broc_orig_broc_expanded2_clean
+
+keywords_manual_search_biomin_noortholog <- c("Collagen alpha", "hemicentin", "skeletal organic matrix", "carbonic anhydrase", "coadhesin", "Von Willebrand Factor D")
+
+manual_search_biomin_noortholog <- DESeq_SwissProt %>% filter(grepl(
+  paste(keywords_manual_search_biomin_noortholog,collapse="|"),ProteinNames,ignore.case = TRUE)) %>%
+  select(query, ProteinNames) %>% 
+  rename(definition = ProteinNames) %>% mutate(List="Searched Keywords") %>% 
+  filter(!(query %in% Biomin_broc$query)) #only keep these if they're not already in our list
+
+manual_search_biomin_noortholog <- manual_search_biomin_noortholog %>% mutate(
+  Classification = 
+    ifelse(grepl("Collagen", definition, ignore.case = TRUE), "Extracellular matrix/cell adhesion",
+    ifelse(grepl("hemicentin", definition, ignore.case = TRUE), "Extracellular matrix/cell adhesion",
+    ifelse(grepl("Uncharacterized skeletal organic matrix", definition, ignore.case = TRUE), "Uncharacterized biomineralization proteins",
+    ifelse(grepl("MAM and LDL", definition, ignore.case = TRUE), "Extracellular matrix/cell adhesion",
+    ifelse(grepl("carbonic anhydrase", definition, ignore.case = TRUE), "Enzymes",
+    ifelse(grepl("coadhesin", definition, ignore.case = TRUE), "Extracellular matrix/cell adhesion",
+    ifelse(grepl("Von Willebrand Factor D", definition, ignore.case = TRUE), "Extracellular matrix/cell adhesion",NA)))))))
+)
+
+manual_search_biomin_noortholog$def_short <- ifelse(nchar(manual_search_biomin_noortholog$definition) > 40, 
+                            paste0(substr(manual_search_biomin_noortholog$definition, 1, 37), "..."), 
+                            manual_search_biomin_noortholog$definition)
+
+#Biomin_broc_orig <- Biomin_broc
+
+Biomin_broc <- Biomin_broc %>% bind_rows(manual_search_biomin_noortholog)
+
+Biomin_broc_filtered_counts <- filtered_counts[(rownames(filtered_counts) %in% Biomin_broc$query),]
+
+DE_05_Biomin_broc    <- join_genes_of_interest(DE_05, Biomin_broc)
+DESeq_Biomin_broc    <- join_genes_of_interest(as.data.frame(resOrdered), Biomin_broc)
+
+write.csv(as.data.frame(DESeq_Biomin_broc), file=paste0(outdir,"/DESeq_biomin_annotation.csv"))
+write.csv(as.data.frame(DE_05_Biomin_broc), file=paste0(outdir,"/DE_05_biomin_annotation.csv"))
+Biomin_broc_all_counts <- as.data.frame(counts(dds)) %>% mutate(query = rownames(dds)) %>% select(query,everything()) %>% left_join(Biomin_broc) 
+Biomin_broc_all_res <- as.data.frame(res) %>% mutate(query = rownames(res)) %>% select(query,everything()) %>% left_join(Biomin_broc) 
+```
+
 
 ### Clean labels and try to categorize annotations
 
@@ -713,6 +785,15 @@ Manual_AllGenes <- DESeq_SwissProt %>% mutate(Heatmap_Label = ProteinNames) %>% 
 
 Manual_AllGenes$Heatmap_Label <- gsub("Homeobox protein", "Hox", Manual_AllGenes$Heatmap_Label, ignore.case = TRUE)
 Manual_AllGenes$Heatmap_Label <- gsub("Protein Wnt", "Wnt", Manual_AllGenes$Heatmap_Label, ignore.case = TRUE)
+
+#fill any missing values that are biomin genes with the biomin gene label
+Manual_AllGenes <- Manual_AllGenes %>%
+  left_join(
+    Biomin_broc %>% select(query, definition),
+    by = "query"
+  ) %>%
+  mutate(Heatmap_Label = coalesce(Heatmap_Label, definition)) %>%
+  select(-definition)
 
 Manual_AllGenes <- Manual_AllGenes %>% mutate(
         Heatmap_Label = str_replace(Heatmap_Label, "\\s*\\(.*", ""),
@@ -774,7 +855,7 @@ library(purrr)
 
 DESeq_SwissProt_categorized <- Manual_AllGenes %>% rowwise() %>%
   mutate(category = list(
-    c(if (query %in% DESeq_Biomin_broc$query & !grepl("Myosin|Actin|cytoplasmic", ProteinNames, ignore.case = TRUE)) "Biomineralization",
+    c(if (query %in% DESeq_Biomin_broc$query) "Biomineralization",
       if (grepl("transient", ProteinNames, ignore.case = TRUE)) "TRP Channel",
       if ((grepl("mucin|lectin|toll-|nitric|sulfotransferase|Complement", ProteinNames, ignore.case = TRUE) |
            grepl("toll-like receptor|NF-kappaB|complement activation|3'-phosphoadenosine 5'-phosphosulfate",
@@ -1035,7 +1116,7 @@ save_ggplot(DE_biomin, "clusters_clean/DE_biomin")
 
 #############################
 
-DE_05_Biomin_broc_filtered <- DE_05_Biomin_broc %>% left_join(Manual,by="query" ) %>% filter(!(Heatmap_Label %in% c("Myosin-9", "Actin, cytoplasmic")))
+DE_05_Biomin_broc_filtered <- DE_05_Biomin_broc %>% left_join(Manual,by="query" ) #%>% filter(!(Heatmap_Label %in% c("Myosin-9", "Actin, cytoplasmic")))
   
 select <- DE_05_Biomin_broc_filtered$query
 z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
@@ -1049,7 +1130,7 @@ DE_Biomin_broc <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n =
          annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
          labels_row = gene_labels[match(select,(gene_labels$query)),2], fontsize_row = 8, cutree_rows = 2)
 DE_Biomin_broc
-save_ggplot(DE_Biomin_broc, "DE_Biomin_broc")
+save_ggplot(DE_Biomin_broc, "DE_Biomin_broc",height=16)
 
 # Perform clustering
 row_clusters <- hclust(dist(z_scores))
@@ -1083,7 +1164,67 @@ DE_Biomin_broc <- pheatmap(
   labels_row = ordered_labels,
   fontsize_row = 8
 )
-save_ggplot(DE_Biomin_broc, "clusters_clean/DE_Biomin_broc")
+save_ggplot(DE_Biomin_broc, "clusters_clean/DE_Biomin_broc",height=16)
+```
+
+
+```{r}
+labels_all <- Manual_AllGenes %>% 
+  select(query,Heatmap_Label) %>%
+  mutate_all(~ ifelse(is.na(.), "", .)) 
+
+DESeq_Biomin_broc_filtered <- DESeq_Biomin_broc %>% left_join(Manual_AllGenes %>% select(query,Heatmap_Label))
+  
+select <- DESeq_Biomin_broc_filtered$query
+z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
+
+annotation_row = DESeq_Biomin_broc_filtered %>%
+    select(query, Classification) %>%
+    tibble::column_to_rownames("query")
+
+DE_Biomin_broc <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
+         cluster_cols=TRUE, cutree_cols = 2,annotation_row=annotation_row,
+         annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
+         labels_row = labels_all[match(select,(labels_all$query)),2], fontsize_row = 8, cutree_rows = 2)
+DE_Biomin_broc
+save_ggplot(DE_Biomin_broc, "ALL_Biomin_broc",bg="white",height = 16)
+
+# Perform clustering
+row_clusters <- hclust(dist(z_scores))
+cluster_assignments <- cutree(row_clusters, k = 2) # Adjust k as needed
+
+# Create a dataframe to manage clusters and reordering
+clustered_data <- data.frame(
+  query = select,
+  Heatmap_Label = labels_all[match(select, labels_all$query), 2],
+  cluster = cluster_assignments
+)
+
+# Reorder rows within each cluster alphabetically by their labels
+clustered_data <- clustered_data %>%
+  arrange(cluster, Heatmap_Label)
+
+# Reorder the z_scores matrix and labels based on the new order
+z_scores <- z_scores[match(clustered_data$query, rownames(z_scores)), ]
+ordered_labels <- clustered_data$Heatmap_Label
+
+# Generate heatmap with reordered rows and labels
+DE_Biomin_broc <- pheatmap(
+  z_scores,
+  color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200),
+  cluster_rows = FALSE,  # Disable clustering since rows are pre-ordered
+  cluster_cols = TRUE,
+  show_rownames = TRUE,
+  cutree_cols = 2,
+  annotation_col = (heatmap_metadata %>% select(Tissue)),
+  annotation_colors = ann_colors,
+  labels_row = ordered_labels,
+  annotation_row=annotation_row,
+  fontsize_row = 8,
+  borders_color = "white",  
+  gaps_row = c(40) 
+)
+save_ggplot(DE_Biomin_broc, "clusters_clean/All_Biomin_broc",bg="white",height = 16)
 ```
 
 ```{r}
@@ -1928,6 +2069,7 @@ length(unique(solute_de_upAboral$SLC_family))
 length(unique(solute_de_upOral$SLC_family))
 table(solute_de$SLC_family)
 ```
+
 ```{r}
 #Basing my annotations on: https://re-solute.eu/knowledgebase/slcfamily and https://slc.bioparadigms.org/
 
@@ -2438,6 +2580,7 @@ plot <- EnhancedVolcano(DESeq_SwissProt,
     y = "padj",
     pCutoff = 0.05,
     colCustom = LFC_colors, colAlpha = .7,
+    shape=16,
     title = NULL, subtitle = NULL, 
     legendPosition = "bottom",
     legendLabSize = 8,
@@ -2465,6 +2608,7 @@ plot <- EnhancedVolcano(DESeq_SwissProt,
     axisLabSize = 12,
     captionLabSize = 4,
     x = "log2FoldChange", 
+    shape=16,
     y = "padj",
     pCutoff = 0.05,
     colCustom = LFC_colors, colAlpha = .7,

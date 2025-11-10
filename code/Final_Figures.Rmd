@@ -106,6 +106,7 @@ plot <- EnhancedVolcano(DESeq_SwissProt,
     labSize = 3,
     axisLabSize = 8,
     captionLabSize = 4,
+  shape=16,
     x = "log2FoldChange", 
     y = "padj",
     pCutoff = 0.05,
@@ -138,6 +139,7 @@ plot <- EnhancedVolcano(DESeq_SwissProt,
     captionLabSize = 4,
     x = "log2FoldChange", 
     y = "padj",
+  shape=16,
     pCutoff = 0.05,
     colCustom = LFC_colors, colAlpha = .7,
     title = NULL, subtitle = NULL, 
@@ -298,15 +300,6 @@ plot_data <- solute_de %>%
   filter(Direction != "noChange") %>%
   group_by(SLC_family, Substrate_Broad, Direction) %>%
   summarise(n = n(), .groups = "drop")
-
-ggplot(plot_data, aes(x = SLC_family, y = n, fill = Direction)) +
-  geom_bar(stat = "identity") +
-  facet_wrap(~Substrate_Broad, scales = "free_x") +
-  scale_fill_manual(values = c("Oral" = "#FD8D3C", "Aboral" = "mediumpurple1")) +
-  theme_minimal() +
-  labs(title = "Differentially Expressed SLC Genes by Family",
-       x = "SLC Family", y = "Number of DE Genes") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 category_order <- plot_data %>%
   group_by(Substrate_Broad) %>%
@@ -495,6 +488,12 @@ ggsave("../output_RNA/differential_expression/composite_figs/Figure2.png",
 ggsave("../output_RNA/differential_expression/composite_figs/Figure2.pdf",
        final_fig, width = 6.9, height = 9, units = "in", dpi = 600, 
        device = cairo_pdf, bg = "white")
+
+```
+
+## Figure 3
+
+```{r}
 
 ```
 
