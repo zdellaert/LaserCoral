@@ -478,19 +478,17 @@ ggsave("../output_RNA/differential_expression/composite_figs/Figure2.pdf",
 ## Figure 3
 
 ```{r}
-Biomin_all_expressed <- read.csv(paste0(outdir,"/DESeq_biomin_annotation.csv"))
+Biomin_all_expressed <- read.csv(paste0(outdir,"/DESeq_biomin_annotation.csv")) %>% left_join(DESeq_SwissProt %>% select(query,Heatmap_Label,category))
+
 Biomin_DE <- Biomin_all_expressed %>% filter(abs(log2FoldChange) > 1 & padj < 0.05)
-
-Biomin_all_expressed_labelled <- Biomin_all_expressed %>% left_join(DESeq_SwissProt %>% select(query,Heatmap_Label,category))
-
 #choose the genes that will be plotted for the heatmap
-select <- Biomin_all_expressed_labelled$query
+select <- Biomin_DE$query
 
 #gather expression info for those genes (assay(vsd) and get the z-scores)
 z_scores <- t(scale(t(vsd[select, ])))
 
 # row annotations: Classification (type of biomin gene), category (genes i also called non-biomin), logfoldchange, padj
-annotation_row <- Biomin_all_expressed_labelled %>%
+annotation_row <- Biomin_DE %>%
   select(query, Classification, category, log2FoldChange, padj) %>%
   tibble::column_to_rownames("query")
 
@@ -501,36 +499,28 @@ annotation_row$DE <- abs(annotation_row$log2FoldChange) > 1 & annotation_row$pad
 annotation_col_df <- meta %>% select(Tissue)
 
 # colors
-expr_colors <- colorRamp2(c(-2, 0, 2), c("#3B4CC0", "white", "#B40426"))
+ann_colors = list(Tissue = c(OralEpi = "#FD8D3C" ,Aboral = "mediumpurple1"))
+expr_colors <- colorRamp2(c(-2, 0, 2), c("#0571b0", "white", "#ca0020"))
+
 class_colors <- setNames(
   brewer.pal(length(unique(annotation_row$Classification)), "Dark2"),
   unique(annotation_row$Classification)
 )
-de_colors <- c("TRUE" = "#222222", "FALSE" = "#FFFFFF00")
-
 # create row annotation object
 row_ha <- rowAnnotation(
   Classification = annotation_row$Classification,
-  DE = annotation_row$DE,
   col = list(
-    Classification = class_colors,
-    DE = de_colors
+    Classification = class_colors
   ),
-  annotation_name_gp = gpar(fontsize = 9, fontface = "bold"),
+  annotation_name_gp = gpar(fontsize = 0, fontface = "bold"),
    annotation_legend_param = list(
     Classification = list(
       title = "Gene Classification",
       title_gp = gpar(fontsize = 10, fontface = "bold"),
       labels_gp = gpar(fontsize = 9)
-    ),
-    DE = list(
-      title = "Differentially Expressed",
-      title_gp = gpar(fontsize = 10, fontface = "bold"),
-      labels_gp = gpar(fontsize = 9),
-      labels = c("No","Yes")
     )
   ),
-  width = unit(14, "mm"),
+  width = unit(18, "mm"),
   gap = unit(1, "mm")
 )
 
@@ -538,7 +528,7 @@ row_ha <- rowAnnotation(
 col_ha <- HeatmapAnnotation(
   Tissue = annotation_col_df$Tissue,
   col = list(Tissue = ann_colors$Tissue),
-  annotation_name_gp = gpar(fontsize = 9, fontface = "bold"),
+  annotation_name_gp = gpar(fontsize = 10, fontface = "bold"),
   annotation_legend_param = list(
     Tissue = list(title = "Tissue", ncol = 1),
     title_gp = gpar(fontsize = 10, fontface = "bold"),
@@ -549,8 +539,11 @@ col_ha <- HeatmapAnnotation(
 
 # labels
 labels_all <- DESeq_SwissProt %>% 
-  select(query, Heatmap_Label) %>%
-  mutate_all(~ ifelse(is.na(.), "", .))
+  mutate(is_DE = abs(log2FoldChange) > 1 & padj < 0.05) %>%
+  select(query, Heatmap_Label,is_DE) %>%
+  mutate_all(~ ifelse(is.na(.), "", .)) #%>%
+ # mutate(Heatmap_Label = ifelse(is_DE,Heatmap_Label, "")) #only label DE genes
+
 row_labels <- labels_all$Heatmap_Label[match(rownames(z_scores), labels_all$query)]
 
 # Perform hierarchical clustering on all samples and genes
@@ -560,8 +553,6 @@ row_hclust <- hclust(dist(z_scores))
 row_clusters <- cutree(row_hclust, k = 2)
 
 # Combine expression-based grouping with supervised annotation
-split_factor <- paste0("Cluster", row_clusters, "_", stringr::str_wrap(annotation_row$Classification, width = 18))
-
 split_factor <- stringr::str_wrap(annotation_row$Classification, width = 18)
 ```
 
@@ -582,32 +573,29 @@ ht <- Heatmap(
   row_title = NULL,
   top_annotation = col_ha,
   show_row_names = TRUE,
-  row_names_gp = gpar(fontsize = 5, fontface = "italic"),
+  row_names_gp = gpar(fontsize = 6.5, fontface = "italic"),
   row_labels = row_labels,
   show_column_names = FALSE,
-  show_column_dend = FALSE,
+  column_dend_height = unit(5, "mm"),
   border = FALSE,
-  
-  row_title_gp = gpar(fontsize = 10, fontface = "bold"),
   column_title_gp = gpar(fontsize = 10, fontface = "bold"),
-  
   heatmap_legend_param = list(
     title = "Expression\n(Z-Score)",
     title_gp = gpar(fontsize = 10, fontface = "bold"),
-    labels_gp = gpar(fontsize = 8),
+    labels_gp = gpar(fontsize = 9),
     legend_height = unit(3, "cm"),
     direction = "horizontal"
   ),
-  rect_gp = gpar(col = "grey85", lwd = 0.4),
+  rect_gp = gpar(col = "grey70", lwd = 0.5),
   use_raster = TRUE,
-  raster_quality = 6
+  raster_quality = 8
 )
 
-pdf("../output_RNA/differential_expression/composite_figs/Figure3.pdf", width = 8.5, height = 12)
-draw(ht, merge_legend = TRUE)
+pdf("../output_RNA/differential_expression/composite_figs/Figure3.pdf", width = 7, height = 8.5)
+draw(ht, merge_legend = TRUE, heatmap_legend_side = "bottom", annotation_legend_side = "bottom")
 dev.off()
 
-png("../output_RNA/differential_expression/composite_figs/Figure3.png", width = 8.5, height = 12, res = 300,units = "in")
+png("../output_RNA/differential_expression/composite_figs/Figure3.png", width = 6, height = 8, res = 300,units = "in")
 draw(ht, merge_legend = TRUE, heatmap_legend_side = "bottom", annotation_legend_side = "bottom")
 dev.off()
 ```
