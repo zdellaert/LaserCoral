@@ -403,18 +403,7 @@ MarkerGenes$def_short <- ifelse(nchar(MarkerGenes$definition) > 20,
 
 ### Biomineralization toolkit
 ```{r}
-Biomin <- read.csv("../output_RNA/marker_genes/Pacuta_Biomin_Blast.csv") %>% dplyr::rename("query" = Pocillopora_acuta_best_hit) %>% select(-c(accessionnumber.geneID, Ref))
 Biomin_broc <- read.csv("../output_RNA/marker_genes/Pacuta_Biomin_Spis_ortholog.csv") %>% dplyr::rename("query" = Pacuta_gene) #%>% select(-c(X,accessionnumber_gene_id, ref))
-
-Biomin <- Biomin %>%
-  group_by(query,List) %>%
-  summarize(definition = paste(unique(definition), collapse = ","))
-
-Biomin$def_short <- ifelse(nchar(Biomin$definition) > 40, 
-                            paste0(substr(Biomin$definition, 1, 37), "..."), 
-                            Biomin$definition)
-
-Biomin_filtered_counts <- filtered_counts[(rownames(filtered_counts) %in% Biomin$query),]
 
 Biomin_broc <- Biomin_broc %>%
   group_by(query,List) %>%
@@ -457,14 +446,12 @@ join_genes_of_interest <- function(df, gene_set) {
     drop_na() %>% distinct()
 }
 
-DE_05_biomin         <- join_genes_of_interest(DE_05, Biomin)
 DE_05_Biomin_broc    <- join_genes_of_interest(DE_05, Biomin_broc)
 DE_05_marker         <- join_genes_of_interest(DE_05, MarkerGenes)
 DE_05_marker_broc    <- join_genes_of_interest(DE_05, MarkerGenes_broc)
 DE_05_He_etal        <- join_genes_of_interest(DE_05, He_etal_Nvec)
 DE_05_DuBuc_etal     <- join_genes_of_interest(DE_05, DuBuc_etal_Nvec)
 
-DESeq_biomin         <- join_genes_of_interest(as.data.frame(resOrdered), Biomin)
 DESeq_Biomin_broc    <- join_genes_of_interest(as.data.frame(resOrdered), Biomin_broc)
 DESeq_marker         <- join_genes_of_interest(as.data.frame(resOrdered), MarkerGenes)
 DESeq_marker_broc    <- join_genes_of_interest(as.data.frame(resOrdered), MarkerGenes_broc)
@@ -477,9 +464,6 @@ DESeq_HeatStressGenes <- HeatStressGenes %>% left_join(as.data.frame(resOrdered)
 write.csv(as.data.frame(DESeq_Biomin_broc), file=paste0(outdir,"/DESeq_biomin_annotation.csv"))
 write.csv(as.data.frame(DE_05_Biomin_broc), file=paste0(outdir,"/DE_05_biomin_annotation.csv"))
 write.csv(as.data.frame(DE_05_marker), file=paste0(outdir,"/DE_05_markergene_annotation.csv"))
-
-biomin_all_counts <- as.data.frame(counts(dds)) %>% mutate(query = rownames(dds)) %>% select(query,everything()) %>% left_join(Biomin) 
-biomin_all_res <- as.data.frame(res) %>% mutate(query = rownames(res)) %>% select(query,everything()) %>% left_join(Biomin) 
 
 Biomin_broc_all_counts <- as.data.frame(counts(dds)) %>% mutate(query = rownames(dds)) %>% select(query,everything()) %>% left_join(Biomin_broc) 
 Biomin_broc_all_res <- as.data.frame(res) %>% mutate(query = rownames(res)) %>% select(query,everything()) %>% left_join(Biomin_broc) 
@@ -1070,52 +1054,6 @@ top50_DE
 ### biomin de heatmap nice
 
 ```{r}
-DE_05_biomin_filtered <- DE_05_biomin %>% left_join(Manual,by="query" ) #%>% filter(!(Heatmap_Label %in% c("Myosin-9", "Actin, cytoplasmic")))
-  
-select <- DE_05_biomin_filtered$query
-z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
-DE_biomin <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), cluster_rows=TRUE, show_rownames=TRUE,
-         cluster_cols=TRUE, cutree_cols = 2,annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
-         labels_row = gene_labels[match(select,(gene_labels$query)),2], fontsize_row = 8, cutree_rows = 2)
-DE_biomin
-save_ggplot(DE_biomin, "DE_biomin")
-
-# Perform clustering
-row_clusters <- hclust(dist(z_scores))
-cluster_assignments <- cutree(row_clusters, k = 2) # Adjust k as needed
-
-# Create a dataframe to manage clusters and reordering
-clustered_data <- data.frame(
-  query = select,
-  Heatmap_Label = gene_labels[match(select, gene_labels$query), 2],
-  cluster = cluster_assignments
-)
-
-# Reorder rows within each cluster alphabetically by their labels
-clustered_data <- clustered_data %>%
-  arrange(cluster, Heatmap_Label)
-
-# Reorder the z_scores matrix and labels based on the new order
-z_scores <- z_scores[match(clustered_data$query, rownames(z_scores)), ]
-ordered_labels <- clustered_data$Heatmap_Label
-
-# Generate heatmap with reordered rows and labels
-DE_biomin <- pheatmap(
-  z_scores,
-  color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200),
-  cluster_rows = FALSE,  # Disable clustering since rows are pre-ordered
-  cluster_cols = TRUE,
-  show_rownames = TRUE,
-  cutree_cols = 2,
-  annotation_col = (heatmap_metadata %>% select(Tissue)),
-  annotation_colors = ann_colors,
-  labels_row = ordered_labels,
-  fontsize_row = 8
-)
-save_ggplot(DE_biomin, "clusters_clean/DE_biomin")
-
-#############################
-
 DE_05_Biomin_broc_filtered <- DE_05_Biomin_broc %>% left_join(Manual,by="query" ) #%>% filter(!(Heatmap_Label %in% c("Myosin-9", "Actin, cytoplasmic")))
   
 select <- DE_05_Biomin_broc_filtered$query
