@@ -780,8 +780,8 @@ Manual_AllGenes <- Manual_AllGenes %>%
   select(-definition)
 
 Manual_AllGenes <- Manual_AllGenes %>% mutate(
-        Heatmap_Label = str_replace(Heatmap_Label, "\\s*\\(.*", ""),
-        Heatmap_Label = str_replace(Heatmap_Label, "\\s*\\[.*", ""),
+        Heatmap_Label = str_replace(Heatmap_Label, "\\s+\\(.*", ""),
+        Heatmap_Label = str_replace(Heatmap_Label, "\\s+\\[.*", ""),
         Heatmap_Label_short = str_trunc(Heatmap_Label, 50),
         Heatmap_Label_short = str_wrap(Heatmap_Label, width = 25)
       )
