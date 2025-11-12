@@ -87,6 +87,8 @@ colnames(interpro) <- c(
   "pathway_annotation"
 )
 
+interpro <- interpro %>% filter(e_value < 0.01)
+
 domains_plot <- interpro %>%
   filter(analysis == "Pfam") %>%
   select(query, hit_name, start, stop, seq_length) %>%
@@ -169,7 +171,7 @@ domain_counts <- domains %>%
   group_by(hit_name, is_DE) %>%
   summarize(n_genes = n_distinct(query), .groups = "drop") %>%
   pivot_wider(names_from = is_DE, values_from = n_genes, values_fill = 0) %>%
-  rename(DE = `TRUE`, NonDE = `FALSE`) %>%
+  dplyr::rename(DE = `TRUE`, NonDE = `FALSE`) %>%
   mutate(Background = DE + NonDE) %>%
   filter(DE != 0)
 
@@ -210,7 +212,7 @@ domain_counts <- domains %>%
   group_by(hit_name, is_DE) %>%
   summarize(n_genes = n_distinct(query), .groups = "drop") %>%
   pivot_wider(names_from = is_DE, values_from = n_genes, values_fill = 0) %>%
-  rename(DE = `TRUE`, NonDE = `FALSE`) %>%
+  dplyr::rename(DE = `TRUE`, NonDE = `FALSE`) %>%
   mutate(Background = DE + NonDE) %>%
   filter(DE != 0)
 
@@ -251,7 +253,7 @@ domain_counts <- domains %>%
   group_by(hit_name, is_DE) %>%
   summarize(n_genes = n_distinct(query), .groups = "drop") %>%
   pivot_wider(names_from = is_DE, values_from = n_genes, values_fill = 0) %>%
-  rename(DE = `TRUE`, NonDE = `FALSE`) %>%
+  dplyr::rename(DE = `TRUE`, NonDE = `FALSE`) %>%
   mutate(Background = DE + NonDE) %>%
   filter(DE != 0)
 
@@ -299,6 +301,8 @@ enrichment_combined <- full_join(
     padj_Aboral = replace_na(padj_Aboral, 1),
     nonDE_Oral = Background - DE_Oral - DE_Aboral,
     nonDE_Aboral = Background - DE_Oral - DE_Aboral)
+
+write.csv(enrichment_combined, "../output_RNA/differential_expression/interpro/Pfam_enrichment_results.csv")
 
 enrichment_combined$hit_name[
   enrichment_combined$hit_name == "ATP:guanido phosphotransferase, C-terminal catalytic domain"
@@ -531,7 +535,7 @@ ggsave(filename = "../output_RNA/differential_expression/pdf_figs/Pfam_enriched_
 
 
 ```{r}
-DE_05_OralEpi_top20 <- DE_05_OralEpi %>% arrange(-abs(log2FoldChange)) %>% slice_head(n = 10)
+DE_05_OralEpi_top20 <- DE_05_OralEpi %>% arrange(-abs(log2FoldChange)) %>% slice_head(n = 20)
 DE_05_Aboral_top20 <- DE_05_Aboral %>% arrange(-abs(log2FoldChange)) %>% slice_head(n = 10)
 ZP_genes <- domains_plot %>% right_join(DESeq %>% select(query, log2FoldChange)) %>%
     filter(grepl("ZP-", hit_name))
@@ -588,6 +592,14 @@ plotting <- domains_plot %>%
 
 ```
 
+```{r}
+# Define the Pfam IDs or names for ZP domains
+zp_genes <- domains %>% filter(hit_name == "ZP-N domain" | hit_name == "ZP-C domain")
+
+annots <- read.delim("../references/annotation/protein-GO.tsv")
+
+zp_genes <- domains %>% filter(hit_name == "ZP-N domain" | hit_name == "ZP-C domain") %>% left_join(annots) %>% left_join(DESeq)
+```
 
 
 ```{r}
@@ -640,4 +652,3 @@ ZP_top20_bothdir <- ggplot(plotting, aes(y = fct_rev(factor(query)))) +
 
 ZP_top20_bothdir
 ```
-
