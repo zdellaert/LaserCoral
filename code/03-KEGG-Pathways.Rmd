@@ -166,7 +166,7 @@ pathview_plot <- function(pathway_id, suffix, LFC_vector) {
 }
 
 # Specify pathways of interest
-pathways <- c("pdam04310", "pdam04150", "pdam04080", "pdam04814", "pdam04142", "pdam04820","pdam04082","pdam04512","pdam04145")
+pathways <- c("pdam04310", "pdam04150", "pdam04080", "pdam04814", "pdam04142", "pdam04820","pdam04082","pdam04512","pdam04145","pdam04350")
 
 # Visualize for DE_05 data and all genes
 for (pathway in pathways) {

@@ -59,6 +59,74 @@ DESeq_SwissProt <- read.csv(file=paste0(outdir,"/DESeq_SwissProt_annotation_cate
 
 ### Panel C
 
+```{r}
+clustered_allDEGs_enrichedGO <- read.csv(file=paste0(outdir,"/semantic-enrichment/DE_05_clusters_named.csv")) 
+```
+
+```{r}
+# Create bidirectional data
+cluster_data <- clustered_allDEGs_enrichedGO %>%
+  select(Cluster.name, Oral_elim.Significant_genes, Aboral_elim.Significant_genes) %>%
+  mutate(
+    # Clean cluster names
+    Cluster.name = gsub("^Cluster \\d+:\\s*", "", Cluster.name),
+    Oral_terms = ifelse(!is.na(Oral_elim.Significant_genes), 1, 0),
+    Aboral_terms = ifelse(!is.na(Aboral_elim.Significant_genes), 1, 0)
+  ) %>%
+  group_by(Cluster.name) %>%
+  summarise(
+    Oral_terms = sum(Oral_terms),
+    Aboral_terms = sum(Aboral_terms),
+    .groups = "drop"
+  ) %>%
+  filter(Oral_terms + Aboral_terms > 0) %>%
+  mutate(
+    deviation = Aboral_terms - Oral_terms,
+    Oral_terms = -Oral_terms  # Make negative for bidirectional plot
+  ) %>%
+  pivot_longer(cols = c("Oral_terms", "Aboral_terms"), 
+               names_to = "Tissue", values_to = "n_terms") %>%
+  mutate(Tissue = ifelse(Tissue == "Oral_terms", "Oral epidermis", "Aboral"))
+
+# Calculate transition points for dashed lines
+transition_data <- cluster_data %>%
+  distinct(Cluster.name, deviation) %>%
+  arrange(deviation)
+
+oral_to_equal <- sum(transition_data$deviation >= 0) + 0.5
+equal_to_aboral <- sum(transition_data$deviation > 0) + 0.5
+
+# Plot
+p <- ggplot(cluster_data, aes(x = reorder(Cluster.name, -deviation), y = n_terms, fill = Tissue)) +
+  geom_col(width = 0.7, alpha = 0.8) +
+  geom_hline(yintercept = 0, color = "black", linewidth = 0.8) +
+  geom_vline(xintercept = c(oral_to_equal, equal_to_aboral), 
+             color = "grey60", linetype = "dashed", linewidth = 0.6) +
+  scale_fill_manual(values = c("Oral epidermis" = "#FD8D3C", "Aboral" = "#756BB1")) + #green: "#2E8B57"
+  coord_flip() +
+  theme_minimal() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.position = "bottom",
+    legend.title = element_text(face = "bold"),
+    axis.title = element_text(face = "bold"),
+    axis.text = element_text(color = "black"),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12)
+  ) +
+  scale_y_continuous(labels = abs) +
+  labs(
+    x = "Gene clusters",
+    y = "Number of enriched GO terms",
+    title = "Tissue-specific GO term enrichment patterns",
+    subtitle = "Clusters ordered by net enrichment (Oral vs. Aboral)"
+  )
+
+ggsave("../output_RNA/differential_expression/semantic-enrichment/GO_enrichment_bidirectional.png", p, width = 10, height = 8, dpi = 300)
+```
+
+
 ### Panel D
 
 ```{r}
