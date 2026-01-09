@@ -2277,7 +2277,7 @@ top50_DE <- pheatmap(
   fontsize_row = 8,
   borders_color = "white",  # Optional border around clusters
   
-  gaps_row = 4  # Add breaks only between clusters
+  gaps_row = 1  # Add breaks only between clusters
 )
 ```
 

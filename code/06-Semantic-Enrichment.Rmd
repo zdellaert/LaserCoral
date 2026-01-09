@@ -163,13 +163,6 @@ BP_Oral <- ViSEAGO::create_topGOdata(
     nodeSize=5
 )
 
-# perform TopGO test using classic algorithm
-classic_Oral <- topGO::runTest(
-    BP_Oral,
-    algorithm ="classic",
-    statistic = "fisher"
-)
-
 # perform TopGO test using elim algorithm
 elim_Oral <- topGO::runTest(
     BP_Oral,
@@ -178,9 +171,7 @@ elim_Oral <- topGO::runTest(
 )
 
 BP_Results <- ViSEAGO::merge_enrich_terms(
-    Input = list(#Oral_classic = c("BP_Oral", "classic_Oral"),
-                 Oral_elim = c("BP_Oral", "elim_Oral"))
-)
+    Input = list( Oral_elim = c("BP_Oral", "elim_Oral")))
 ```
 
 
@@ -199,11 +190,9 @@ ViSEAGO::show_table(
 ```
 
  - enrichment pvalue cutoff:
-        Oral_classic : 0.01
         Oral_elim : 0.01
-- enrich GOs (in at least one list): 171 GO terms of 2 conditions.
-        Oral_classic : 171 terms
-        Oral_elim : 58 terms
+- enrich GOs (in at least one list):
+        Oral_elim : 60 terms
 
 ### Semantic similarity --> Cluster: Use Wang graph-based method to identify similarity between GO terms
 
@@ -326,13 +315,6 @@ BP_Aboral <- ViSEAGO::create_topGOdata(
     nodeSize=5
 )
 
-# perform TopGO test using classic algorithm
-classic_Aboral <- topGO::runTest(
-    BP_Aboral,
-    algorithm ="classic",
-    statistic = "fisher"
-)
-
 # perform TopGO test using elim algorithm
 elim_Aboral <- topGO::runTest(
     BP_Aboral,
@@ -341,8 +323,7 @@ elim_Aboral <- topGO::runTest(
 )
 
 BP_Results <- ViSEAGO::merge_enrich_terms(
-    Input = list(#Aboral_classic = c("BP_Aboral", "classic_Aboral"),
-                 Aboral_elim = c("BP_Aboral", "elim_Aboral"))
+    Input = list(Aboral_elim = c("BP_Aboral", "elim_Aboral"))
 )
 ```
 
@@ -362,10 +343,8 @@ ViSEAGO::show_table(
 ```
 
  - enrichment pvalue cutoff:
-        Aboral_classic : 0.01
         Aboral_elim : 0.01
-- enrich GOs (in at least one list): 347 GO terms of 2 conditions.
-        Aboral_classic : 347 terms
+- enrich GOs (in at least one list):
         Aboral_elim : 118 terms
 
 ### Semantic similarity --> Cluster: Use Wang graph-based method to identify similarity between GO terms
@@ -387,7 +366,7 @@ myGOs
 
 #### Multi Dimensional Scaling Plot of the GO-terms based on semantic similarity
 
-```{r}
+```{r, eval=FALSE}
 # display MDSplot
 ViSEAGO::MDSplot(myGOs,
                  "GOterms")
@@ -432,7 +411,7 @@ ViSEAGO::show_table(
 
 #### Multi Dimensional Scaling Plot of the enriched GO-terms based on semantic similarity, colored by cluster
 
-```{r}
+```{r, eval=FALSE}
 # display colored MDSplot
 ViSEAGO::MDSplot(
     Wang_clusters_wardD2_Aboral,
@@ -449,7 +428,7 @@ Wang_clusters_wardD2_Aboral<-ViSEAGO::compute_SS_distances(
 )
 ```
 
-```{r}
+```{r, eval=FALSE}
 # MDSplot - one point per cluster
 ViSEAGO::MDSplot(
     Wang_clusters_wardD2_Aboral,
@@ -611,8 +590,8 @@ ViSEAGO::show_table(
  - enrichment pvalue cutoff:
         Oral_elim : 0.01
         Aboral_elim : 0.01
-- enrich GOs (in at least one list): 176 GO terms of 2 conditions.
-        Oral_elim : 58 terms
+- enrich GOs (in at least one list): 178 GO terms of 2 conditions.
+        Oral_elim : 60 terms
         Aboral_elim : 118 terms
 
 ### Semantic similarity --> Cluster: Use Wang graph-based method to identify similarity between GO terms
@@ -631,9 +610,10 @@ myGOs <- ViSEAGO::compute_SS_distances(
 
 myGOs
 ```
+
 #### Multi Dimensional Scaling Plot of the GO-terms based on semantic similarity
 
-```{r}
+```{r, eval=FALSE}
 # display MDSplot
 ViSEAGO::MDSplot(myGOs,
                  "GOterms")
@@ -678,7 +658,7 @@ ViSEAGO::show_table(
 
 #### Multi Dimensional Scaling Plot of the enriched GO-terms based on semantic similarity, colored by cluster
 
-```{r}
+```{r, eval=FALSE}
 # display colored MDSplot
 ViSEAGO::MDSplot(
     Wang_clusters_wardD2,
@@ -695,7 +675,7 @@ Wang_clusters_wardD2<-ViSEAGO::compute_SS_distances(
 )
 ```
 
-```{r}
+```{r, eval=FALSE}
 # MDSplot - one point per cluster
 ViSEAGO::MDSplot(
     Wang_clusters_wardD2,
@@ -739,18 +719,18 @@ cluster_map
 ### Manually fix cluster names based on GO terms inside each cluster
 
 ```{r}
-cluster_map_fixed <- cluster_map %>%
-  mutate(Cluster.name = str_replace(Cluster.name, "Cluster 2: developmental process", "Cluster 2: cell fate determination"),
-         Cluster.name = str_replace(Cluster.name, "Cluster 4: anatomical structure development", "Cluster 4: regeneration & tissue morphogenesis"),
-         Cluster.name = str_replace(Cluster.name, "Cluster 5: multicellular organism development", "Cluster 5: multicellular organism pattern formation"),
-         Cluster.name = str_replace(Cluster.name, "Cluster 9: transport", "Cluster 9: metal ion transmembrane transport"),
-         Cluster.name = str_replace(Cluster.name, "Cluster 10: transport", "Cluster 10: amino acid & small molecule transmembrane transport"),
-        Cluster.name = str_replace(Cluster.name, "Cluster 12: nervous system process", "Cluster 12: sensory perception"),
-        Cluster.name = str_replace(Cluster.name, "Cluster 16: biological_process", "Cluster 16: regeneration & wound healing"),
-        Cluster.name = str_replace(Cluster.name, "Cluster 18: secretion by cell", "Cluster 18: neurotransmitter and hormone secretion"),
-        Cluster.name = str_replace(Cluster.name, "Cluster 24: external encapsulating structure organization", "Cluster 24: extracellular matrix organization"),
-        Cluster.name = str_replace(Cluster.name, "Cluster 25: biological_process", "Cluster 25: cell organization and homeostasis")
-         )
+cluster_map_fixed <- cluster_map #%>%
+  # mutate(Cluster.name = str_replace(Cluster.name, "Cluster 2: developmental process", "Cluster 2: cell fate determination"),
+  #        Cluster.name = str_replace(Cluster.name, "Cluster 4: anatomical structure development", "Cluster 4: regeneration & tissue morphogenesis"),
+  #        Cluster.name = str_replace(Cluster.name, "Cluster 5: multicellular organism development", "Cluster 5: multicellular organism pattern formation"),
+  #        Cluster.name = str_replace(Cluster.name, "Cluster 9: transport", "Cluster 9: metal ion transmembrane transport"),
+  #        Cluster.name = str_replace(Cluster.name, "Cluster 10: transport", "Cluster 10: amino acid & small molecule transmembrane transport"),
+  #       Cluster.name = str_replace(Cluster.name, "Cluster 12: nervous system process", "Cluster 12: sensory perception"),
+  #       Cluster.name = str_replace(Cluster.name, "Cluster 16: biological_process", "Cluster 16: regeneration & wound healing"),
+  #       Cluster.name = str_replace(Cluster.name, "Cluster 18: secretion by cell", "Cluster 18: neurotransmitter and hormone secretion"),
+  #       Cluster.name = str_replace(Cluster.name, "Cluster 24: external encapsulating structure organization", "Cluster 24: extracellular matrix organization"),
+  #       Cluster.name = str_replace(Cluster.name, "Cluster 25: biological_process", "Cluster 25: cell organization and homeostasis")
+  #        )
 ```
 
 
@@ -783,7 +763,7 @@ cluster_data <- clustered_allDEGs_enrichedGO %>%
   select(Cluster.name, Oral_elim.Significant_genes, Aboral_elim.Significant_genes) %>%
   mutate(
     # Clean cluster names
-    Cluster.name = gsub("^Cluster \\d+:\\s*", "", Cluster.name),
+    #Cluster.name = gsub("^Cluster \\d+:\\s*", "", Cluster.name),
     Oral_terms = ifelse(!is.na(Oral_elim.Significant_genes), 1, 0),
     Aboral_terms = ifelse(!is.na(Aboral_elim.Significant_genes), 1, 0)
   ) %>%
