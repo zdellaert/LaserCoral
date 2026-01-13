@@ -44,7 +44,7 @@ meta <- read.csv("../data_RNA/LCM_RNA_metadata.csv") %>%
             dplyr::arrange(Sample) %>%
             mutate(across(c(Tissue, Fragment, Section_Date, LCM_Date), factor)) # Set variables as factors 
 
-meta$Tissue <- factor(meta$Tissue, levels = c("OralEpi","Aboral")) #we want OralEpi to be the baseline
+meta$Tissue <- factor(meta$Tissue, levels = c("Aboral","OralEpi")) #we want Aboral to be the baseline
 
 # Gene annotation data
 
@@ -69,7 +69,7 @@ cluster_data <- clustered_allDEGs_enrichedGO %>%
   select(Cluster.name, Oral_elim.Significant_genes, Aboral_elim.Significant_genes) %>%
   mutate(
     # Clean cluster names
-    Cluster.name = gsub("^Cluster \\d+:\\s*", "", Cluster.name),
+    #Cluster.name = gsub("^Cluster \\d+:\\s*", "", Cluster.name),
     Oral_terms = ifelse(!is.na(Oral_elim.Significant_genes), 1, 0),
     Aboral_terms = ifelse(!is.na(Aboral_elim.Significant_genes), 1, 0)
   ) %>%
@@ -134,10 +134,10 @@ ann_colors = list(Tissue = c(OralEpi = "#FD8D3C" ,Aboral = "mediumpurple1"))
 
 colorRampPalette(c("mediumpurple1", "white", "#FD8D3C"))(5)
 
-LFC_colors <- ifelse(DESeq_SwissProt$padj < 0.05 & DESeq_SwissProt$log2FoldChange < -1, '#FD8D3C',
-                  ifelse(DESeq_SwissProt$padj < 0.05 & DESeq_SwissProt$log2FoldChange < 0 , '#FEC69D',
-                         ifelse(DESeq_SwissProt$padj < 0.05 & DESeq_SwissProt$log2FoldChange > 1, '#AB82FF',
-                                ifelse(DESeq_SwissProt$padj < 0.05 & DESeq_SwissProt$log2FoldChange > 0, '#D4C0FF',
+LFC_colors <- ifelse(DESeq_SwissProt$padj < 0.05 & DESeq_SwissProt$log2FoldChange > 1, '#FD8D3C',
+                  ifelse(DESeq_SwissProt$padj < 0.05 & DESeq_SwissProt$log2FoldChange > 0 , '#FEC69D',
+                         ifelse(DESeq_SwissProt$padj < 0.05 & DESeq_SwissProt$log2FoldChange < -1, '#AB82FF',
+                                ifelse(DESeq_SwissProt$padj < 0.05 & DESeq_SwissProt$log2FoldChange < 0, '#D4C0FF',
                                        'grey'))))
 
 LFC_colors[is.na(LFC_colors)] <- 'grey'
@@ -346,8 +346,8 @@ solute_de <- read.csv(file=paste0(outdir,"/DE_05_SLC_genes.csv"))
 
 # Summarize counts by family and direction
 plot_data <- solute_de %>%
-  mutate(Direction = ifelse(log2FoldChange > 1, "Aboral",
-                            ifelse(log2FoldChange < -1, "Oral", "noChange"))) %>%
+  mutate(Direction = ifelse(log2FoldChange < -1, "Aboral",
+                            ifelse(log2FoldChange > 1, "Oral", "noChange"))) %>%
   filter(Direction != "noChange") %>%
   group_by(SLC_family, Substrate_Broad, Direction) %>%
   summarise(n = n(), .groups = "drop")
