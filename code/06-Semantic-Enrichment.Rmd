@@ -299,6 +299,19 @@ ViSEAGO::show_heatmap(
     "GOclusters")
 ```
 
+```{r}
+DE_05_SwissProt <- read.csv("../output_RNA/differential_expression/DE_05_SwissProt_annotation.csv")
+DESeq_SwissProt <- read.csv("../output_RNA/differential_expression/DESeq_SwissProt_annotation.csv")
+
+Oral_enriched_clustered <- Wang_clusters_wardD2_Oral@enrich_GOs@data
+
+top_cluster <- Oral_enriched_clustered %>% arrange(Oral_elim.pvalue) %>% head(1) %>% pull(GO.cluster)
+
+Oral_enriched_clustered %>% dplyr::filter(GO.cluster == top_cluster)
+
+```
+
+
 ## Aboral Epidermis:
 
 ### create topGO objects and perform enrichment using topGO wrapped by ViSEAGO
@@ -452,9 +465,21 @@ ViSEAGO::show_heatmap(
     "GOclusters")
 ```
 
+```{r}
+Aboral_enriched_clustered <- Wang_clusters_wardD2_Aboral@enrich_GOs@data
+
+top_cluster <- Aboral_enriched_clustered %>% arrange(Aboral_elim.pvalue) %>% head(1) %>% pull(GO.cluster)
+
+Aboral_enriched_clustered %>% dplyr::filter(GO.cluster == top_cluster)
+
+ViSEAGO::show_heatmap(
+    Wang_clusters_wardD2_Aboral,
+    "GOterms")
+```
+
 ## Plotting of both tissues, pre-clustered by tissue
 
-## Custom plotting of results
+### Custom plotting of results
 
 ```{r}
 clustered_Oral_DEGs_enrichedGO <- as.data.frame(Wang_clusters_wardD2_Oral@enrich_GOs@data) 
@@ -466,9 +491,9 @@ cluster_map <- cluster_map %>%
     Cluster.name = str_replace(cluster_full,".*?_.*?_",""),
     Cluster.term = str_replace(cluster_full,"^\\d+_",""),
     Cluster.term = str_replace(Cluster.term,"_.*$","")
-  ) #%>%
-  #mutate(Cluster.name = paste0("Cluster ", cluster, ": ", Cluster.name)) #%>%
-  #dplyr::select(cluster, Cluster.name)
+  ) %>%
+  mutate(Cluster.name = paste0("Cluster ", cluster, ": ", Cluster.name)) %>%
+  dplyr::select(cluster, Cluster.name)
 
 clustered_Oral_DEGs_enrichedGO <- clustered_Oral_DEGs_enrichedGO %>%
   left_join(cluster_map, by = c("GO.cluster" = "cluster")) %>%
@@ -483,9 +508,9 @@ cluster_map <- cluster_map %>%
     Cluster.name = str_replace(cluster_full,".*?_.*?_",""),
     Cluster.term = str_replace(cluster_full,"^\\d+_",""),
     Cluster.term = str_replace(Cluster.term,"_.*$","")
-  ) #%>%
-  #mutate(Cluster.name = paste0("Cluster ", cluster, ": ", Cluster.name)) #%>%
-  #dplyr::select(cluster, Cluster.name)
+  ) %>%
+  mutate(Cluster.name = paste0("Cluster ", cluster, ": ", Cluster.name)) %>%
+  dplyr::select(cluster, Cluster.name)
 clustered_Aboral_DEGs_enrichedGO <- clustered_Aboral_DEGs_enrichedGO %>%
   left_join(cluster_map, by = c("GO.cluster" = "cluster")) %>%
   mutate(Tissue="Aboral")
@@ -496,6 +521,198 @@ clustered_allDEGs_enrichedGO <- rbind(clustered_Oral_DEGs_enrichedGO %>%
                                       clustered_Aboral_DEGs_enrichedGO %>%
                                         dplyr::select(-contains("Aboral")))
 
+```
+
+### NEW: Plotting of both tissues, pre-clustered by tissue
+
+```{r}
+top_Oral_per_Cluster <- clustered_Oral_DEGs_enrichedGO %>% group_by(GO.cluster) %>% arrange(Oral_elim.pvalue) %>% slice(1) %>% ungroup() %>% dplyr::select(GO.cluster,GO.ID,term) %>% rename("top_sig_GO" = `GO.ID`,"top_sig_term" = `term`)
+
+plotting_oral <- left_join(clustered_Oral_DEGs_enrichedGO,top_Oral_per_Cluster) %>%
+  arrange(as.numeric(GO.cluster)) %>%
+                        mutate(is_top = GO.ID == top_sig_GO,
+                               pvalue = Oral_elim.pvalue,
+                                term_wrapped = str_wrap(`term`, width = 25),
+                                 cluster_label = factor(Cluster.name, levels = unique(Cluster.name))) %>%
+  add_count(GO.cluster, name = "n_terms")
+
+top_Aboral_per_Cluster <- clustered_Aboral_DEGs_enrichedGO %>% group_by(GO.cluster) %>% arrange(Aboral_elim.pvalue) %>% slice(1) %>% ungroup() %>% dplyr::select(GO.cluster,GO.ID,term) %>% rename("top_sig_GO" = `GO.ID`,"top_sig_term" = `term`)
+
+plotting_aboral <- left_join(clustered_Aboral_DEGs_enrichedGO,top_Aboral_per_Cluster)%>%
+                      arrange(as.numeric(GO.cluster)) %>%
+                        mutate(is_top = GO.ID == top_sig_GO,
+                               pvalue = Aboral_elim.pvalue,
+                                term_wrapped = str_wrap(`term`, width = 25),
+                                 cluster_label = factor(Cluster.name, levels = unique(Cluster.name))) %>%
+  add_count(GO.cluster, name = "n_terms")
+  
+
+combined_plotting <- rbind(plotting_oral %>%
+                                        dplyr::select(-contains("Oral")),
+                                      plotting_aboral %>%
+                                        dplyr::select(-contains("Aboral")))
+```
+
+```{r}
+library(ggrepel)
+p_oral <- ggplot(plotting_oral, 
+         aes(x = `Oral_elim.-log10_pvalue`, 
+             y = reorder(GO.ID, `Oral_elim.-log10_pvalue`),
+             color = factor(GO.cluster),
+             size = `Oral_elim.-log10_pvalue`)) +
+    geom_segment(aes(xend = 0, yend = reorder(GO.ID, `Oral_elim.-log10_pvalue`)),
+                 alpha = 0.5, linewidth = 0.8) +
+    geom_point(alpha = 0.8) +
+    facet_grid(cluster_label ~ ., 
+               scales = "free_y", space = "free_y") +
+    geom_text_repel(data = plotting_oral %>% filter(is_top),
+                  aes(label = term_wrapped),
+                  size = 2.5,
+                  hjust = 0,
+                  nudge_x = 0.3,
+                  direction = "y",
+                  color = "black",
+                  fontface = "bold",
+                  segment.color = "gray40",
+                  segment.size = 0.3,
+                  box.padding = 0.3,
+                  max.overlaps = 30) +
+    labs(title = "Oral Epidermis Tissue",
+         x = "-log10(p-value)",
+         y = NULL) +
+    theme_minimal(base_size = 10) +
+    theme(plot.title = element_text(face = "bold", size = 12),
+          axis.text.y = element_text(size = 7.5),
+          strip.text.y = element_text(size = 8.5, angle = 0, hjust = 0, face = "bold"),
+          legend.position = "none",
+          panel.spacing = unit(0.5, "lines"),
+          panel.grid.major.y = element_blank(),
+          panel.grid.minor = element_blank()) +
+    scale_size_continuous(range = c(2, 5))
+
+p_aboral <- ggplot(plotting_aboral, 
+         aes(x = `Aboral_elim.-log10_pvalue`, 
+             y = reorder(GO.ID, `Aboral_elim.-log10_pvalue`),
+             color = factor(GO.cluster),
+             size = `Aboral_elim.-log10_pvalue`)) +
+    geom_segment(aes(xend = 0, yend = reorder(GO.ID, `Aboral_elim.-log10_pvalue`)),
+                 alpha = 0.5, linewidth = 0.8) +
+    geom_point(alpha = 0.8) +
+    facet_grid(cluster_label ~ ., 
+               scales = "free_y", space = "free_y") +
+  geom_text_repel(data = plotting_aboral %>% filter(is_top),
+                  aes(label = term_wrapped),
+                  size = 2.5,
+                  hjust = 0,
+                  nudge_x = 0.3,
+                  direction = "y",
+                  color = "black",
+                  fontface = "bold",
+                  segment.color = "gray40",
+                  segment.size = 0.3,
+                  box.padding = 0.3,
+                  max.overlaps = 30) + 
+  labs(title = "Aboral Tissue",
+         x = "-log10(p-value)",
+         y = NULL) +
+    theme_minimal(base_size = 10) +
+    theme(plot.title = element_text(face = "bold", size = 12),
+          axis.text.y = element_text(size = 7.5),
+          strip.text.y = element_text(size = 8.5, angle = 0, hjust = 0, face = "bold"),
+          legend.position = "none",
+          panel.spacing = unit(0.5, "lines"),
+          panel.grid.major.y = element_blank(),
+          panel.grid.minor = element_blank()) +
+    scale_size_continuous(range = c(2, 5))
+library(patchwork)
+p2 <- p_oral + p_aboral +
+  plot_annotation(
+    title = "Enriched GO Terms by Semantic Cluster",
+    subtitle = "Diamond = most significant term per cluster | Size = significance",
+    theme = theme(plot.title = element_text(face = "bold", size = 14))
+  )
+
+
+ggsave("../output_RNA/differential_expression/semantic-enrichment/All_sig_BP_terms_by_cluster.pdf", p2, width = 14, height = 16)
+```
+
+```{r}
+p_oral <-ggplot(plotting_oral, 
+       aes(x = `Oral_elim.-log10_pvalue`, 
+           y = reorder(GO.ID, `Oral_elim.-log10_pvalue`),
+           size = `Oral_elim.-log10_pvalue`)) +
+  geom_segment(aes(xend = 0, yend = reorder(GO.ID, `Oral_elim.-log10_pvalue`)),
+               alpha = 0.4, linewidth = 0.6, color = "#FD8D3C") +
+  geom_point(alpha = 0.7, color = "#FD8D3C") +
+    facet_grid(str_wrap(cluster_label, width = 20) ~ ., 
+               scales = "free_y", space = "free_y") +
+    geom_text_repel(data = plotting_oral %>% filter(is_top),
+                  aes(label = str_wrap(term, width = 20)),
+                  size = 2,
+                  hjust = 0,
+                  nudge_x = 0.5,
+                  nudge_y = -0.5,
+                  direction = "y",
+                  color = "black",
+                  segment.color = "gray50",
+                  segment.size = 0.5,
+                  max.overlaps = 30) +
+    labs(title = "Oral Epidermis Tissue",
+         x = "-log10(p-value)",
+         y = NULL) +
+    theme_minimal(base_size = 11) +
+    theme(plot.title = element_text(face = "bold", size = 12),
+          axis.text.y = element_text(size = 7.5),
+          strip.text.y = element_text(size = 7.5, angle = 0, hjust = 0, face = "bold"),
+          legend.position = "none",
+          panel.spacing = unit(.15, "lines"),
+          panel.grid.major.y = element_blank(),
+          panel.grid.minor = element_blank()) +
+    scale_size_continuous(range = c(2, 5))
+
+p_aboral <- ggplot(plotting_aboral, 
+         aes(x = `Aboral_elim.-log10_pvalue`, 
+             y = reorder(GO.ID, `Aboral_elim.-log10_pvalue`),
+             color = factor(GO.cluster),
+             size = `Aboral_elim.-log10_pvalue`)) +
+    geom_segment(aes(xend = 0, yend = reorder(GO.ID, `Aboral_elim.-log10_pvalue`)),
+               alpha = 0.4, linewidth = 0.6, color = "#756BB1") +
+  geom_point(alpha = 0.7, color = "#756BB1") +
+    facet_grid(str_wrap(cluster_label, width = 20) ~ ., 
+               scales = "free_y", space = "free_y") +
+  geom_text_repel(data = plotting_aboral %>% filter(is_top),
+                  aes(label = str_wrap(term, width = 20)),
+                  size = 2,
+                  hjust = 0,
+                  nudge_x = 0.5,
+                  nudge_y = -0.5,
+                  direction = "y",
+                  color = "black",
+                  segment.color = "gray50",
+                  segment.size = 0.5,
+                  max.overlaps = 30) +
+  labs(title = "Aboral Tissue",
+         x = "-log10(p-value)",
+         y = NULL) +
+   theme_minimal(base_size = 11) +
+    theme(plot.title = element_text(face = "bold", size = 12),
+          axis.text.y = element_text(size = 7.5),
+          strip.text.y = element_text(size = 7.5, angle = 0, hjust = 0, face = "bold"),
+          legend.position = "none",
+          panel.spacing = unit(.15, "lines"),
+          panel.grid.major.y = element_blank(),
+          panel.grid.minor = element_blank()) +
+    scale_size_continuous(range = c(2, 5))
+
+p2 <- p_oral + p_aboral +
+  plot_annotation(
+    title = "Tissue-specific GO term enrichment patterns",
+    theme = theme(plot.title = element_text(face = "bold", size = 14))
+  )
+
+
+ggsave("../output_RNA/differential_expression/semantic-enrichment/All_sig_BP_terms_by_cluster_colored.pdf", p2, width = 14, height = 16)
+ggsave("../output_RNA/differential_expression/semantic-enrichment/All_sig_BP_terms_by_cluster_colored2.png", p2, width = 8, height = 12, dpi = 300)
 ```
 
 
@@ -712,7 +929,7 @@ cluster_map <- cluster_map %>%
     Cluster.name = str_replace(cluster_full,".*?_.*?_","")
   ) %>%
   mutate(Cluster.name = paste0("Cluster ", cluster, ": ", Cluster.name)) %>%
-  select(cluster, Cluster.name)
+  dplyr::select(cluster, Cluster.name)
 
 cluster_map
 ```
@@ -761,7 +978,7 @@ library(ggplot2)
 
 # Create bidirectional data
 cluster_data <- clustered_allDEGs_enrichedGO %>%
-  select(Cluster.name, Oral_elim.Significant_genes, Aboral_elim.Significant_genes) %>%
+  dplyr::select(Cluster.name, Oral_elim.Significant_genes, Aboral_elim.Significant_genes) %>%
   mutate(
     # Clean cluster names
     #Cluster.name = gsub("^Cluster \\d+:\\s*", "", Cluster.name),
@@ -2394,3 +2611,215 @@ p
 
 ggsave("../output_RNA/differential_expression/semantic-enrichment/MF_GO_enrichment_bidirectional_horiz.png", p, width = 12, height = 8, dpi = 300)
 ```
+
+
+
+## Combine everything into one big plot:
+
+```{r}
+BP_GOs_Aboral <- read.delim(file="../output_RNA/differential_expression/semantic-enrichment/DE_05_Aboral.tsv") %>% mutate(ontology="BP")
+MF_GOs_Aboral <- read.delim(file="../output_RNA/differential_expression/semantic-enrichment/MF_DE_05_Aboral.tsv")   %>% mutate(ontology="MF")
+CC_GOs_Aboral <- read.delim(file="../output_RNA/differential_expression/semantic-enrichment/CC_DE_05_Aboral.tsv") %>% mutate(ontology="CC")
+
+BP_GOs_Oral <- read.delim(file="../output_RNA/differential_expression/semantic-enrichment/DE_05_Oral.tsv") %>% mutate(ontology="BP")
+MF_GOs_Oral <- read.delim(file="../output_RNA/differential_expression/semantic-enrichment/MF_DE_05_Oral.tsv") %>% mutate(ontology="MF")
+CC_GOs_Oral <- read.delim(file="../output_RNA/differential_expression/semantic-enrichment/CC_DE_05_Oral.tsv") %>% mutate(ontology="CC")
+
+oral_combined <- rbind(BP_GOs_Oral,MF_GOs_Oral,CC_GOs_Oral) %>%
+                        rename_with(~ str_replace_all(.x, "Oral_elim|\\.", "")) %>% mutate(Tissue="Oral")
+aboral_combined <- rbind(BP_GOs_Aboral,MF_GOs_Aboral,CC_GOs_Aboral) %>%
+                        rename_with(~ str_replace_all(.x, "Aboral_elim|\\.", "")) %>% mutate(Tissue="Aboral")
+
+tissues_combined <- rbind(oral_combined,aboral_combined) %>%
+                          mutate(freq = as.numeric(str_remove(genes_frequency,pattern="\\%.*")))
+```
+
+```{r}
+aboral_cols <- c(
+  BP = "#756BB1",
+  CC = "#9E9AC8",
+  MF = "#CBC9E2"
+)
+
+oral_cols <- c(
+  BP = "#FD8D3C",
+  CC = "#FDAE6B",
+  MF = "#FDD0A2"
+)
+
+top10_pval <- tissues_combined %>%
+  filter(ontology=="BP") %>%
+  group_by(Tissue,ontology) %>%
+  slice_max(order_by = desc(pvalue), n = 30, with_ties = FALSE) %>% 
+  arrange(Tissue, ontology, log10_pvalue) %>%
+  ungroup() %>%
+  mutate(term=str_wrap(`term`, width = 40))
+
+p1 <- top10_pval %>% filter(Tissue == "Aboral") %>%
+  mutate(term = fct_reorder(term, log10_pvalue)) %>% 
+  ggplot(aes(x = term, y = log10_pvalue, fill = ontology)) +
+  geom_col(width = .8, fill="#756BB1", alpha = 0.8) +
+  facet_grid(ontology ~ ., scales = "free_y", space = "free_y") +
+  coord_flip() +
+ # scale_fill_manual(values = aboral_cols) +
+  theme_bw(base_size = 9) +
+  #scale_y_continuous(limits = c(0, 35), expand = expansion(mult = c(0, 0.05)))+
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.major.x = element_line(color = "grey90", linewidth = 0.2),
+    axis.title.y = element_blank(),
+    axis.text.y = element_text(size = 7, lineheight = 0.7,color = "black"),
+    strip.text = element_text(face = "bold", size = 9),
+    strip.background = element_rect(fill = "white", color = "black"),
+    legend.position = "none",
+    plot.subtitle = element_text(face = "bold", size = 9, hjust = 0.5),
+    panel.spacing.y = unit(0.2, "lines")
+  ) + labs(subtitle = "Aboral", y = "-log10(p-value)")
+
+p2 <- top10_pval %>% filter(Tissue == "Oral") %>%
+  mutate(term = fct_reorder(term, log10_pvalue)) %>% 
+  ggplot(aes(x = term, y = log10_pvalue, fill = ontology)) +
+  geom_col(width = .8, fill="#FD8D3C", alpha = 0.8) +
+  facet_grid(ontology ~ ., scales = "free_y", space = "free_y") +
+  coord_flip() +
+ # scale_fill_manual(values = oral_cols) +
+ # scale_y_continuous(limits = c(0, 35), expand = expansion(mult = c(0, 0.05)))+
+  theme_bw(base_size = 9) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.major.x = element_line(color = "grey90", linewidth = 0.2),
+    axis.title.y = element_blank(),
+    axis.text.y = element_text(size = 7, lineheight = 0.7,color = "black"),
+    strip.text = element_text(face = "bold", size = 9),
+     strip.background = element_rect(fill = "white", color = "black"),
+    legend.position = "none",
+    plot.subtitle = element_text(face = "bold", size = 9, hjust = 0.5),
+    panel.spacing.y = unit(0.2, "lines")
+  ) + labs(subtitle = "Oral epidermis", y = "-log10(p-value)")
+
+plot <- p1 + p2 +
+  plot_annotation(
+    title = "Top 10 enriched GO terms by p-value",
+    theme = theme(plot.title = element_text(face = "bold", size = 9, hjust = 0.5))
+  )
+
+ggsave("../output_RNA/differential_expression/semantic-enrichment/Top_BP_30.png", plot, width = 7, height = 6.5, dpi = 300)
+```
+
+```{r}
+top10_freq <- tissues_combined %>% group_by(Tissue,ontology) %>%
+  slice_max(order_by = freq, n = 10, with_ties = FALSE) %>% 
+  arrange(Tissue, ontology, log10_pvalue) %>%
+  ungroup() %>%
+  mutate(term=str_wrap(`term`, width = 40))
+
+
+p1 <- top10_freq %>% filter(Tissue == "Aboral") %>%
+  mutate(term = fct_reorder(term, freq)) %>% 
+  ggplot(aes(x = term, y = freq, fill = ontology)) +
+  geom_col(width = 0.7, alpha = 0.85) +
+  facet_grid(ontology ~ ., scales = "free_y", space = "free_y") +
+  coord_flip() +
+  scale_fill_manual(values = aboral_cols) +
+  theme_bw(base_size = 9) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.major.x = element_line(color = "grey90", linewidth = 0.2),
+    axis.title.y = element_blank(),
+    axis.text.y = element_text(size = 7, lineheight = 0.7,color = "black"),
+    strip.text = element_text(face = "bold", size = 9),
+     strip.background = element_rect(fill = "white", color = "black"),
+    legend.position = "none",
+    plot.subtitle = element_text(face = "bold", size = 9, hjust = 0.5),
+    panel.spacing.y = unit(0.2, "lines")
+  ) + labs(subtitle = "Aboral", y = "% DEGs with GO term of\nall genes with GO term")
+
+p2 <- top10_freq %>% filter(Tissue == "Oral") %>%
+  mutate(term = fct_reorder(term, freq)) %>% 
+  ggplot(aes(x = term, y = freq, fill = ontology)) +
+  geom_col(width = 0.7, alpha = 0.85) +
+  facet_grid(ontology ~ ., scales = "free_y", space = "free_y") +
+  coord_flip() +
+  scale_fill_manual(values = oral_cols) +
+  theme_bw(base_size = 9) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.major.x = element_line(color = "grey90", linewidth = 0.2),
+    axis.title.y = element_blank(),
+    axis.text.y = element_text(size = 7, lineheight = 0.7,color = "black"),
+    strip.text = element_text(face = "bold", size = 9),
+     strip.background = element_rect(fill = "white", color = "black"),
+    legend.position = "none",
+    plot.subtitle = element_text(face = "bold", size = 9, hjust = 0.5),
+    panel.spacing.y = unit(0.2, "lines")
+  ) + labs(subtitle = "Oral epidermis", y = "% DEGs with GO term of\nall genes with GO term")
+
+
+plot <- p1 + p2 +
+  plot_annotation(
+    title = "Top 10 enriched GO terms by frequency in tissue DEGs",
+    theme = theme(plot.title = element_text(face = "bold", size = 9, hjust = 0.5))
+  )
+
+ggsave("../output_RNA/differential_expression/semantic-enrichment/All_Onts_frq.png", plot, width = 7, height = 6.5, dpi = 300)
+```
+
+
+```{r}
+# Create gradient scales for each tissue
+aboral_gradient <- colorRampPalette(c("#CBC9E2", "#756BB1"))(100)
+oral_gradient <- colorRampPalette(c("#FDD0A2", "#FD8D3C"))(100)
+
+p1 <- top10_freq %>% filter(Tissue == "Aboral") %>%
+  mutate(term = fct_reorder(term, freq)) %>% 
+  ggplot(aes(x = term, y = freq, fill = log10_pvalue)) +
+  geom_col(width = 0.7, alpha = 0.85) +
+  facet_grid(ontology ~ ., scales = "free_y", space = "free_y") +
+  coord_flip() +
+  scale_fill_gradientn(colors = aboral_gradient, name = "-log10(p-value)") +
+  theme_bw(base_size = 9) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.major.x = element_line(color = "grey90", linewidth = 0.2),
+    axis.title.y = element_blank(),
+    axis.text.y = element_text(size = 7, lineheight = 0.7, color = "black"),
+    strip.text = element_text(face = "bold", size = 9),
+    strip.background = element_rect(fill = "white", color = "black"),
+    legend.position = "right",
+    legend.key.height = unit(0.8, "cm"),
+    legend.key.width = unit(0.3, "cm"),
+    plot.subtitle = element_text(face = "bold", size = 9, hjust = 0.5),
+    panel.spacing.y = unit(0.2, "lines")
+  ) + labs(subtitle = "Aboral", y = "% DEGs with GO term of\nall genes with GO term")
+
+p2 <- top10_freq %>% filter(Tissue == "Oral") %>%
+  mutate(term = fct_reorder(term, freq)) %>% 
+  ggplot(aes(x = term, y = freq, fill = log10_pvalue)) +
+  geom_col(width = 0.7, alpha = 0.85) +
+  facet_grid(ontology ~ ., scales = "free_y", space = "free_y") +
+  coord_flip() +
+  scale_fill_gradientn(colors = oral_gradient, name = "-log10(p-value)") +
+  theme_bw(base_size = 9) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.major.x = element_line(color = "grey90", linewidth = 0.2),
+    axis.title.y = element_blank(),
+    axis.text.y = element_text(size = 7, lineheight = 0.7, color = "black"),
+    strip.text = element_text(face = "bold", size = 9),
+    strip.background = element_rect(fill = "white", color = "black"),
+    legend.position = "right",
+    legend.key.height = unit(0.8, "cm"),
+    legend.key.width = unit(0.3, "cm"),
+    plot.subtitle = element_text(face = "bold", size = 9, hjust = 0.5),
+    panel.spacing.y = unit(0.2, "lines")
+  ) + labs(subtitle = "Oral epidermis", y = "% DEGs with GO term of\nall genes with GO term")
+
+plot <- p1 + p2 +
+  plot_annotation(
+    title = "Top 10 enriched GO terms by frequency in tissue DEGs",
+    theme = theme(plot.title = element_text(face = "bold", size = 9, hjust = 0.5))
+  )
+
+ggsave("../output_RNA/differential_expression/semantic-enrichment/All_Onts_freq_pval.png", plot, width = 8, height = 6.5, dpi = 300)
+```
+
