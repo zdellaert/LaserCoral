@@ -523,6 +523,198 @@ clustered_allDEGs_enrichedGO <- rbind(clustered_Oral_DEGs_enrichedGO %>%
 
 ```
 
+### NEW: Plotting of each tissue cluster separately
+
+#### extract cluster trees
+```{r}
+library(ggdendro)
+dist_mat <- slot(Wang_clusters_wardD2_Oral, "clusters_dist")[["BMA"]]
+hc <- hclust(dist_mat, method = "ward.D2")
+dend <- as.dendrogram(hc)
+
+dend_data <- ggdendro::dendro_data(dend, type = "rectangle")
+
+dend_labels <- dend_data$labels %>%
+    mutate(
+    cluster = str_extract(label, "\\d+"),
+    Cluster.name = str_replace(label,".*?_.*?_",""),
+    Cluster.term = str_replace(label,"^\\d+_",""),
+    Cluster.term = str_replace(Cluster.term,"_.*$","")
+  ) %>%
+  mutate(Cluster.name = paste0("Cluster ", cluster, ": ", Cluster.name)) 
+
+bar_plot <- clustered_allDEGs_enrichedGO %>%  
+filter(Tissue == "Oral") %>%
+  arrange(as.numeric(GO.cluster)) %>%
+  mutate(Cluster_label = factor(Cluster.name, levels = rev(dend_labels$Cluster.name))) %>%
+  ggplot(aes(x = Cluster_label)) +
+  stat_count(width = .8, fill="#FD8D3C", alpha = 0.8) +
+  coord_flip() +
+  theme_classic(base_size = 9) +
+  scale_y_continuous(
+    breaks = scales::breaks_width(2),
+    expand = c(0, 0),
+    limits = c(0, NA)
+  ) + 
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.major.x = element_line(color = "grey90", linewidth = 0.2),
+    axis.title.y = element_blank(),
+    axis.text.y = element_text(size = 7, lineheight = 0.7,color = "black"),
+    strip.text = element_text(face = "bold", size = 9),
+    strip.background = element_rect(fill = "white", color = "black"),
+    legend.position = "none",
+    plot.subtitle = element_text(face = "bold", size = 9, hjust = 0.5),
+    panel.spacing.y = unit(0.2, "lines")
+  ) + labs(subtitle = "Oral epidermis", y = "Terms in Cluster")
+
+dend_plot <- ggplot() +
+  geom_segment(
+    data = dend_data$segments,
+    aes(x = y, y = x, xend = yend, yend = xend),
+    linewidth = 0.6,
+    color = "#2C3E50"
+  ) +
+  scale_y_reverse(
+    breaks = seq_along(dend_labels$Cluster.name),
+    expand = c(0.02, 0.02)
+  ) +
+  scale_x_reverse(expand = c(0.02, 0)) +
+  theme_void() +
+  theme(
+    plot.margin = margin(t = 30, r = 0, b = 22, l = 5)
+  )
+
+# Combine plots with better proportions
+final <- dend_plot + bar_plot +
+  plot_layout(widths = c(0.8, 3.5))
+
+Wang_clusters_wardD2_Oral@heatmap$GOclusters_static
+
+ggsave("../output_RNA/differential_expression/semantic-enrichment/BP_Dend_Clusters_Oral.png", final, width = 7, height = 6.5, dpi = 300)
+```
+
+```{r}
+library(ggdendro)
+dist_mat <- slot(Wang_clusters_wardD2_Aboral, "clusters_dist")[["BMA"]]
+hc <- hclust(dist_mat, method = "ward.D2")
+dend <- as.dendrogram(hc)
+
+dend_data <- ggdendro::dendro_data(dend, type = "rectangle")
+
+dend_labels <- dend_data$labels %>%
+    mutate(
+    cluster = str_extract(label, "\\d+"),
+    Cluster.name = str_replace(label,".*?_.*?_",""),
+    Cluster.term = str_replace(label,"^\\d+_",""),
+    Cluster.term = str_replace(Cluster.term,"_.*$","")
+  ) %>%
+  mutate(Cluster.name = paste0("Cluster ", cluster, ": ", Cluster.name)) 
+
+bar_plot <- clustered_allDEGs_enrichedGO %>%  
+filter(Tissue == "Aboral") %>%
+  arrange(as.numeric(GO.cluster)) %>%
+  mutate(Cluster_label = factor(Cluster.name, levels = rev(dend_labels$Cluster.name))) %>%
+  ggplot(aes(x = Cluster_label)) +
+  stat_count(width = .8, fill="#756BB1", alpha = 0.8) +
+  coord_flip() +
+  theme_classic(base_size = 9) +
+  scale_y_continuous(
+    breaks = scales::breaks_width(2),
+    expand = c(0, 0),
+    limits = c(0, NA)
+  ) + 
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.major.x = element_line(color = "grey90", linewidth = 0.2),
+    axis.title.y = element_blank(),
+    axis.text.y = element_text(size = 7, lineheight = 0.7,color = "black"),
+    strip.text = element_text(face = "bold", size = 9),
+    strip.background = element_rect(fill = "white", color = "black"),
+    legend.position = "none",
+    plot.subtitle = element_text(face = "bold", size = 9, hjust = 0.5),
+    panel.spacing.y = unit(0.2, "lines")
+  ) + labs(subtitle = "Aboral", y = "Terms in Cluster")
+
+dend_plot <- ggplot() +
+  geom_segment(
+    data = dend_data$segments,
+    aes(x = y, y = x, xend = yend, yend = xend),
+    linewidth = 0.6,
+    color = "#2C3E50"
+  ) +
+  scale_y_reverse(
+    breaks = seq_along(dend_labels$Cluster.name),
+    expand = c(0.02, 0.02)
+  ) +
+  scale_x_reverse(expand = c(0.02, 0)) +
+  theme_void() +
+  theme(
+    plot.margin = margin(t = 30, r = 0, b = 22, l = 5)
+  )
+
+# Combine plots with better proportions
+final <- dend_plot + bar_plot +
+  plot_layout(widths = c(0.8, 3.5))
+
+Wang_clusters_wardD2_Oral@heatmap$GOclusters_static
+
+ggsave("../output_RNA/differential_expression/semantic-enrichment/BP_Dend_Clusters_Aboral.png", final, width = 7, height = 6.5, dpi = 300)
+```
+
+#### bar plots
+```{r}
+p1 <- clustered_allDEGs_enrichedGO %>%  
+filter(Tissue == "Aboral") %>%
+  arrange(as.numeric(GO.cluster)) %>%
+  mutate(Cluster_label = factor(Cluster.name, levels = rev(unique(Cluster.name)))) %>%
+  ggplot(aes(x = Cluster_label)) +
+  stat_count(width = .8, fill="#756BB1", alpha = 0.8) +
+  coord_flip() +
+  scale_y_continuous(breaks = scales::breaks_width(2)) +
+  theme_bw(base_size = 9) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.major.x = element_line(color = "grey90", linewidth = 0.2),
+    axis.title.y = element_blank(),
+    axis.text.y = element_text(size = 7, lineheight = 0.7,color = "black"),
+    strip.text = element_text(face = "bold", size = 9),
+    strip.background = element_rect(fill = "white", color = "black"),
+    legend.position = "none",
+    plot.subtitle = element_text(face = "bold", size = 9, hjust = 0.5),
+    panel.spacing.y = unit(0.2, "lines")
+  ) + labs(subtitle = "Aboral", y = "Terms in Cluster")
+
+p2 <- clustered_allDEGs_enrichedGO %>%  
+filter(Tissue == "Oral") %>%
+  arrange(as.numeric(GO.cluster)) %>%
+  mutate(Cluster_label = factor(Cluster.name, levels = rev(unique(Cluster.name)))) %>%
+  ggplot(aes(x = Cluster_label)) +
+  stat_count(width = .8, fill="#FD8D3C", alpha = 0.8) +
+  coord_flip() +
+  theme_bw(base_size = 9) +
+  scale_y_continuous(breaks = scales::breaks_width(2)) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.major.x = element_line(color = "grey90", linewidth = 0.2),
+    axis.title.y = element_blank(),
+    axis.text.y = element_text(size = 7, lineheight = 0.7,color = "black"),
+    strip.text = element_text(face = "bold", size = 9),
+    strip.background = element_rect(fill = "white", color = "black"),
+    legend.position = "none",
+    plot.subtitle = element_text(face = "bold", size = 9, hjust = 0.5),
+    panel.spacing.y = unit(0.2, "lines")
+  ) + labs(subtitle = "Oral epidermis", y = "Terms in Cluster")
+
+plot <- p1 + p2 +
+  plot_annotation(
+    title = "Semantic Similarity Clusters of All Enriched (p < 0.01) BP GO Terms",
+    theme = theme(plot.title = element_text(face = "bold", size = 9, hjust = 0.5))
+  )
+
+ggsave("../output_RNA/differential_expression/semantic-enrichment/BP_Clusters.png", plot, width = 7, height = 6.5, dpi = 300)
+```
+
 ### NEW: Plotting of both tissues, pre-clustered by tissue
 
 ```{r}
@@ -2699,7 +2891,7 @@ p2 <- top10_pval %>% filter(Tissue == "Oral") %>%
 
 plot <- p1 + p2 +
   plot_annotation(
-    title = "Top 10 enriched GO terms by p-value",
+    title = "Top 30 enriched GO terms by p-value",
     theme = theme(plot.title = element_text(face = "bold", size = 9, hjust = 0.5))
   )
 
