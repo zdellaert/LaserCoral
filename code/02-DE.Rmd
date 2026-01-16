@@ -848,10 +848,7 @@ DESeq_SwissProt_categorized <- Manual_AllGenes %>% rowwise() %>%
                 glycerol transmembrane transport|cholesterol transport", BiologicalProcess, ignore.case = TRUE) &
           !grepl("neurotransmitter|synaptic|pigmentation", BiologicalProcess, ignore.case = TRUE)) "Transport",
       if (grepl("Solute carrier", ProteinNames, ignore.case = TRUE)) "Solute Carrier (SLC Family)",
-      if (grepl("cellular response to light stimulus|detection of mechanical stimulus|
-                thermoception [GO:0050955]", BiologicalProcess, ignore.case = TRUE) &
-          !grepl("Solute carrier", ProteinNames, ignore.case = TRUE)) "Sensors",
-      if (grepl("stereocilium", CellularComponent, ignore.case = TRUE)) "Stereocillium",
+      if (query %in% cluster_8_9) "Sensors",
       if (query %in% PFAM_ZP_domain) "Zona Pellucida",
       if (query %in% COMBINED_HOX_WNT_all$query) "Hox/Wnt Developmental Signaling"
     )

@@ -282,11 +282,13 @@ combined_df <- combined_df %>%
     grepl("light", BiologicalProcess, ignore.case = TRUE) ~ "Light",
     grepl("thermo", BiologicalProcess, ignore.case = TRUE) ~ "Temperature",
     grepl("mechanical", BiologicalProcess, ignore.case = TRUE) ~ "Mechanosensory",
+    grepl("Hemicentin", ProteinNames, ignore.case = TRUE) ~ "Hemicentin",
+    
     TRUE ~ "Other"
   ))
 
 combined_df$Modality <- factor(combined_df$Modality, 
-                        levels = c("Light", "Temperature", "Mechanosensory", "Stereocilia","Other"))
+                        levels = c("Light", "Temperature", "Mechanosensory", "Stereocilia","Hemicentin","Other"))
 
 plot_df <- combined_df %>%
   group_by(Tissue, query, short_name, Modality) %>%
@@ -334,7 +336,7 @@ p_sensory <- ggplot(plot_df, aes(x = Tissue, y = query)) +
   )
 
 ggsave("../output_RNA/differential_expression/sensors_dotplot.png", p_sensory, 
-       width = 2.5, height = 5, units = "in")
+       width = 2.5, height = 10, units = "in")
 ```
 
 ### Panel B

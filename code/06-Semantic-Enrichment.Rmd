@@ -175,6 +175,20 @@ BP_Results <- ViSEAGO::merge_enrich_terms(
     Input = list( Oral_elim = c("BP_Oral", "elim_Oral")))
 ```
 
+```{r}
+BP_go_terms <- BP_Oral@graph@nodes
+genes_by_GO <- genesInTerm(BP_Oral, BP_go_terms)
+
+cluster_8_9 <- unique(c(genes_by_GO[["GO:0050955"]], 
+               genes_by_GO[["GO:0050906"]], 
+               genes_by_GO[["GO:0007600"]], 
+               genes_by_GO[["GO:0007605"]],
+               genes_by_GO[["GO:0050982"]]))
+
+
+```
+
+
 
 ### Visualize and save initial results
 
