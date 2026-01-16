@@ -1,5 +1,0 @@
-Sample	bam_source	fastqc	qualimap	nf-core/methylseq	Nextflow
-BWAMETH_ALIGN	pre-existing				
-FastQC		0.12.1			
-QUALIMAP_BAMQC			2.3		
-Workflow				v3.0.0-g4415e90	24.10.3
