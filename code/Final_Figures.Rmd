@@ -543,10 +543,11 @@ Pfam_plot <- enrichmentplot_bidirectional_v2(enrichment_combined, n_top = 10)
 library(patchwork)
 
 layout <- "
-AACCCC
-AACCCC
-AACCCC
-BBBBBB
+AAACCCC
+AAACCCC
+AAACCCC
+AAACCCC
+BBBBBBB
 "
 
 

@@ -835,6 +835,11 @@ write.csv(COMBINED_HOX_WNT_all, file=paste0(outdir,"/HOX_Wnt_genes.csv"))
 ```
 
 ```{r}
+cluster_8_9_genes <- read.csv("../output_RNA/differential_expression/semantic-enrichment/cluster_gene_lists/Oral_enrich_BP_Sensory.csv")
+```
+
+
+```{r}
 library(purrr)
 
 DESeq_SwissProt_categorized <- Manual_AllGenes %>% rowwise() %>%
@@ -848,7 +853,7 @@ DESeq_SwissProt_categorized <- Manual_AllGenes %>% rowwise() %>%
                 glycerol transmembrane transport|cholesterol transport", BiologicalProcess, ignore.case = TRUE) &
           !grepl("neurotransmitter|synaptic|pigmentation", BiologicalProcess, ignore.case = TRUE)) "Transport",
       if (grepl("Solute carrier", ProteinNames, ignore.case = TRUE)) "Solute Carrier (SLC Family)",
-      if (query %in% cluster_8_9) "Sensors",
+      if (query %in% cluster_8_9_genes) "Sensors",
       if (query %in% PFAM_ZP_domain) "Zona Pellucida",
       if (query %in% COMBINED_HOX_WNT_all$query) "Hox/Wnt Developmental Signaling"
     )

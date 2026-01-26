@@ -175,19 +175,6 @@ BP_Results <- ViSEAGO::merge_enrich_terms(
     Input = list( Oral_elim = c("BP_Oral", "elim_Oral")))
 ```
 
-```{r}
-BP_go_terms <- BP_Oral@graph@nodes
-genes_by_GO <- genesInTerm(BP_Oral, BP_go_terms)
-
-cluster_8_9 <- unique(c(genes_by_GO[["GO:0050955"]], 
-               genes_by_GO[["GO:0050906"]], 
-               genes_by_GO[["GO:0007600"]], 
-               genes_by_GO[["GO:0007605"]],
-               genes_by_GO[["GO:0050982"]]))
-
-
-```
-
 
 
 ### Visualize and save initial results
@@ -207,7 +194,7 @@ ViSEAGO::show_table(
  - enrichment pvalue cutoff:
         Oral_elim : 0.01
 - enrich GOs (in at least one list):
-        Oral_elim : 60 terms
+        Oral_elim : 67 terms
 
 ### Semantic similarity --> Cluster: Use Wang graph-based method to identify similarity between GO terms
 
@@ -322,7 +309,19 @@ Oral_enriched_clustered <- Wang_clusters_wardD2_Oral@enrich_GOs@data
 top_cluster <- Oral_enriched_clustered %>% arrange(Oral_elim.pvalue) %>% head(1) %>% pull(GO.cluster)
 
 Oral_enriched_clustered %>% dplyr::filter(GO.cluster == top_cluster)
+```
 
+```{r}
+BP_go_terms <- BP_Oral@graph@nodes
+genes_by_GO <- genesInTerm(BP_Oral, BP_go_terms)
+
+
+cluster_8 <- Oral_enriched_clustered %>% dplyr::filter(GO.cluster == 8) %>% pull(GO.ID)
+cluster_8_9 <- c(cluster_8, "GO:0050982")
+  
+cluster_8_9_genes <- unique(unlist(genes_by_GO[cluster_8_9]))
+
+write.csv(cluster_8_9_genes,"../output_RNA/differential_expression/semantic-enrichment/cluster_gene_lists/Oral_enrich_BP_Sensory.csv")
 ```
 
 
@@ -1015,8 +1014,8 @@ ViSEAGO::show_table(
  - enrichment pvalue cutoff:
         Oral_elim : 0.01
         Aboral_elim : 0.01
-- enrich GOs (in at least one list): 178 GO terms of 2 conditions.
-        Oral_elim : 60 terms
+- enrich GOs (in at least one list): 185 GO terms of 2 conditions.
+        Oral_elim : 67 terms
         Aboral_elim : 118 terms
 
 ### Semantic similarity --> Cluster: Use Wang graph-based method to identify similarity between GO terms
