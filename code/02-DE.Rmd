@@ -614,6 +614,7 @@ annot_tab <- left_join(bltabl, spgo, by = c("V3" = "Entry")) %>%
   select(
     query = V1,
     blast_hit = V3,
+    perc_ident = V5,
     evalue = V13,
     ProteinNames = Protein.names,
     BiologicalProcess = Gene.Ontology..biological.process.,
@@ -627,6 +628,10 @@ rm(spgo)
 ```
 
 ```{r}
+# potenital additional cutoffs if desired
+#annot_tab <- annot_tab %>% filter(perc_ident >= 25)
+#annot_tab <- annot_tab %>% filter(evalue < 1e-10)
+
 write.table(annot_tab, 
             file = "../references/annotation/protein-GO.tsv", 
             sep = "\t", 
