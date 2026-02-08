@@ -327,7 +327,21 @@ cluster_8_genes <- unique(unlist(genes_by_GO[cluster_8]))
 
 write.csv(cluster_8_genes,"../output_RNA/differential_expression/semantic-enrichment/cluster_gene_lists/Oral_enrich_BP_Sensory.csv",row.names=FALSE)
 
-DE_05_SwissProt %>% filter(query %in%unique(unlist(genes_by_GO[Oral_enriched_clustered %>% pull(GO.ID)]))) #%>% View()
+DE_05_SwissProt %>% filter(query %in%unique(unlist(genes_by_GO[Oral_enriched_clustered %>% pull(GO.ID)])))
+
+
+cluster_1_3 <- Oral_enriched_clustered %>% dplyr::filter(GO.cluster == 1|
+                                                           GO.cluster == 2|
+                                                           GO.cluster == 3) %>% pull(GO.ID)
+
+showSigOfNodes(BP_Oral, score(elim_Oral)[names(score(elim_Oral)) %in% cluster_1_3],  firstSigNodes = length(cluster_1_3), useInfo = 'all')
+
+cluster_1_3_genes <- unique(unlist(genes_by_GO[cluster_1_3]))
+
+write.csv(cluster_1_3_genes,"../output_RNA/differential_expression/semantic-enrichment/cluster_gene_lists/Oral_enrich_BP_transport.csv",row.names=FALSE)
+cluster_1_3_genes_DE <- DE_05_SwissProt %>% filter(query %in%cluster_1_3_genes)
+
+#DE_05_SwissProt %>% filter(query %in%unique(unlist(genes_by_GO[Aboral_enriched_clustered %>% pull(GO.ID)])))
 ```
 
 
@@ -501,6 +515,36 @@ Aboral_enriched_clustered %>% dplyr::filter(GO.cluster == top_cluster)
 ViSEAGO::show_heatmap(
     Wang_clusters_wardD2_Aboral,
     "GOterms")
+```
+
+```{r}
+BP_go_terms <- BP_Aboral@graph@nodes
+genes_by_GO <- genesInTerm(BP_Aboral, BP_go_terms)
+
+cluster_6_9 <- Aboral_enriched_clustered %>% dplyr::filter(GO.cluster == 6|GO.cluster == 9) %>% pull(GO.ID)
+
+showSigOfNodes(BP_Aboral, score(elim_Aboral)[names(score(elim_Aboral)) %in% cluster_6_9],  firstSigNodes = length(cluster_6_9), useInfo = 'all')
+
+cluster_6_9_genes <- unique(unlist(genes_by_GO[cluster_6_9]))
+
+write.csv(cluster_6_9_genes,"../output_RNA/differential_expression/semantic-enrichment/cluster_gene_lists/Aboral_enrich_BP_adhesion.csv",row.names=FALSE)
+
+cluster_6_9_genes_DE <- DE_05_SwissProt %>% filter(query %in%cluster_6_9_genes)
+
+cluster_1_5 <- Aboral_enriched_clustered %>% dplyr::filter(GO.cluster == 1|
+                                                           GO.cluster == 2|
+                                                           GO.cluster == 3|
+                                                           GO.cluster == 4|
+                                                           GO.cluster == 5) %>% pull(GO.ID)
+
+showSigOfNodes(BP_Aboral, score(elim_Aboral)[names(score(elim_Aboral)) %in% cluster_1_5],  firstSigNodes = length(cluster_1_5), useInfo = 'all')
+
+cluster_1_5_genes <- unique(unlist(genes_by_GO[cluster_1_5]))
+
+write.csv(cluster_1_5_genes,"../output_RNA/differential_expression/semantic-enrichment/cluster_gene_lists/Aboral_enrich_BP_development.csv",row.names=FALSE)
+cluster_1_5_genes_DE <- DE_05_SwissProt %>% filter(query %in%cluster_1_5_genes)
+
+#DE_05_SwissProt %>% filter(query %in%unique(unlist(genes_by_GO[Aboral_enriched_clustered %>% pull(GO.ID)])))
 ```
 
 ## Plotting of both tissues, pre-clustered by tissue
