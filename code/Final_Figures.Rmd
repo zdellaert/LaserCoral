@@ -644,7 +644,7 @@ row_hclust <- hclust(dist(z_scores))
 row_clusters <- cutree(row_hclust, k = 2)
 
 # Combine expression-based grouping with supervised annotation
-split_factor <- stringr::str_wrap(annotation_row$Classification, width = 18)
+#split_factor <- stringr::str_wrap(annotation_row$Classification, width = 18)
 ```
 
 ```{r}
@@ -655,10 +655,11 @@ ht <- Heatmap(
   cluster_columns = TRUE,
   show_parent_dend_line = FALSE,
   row_km = 2,
-  row_split = split_factor,
+  #row_split = split_factor,
   column_split = annotation_col_df$Tissue,
   col = expr_colors,
-  row_gap = unit(c(1,1,1,1,2,1,1,1,1), "mm"),
+  #row_gap = unit(c(1,1,1,1,2,1,1,1,1), "mm"),
+  row_gap = unit(2, "mm"),
   column_gap = unit(1.5, "mm"),
   left_annotation = row_ha,
   row_title = NULL,
