@@ -684,11 +684,13 @@ combined_df &lt;- combined_df %&gt;%
     grepl(&quot;light&quot;, BiologicalProcess, ignore.case = TRUE) ~ &quot;Light&quot;,
     grepl(&quot;thermo&quot;, BiologicalProcess, ignore.case = TRUE) ~ &quot;Temperature&quot;,
     grepl(&quot;mechanical&quot;, BiologicalProcess, ignore.case = TRUE) ~ &quot;Mechanosensory&quot;,
+    grepl(&quot;Hemicentin&quot;, ProteinNames, ignore.case = TRUE) ~ &quot;Hemicentin&quot;,
+    
     TRUE ~ &quot;Other&quot;
   ))
 
 combined_df$Modality &lt;- factor(combined_df$Modality, 
-                        levels = c(&quot;Light&quot;, &quot;Temperature&quot;, &quot;Mechanosensory&quot;, &quot;Stereocilia&quot;,&quot;Other&quot;))
+                        levels = c(&quot;Light&quot;, &quot;Temperature&quot;, &quot;Mechanosensory&quot;, &quot;Stereocilia&quot;,&quot;Hemicentin&quot;,&quot;Other&quot;))
 
 plot_df &lt;- combined_df %&gt;%
   group_by(Tissue, query, short_name, Modality) %&gt;%
@@ -735,7 +737,7 @@ p_sensory &lt;- ggplot(plot_df, aes(x = Tissue, y = query)) +
   )
 
 ggsave(&quot;../output_RNA/differential_expression/sensors_dotplot.png&quot;, p_sensory, 
-       width = 2.5, height = 5, units = &quot;in&quot;)</code></pre>
+       width = 2.5, height = 10, units = &quot;in&quot;)</code></pre>
 </div>
 </div>
 <div id="panel-b" class="section level3">
@@ -939,10 +941,11 @@ Pfam_plot &lt;- enrichmentplot_bidirectional_v2(enrichment_combined, n_top = 10)
 <pre class="r"><code>library(patchwork)
 
 layout &lt;- &quot;
-AACCCC
-AACCCC
-AACCCC
-BBBBBB
+AAACCCC
+AAACCCC
+AAACCCC
+AAACCCC
+BBBBBBB
 &quot;
 
 

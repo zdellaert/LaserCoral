@@ -323,13 +323,11 @@ genes_by_GO <- genesInTerm(BP_Oral, BP_go_terms)
 
 
 cluster_8 <- Oral_enriched_clustered %>% dplyr::filter(GO.cluster == 8) %>% pull(GO.ID)
-cluster_8_9 <- c(cluster_8, "GO:0050982")
-  
-cluster_8_9_genes <- unique(unlist(genes_by_GO[cluster_8_9]))
+cluster_8_genes <- unique(unlist(genes_by_GO[cluster_8]))
 
-write.csv(cluster_8_9_genes,"../output_RNA/differential_expression/semantic-enrichment/cluster_gene_lists/Oral_enrich_BP_Sensory.csv")
+write.csv(cluster_8_genes,"../output_RNA/differential_expression/semantic-enrichment/cluster_gene_lists/Oral_enrich_BP_Sensory.csv",row.names=FALSE)
 
-DE_05_SwissProt %>% filter(query %in%unique(unlist(genes_by_GO[Oral_enriched_clustered %>% pull(GO.ID)]))) %>% View()
+DE_05_SwissProt %>% filter(query %in%unique(unlist(genes_by_GO[Oral_enriched_clustered %>% pull(GO.ID)]))) #%>% View()
 ```
 
 
