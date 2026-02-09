@@ -291,12 +291,15 @@ ViSEAGO::MDSplot(
 ```
 
 ```{r}
+Wang_clusters_wardD2_Oral_init <- Wang_clusters_wardD2_Oral
 # GOclusters heatmap
 Wang_clusters_wardD2_Oral <-ViSEAGO::GOclusters_heatmap(
     Wang_clusters_wardD2_Oral,
     tree=list(
         distance="BMA",
-        aggreg.method="ward.D2"
+        aggreg.method="ward.D2",
+        rotate=labels(as.dendrogram(hclust(Wang_clusters_wardD2_Oral_init@clusters_dist[["BMA"]],
+                                           method ="ward.D2")))[c(2,3,1,4,5,7,8,9,6,10,11,13,14,12)]
     )
 )
 
@@ -486,12 +489,16 @@ ViSEAGO::MDSplot(
 ```
 
 ```{r}
+Wang_clusters_wardD2_Aboral_init <- Wang_clusters_wardD2_Aboral
 # GOclusters heatmap
-Wang_clusters_wardD2_Aboral<-ViSEAGO::GOclusters_heatmap(
-    Wang_clusters_wardD2_Aboral,
+Wang_clusters_wardD2_Aboral <-ViSEAGO::GOclusters_heatmap(
+    Wang_clusters_wardD2_Aboral_init,
     tree=list(
         distance="BMA",
-        aggreg.method="ward.D2"
+        aggreg.method="ward.D2",
+        rotate=labels(as.dendrogram(hclust(
+          Wang_clusters_wardD2_Aboral_init@clusters_dist[["BMA"]],
+          method ="ward.D2")))[c(1:8,11,12,9:10,13:16)]
     )
 )
 
@@ -599,6 +606,7 @@ library(patchwork)
 dist_mat <- slot(Wang_clusters_wardD2_Oral, "clusters_dist")[["BMA"]]
 hc <- hclust(dist_mat, method = "ward.D2")
 dend <- as.dendrogram(hc)
+dend <- dendextend::rotate(dend,c(2,3,1,4,5,7,8,9,6,10,11,13,14,12))
 
 dend_data <- ggdendro::dendro_data(dend, type = "rectangle")
 
@@ -664,6 +672,7 @@ library(ggdendro)
 dist_mat <- slot(Wang_clusters_wardD2_Aboral, "clusters_dist")[["BMA"]]
 hc <- hclust(dist_mat, method = "ward.D2")
 dend <- as.dendrogram(hc)
+dend <- dendextend::rotate(dend,c(1:8,11,12,9:10,13:16))
 
 dend_data <- ggdendro::dendro_data(dend, type = "rectangle")
 
@@ -788,7 +797,7 @@ ggsave("../output_RNA/differential_expression/semantic-enrichment/BP_Clusters.pn
 top_Oral_per_Cluster <- clustered_Oral_DEGs_enrichedGO %>% group_by(GO.cluster) %>% arrange(Oral_elim.pvalue) %>% slice(1) %>% ungroup() %>% dplyr::select(GO.cluster,GO.ID,term) %>% rename("top_sig_GO" = `GO.ID`,"top_sig_term" = `term`)
 
 plotting_oral <- left_join(clustered_Oral_DEGs_enrichedGO,top_Oral_per_Cluster) %>%
-  arrange(match(GO.cluster,dend_labels_oral$cluster)) %>%
+  arrange(as.numeric(GO.cluster)) %>%
                         mutate(is_top = GO.ID == top_sig_GO,
                                pvalue = Oral_elim.pvalue,
                                 term_wrapped = str_wrap(`term`, width = 25),
@@ -800,7 +809,7 @@ plotting_oral <- left_join(clustered_Oral_DEGs_enrichedGO,top_Oral_per_Cluster) 
 top_Aboral_per_Cluster <- clustered_Aboral_DEGs_enrichedGO %>% group_by(GO.cluster) %>% arrange(Aboral_elim.pvalue) %>% slice(1) %>% ungroup() %>% dplyr::select(GO.cluster,GO.ID,term) %>% rename("top_sig_GO" = `GO.ID`,"top_sig_term" = `term`)
 
 plotting_aboral <- left_join(clustered_Aboral_DEGs_enrichedGO,top_Aboral_per_Cluster)%>%
-                      arrange(match(GO.cluster,dend_labels_aboral$cluster)) %>%
+                      arrange(as.numeric(GO.cluster)) %>%
                         mutate(is_top = GO.ID == top_sig_GO,
                                pvalue = Aboral_elim.pvalue,
                                 term_wrapped = str_wrap(`term`, width = 25),
@@ -818,88 +827,6 @@ combined_plotting <- rbind(plotting_oral %>%
 
 ```{r}
 library(ggrepel)
-p_oral <- ggplot(plotting_oral, 
-         aes(x = `Oral_elim.-log10_pvalue`, 
-             y = reorder(GO.ID, `Oral_elim.-log10_pvalue`),
-             color = factor(GO.cluster),
-             size = `Oral_elim.-log10_pvalue`)) +
-    geom_segment(aes(xend = 0, yend = reorder(GO.ID, `Oral_elim.-log10_pvalue`)),
-                 alpha = 0.5, linewidth = 0.8) +
-    geom_point(alpha = 0.8) +
-    facet_grid(cluster_label ~ ., 
-               scales = "free_y", space = "free_y") +
-    geom_text_repel(data = plotting_oral %>% filter(is_top),
-                  aes(label = term_wrapped),
-                  size = 2.5,
-                  hjust = 0,
-                  nudge_x = 0.3,
-                  direction = "y",
-                  color = "black",
-                  fontface = "bold",
-                  segment.color = "gray40",
-                  segment.size = 0.3,
-                  box.padding = 0.3,
-                  max.overlaps = 30) +
-    labs(title = "Oral Epidermis Tissue",
-         x = "-log10(p-value)",
-         y = NULL) +
-    theme_minimal(base_size = 10) +
-    theme(plot.title = element_text(face = "bold", size = 12),
-          axis.text.y = element_text(size = 7.5),
-          strip.text.y = element_text(size = 8.5, angle = 0, hjust = 0, face = "bold"),
-          legend.position = "none",
-          panel.spacing = unit(0.5, "lines"),
-          panel.grid.major.y = element_blank(),
-          panel.grid.minor = element_blank()) +
-    scale_size_continuous(range = c(2, 5))
-
-p_aboral <- ggplot(plotting_aboral, 
-         aes(x = `Aboral_elim.-log10_pvalue`, 
-             y = reorder(GO.ID, `Aboral_elim.-log10_pvalue`),
-             color = factor(GO.cluster),
-             size = `Aboral_elim.-log10_pvalue`)) +
-    geom_segment(aes(xend = 0, yend = reorder(GO.ID, `Aboral_elim.-log10_pvalue`)),
-                 alpha = 0.5, linewidth = 0.8) +
-    geom_point(alpha = 0.8) +
-    facet_grid(cluster_label ~ ., 
-               scales = "free_y", space = "free_y") +
-  geom_text_repel(data = plotting_aboral %>% filter(is_top),
-                  aes(label = term_wrapped),
-                  size = 2.5,
-                  hjust = 0,
-                  nudge_x = 0.3,
-                  direction = "y",
-                  color = "black",
-                  fontface = "bold",
-                  segment.color = "gray40",
-                  segment.size = 0.3,
-                  box.padding = 0.3,
-                  max.overlaps = 30) + 
-  labs(title = "Aboral Tissue",
-         x = "-log10(p-value)",
-         y = NULL) +
-    theme_minimal(base_size = 10) +
-    theme(plot.title = element_text(face = "bold", size = 12),
-          axis.text.y = element_text(size = 7.5),
-          strip.text.y = element_text(size = 8.5, angle = 0, hjust = 0, face = "bold"),
-          legend.position = "none",
-          panel.spacing = unit(0.5, "lines"),
-          panel.grid.major.y = element_blank(),
-          panel.grid.minor = element_blank()) +
-    scale_size_continuous(range = c(2, 5))
-library(patchwork)
-p2 <- p_oral + p_aboral +
-  plot_annotation(
-    title = "Enriched GO Terms by Semantic Cluster",
-    subtitle = "Diamond = most significant term per cluster | Size = significance",
-    theme = theme(plot.title = element_text(face = "bold", size = 14))
-  )
-
-
-ggsave("../output_RNA/differential_expression/semantic-enrichment/All_sig_BP_terms_by_cluster.pdf", p2, width = 14, height = 16)
-```
-
-```{r}
 p_oral <-ggplot(plotting_oral, 
        aes(x = `Oral_elim.-log10_pvalue`, 
            y = reorder(GO.ID, `Oral_elim.-log10_pvalue`),
@@ -926,7 +853,7 @@ p_oral <-ggplot(plotting_oral,
     theme_minimal(base_size = 11) +
     theme(plot.title = element_text(face = "bold", size = 12),
           axis.text.y = element_text(size = 7.5),
-          strip.text.y = element_text(size = 7.5, angle = 0, hjust = 0, face = "bold"),
+          strip.text.y = element_text(size = 7.5, angle = 0, hjust=0,face = "bold"),
           legend.position = "none",
           panel.spacing = unit(.15, "lines"),
           panel.grid.major.y = element_blank(),
@@ -960,7 +887,7 @@ p_aboral <- ggplot(plotting_aboral,
    theme_minimal(base_size = 11) +
     theme(plot.title = element_text(face = "bold", size = 12),
           axis.text.y = element_text(size = 7.5),
-          strip.text.y = element_text(size = 7.5, angle = 0, hjust = 0, face = "bold"),
+          strip.text.y = element_text(size = 7.5, angle = 0, hjust=0,face = "bold"),
           legend.position = "none",
           panel.spacing = unit(.15, "lines"),
           panel.grid.major.y = element_blank(),
@@ -1001,26 +928,130 @@ ggsave("../output_RNA/differential_expression/semantic-enrichment/All_sig_BP_ter
 ```
 
 ```{r}
-layout <- "
-AABB
-AABB
-AABB
-AABB
-CDBB
-EFBB
-"
+top_Oral_per_Cluster <- clustered_Oral_DEGs_enrichedGO %>% group_by(GO.cluster) %>% arrange(Oral_elim.pvalue) %>% slice(1) %>% ungroup() %>% dplyr::select(GO.cluster,GO.ID,term) %>% rename("top_sig_GO" = `GO.ID`,"top_sig_term" = `term`)
 
-final_fig <- free(p_oral) + free(p_aboral) + 
-  dend_plot_oral + bar_plot_oral + 
-  dend_plot_aboral + bar_plot_aboral +
-  plot_layout(design = layout, widths = c(1.5, 8,8,8), axes = "collect_x") +
+plotting_oral <- left_join(clustered_Oral_DEGs_enrichedGO,top_Oral_per_Cluster) %>%
+  arrange(match(GO.cluster,dend_labels_oral$cluster)) %>%
+                        mutate(is_top = GO.ID == top_sig_GO,
+                               pvalue = Oral_elim.pvalue,
+                                term_wrapped = str_wrap(`term`, width = 25),
+                                 cluster_label = factor(str_wrap(Cluster.name,
+                                        width = 20), levels = unique(str_wrap(Cluster.name,
+                                        width = 20)))) %>%
+  add_count(GO.cluster, name = "n_terms")
+
+top_Aboral_per_Cluster <- clustered_Aboral_DEGs_enrichedGO %>% group_by(GO.cluster) %>% arrange(Aboral_elim.pvalue) %>% slice(1) %>% ungroup() %>% dplyr::select(GO.cluster,GO.ID,term) %>% rename("top_sig_GO" = `GO.ID`,"top_sig_term" = `term`)
+
+plotting_aboral <- left_join(clustered_Aboral_DEGs_enrichedGO,top_Aboral_per_Cluster)%>%
+                      arrange(match(GO.cluster,dend_labels_aboral$cluster)) %>%
+                        mutate(is_top = GO.ID == top_sig_GO,
+                               pvalue = Aboral_elim.pvalue,
+                                term_wrapped = str_wrap(`term`, width = 25),
+                                 cluster_label = factor(str_wrap(Cluster.name,
+                                        width = 20), levels = unique(str_wrap(Cluster.name,
+                                        width = 20)))) %>%
+  add_count(GO.cluster, name = "n_terms")
+  
+
+combined_plotting <- rbind(plotting_oral %>%
+                                        dplyr::select(-contains("Oral")),
+                                      plotting_aboral %>%
+                                        dplyr::select(-contains("Aboral")))
+```
+
+```{r}
+p_oral <-ggplot(plotting_oral, 
+       aes(x = `Oral_elim.-log10_pvalue`, 
+           y = reorder(GO.ID, `Oral_elim.-log10_pvalue`),
+           size = `Oral_elim.-log10_pvalue`)) +
+  geom_segment(aes(xend = 0, yend = reorder(GO.ID, `Oral_elim.-log10_pvalue`)),
+               alpha = 0.4, linewidth = 0.6, color = "#FD8D3C") +
+  geom_point(alpha = 0.7, color = "#FD8D3C") +
+    facet_grid(cluster_label ~ ., 
+               scales = "free_y", space = "free_y",switch = "y") +
+    geom_text_repel(data = plotting_oral %>% filter(is_top),
+                  aes(label = str_wrap(term, width = 20)),
+                  size = 2,
+                  hjust = 0,
+                  nudge_x = 0.5,
+                  nudge_y = -0.5,
+                  direction = "y",
+                  color = "black",
+                  segment.color = "gray50",
+                  segment.size = 0.5,
+                  max.overlaps = 30) +
+    labs(#title = "Oral Epidermis Tissue",
+         x = "-log10(p-value)",
+         y = NULL) +
+    theme_minimal(base_size = 11) +
+    theme(plot.title = element_text(face = "bold", size = 12),
+          axis.text.y = element_text(size = 7.5),
+          strip.text.y.left = element_text(size = 7.5, angle = 0, hjust = 0.5, face = "bold"),
+          strip.placement = "outside",
+          strip.background.y = element_rect(
+  fill = "white",
+  color = "black",
+  linewidth = 0.6
+),
+          legend.position = "none",
+          panel.spacing = unit(.15, "lines"),
+          panel.grid.major.y = element_blank(),
+          panel.grid.minor = element_blank()) +
+    scale_size_continuous(range = c(2, 5))
+
+p_aboral <- ggplot(plotting_aboral, 
+         aes(x = `Aboral_elim.-log10_pvalue`, 
+             y = reorder(GO.ID, `Aboral_elim.-log10_pvalue`),
+             color = factor(GO.cluster),
+             size = `Aboral_elim.-log10_pvalue`)) +
+    geom_segment(aes(xend = 0, yend = reorder(GO.ID, `Aboral_elim.-log10_pvalue`)),
+               alpha = 0.4, linewidth = 0.6, color = "#756BB1") +
+  geom_point(alpha = 0.7, color = "#756BB1") +
+      facet_grid(cluster_label ~ ., 
+               scales = "free_y", space = "free_y",switch = "y") +
+  geom_text_repel(data = plotting_aboral %>% filter(is_top),
+                  aes(label = str_wrap(term, width = 20)),
+                  size = 2,
+                  hjust = 0,
+                  nudge_x = 0.5,
+                  nudge_y = -0.5,
+                  direction = "y",
+                  color = "black",
+                  segment.color = "gray50",
+                  segment.size = 0.5,
+                  max.overlaps = 30) +
+  labs(#title = "Aboral Tissue",
+         x = "-log10(p-value)",
+         y = NULL) +
+   theme_minimal(base_size = 11) +
+    theme(plot.title = element_text(face = "bold", size = 12),
+          axis.text.y = element_text(size = 7.5),
+          strip.text.y.left = element_text(size = 7.5, angle = 0, hjust = 0.5, face = "bold"),
+          strip.placement = "outside",
+          strip.background.y = element_rect(
+  fill = "white",
+  color = "black",
+  linewidth = 0.6
+),
+          legend.position = "none",
+          panel.spacing = unit(.15, "lines"),
+          panel.grid.major.y = element_blank(),
+          panel.grid.minor = element_blank()) +
+    scale_size_continuous(range = c(2, 5))
+```
+
+```{r}
+final_fig <- dend_plot_oral + p_oral + dend_plot_aboral + p_aboral +
+  plot_layout(nrow=1,widths=c(1,4.5,1,4.5),heights =c(1,4.5,1,4.5)) +
   plot_annotation(tag_levels = "A") &
   theme(plot.tag = element_text(size = 12, face = "bold")) 
 
-final_fig <- final_fig + plot_annotation(tag_levels = list(c("A", "B", "C", "", "D", "")))
+final_fig <- final_fig + plot_annotation(tag_levels = list(c("A", "", "B", ""))) 
+ggsave("../output_RNA/differential_expression/semantic-enrichment/All_sig_BP_terms_by_cluster_FULL_dend.png", final_fig, width = 8, height = 12, dpi = 300)
 
-ggsave("../output_RNA/differential_expression/semantic-enrichment/All_sig_BP_terms_by_cluster_FULL.png", final_fig, width = 12, height = 16, dpi = 300)
 ```
+
+
 
 
 
