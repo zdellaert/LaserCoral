@@ -1437,9 +1437,9 @@ cluster_map <- cluster_map %>%
     Cluster.name = str_replace(cluster_full,".*?_.*?_",""),
     Cluster.term = str_replace(cluster_full,"^\\d+_",""),
     Cluster.term = str_replace(Cluster.term,"_.*$","")
-  ) #%>%
-  #mutate(Cluster.name = paste0("Cluster ", cluster, ": ", Cluster.name)) #%>%
-  #dplyr::select(cluster, Cluster.name)
+  ) %>%
+  mutate(Cluster.name = paste0("Cluster ", cluster, ": ", Cluster.name)) %>%
+  dplyr::select(cluster, Cluster.name)
 
 clustered_Oral_DEGs_enrichedGO <- clustered_Oral_DEGs_enrichedGO %>%
   left_join(cluster_map, by = c("GO.cluster" = "cluster")) %>%
@@ -1454,9 +1454,9 @@ cluster_map <- cluster_map %>%
     Cluster.name = str_replace(cluster_full,".*?_.*?_",""),
     Cluster.term = str_replace(cluster_full,"^\\d+_",""),
     Cluster.term = str_replace(Cluster.term,"_.*$","")
-  ) #%>%
-  #mutate(Cluster.name = paste0("Cluster ", cluster, ": ", Cluster.name)) #%>%
-  #dplyr::select(cluster, Cluster.name)
+  ) %>%
+  mutate(Cluster.name = paste0("Cluster ", cluster, ": ", Cluster.name)) %>%
+  dplyr::select(cluster, Cluster.name)
 clustered_Aboral_DEGs_enrichedGO <- clustered_Aboral_DEGs_enrichedGO %>%
   left_join(cluster_map, by = c("GO.cluster" = "cluster")) %>%
   mutate(Tissue="Aboral")
@@ -1825,6 +1825,13 @@ ViSEAGO::MDSplot(
 ```
 
 ```{r}
+cluster_GOs <- Wang_clusters_wardD2_Aboral@enrich_GOs@data %>% dplyr::filter(GO.cluster == 8) %>% pull(GO.ID)
+
+showSigOfNodes(MF_Aboral, score(elim_Aboral)[names(score(elim_Aboral)) %in% cluster_GOs],  firstSigNodes = length(cluster_GOs), useInfo = 'all')
+```
+
+
+```{r}
 # GOclusters heatmap
 Wang_clusters_wardD2_Aboral<-ViSEAGO::GOclusters_heatmap(
     Wang_clusters_wardD2_Aboral,
@@ -1854,9 +1861,9 @@ cluster_map <- cluster_map %>%
     Cluster.name = str_replace(cluster_full,".*?_.*?_",""),
     Cluster.term = str_replace(cluster_full,"^\\d+_",""),
     Cluster.term = str_replace(Cluster.term,"_.*$","")
-  ) #%>%
-  #mutate(Cluster.name = paste0("Cluster ", cluster, ": ", Cluster.name)) #%>%
-  #dplyr::select(cluster, Cluster.name)
+  ) %>%
+  mutate(Cluster.name = paste0("Cluster ", cluster, ": ", Cluster.name)) %>%
+  dplyr::select(cluster, Cluster.name)
 
 clustered_Oral_DEGs_enrichedGO <- clustered_Oral_DEGs_enrichedGO %>%
   left_join(cluster_map, by = c("GO.cluster" = "cluster")) %>%
@@ -1868,12 +1875,12 @@ cluster_map <- data.frame(cluster_full = rownames(as.matrix(slot(Wang_clusters_w
 cluster_map <- cluster_map %>% 
   mutate(
     cluster = str_extract(cluster_full, "\\d+"),
-    Cluster.name = str_replace(cluster_full,".*?_.*?_",""),
+    Cluster.name = str_wrap(str_replace(cluster_full,".*?_.*?_",""), width = 60),
     Cluster.term = str_replace(cluster_full,"^\\d+_",""),
     Cluster.term = str_replace(Cluster.term,"_.*$","")
-  ) #%>%
-  #mutate(Cluster.name = paste0("Cluster ", cluster, ": ", Cluster.name)) #%>%
-  #dplyr::select(cluster, Cluster.name)
+  ) %>%
+  mutate(Cluster.name = paste0("Cluster ", cluster, ": ", Cluster.name)) %>%
+  dplyr::select(cluster, Cluster.name)
 clustered_Aboral_DEGs_enrichedGO <- clustered_Aboral_DEGs_enrichedGO %>%
   left_join(cluster_map, by = c("GO.cluster" = "cluster")) %>%
   mutate(Tissue="Aboral")
