@@ -602,7 +602,7 @@ dend <- as.dendrogram(hc)
 
 dend_data <- ggdendro::dendro_data(dend, type = "rectangle")
 
-dend_labels <- dend_data$labels %>%
+dend_labels_oral <- dend_data$labels %>%
     mutate(
     cluster = str_extract(label, "\\d+"),
     Cluster.name = str_replace(label,".*?_.*?_",""),
@@ -614,7 +614,7 @@ dend_labels <- dend_data$labels %>%
 bar_plot_oral <- clustered_allDEGs_enrichedGO %>%  
 filter(Tissue == "Oral") %>%
   arrange(as.numeric(GO.cluster)) %>%
-  mutate(Cluster_label = factor(Cluster.name, levels = rev(dend_labels$Cluster.name))) %>%
+  mutate(Cluster_label = factor(Cluster.name, levels = rev(dend_labels_oral$Cluster.name))) %>%
   ggplot(aes(x = Cluster_label)) +
   stat_count(width = .8, fill="#FD8D3C", alpha = 0.8) +
   coord_flip() +
@@ -644,7 +644,7 @@ dend_plot_oral <- ggplot() +
     color = "#2C3E50"
   ) +
   scale_y_reverse(
-    breaks = seq_along(dend_labels$Cluster.name),
+    breaks = seq_along(dend_labels_oral$Cluster.name),
     expand = c(0.02, 0.02)
   ) +
   scale_x_reverse(expand = c(0.02, 0)) +
@@ -667,7 +667,7 @@ dend <- as.dendrogram(hc)
 
 dend_data <- ggdendro::dendro_data(dend, type = "rectangle")
 
-dend_labels <- dend_data$labels %>%
+dend_labels_aboral <- dend_data$labels %>%
     mutate(
     cluster = str_extract(label, "\\d+"),
     Cluster.name = str_replace(label,".*?_.*?_",""),
@@ -679,7 +679,7 @@ dend_labels <- dend_data$labels %>%
 bar_plot_aboral <- clustered_allDEGs_enrichedGO %>%  
 filter(Tissue == "Aboral") %>%
   arrange(as.numeric(GO.cluster)) %>%
-  mutate(Cluster_label = factor(Cluster.name, levels = rev(dend_labels$Cluster.name))) %>%
+  mutate(Cluster_label = factor(Cluster.name, levels = rev(dend_labels_aboral$Cluster.name))) %>%
   ggplot(aes(x = Cluster_label)) +
   stat_count(width = .8, fill="#756BB1", alpha = 0.8) +
   coord_flip() +
@@ -709,7 +709,7 @@ dend_plot_aboral <- ggplot() +
     color = "#2C3E50"
   ) +
   scale_y_reverse(
-    breaks = seq_along(dend_labels$Cluster.name),
+    breaks = seq_along(dend_labels_aboral$Cluster.name),
     expand = c(0.02, 0.02)
   ) +
   scale_x_reverse(expand = c(0.02, 0)) +
@@ -788,7 +788,7 @@ ggsave("../output_RNA/differential_expression/semantic-enrichment/BP_Clusters.pn
 top_Oral_per_Cluster <- clustered_Oral_DEGs_enrichedGO %>% group_by(GO.cluster) %>% arrange(Oral_elim.pvalue) %>% slice(1) %>% ungroup() %>% dplyr::select(GO.cluster,GO.ID,term) %>% rename("top_sig_GO" = `GO.ID`,"top_sig_term" = `term`)
 
 plotting_oral <- left_join(clustered_Oral_DEGs_enrichedGO,top_Oral_per_Cluster) %>%
-  arrange(as.numeric(GO.cluster)) %>%
+  arrange(match(GO.cluster,dend_labels_oral$cluster)) %>%
                         mutate(is_top = GO.ID == top_sig_GO,
                                pvalue = Oral_elim.pvalue,
                                 term_wrapped = str_wrap(`term`, width = 25),
@@ -800,7 +800,7 @@ plotting_oral <- left_join(clustered_Oral_DEGs_enrichedGO,top_Oral_per_Cluster) 
 top_Aboral_per_Cluster <- clustered_Aboral_DEGs_enrichedGO %>% group_by(GO.cluster) %>% arrange(Aboral_elim.pvalue) %>% slice(1) %>% ungroup() %>% dplyr::select(GO.cluster,GO.ID,term) %>% rename("top_sig_GO" = `GO.ID`,"top_sig_term" = `term`)
 
 plotting_aboral <- left_join(clustered_Aboral_DEGs_enrichedGO,top_Aboral_per_Cluster)%>%
-                      arrange(as.numeric(GO.cluster)) %>%
+                      arrange(match(GO.cluster,dend_labels_aboral$cluster)) %>%
                         mutate(is_top = GO.ID == top_sig_GO,
                                pvalue = Aboral_elim.pvalue,
                                 term_wrapped = str_wrap(`term`, width = 25),
@@ -976,6 +976,28 @@ p2 <- p_oral + p_aboral +
 
 ggsave("../output_RNA/differential_expression/semantic-enrichment/All_sig_BP_terms_by_cluster_colored.pdf", p2, width = 14, height = 16)
 ggsave("../output_RNA/differential_expression/semantic-enrichment/All_sig_BP_terms_by_cluster_colored2.png", p2, width = 8, height = 12, dpi = 300)
+```
+
+```{r}
+layout <- "
+AABB
+AABB
+AABB
+AABB
+CDBB
+EFBB
+"
+
+final_fig <- free(p_oral) + free(p_aboral) + 
+  dend_plot_oral + bar_plot_oral + 
+  dend_plot_aboral + bar_plot_aboral +
+  plot_layout(design = layout, widths = c(1.5, 8,8,8), axes = "collect_x") +
+  plot_annotation(tag_levels = "A") &
+  theme(plot.tag = element_text(size = 12, face = "bold")) 
+
+final_fig <- final_fig + plot_annotation(tag_levels = list(c("A", "B", "C", "", "D", "")))
+
+ggsave("../output_RNA/differential_expression/semantic-enrichment/All_sig_BP_terms_by_cluster_FULL.png", final_fig, width = 12, height = 16, dpi = 300)
 ```
 
 ```{r}
