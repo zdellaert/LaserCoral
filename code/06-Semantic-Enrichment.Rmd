@@ -728,22 +728,23 @@ filter(Tissue == "Oral") %>%
   ggplot(aes(x = Cluster_label)) +
   stat_count(width = .8, fill="#FD8D3C", alpha = 0.8) +
   coord_flip() +
-  theme_classic(base_size = 9) +
+  theme_classic(base_size = 11) +
   scale_y_continuous(
     breaks = scales::breaks_width(2),
     expand = c(0, 0),
     limits = c(0, NA)
   ) + 
   theme(
+    plot.title = element_text(face = "bold", size = 12),
     panel.grid.major.y = element_blank(),
     panel.grid.major.x = element_line(color = "grey90", linewidth = 0.2),
     axis.title.y = element_blank(),
-    axis.text.y = element_text(size = 7, lineheight = 0.7,color = "black"),
+    axis.text.y = element_text(size = 7.5, lineheight = 0.7,color = "black"),
     strip.text = element_text(face = "bold", size = 9),
     strip.background = element_rect(fill = "white", color = "black"),
     legend.position = "none",
     plot.subtitle = element_text(face = "bold", size = 9, hjust = 0.5),
-    panel.spacing.y = unit(0.2, "lines")
+    panel.spacing.y = unit(0.15, "lines")
   ) + labs(y = "Terms in Cluster")
 
 dend_plot_oral <- ggplot() +
@@ -794,23 +795,25 @@ filter(Tissue == "Aboral") %>%
   ggplot(aes(x = Cluster_label)) +
   stat_count(width = .8, fill="#756BB1", alpha = 0.8) +
   coord_flip() +
-  theme_classic(base_size = 9) +
+  theme_classic(base_size = 11) +
   scale_y_continuous(
     breaks = scales::breaks_width(2),
     expand = c(0, 0),
     limits = c(0, NA)
   ) + 
   theme(
+    plot.title = element_text(face = "bold", size = 12),
     panel.grid.major.y = element_blank(),
     panel.grid.major.x = element_line(color = "grey90", linewidth = 0.2),
     axis.title.y = element_blank(),
-    axis.text.y = element_text(size = 7, lineheight = 0.7,color = "black"),
+    axis.text.y = element_text(size = 7.5, lineheight = 0.7,color = "black"),
     strip.text = element_text(face = "bold", size = 9),
     strip.background = element_rect(fill = "white", color = "black"),
     legend.position = "none",
     plot.subtitle = element_text(face = "bold", size = 9, hjust = 0.5),
-    panel.spacing.y = unit(0.2, "lines")
+    panel.spacing.y = unit(0.15, "lines")
   ) + labs(y = "Terms in Cluster")
+
 
 dend_plot_aboral <- ggplot() +
   geom_segment(
@@ -824,10 +827,7 @@ dend_plot_aboral <- ggplot() +
     expand = c(0.02, 0.02)
   ) +
   scale_x_reverse(expand = c(0.02, 0)) +
-  theme_void() #+
-  #theme(
-   # plot.margin = margin(t = 30, r = 0, b = 22, l = 5)
-  #)
+  theme_void()
 
 # Combine plots with better proportions
 final_aboral_dend <- wrap_elements(
@@ -840,66 +840,13 @@ ggsave("../output_RNA/differential_expression/semantic-enrichment/BP_Dend_Cluste
 
 
 
-#### bar plots
-```{r}
-p1 <- clustered_allDEGs_enrichedGO %>%  
-filter(Tissue == "Aboral") %>%
-  arrange(as.numeric(GO.cluster)) %>%
-  mutate(Cluster_label = factor(Cluster.name, levels = rev(unique(Cluster.name)))) %>%
-  ggplot(aes(x = Cluster_label)) +
-  stat_count(width = .8, fill="#756BB1", alpha = 0.8) +
-  coord_flip() +
-  scale_y_continuous(breaks = scales::breaks_width(2)) +
-  theme_bw(base_size = 9) +
-  theme(
-    panel.grid.major.y = element_blank(),
-    panel.grid.major.x = element_line(color = "grey90", linewidth = 0.2),
-    axis.title.y = element_blank(),
-    axis.text.y = element_text(size = 7, lineheight = 0.7,color = "black"),
-    strip.text = element_text(face = "bold", size = 9),
-    strip.background = element_rect(fill = "white", color = "black"),
-    legend.position = "none",
-    plot.subtitle = element_text(face = "bold", size = 9, hjust = 0.5),
-    panel.spacing.y = unit(0.2, "lines")
-  ) + labs(subtitle = "Aboral", y = "Terms in Cluster")
-
-p2 <- clustered_allDEGs_enrichedGO %>%  
-filter(Tissue == "Oral") %>%
-  arrange(as.numeric(GO.cluster)) %>%
-  mutate(Cluster_label = factor(Cluster.name, levels = rev(unique(Cluster.name)))) %>%
-  ggplot(aes(x = Cluster_label)) +
-  stat_count(width = .8, fill="#FD8D3C", alpha = 0.8) +
-  coord_flip() +
-  theme_bw(base_size = 9) +
-  scale_y_continuous(breaks = scales::breaks_width(2)) +
-  theme(
-    panel.grid.major.y = element_blank(),
-    panel.grid.major.x = element_line(color = "grey90", linewidth = 0.2),
-    axis.title.y = element_blank(),
-    axis.text.y = element_text(size = 7, lineheight = 0.7,color = "black"),
-    strip.text = element_text(face = "bold", size = 9),
-    strip.background = element_rect(fill = "white", color = "black"),
-    legend.position = "none",
-    plot.subtitle = element_text(face = "bold", size = 9, hjust = 0.5),
-    panel.spacing.y = unit(0.2, "lines")
-  ) + labs(subtitle = "Oral epidermis", y = "Terms in Cluster")
-
-plot <- p1 + p2 +
-  plot_annotation(
-    title = "Semantic Similarity Clusters of All Enriched (p < 0.01) BP GO Terms",
-    theme = theme(plot.title = element_text(face = "bold", size = 9, hjust = 0.5))
-  )
-
-ggsave("../output_RNA/differential_expression/semantic-enrichment/BP_Clusters.png", plot, width = 7, height = 6.5, dpi = 300)
-```
-
 ### NEW: Plotting of both tissues, pre-clustered by tissue
 
 ```{r}
 top_Oral_per_Cluster <- clustered_Oral_DEGs_enrichedGO %>% group_by(GO.cluster) %>% arrange(Oral_elim.pvalue) %>% slice(1) %>% ungroup() %>% dplyr::select(GO.cluster,GO.ID,term) %>% rename("top_sig_GO" = `GO.ID`,"top_sig_term" = `term`)
 
 plotting_oral <- left_join(clustered_Oral_DEGs_enrichedGO,top_Oral_per_Cluster) %>%
-  arrange(as.numeric(GO.cluster)) %>%
+                        arrange(match(GO.cluster,dend_labels_oral$cluster)) %>%
                         mutate(is_top = GO.ID == top_sig_GO,
                                pvalue = Oral_elim.pvalue,
                                 term_wrapped = str_wrap(`term`, width = 25),
@@ -911,7 +858,7 @@ plotting_oral <- left_join(clustered_Oral_DEGs_enrichedGO,top_Oral_per_Cluster) 
 top_Aboral_per_Cluster <- clustered_Aboral_DEGs_enrichedGO %>% group_by(GO.cluster) %>% arrange(Aboral_elim.pvalue) %>% slice(1) %>% ungroup() %>% dplyr::select(GO.cluster,GO.ID,term) %>% rename("top_sig_GO" = `GO.ID`,"top_sig_term" = `term`)
 
 plotting_aboral <- left_join(clustered_Aboral_DEGs_enrichedGO,top_Aboral_per_Cluster)%>%
-                      arrange(as.numeric(GO.cluster)) %>%
+                      arrange(match(GO.cluster,dend_labels_aboral$cluster)) %>%
                         mutate(is_top = GO.ID == top_sig_GO,
                                pvalue = Aboral_elim.pvalue,
                                 term_wrapped = str_wrap(`term`, width = 25),
@@ -949,7 +896,7 @@ p_oral <-ggplot(plotting_oral,
                   segment.color = "gray50",
                   segment.size = 0.5,
                   max.overlaps = 30) +
-    labs(title = "Oral Epidermis Tissue",
+    labs(#title = "Oral Epidermis Tissue",
          x = "-log10(p-value)",
          y = NULL) +
     theme_minimal(base_size = 11) +
@@ -983,7 +930,7 @@ p_aboral <- ggplot(plotting_aboral,
                   segment.color = "gray50",
                   segment.size = 0.5,
                   max.overlaps = 30) +
-  labs(title = "Aboral Tissue",
+  labs(#title = "Aboral Tissue",
          x = "-log10(p-value)",
          y = NULL) +
    theme_minimal(base_size = 11) +
@@ -1009,22 +956,24 @@ ggsave("../output_RNA/differential_expression/semantic-enrichment/All_sig_BP_ter
 
 ```{r}
 layout <- "
-AABB
-AABB
-AABB
-AABB
-CDBB
-EFBB
+ABFF
+CDFF
+EEFF
+EEFF
+EEFF
 "
 
-final_fig <- free(p_oral) + free(p_aboral) + 
+final_fig <- 
   dend_plot_oral + bar_plot_oral + 
   dend_plot_aboral + bar_plot_aboral +
+  free(p_oral) + free(p_aboral) + 
   plot_layout(design = layout, widths = c(1.5, 8,8,8), axes = "collect_x") +
   plot_annotation(tag_levels = "A") &
-  theme(plot.tag = element_text(size = 12, face = "bold")) 
+  theme(plot.tag = element_text(size = 12, face = "bold", hjust = 0, vjust = -0.5),
+        plot.tag.position = c(0, 1),
+        margins=margin(10.5,5.5,5.5,5.5, unit = "pt")) 
 
-final_fig <- final_fig + plot_annotation(tag_levels = list(c("A", "B", "C", "", "D", "")))
+final_fig <- final_fig + plot_annotation(tag_levels = list(c("A: Oral Epidermis Tissue", "","B: Aboral Tissue", "","C: Oral Epidermis Tissue", "D: Aboral Tissue")))
 
 ggsave("../output_RNA/differential_expression/semantic-enrichment/All_sig_BP_terms_by_cluster_FULL.png", final_fig, width = 12, height = 16, dpi = 300)
 ```
