@@ -366,9 +366,7 @@ cluster_9_10_genes_DE <- DE_05_SwissProt %>% filter(query %in% cluster_genes)
 write.csv(cluster_genes,"../output_RNA/differential_expression/semantic-enrichment/cluster_gene_lists/Oral_enrich_BP_metabolic.csv",row.names=FALSE)
 
 ##### Clusters 11-13-14: stimulus_immune
-cluster_GOs <- Oral_enriched_clustered %>% dplyr::filter(GO.cluster == 6|
-                                                           GO.cluster == 7|
-                                                           GO.cluster == 8|GO.cluster == 11|
+cluster_GOs <- Oral_enriched_clustered %>% dplyr::filter(GO.cluster == 11|
                                                            GO.cluster == 13|
                                                            GO.cluster == 14) %>% pull(GO.ID)
 
