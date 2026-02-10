@@ -1426,6 +1426,83 @@ tissue_cols <- setdiff(colnames(plot_df), c("Standardized_Name_spA", "gene"))
 t1 <- tissue_cols[tissue_cols=="OralEpi"]
 t2 <- tissue_cols[tissue_cols=="Aboral"]
 
+# Sort sectors by tissue dominance for better visual flow
+sector_totals <- plot_df %>%
+  group_by(Standardized_Name_spA) %>%
+  summarise(
+    n_t1 = sum(.data[[t1]] > .data[[t2]], na.rm = TRUE),
+    n_t2 = sum(.data[[t2]] > .data[[t1]], na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    dom_group = if_else(n_t1 > n_t2, "t1_dominant", "t2_dominant"),
+    sort_value = if_else(dom_group == "t1_dominant", -n_t1, n_t2)  # negative makes n_t1 descending
+  ) %>%
+  arrange(
+    factor(dom_group, levels = c("t1_dominant", "t2_dominant")),
+    sort_value
+  )
+
+plot_df_bar <- gene_tissue %>%
+  mutate(Standardized_Name_spA = factor(Standardized_Name_spA, 
+                                       levels = sector_totals$Standardized_Name_spA))
+
+library(tidytext)
+bar_colored_vst <- plot_df_bar %>%
+  # flip Aboral negative for mirrored bars
+  mutate(mean_vst_plot = if_else(Tissue == "Aboral", -mean_vst, mean_vst)) %>%
+  
+  # get dominant vst per gene within each cell type
+  group_by(Standardized_Name_spA, gene) %>%
+  mutate( oral_vst  = mean_vst[Tissue == "OralEpi"],
+          max_Tissue = Tissue[which.max(mean_vst)])   %>%
+  ungroup() %>%
+  mutate(gene_ord = reorder_within(gene, desc(oral_vst), Standardized_Name_spA)) %>%
+  mutate(fill_col = case_when(
+    Tissue == "OralEpi" & max_Tissue == "OralEpi" ~ "#FD8D3C",   # bright oral
+    Tissue == "OralEpi" & max_Tissue == "Aboral"  ~ "#FED8A6",   # muted oral
+    Tissue == "Aboral"  & max_Tissue == "Aboral"  ~ "mediumpurple1", # bright aboral
+    Tissue == "Aboral"  & max_Tissue == "OralEpi" ~ "#E6D3F7"    # muted aboral
+  )) %>%
+  
+  ggplot(aes(x = gene_ord, y = mean_vst_plot, fill = fill_col)) +
+  geom_col(color = "white") +
+  facet_grid(~Standardized_Name_spA, scales = "free_x") +
+  scale_x_reordered() +
+  scale_fill_identity() +theme_minimal(base_size = 9) +
+  theme(axis.text.x = element_blank(),
+        axis.title.x = element_blank())
+
+save_ggplot(bar_colored_vst, "DE_05_brocmarker_bar_colored",width=16)
+
+plot_df_bar %>%
+  # get dominant vst per gene within each cell type
+  group_by(Standardized_Name_spA, gene) %>%
+  mutate(max_vst = max(mean_vst)) %>%
+  ungroup() %>%
+  
+  # reorder gene within each facet by dominant vst
+  mutate(gene_ord = reorder_within(gene, desc(max_vst), Standardized_Name_spA)) %>%
+  
+  ggplot(aes(x = gene_ord, y = mean_vst, fill = Tissue)) +
+  geom_col(color = "white", position = "dodge") +
+  facet_grid(~Standardized_Name_spA, scales = "free_x") +
+  scale_x_reordered() +
+  scale_fill_manual(values = c("OralEpi" = "#FD8D3C",
+                               "Aboral"  = "mediumpurple1")) +
+  theme_minimal(base_size = 9) +
+  theme(axis.text.x = element_blank(),
+        axis.title.x = element_blank())
+```
+
+
+```{r}
+tissue_cols <- setdiff(colnames(plot_df), c("Standardized_Name_spA", "gene"))
+
+# outer = OralEpi (t1), inner = Aboral (t2)
+t1 <- tissue_cols[tissue_cols=="OralEpi"]
+t2 <- tissue_cols[tissue_cols=="Aboral"]
+
 # Sort sectors by total expression for better visual flow
 sector_totals <- plot_df %>%
   group_by(Standardized_Name_spA) %>%
