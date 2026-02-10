@@ -294,12 +294,12 @@ ViSEAGO::MDSplot(
 Wang_clusters_wardD2_Oral_init <- Wang_clusters_wardD2_Oral
 # GOclusters heatmap
 Wang_clusters_wardD2_Oral <-ViSEAGO::GOclusters_heatmap(
-    Wang_clusters_wardD2_Oral,
+    Wang_clusters_wardD2_Oral_init,
     tree=list(
         distance="BMA",
         aggreg.method="ward.D2",
         rotate=labels(as.dendrogram(hclust(Wang_clusters_wardD2_Oral_init@clusters_dist[["BMA"]],
-                                           method ="ward.D2")))[c(2,3,1,4,5,7,8,9,6,10,11,13,14,12)]
+                                           method ="ward.D2")))[c(2,3,1,4,5,10,11,13,14,12,7,8,9,6)]
     )
 )
 
@@ -324,22 +324,57 @@ Oral_enriched_clustered %>% dplyr::filter(GO.cluster == top_cluster)
 BP_go_terms <- BP_Oral@graph@nodes
 genes_by_GO <- genesInTerm(BP_Oral, BP_go_terms)
 
+##### Clusters 1-3: development
+cluster_GOs <- Oral_enriched_clustered %>% dplyr::filter(GO.cluster == 1|
+                                                           GO.cluster == 2|
+                                                           GO.cluster == 3) %>% pull(GO.ID)
+
+#showSigOfNodes(BP_Oral, score(elim_Oral)[names(score(elim_Oral)) %in% cluster_GOs],  firstSigNodes = length(cluster_GOs), useInfo = 'all')
+cluster_genes <- unique(unlist(genes_by_GO[cluster_GOs]))
+cluster_1_3_genes_DE <- DE_05_SwissProt %>% filter(query %in% cluster_genes)
+write.csv(cluster_genes,"../output_RNA/differential_expression/semantic-enrichment/cluster_gene_lists/Oral_enrich_BP_development.csv",row.names=FALSE)
+
 ##### Clusters 4-5: Transport
 cluster_GOs <- Oral_enriched_clustered %>% dplyr::filter(GO.cluster == 4|
                                                            GO.cluster == 5) %>% pull(GO.ID)
 
-showSigOfNodes(BP_Oral, score(elim_Oral)[names(score(elim_Oral)) %in% cluster_GOs],  firstSigNodes = length(cluster_GOs), useInfo = 'all')
 cluster_genes <- unique(unlist(genes_by_GO[cluster_GOs]))
 cluster_4_5_genes_DE <- DE_05_SwissProt %>% filter(query %in% cluster_genes)
 write.csv(cluster_genes,"../output_RNA/differential_expression/semantic-enrichment/cluster_gene_lists/Oral_enrich_BP_transport.csv",row.names=FALSE)
 
-##### Cluster 11: Sensory
-cluster_11 <- Oral_enriched_clustered %>% dplyr::filter(GO.cluster == 11) %>% pull(GO.ID)
-cluster_11_genes <- unique(unlist(genes_by_GO[cluster_11]))
-cluster_11_genes_DE <- DE_05_SwissProt %>% filter(query %in% cluster_11_genes)
-write.csv(cluster_11_genes,"../output_RNA/differential_expression/semantic-enrichment/cluster_gene_lists/Oral_enrich_BP_Sensory.csv",row.names=FALSE)
+##### Clusters 6-8: Signaling + secretion
+cluster_GOs <- Oral_enriched_clustered %>% dplyr::filter(GO.cluster == 6|
+                                                           GO.cluster == 7|
+                                                           GO.cluster == 8) %>% pull(GO.ID)
 
+cluster_genes <- unique(unlist(genes_by_GO[cluster_GOs]))
+cluster_6_8_genes_DE <- DE_05_SwissProt %>% filter(query %in% cluster_genes)
+write.csv(cluster_genes,"../output_RNA/differential_expression/semantic-enrichment/cluster_gene_lists/Oral_enrich_BP_signaling_secretion.csv",row.names=FALSE)
 
+##### Cluster 12: Adhesion
+cluster_12 <- Oral_enriched_clustered %>% dplyr::filter(GO.cluster == 12) %>% pull(GO.ID)
+cluster_12_genes <- unique(unlist(genes_by_GO[cluster_12]))
+cluster_12_genes_DE <- DE_05_SwissProt %>% filter(query %in% cluster_12_genes)
+write.csv(cluster_12_genes,"../output_RNA/differential_expression/semantic-enrichment/cluster_gene_lists/Oral_enrich_BP_adhesion.csv",row.names=FALSE)
+
+##### Clusters 9-10: metabolic
+cluster_GOs <- Oral_enriched_clustered %>% dplyr::filter(GO.cluster == 9|
+                                                           GO.cluster == 10) %>% pull(GO.ID)
+
+cluster_genes <- unique(unlist(genes_by_GO[cluster_GOs]))
+cluster_9_10_genes_DE <- DE_05_SwissProt %>% filter(query %in% cluster_genes)
+write.csv(cluster_genes,"../output_RNA/differential_expression/semantic-enrichment/cluster_gene_lists/Oral_enrich_BP_metabolic.csv",row.names=FALSE)
+
+##### Clusters 11-13-14: stimulus_immune
+cluster_GOs <- Oral_enriched_clustered %>% dplyr::filter(GO.cluster == 6|
+                                                           GO.cluster == 7|
+                                                           GO.cluster == 8|GO.cluster == 11|
+                                                           GO.cluster == 13|
+                                                           GO.cluster == 14) %>% pull(GO.ID)
+
+cluster_genes <- unique(unlist(genes_by_GO[cluster_GOs]))
+cluster_11_13_14_genes_DE <- DE_05_SwissProt %>% filter(query %in% cluster_genes)
+write.csv(cluster_genes,"../output_RNA/differential_expression/semantic-enrichment/cluster_gene_lists/Oral_enrich_BP_stimulus_immune.csv",row.names=FALSE)
 #DE_05_SwissProt %>% filter(query %in%unique(unlist(genes_by_GO[Aboral_enriched_clustered %>% pull(GO.ID)])))
 ```
 
@@ -524,15 +559,7 @@ ViSEAGO::show_heatmap(
 BP_go_terms <- BP_Aboral@graph@nodes
 genes_by_GO <- genesInTerm(BP_Aboral, BP_go_terms)
 
-cluster_1_2 <- Aboral_enriched_clustered %>% dplyr::filter(GO.cluster == 1|
-                                                             GO.cluster == 2) %>% pull(GO.ID)
-
-showSigOfNodes(BP_Aboral, score(elim_Aboral)[names(score(elim_Aboral)) %in% cluster_1_2],  firstSigNodes = length(cluster_1_2), useInfo = 'all')
-
-cluster_1_2_genes <- unique(unlist(genes_by_GO[cluster_1_2]))
-cluster_1_2_genes_DE <- DE_05_SwissProt %>% filter(query %in%cluster_1_2_genes)
-write.csv(cluster_1_2_genes,"../output_RNA/differential_expression/semantic-enrichment/cluster_gene_lists/Aboral_enrich_BP_adhesion.csv",row.names=FALSE)
-
+#### Clusters 9-16: Developmental
 cluster_9_16 <- Aboral_enriched_clustered %>% dplyr::filter(GO.cluster == 9|
                                                                GO.cluster == 10|
                                                              GO.cluster == 11|
@@ -547,6 +574,83 @@ showSigOfNodes(BP_Aboral, score(elim_Aboral)[names(score(elim_Aboral)) %in% clus
 cluster_9_16_genes <- unique(unlist(genes_by_GO[cluster_9_16]))
 cluster_9_16_genes_DE <- DE_05_SwissProt %>% filter(query %in%cluster_9_16_genes)
 write.csv(cluster_9_16_genes,"../output_RNA/differential_expression/semantic-enrichment/cluster_gene_lists/Aboral_enrich_BP_development.csv",row.names=FALSE)
+
+#### Clusters 1-2: Adhesion
+cluster_1_2 <- Aboral_enriched_clustered %>% dplyr::filter(GO.cluster == 1|
+                                                             GO.cluster == 2) %>% pull(GO.ID)
+
+showSigOfNodes(BP_Aboral, score(elim_Aboral)[names(score(elim_Aboral)) %in% cluster_1_2],  firstSigNodes = length(cluster_1_2), useInfo = 'all')
+
+cluster_1_2_genes <- unique(unlist(genes_by_GO[cluster_1_2]))
+cluster_1_2_genes_DE <- DE_05_SwissProt %>% filter(query %in%cluster_1_2_genes)
+write.csv(cluster_1_2_genes,"../output_RNA/differential_expression/semantic-enrichment/cluster_gene_lists/Aboral_enrich_BP_adhesion.csv",row.names=FALSE)
+
+#### Clusters 3_4_6: Stimulus
+cluster_3_4_6 <- Aboral_enriched_clustered %>% dplyr::filter(GO.cluster == 3|
+                                                             GO.cluster == 4|
+                                                             GO.cluster == 6) %>% pull(GO.ID)
+
+showSigOfNodes(BP_Aboral, score(elim_Aboral)[names(score(elim_Aboral)) %in% cluster_3_4_6],  firstSigNodes = length(cluster_3_4_6), useInfo = 'all')
+
+cluster_3_4_6_genes <- unique(unlist(genes_by_GO[cluster_3_4_6]))
+cluster_3_4_6_genes_DE <- DE_05_SwissProt %>% filter(query %in%cluster_3_4_6_genes)
+write.csv(cluster_3_4_6_genes,"../output_RNA/differential_expression/semantic-enrichment/cluster_gene_lists/Aboral_enrich_BP_stimulus_immune.csv",row.names=FALSE)
+
+#### Cluster 3
+cluster_3 <- Aboral_enriched_clustered %>% dplyr::filter(GO.cluster == 3) %>% pull(GO.ID)
+
+showSigOfNodes(BP_Aboral, score(elim_Aboral)[names(score(elim_Aboral)) %in% cluster_3],  firstSigNodes = length(cluster_3), useInfo = 'all')
+
+cluster_3_genes <- unique(unlist(genes_by_GO[cluster_3]))
+cluster_3_genes_DE <- DE_05_SwissProt %>% filter(query %in%cluster_3_genes)
+write.csv(cluster_3_genes,"../output_RNA/differential_expression/semantic-enrichment/cluster_gene_lists/Aboral_enrich_BP_cluster3.csv",row.names=FALSE)
+
+#### Cluster 4
+cluster_4 <- Aboral_enriched_clustered %>% dplyr::filter(GO.cluster == 4) %>% pull(GO.ID)
+
+showSigOfNodes(BP_Aboral, score(elim_Aboral)[names(score(elim_Aboral)) %in% cluster_4],  firstSigNodes = length(cluster_4), useInfo = 'all')
+
+cluster_4_genes <- unique(unlist(genes_by_GO[cluster_4]))
+cluster_4_genes_DE <- DE_05_SwissProt %>% filter(query %in%cluster_4_genes)
+write.csv(cluster_4_genes,"../output_RNA/differential_expression/semantic-enrichment/cluster_gene_lists/Aboral_enrich_BP_cluster4.csv",row.names=FALSE)
+
+#### Cluster 6
+cluster_6 <- Aboral_enriched_clustered %>% dplyr::filter(GO.cluster == 6) %>% pull(GO.ID)
+
+showSigOfNodes(BP_Aboral, score(elim_Aboral)[names(score(elim_Aboral)) %in% cluster_6],  firstSigNodes = length(cluster_6), useInfo = 'all')
+
+cluster_6_genes <- unique(unlist(genes_by_GO[cluster_6]))
+cluster_6_genes_DE <- DE_05_SwissProt %>% filter(query %in%cluster_6_genes)
+write.csv(cluster_6_genes,"../output_RNA/differential_expression/semantic-enrichment/cluster_gene_lists/Aboral_enrich_BP_cluster6.csv",row.names=FALSE)
+
+#### Cluster 5
+cluster_5 <- Aboral_enriched_clustered %>% dplyr::filter(GO.cluster == 5) %>% pull(GO.ID)
+
+showSigOfNodes(BP_Aboral, score(elim_Aboral)[names(score(elim_Aboral)) %in% cluster_5],  firstSigNodes = length(cluster_5), useInfo = 'all')
+
+cluster_5_genes <- unique(unlist(genes_by_GO[cluster_5]))
+cluster_5_genes_DE <- DE_05_SwissProt %>% filter(query %in%cluster_5_genes)
+write.csv(cluster_5_genes,"../output_RNA/differential_expression/semantic-enrichment/cluster_gene_lists/Aboral_enrich_BP_cluster5.csv",row.names=FALSE)
+
+
+#### Cluster 7
+cluster_7 <- Aboral_enriched_clustered %>% dplyr::filter(GO.cluster == 7) %>% pull(GO.ID)
+
+showSigOfNodes(BP_Aboral, score(elim_Aboral)[names(score(elim_Aboral)) %in% cluster_7],  firstSigNodes = length(cluster_7), useInfo = 'all')
+
+cluster_7_genes <- unique(unlist(genes_by_GO[cluster_7]))
+cluster_7_genes_DE <- DE_05_SwissProt %>% filter(query %in%cluster_7_genes)
+write.csv(cluster_7_genes,"../output_RNA/differential_expression/semantic-enrichment/cluster_gene_lists/Aboral_enrich_BP_cluster7.csv",row.names=FALSE)
+
+#### Cluster 8
+cluster_8 <- Aboral_enriched_clustered %>% dplyr::filter(GO.cluster == 8) %>% pull(GO.ID)
+
+showSigOfNodes(BP_Aboral, score(elim_Aboral)[names(score(elim_Aboral)) %in% cluster_8],  firstSigNodes = length(cluster_8), useInfo = 'all')
+
+cluster_8_genes <- unique(unlist(genes_by_GO[cluster_8]))
+cluster_8_genes_DE <- DE_05_SwissProt %>% filter(query %in%cluster_8_genes)
+write.csv(cluster_8_genes,"../output_RNA/differential_expression/semantic-enrichment/cluster_gene_lists/Aboral_enrich_BP_cluster8.csv",row.names=FALSE)
+
 
 #DE_05_SwissProt %>% filter(query %in%unique(unlist(genes_by_GO[Aboral_enriched_clustered %>% pull(GO.ID)])))
 ```
@@ -606,7 +710,7 @@ library(patchwork)
 dist_mat <- slot(Wang_clusters_wardD2_Oral, "clusters_dist")[["BMA"]]
 hc <- hclust(dist_mat, method = "ward.D2")
 dend <- as.dendrogram(hc)
-dend <- dendextend::rotate(dend,c(2,3,1,4,5,7,8,9,6,10,11,13,14,12))
+dend <- dendextend::rotate(dend,c(2,3,1,4,5,10,11,13,14,12,7,8,9,6))
 
 dend_data <- ggdendro::dendro_data(dend, type = "rectangle")
 
@@ -2165,5 +2269,138 @@ plot <- p1 + p2 +
   )
 
 ggsave("../output_RNA/differential_expression/semantic-enrichment/All_Onts_freq_pval.png", plot, width = 8, height = 6.5, dpi = 300)
+```
+
+
+```{r}
+top10_pval <- tissues_combined %>%
+  group_by(Tissue,ontology) %>%
+  slice_max(order_by = desc(pvalue), n = 10, with_ties = FALSE) %>% 
+  arrange(Tissue, ontology, log10_pvalue) %>%
+  ungroup() %>%
+  mutate(term=str_wrap(`term`, width = 40))
+
+make_lollipop <- function(df, subtitle_label,fill="white") {
+  df %>%
+    mutate(term = fct_reorder(term, log10_pvalue)) %>%
+    ggplot(aes(y = term, x = log10_pvalue)) +
+
+    # stick
+    geom_segment(aes(yend = term, x = 0, xend = log10_pvalue),
+                 color = fill, linewidth = 0.6) +
+
+    # dot sized by frequency
+    geom_point(aes(size = freq, fill = fill),
+               shape = 21, color = "black") +
+    facet_grid(ontology ~ ., scales = "free_y", space = "free_y") +
+    scale_fill_manual(values = fill, guide = "none") +
+    scale_size_continuous(name = "% DEGs\nwith GO term",
+                          limits = c(0, 100),
+                          breaks = c(0, 25, 50, 75, 100),
+                          range = c(2, 6)) +
+
+    theme_bw(base_size = 9) +
+    theme(
+      panel.grid.major.y = element_blank(),
+      panel.grid.major.x = element_line(color = "grey90", linewidth = 0.2),
+      axis.title.y = element_blank(),
+      axis.text.y = element_text(size = 7, lineheight = 0.7, color = "black"),
+      strip.text = element_text(face = "bold", size = 9),
+      strip.background = element_rect(fill = "white", color = "black"),
+      legend.position = "bottom",
+      plot.subtitle = element_text(face = "bold", size = 9, hjust = 0.5),
+      panel.spacing.y = unit(0.2, "lines")
+    ) +
+    labs(
+      subtitle = subtitle_label,
+      x = expression(-log[10](p-value))
+    )
+}
+
+p1 <- make_lollipop(
+  top10_pval %>% filter(Tissue == "Aboral"),
+  "Aboral", fill = "#9E9AC8"
+)
+
+p2 <- make_lollipop(
+  top10_pval %>% filter(Tissue == "Oral"),
+  "Oral epidermis", fill = "#FDAE6B"
+)
+
+plot <- p1 + p2 + 
+  plot_layout(guides = "collect") +
+  plot_annotation(
+    title = "Top 10 enriched GO terms by p-value in tissue DEGs",
+    theme = theme(plot.title = element_text(face = "bold", size = 9, hjust = 0.5))
+  ) &
+  theme(legend.position='bottom')
+
+ggsave("../output_RNA/differential_expression/semantic-enrichment/All_Onts_pval_top10_lollipop.png", plot, width = 10, height = 6.5, dpi = 300)
+```
+
+```{r}
+top10_pval <- tissues_combined %>%
+  group_by(Tissue,ontology) %>%
+  slice_max(order_by = desc(pvalue), n = 20, with_ties = FALSE) %>% 
+  arrange(Tissue, ontology, log10_pvalue) %>%
+  ungroup() %>%
+  mutate(term=str_wrap(`term`, width = 40))
+
+make_lollipop <- function(df, subtitle_label,fill="white") {
+  df %>%
+    mutate(term = fct_reorder(term, log10_pvalue)) %>%
+    ggplot(aes(y = term, x = log10_pvalue)) +
+
+    # stick
+    geom_segment(aes(yend = term, x = 0, xend = log10_pvalue),
+                 color = fill, linewidth = 0.6) +
+
+    # dot sized by frequency
+    geom_point(aes(size = freq, fill = fill),
+               shape = 21, color = "black") +
+    facet_grid(ontology ~ ., scales = "free_y", space = "free_y") +
+    scale_fill_manual(values = fill, guide = "none") +
+    scale_size_continuous(name = "% DEGs\nwith GO term",
+                          limits = c(0, 100),
+                          breaks = c(0, 25, 50, 75, 100),
+                          range = c(2, 6)) +
+
+    theme_bw(base_size = 9) +
+    theme(
+      panel.grid.major.y = element_blank(),
+      panel.grid.major.x = element_line(color = "grey90", linewidth = 0.2),
+      axis.title.y = element_blank(),
+      axis.text.y = element_text(size = 7, lineheight = 0.7, color = "black"),
+      strip.text = element_text(face = "bold", size = 9),
+      strip.background = element_rect(fill = "white", color = "black"),
+      legend.position = "bottom",
+      plot.subtitle = element_text(face = "bold", size = 9, hjust = 0.5),
+      panel.spacing.y = unit(0.2, "lines")
+    ) +
+    labs(
+      subtitle = subtitle_label,
+      x = expression(-log[10](p-value))
+    )
+}
+
+p1 <- make_lollipop(
+  top10_pval %>% filter(Tissue == "Aboral"),
+  "Aboral", fill = "#9E9AC8"
+)
+
+p2 <- make_lollipop(
+  top10_pval %>% filter(Tissue == "Oral"),
+  "Oral epidermis", fill = "#FDAE6B"
+)
+
+plot <- p1 + p2 + 
+  plot_layout(guides = "collect") +
+  plot_annotation(
+    title = "Top 10 enriched GO terms by p-value in tissue DEGs",
+    theme = theme(plot.title = element_text(face = "bold", size = 9, hjust = 0.5))
+  ) &
+  theme(legend.position='bottom')
+
+ggsave("../output_RNA/differential_expression/semantic-enrichment/All_Onts_pval_top20_lollipop.png", plot, width = 10, height = 16, dpi = 300)
 ```
 
