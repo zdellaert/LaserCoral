@@ -1,0 +1,84 @@
+---
+title: "Dissection Area Summary"
+author: "Zoe Dellaert"
+date: "2025-10-15"
+output:
+  html_document: default
+  github_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    html_preview: true
+always_allow_html: true
+---
+
+## Summary statistics and table for the dissected areas for LCM analysis
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Read in data and clean
+
+```{r}
+library(tidyverse)
+library(scales)
+library(kableExtra)
+
+table <- read.csv("../data_RNA/LCM_RNA_metadata_bydissection.csv")
+
+table <- table %>%
+  mutate(`Total Tissue Area` = as.numeric(gsub(",","",Total.Tissue.Area)),
+         `Total Dissection Area / 40 (approx # cells)` =
+                as.numeric(gsub(",","",Total.Dissection.Area...40..approx...cells.))) %>% 
+  select(-c(Total.Tissue.Area,Total.Dissection.Area...40..approx...cells.))
+```
+
+Read in metadata and join to dissection data 
+
+```{r}
+meta <- read.csv("../data_RNA/LCM_RNA_metadata.csv") %>%
+            dplyr::arrange(Sample) %>%
+            mutate(across(c(Tissue, Fragment, Section_Date, LCM_Date), factor)) # Set variables as factors 
+
+meta$Tissue <- factor(meta$Tissue, levels = c("OralEpi","Aboral")) #we want OralEpi to be the baseline
+
+table <- table %>% left_join(meta)
+```
+
+Summary table
+
+```{r}
+supp_table <- table %>%
+  filter(DissectionNumber != "Total") %>%
+  group_by(Fragment, Tissue) %>%
+  summarise(
+    n_dissections = n(),
+    total_area = sum(`Total Tissue Area`, na.rm = TRUE),
+    mean_area = mean(`Total Tissue Area`, na.rm = TRUE),
+    sd_area = sd(`Total Tissue Area`, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    total_area_fmt = comma(round(total_area)),
+    mean_sd_fmt = paste0(round(mean_area), " ± ", round(sd_area))
+  ) %>%
+  select(Fragment, Tissue, n_dissections, total_area_fmt, mean_sd_fmt)
+
+knitr::kable(
+  supp_table,
+  format = "markdown",
+  col.names = c("Fragment", "Tissue Type", "Number of Dissections", "Total Tissue Area (µm²)", "Mean ± SD per Dissection (µm²)")
+)
+ggplot(table %>% filter(DissectionNumber != "Total"),
+       aes(x = Tissue, y = `Total Tissue Area`, fill = Tissue)) +
+  geom_violin(alpha = 0.6, trim = FALSE) +
+  geom_jitter(width = 0.1, alpha = 0.5) +
+  theme_minimal() + facet_grid(~Fragment) + scale_fill_manual(values = c(OralEpi = "#FD8D3C" ,Aboral = "mediumpurple1")) + 
+  labs(title = "Distribution of Tissue Area Dissected by Tissue Type and Fragment") +
+  ylab("Tissue Area per Dissection (µm²)")
+
+
+```
+
+
