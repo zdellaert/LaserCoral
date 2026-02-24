@@ -463,7 +463,8 @@ DESeq_HeatStressGenes <- HeatStressGenes %>% left_join(as.data.frame(resOrdered)
 
 write.csv(as.data.frame(DESeq_Biomin_broc), file=paste0(outdir,"/DESeq_biomin_annotation.csv"))
 write.csv(as.data.frame(DE_05_Biomin_broc), file=paste0(outdir,"/DE_05_biomin_annotation.csv"))
-write.csv(as.data.frame(DE_05_marker), file=paste0(outdir,"/DE_05_markergene_annotation.csv"))
+write.csv(as.data.frame(DESeq_marker_broc), file=paste0(outdir,"/DESeq_markergene_annotation.csv"))
+write.csv(as.data.frame(DE_05_marker_broc), file=paste0(outdir,"/DE_05_markergene_annotation.csv"))
 
 Biomin_broc_all_counts <- as.data.frame(counts(dds)) %>% mutate(query = rownames(dds)) %>% select(query,everything()) %>% left_join(Biomin_broc) 
 Biomin_broc_all_res <- as.data.frame(res) %>% mutate(query = rownames(res)) %>% select(query,everything()) %>% left_join(Biomin_broc) 
