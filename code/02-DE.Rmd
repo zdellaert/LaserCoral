@@ -401,9 +401,9 @@ MarkerGenes$def_short <- ifelse(nchar(MarkerGenes$definition) > 20,
 
 ### Biomineralization toolkit
 ```{r}
-Biomin_broc_orig <- read.csv("../output_RNA/marker_genes/Pacuta_Biomin_Spis_ortholog.csv") %>% dplyr::rename("query" = Pacuta_gene) #%>% select(-c(X,accessionnumber_gene_id, ref))
+Biomin_broc_original <- read.csv("../output_RNA/marker_genes/Pacuta_Biomin_Spis_ortholog.csv") %>% dplyr::rename("query" = Pacuta_gene) #%>% select(-c(X,accessionnumber_gene_id, ref))
 
-Biomin_broc <- Biomin_broc_orig %>%
+Biomin_broc <- Biomin_broc_original %>%
   group_by(query,List) %>%
   summarize(definition = paste(unique(definition), collapse = ","),
             Classification = paste(unique(Classification), collapse = ","),
@@ -442,7 +442,7 @@ join_genes_of_interest <- function(df, gene_set) {
   df %>%
     left_join(gene_set, by = "query") %>%
     select(query, everything()) %>%
-    drop_na() %>% distinct()
+    drop_na(List) %>% distinct()
 }
 
 DE_05_Biomin_broc    <- join_genes_of_interest(DE_05, Biomin_broc)
