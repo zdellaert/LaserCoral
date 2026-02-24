@@ -392,8 +392,6 @@ up_OralEpi
 
 ### Single cell marker genes (Levy et al 2021)
 ```{r}
-MarkerGenes <- read.csv("../references/Pacuta_MarkerGenes_Levy2021.csv") %>% dplyr::rename("query" = 1, "List" = 2, "definition" = 3) %>% filter(List !="Toolkit")
-
 MarkerGenes_broc <- read.csv("../output_RNA/marker_genes/Pacuta_Spis_Markers_pairs.csv") %>% select(protein_id_spB,cluster,Standardized_Name_spA ) %>% dplyr::rename("query" = 1, "List" = 2)
 
 MarkerGenes$def_short <- ifelse(nchar(MarkerGenes$definition) > 20, 
@@ -403,11 +401,14 @@ MarkerGenes$def_short <- ifelse(nchar(MarkerGenes$definition) > 20,
 
 ### Biomineralization toolkit
 ```{r}
-Biomin_broc <- read.csv("../output_RNA/marker_genes/Pacuta_Biomin_Spis_ortholog.csv") %>% dplyr::rename("query" = Pacuta_gene) #%>% select(-c(X,accessionnumber_gene_id, ref))
+Biomin_broc_orig <- read.csv("../output_RNA/marker_genes/Pacuta_Biomin_Spis_ortholog.csv") %>% dplyr::rename("query" = Pacuta_gene) #%>% select(-c(X,accessionnumber_gene_id, ref))
 
-Biomin_broc <- Biomin_broc %>%
+Biomin_broc <- Biomin_broc_orig %>%
   group_by(query,List) %>%
-  summarize(definition = paste(unique(definition), collapse = ","),Classification = paste(unique(Classification), collapse = ",")) 
+  summarize(definition = paste(unique(definition), collapse = ","),
+            Classification = paste(unique(Classification), collapse = ","),
+            Reference = paste(unique(ref), collapse = ","),
+            Original_Accession = paste(unique(accessionnumber_gene_id), collapse = ",")) 
 
 Biomin_broc$def_short <- ifelse(nchar(Biomin_broc$definition) > 40, 
                             paste0(substr(Biomin_broc$definition, 1, 37), "..."), 
@@ -445,13 +446,11 @@ join_genes_of_interest <- function(df, gene_set) {
 }
 
 DE_05_Biomin_broc    <- join_genes_of_interest(DE_05, Biomin_broc)
-DE_05_marker         <- join_genes_of_interest(DE_05, MarkerGenes)
 DE_05_marker_broc    <- join_genes_of_interest(DE_05, MarkerGenes_broc)
 DE_05_He_etal        <- join_genes_of_interest(DE_05, He_etal_Nvec)
 DE_05_DuBuc_etal     <- join_genes_of_interest(DE_05, DuBuc_etal_Nvec)
 
 DESeq_Biomin_broc    <- join_genes_of_interest(as.data.frame(resOrdered), Biomin_broc)
-DESeq_marker         <- join_genes_of_interest(as.data.frame(resOrdered), MarkerGenes)
 DESeq_marker_broc    <- join_genes_of_interest(as.data.frame(resOrdered), MarkerGenes_broc)
 DESeq_He_etal        <- join_genes_of_interest(as.data.frame(resOrdered), He_etal_Nvec)
 DESeq_DuBuc_etal     <- join_genes_of_interest(as.data.frame(resOrdered), DuBuc_etal_Nvec)
@@ -462,10 +461,7 @@ write.csv(as.data.frame(DESeq_marker_broc), file=paste0(outdir,"/DESeq_markergen
 write.csv(as.data.frame(DE_05_marker_broc), file=paste0(outdir,"/DE_05_markergene_annotation.csv"))
 
 Biomin_broc_all_counts <- as.data.frame(counts(dds)) %>% mutate(query = rownames(dds)) %>% select(query,everything()) %>% left_join(Biomin_broc) 
-Biomin_broc_all_res <- as.data.frame(res) %>% mutate(query = rownames(res)) %>% select(query,everything()) %>% left_join(Biomin_broc) 
-
-markers_all_counts <- as.data.frame(counts(dds)) %>% mutate(query = rownames(dds)) %>% select(query,everything()) %>% left_join(MarkerGenes) 
-markers_all_res <- as.data.frame(res) %>% mutate(query = rownames(res)) %>% select(query,everything()) %>% left_join(MarkerGenes) 
+Biomin_broc_all_res <- as.data.frame(res) %>% mutate(query = rownames(res)) %>% select(query,everything()) %>% left_join(Biomin_broc)
 
 broc_markers_all_counts <- as.data.frame(counts(dds)) %>% mutate(query = rownames(dds)) %>% select(query,everything()) %>% left_join(MarkerGenes_broc) 
 broc_markers_all_res <- as.data.frame(res) %>% mutate(query = rownames(res)) %>% select(query,everything()) %>% left_join(MarkerGenes_broc) 
@@ -1092,26 +1088,6 @@ ggplot(df, aes(x=Tissue, y=expression, group=Fragment, color=Fragment)) +
 ### Marker DE nice
 
 ```{r}
-#view marker genes that are differentially expressed
-select <- DE_05_marker$query
-z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
-DE_marker <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), 
-                      cluster_rows=TRUE, show_rownames=TRUE,
-                      cluster_cols=TRUE, cutree_cols = 2, cutree_rows = 5,
-                      annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
-                      labels_row = DE_05_marker$List, fontsize_row = 7)
-DE_marker
-
-#view marker genes that are differentially expressed
-select <- DE_05_marker$query
-z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
-DE_marker <- pheatmap(z_scores, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdBu")))(200), 
-                      cluster_rows=TRUE, show_rownames=TRUE,
-                      cluster_cols=TRUE, cutree_cols = 2, cutree_rows = 5,
-                      annotation_col=(heatmap_metadata%>% select(Tissue)), annotation_colors = ann_colors,
-                      labels_row = paste0(DE_05_marker$List,": ", gene_labels[match(select,(gene_labels$query)),2]), fontsize_row = 7)
-DE_marker
-
 #view marker genes that are differentially expressed
 select <- DE_05_marker_broc$query
 z_scores <- t(scale(t(assay(vsd)[select, ]), center = TRUE, scale = TRUE))
