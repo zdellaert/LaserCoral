@@ -58,7 +58,7 @@
 57,Gene:g39770,Annotated: Kielin-Like,"Mummadisetti et al., 2021",Pocillopora_acuta_HIv2___RNAseq.g3780.t1,Biomin_Genes,Extracellular matrix/cell adhesion
 58,Gene:g5735.t1,Annotated: Tolloid-Like,"Mummadisetti et al., 2021",Pocillopora_acuta_HIv2___RNAseq.g26037.t1,Biomin_Genes,Extracellular matrix/cell adhesion
 59,Gene:g7086,Annotated: EGF and LamininG-Like (EGF LamG1),"Mummadisetti et al., 2021",Pocillopora_acuta_HIv2___RNAseq.g26221.t1,Biomin_Genes,Extracellular matrix/cell adhesion
-60,Gene:g8396,"Annotated: N/A, named it CARP6-partial","Mummadisetti et al., 2021",Pocillopora_acuta_HIv2___TS.g5112.t1,Biomin_Genes,Acidic proteins
+60,Gene:g8396,CARP6-partial,"Mummadisetti et al., 2021",Pocillopora_acuta_HIv2___TS.g5112.t1,Biomin_Genes,Acidic proteins
 61,Gene:g907,Annotated: Zona Pellucida (ZP domain-containing),"Mummadisetti et al., 2021",Pocillopora_acuta_HIv2___TS.g2710.t1,Biomin_Genes,Extracellular matrix/cell adhesion
 62,Gene:g9094,Annotated: Actin,"Mummadisetti et al., 2021",Pocillopora_acuta_HIv2___RNAseq.g14504.t1a,Biomin_Genes,Actin
 63,Gene:g9094,Annotated: Actin,"Mummadisetti et al., 2021",Pocillopora_acuta_HIv2___TS.g30561.t1a,Biomin_Genes,Actin

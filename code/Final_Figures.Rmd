@@ -170,11 +170,13 @@ ggsave("../output_RNA/differential_expression/composite_figs/Figure1.pdf",
        device = cairo_pdf, bg = "white")
 ```
 
-## Figure 3
+## Figure 4
 
 ```{r}
-Biomin_all_expressed <- read.csv(paste0(outdir,"/DESeq_biomin_annotation.csv")) %>% left_join(DESeq_SwissProt %>% select(query,Heatmap_Label,category))
-write.csv(Biomin_all_expressed, file=paste0(outdir,"/DESeq_biomin_annotation_heatmap_labels.csv"))
+Biomin_all_expressed <- read.csv(paste0(outdir,"/DESeq_biomin_annotation.csv")) %>% left_join(DESeq_SwissProt %>% select(query,Heatmap_Label,category))# %>% select(-Classification)
+
+
+write.csv(Biomin_all_expressed %>% select(-X) %>% select(Heatmap_Label,query,everything()), file=paste0(outdir,"/DESeq_biomin_annotation_heatmap_labels.csv"),row.names=FALSE)
 
 Biomin_DE <- Biomin_all_expressed %>% filter(abs(log2FoldChange) > 1 & padj < 0.05)
 #choose the genes that will be plotted for the heatmap
@@ -202,10 +204,16 @@ annotation_col_df <- meta %>% select(Tissue)
 ann_colors = list(Tissue = c(OralEpi = "#FD8D3C" ,Aboral = "mediumpurple1"))
 expr_colors <- colorRamp2(c(-2, 0, 2), c("#0571b0", "white", "#ca0020"))
 
+Dark_Pal <- brewer.pal(length(unique(annotation_row$Classification))+2, "Dark2")
+
+#remove purple and orange colors
+Dark_Pal <- Dark_Pal[-c(2,3)]
+
 class_colors <- setNames(
-  brewer.pal(length(unique(annotation_row$Classification)), "Dark2"),
+  Dark_Pal,
   unique(annotation_row$Classification)
 )
+
 # create row annotation object
 row_ha <- rowAnnotation(
   Classification = annotation_row$Classification,
@@ -253,7 +261,7 @@ row_hclust <- hclust(dist(z_scores))
 row_clusters <- cutree(row_hclust, k = 2)
 
 # Combine expression-based grouping with supervised annotation
-#split_factor <- stringr::str_wrap(annotation_row$Classification, width = 18)
+split_factor <- stringr::str_wrap(annotation_row$Classification, width = 18)
 ```
 
 ```{r}
@@ -264,11 +272,11 @@ ht <- Heatmap(
   cluster_columns = TRUE,
   show_parent_dend_line = FALSE,
   row_km = 2,
-  #row_split = split_factor,
+  row_split = split_factor,
   column_split = annotation_col_df$Tissue,
   col = expr_colors,
-  #row_gap = unit(c(1,1,1,1,2,1,1,1,1), "mm"),
-  row_gap = unit(2, "mm"),
+  row_gap = unit(c(1,1,1,1,2,1,1,1,1), "mm"),
+  #row_gap = unit(2, "mm"),
   column_gap = unit(1.5, "mm"),
   left_annotation = row_ha,
   row_title = NULL,
@@ -293,11 +301,11 @@ ht <- Heatmap(
   height = unit(6.25, "in")
 )
 
-pdf("../output_RNA/differential_expression/composite_figs/Figure3.pdf", width = 7, height = 8.5)
+pdf("../output_RNA/differential_expression/composite_figs/Figure4_withsplit.pdf", width = 7, height = 8.5)
 draw(ht, merge_legend = TRUE, heatmap_legend_side = "bottom", annotation_legend_side = "bottom")
 dev.off()
 
-png("../output_RNA/differential_expression/composite_figs/Figure3.png", width = 6, height = 8, res = 300,units = "in")
+png("../output_RNA/differential_expression/composite_figs/Figure4_withsplit.png", width = 6, height = 8, res = 300,units = "in")
 draw(ht, merge_legend = TRUE, heatmap_legend_side = "bottom", annotation_legend_side = "bottom")
 dev.off()
 ```

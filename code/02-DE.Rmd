@@ -393,10 +393,6 @@ up_OralEpi
 ### Single cell marker genes (Levy et al 2021)
 ```{r}
 MarkerGenes_broc <- read.csv("../output_RNA/marker_genes/Pacuta_Spis_Markers_pairs.csv") %>% select(protein_id_spB,cluster,Standardized_Name_spA ) %>% dplyr::rename("query" = 1, "List" = 2)
-
-MarkerGenes$def_short <- ifelse(nchar(MarkerGenes$definition) > 20, 
-                            paste0(substr(MarkerGenes$definition, 1, 17), "..."), 
-                            MarkerGenes$definition)
 ```
 
 ### Biomineralization toolkit
@@ -442,7 +438,7 @@ join_genes_of_interest <- function(df, gene_set) {
   df %>%
     left_join(gene_set, by = "query") %>%
     select(query, everything()) %>%
-    drop_na(List) %>% distinct()
+    drop_na() %>% distinct()
 }
 
 DE_05_Biomin_broc    <- join_genes_of_interest(DE_05, Biomin_broc)
@@ -624,8 +620,15 @@ Biomin_broc_orig_broc_expanded2_clean <- Biomin_broc_orig_broc_expanded2_clean %
   summarize(definition = paste(unique(definition), collapse = ","),Classification = paste(unique(Classification), collapse = ","),def_short = paste(unique(def_short), collapse = ","))
 
 
-DE_05_Biomin_broc    <- join_genes_of_interest(DE_05, Biomin_broc_orig_broc_expanded2_clean)
-DESeq_Biomin_broc    <- join_genes_of_interest(as.data.frame(resOrdered), Biomin_broc_orig_broc_expanded2_clean)
+DE_05_Biomin_broc    <- DE_05 %>%
+    left_join(Biomin_broc_orig_broc_expanded2_clean, by = "query") %>%
+    select(query, everything()) %>%
+    drop_na(List) %>% distinct()
+
+DESeq_Biomin_broc    <- as.data.frame(resOrdered) %>%
+    left_join(Biomin_broc_orig_broc_expanded2_clean, by = "query") %>%
+    select(query, everything()) %>%
+    drop_na(List) %>% distinct()
 ```
 
 ```{r}
@@ -660,8 +663,14 @@ Biomin_broc <- Biomin_broc %>% bind_rows(manual_search_biomin_noortholog)
 
 Biomin_broc_filtered_counts <- filtered_counts[(rownames(filtered_counts) %in% Biomin_broc$query),]
 
-DE_05_Biomin_broc    <- join_genes_of_interest(DE_05, Biomin_broc)
-DESeq_Biomin_broc    <- join_genes_of_interest(as.data.frame(resOrdered), Biomin_broc)
+DE_05_Biomin_broc    <- DE_05 %>%
+    left_join(Biomin_broc, by = "query") %>%
+    select(query, everything()) %>%
+    drop_na(List) %>% distinct()
+DESeq_Biomin_broc    <- as.data.frame(resOrdered)%>%
+    left_join(Biomin_broc, by = "query") %>%
+    select(query, everything()) %>%
+    drop_na(List) %>% distinct()
 
 write.csv(as.data.frame(DESeq_Biomin_broc), file=paste0(outdir,"/DESeq_biomin_annotation.csv"))
 write.csv(as.data.frame(DE_05_Biomin_broc), file=paste0(outdir,"/DE_05_biomin_annotation.csv"))
@@ -826,99 +835,6 @@ save_ggplot(up_OralEpi, "up_OralEpi_Manual")
 ```
 
 ## Expression of certain genes of interest: blast against P. acuta genome
-
-### yin yang Transctiption factor
-
-```{bash, eval=FALSE}
-cd ../references
-
-#download the genome protein fasta if you have not already
-wget http://cyanophora.rutgers.edu/Pocillopora_acuta/Pocillopora_acuta_HIv2.genes.pep.faa.gz
-
-#unzip file
-gunzip Pocillopora_acuta_HIv2.genes.pep.faa.gz
-```
-
-In unity
-
-```{bash, eval=FALSE}
-salloc -p cpu -c 8 --mem 32G
-
-module load uri/main
-module load BLAST+/2.15.0-gompi-2023a
-
-#make blast_dbs directory if you haven't done so above
-mkdir blast_dbs
-cd blast_dbs
-
-makeblastdb -in ../Pocillopora_acuta_HIv2.genes.pep.faa -out Pacuta_prot -dbtype prot
-
-cd ../../output_RNA/differential_expression/
-
-#make blast output directory if you haven't done so above
-mkdir blast
-cd blast
-
-nano YinYang.txt
-```
-
-add accession numbers of interest:
-
-- nematostella vectensis transcriptional repressor protein YY1 isoforms
-  - XP_048585772.1
-  - XP_048585773.1
-  - XP_048585774.1
-
-- human transcription factor YY2
-  - NP_996806.2
-
-- human transcription factor ZFP41 (REX-1)
-  - NP_777560.2
-
-```{bash, eval = FALSE}
-XP_048585772.1
-XP_048585773.1
-XP_048585774.1
-NP_996806.2
-NP_777560.2
-```
-
-```{bash, eval = FALSE}
-# Read the input file line by line and fetch FASTA sequences
-while read -r accession; do
-  if [[ -n "$accession" ]]; then
-    echo "Fetching $accession..."
-    curl -s "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=${accession}&rettype=fasta&retmode=text" >> "YinYang.fasta"
-    echo >> "YinYang.fasta"  # Add a newline between sequences
-    sleep 1  # Avoid hitting rate limits
-  fi
-done < "YinYang.txt"
-
-# run blast with human-readable output
-blastp -query YinYang.fasta -db ../../../references/blast_dbs/Pacuta_prot -out YinYang_blast_results.txt -outfmt 0
-
-#looks like there are a lot of matches for each gene! I am going to do a tab search with a very low e-value cutoff:
-
-# run blast with tabular output
-blastp -query YinYang.fasta -db ../../../references/blast_dbs/Pacuta_prot -out YinYang_blast_results_tab.txt -outfmt 6 -evalue 1e-25
-```
-
-Great! Interestingly, the same gene, Pocillopora_acuta_HIv2___RNAseq.g25242.t1 is the top match for all 5 proteins I searched. Pocillopora_acuta_HIv2___TS.g24434.t1 is the second best match for all 5. That is interesting! Pocillopora_acuta_HIv2___RNAseq.g7583.t1 is also worth looking at. And Pocillopora_acuta_HIv2___TS.g21338.t1 matched all three YY1 isoforms.
-
-```{r}
-YinYangs <- c("Pocillopora_acuta_HIv2___RNAseq.g25242.t1",
-              "Pocillopora_acuta_HIv2___TS.g24434.t1",
-              "Pocillopora_acuta_HIv2___RNAseq.g7583.t1",
-              "Pocillopora_acuta_HIv2___TS.g21338.t1")
-
-for (i in 1:length(YinYangs)){
-  plotCounts(dds, gene=YinYangs[i], intgroup=c("Tissue"),)
-}
-
-as.data.frame(resOrdered)[YinYangs,]
-```
-
-Okay! None of these genes are differentially expressed between the tissues. That is interesting and good to know. Pocillopora_acuta_HIv2___RNAseq.g25242.t1 has the highest basal expression of all the potential isoforms of this transcription factor.
 
 ### TRP Channels
 
