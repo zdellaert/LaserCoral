@@ -708,12 +708,17 @@ split_factor &lt;- stringr::str_wrap(annotation_row$Classification, width = 18)<
 <pre><code>## &#39;magick&#39; package is suggested to install to give better rasterization.
 ## 
 ## Set `ht_opt$message = FALSE` to turn off this message.</code></pre>
-<pre class="r"><code>pdf(&quot;../output_RNA/differential_expression/composite_figs/Figure4_withsplit.pdf&quot;, width = 7, height = 8.5)
+<pre class="r"><code>pdf(&quot;../output_RNA/differential_expression/composite_figs/Figure4.pdf&quot;, width = 7, height = 8.5)
 draw(ht, merge_legend = TRUE, heatmap_legend_side = &quot;bottom&quot;, annotation_legend_side = &quot;bottom&quot;)
 dev.off()</code></pre>
 <pre><code>## quartz_off_screen 
 ##                 2</code></pre>
-<pre class="r"><code>png(&quot;../output_RNA/differential_expression/composite_figs/Figure4_withsplit.png&quot;, width = 6, height = 8, res = 300,units = &quot;in&quot;)
+<pre class="r"><code>png(&quot;../output_RNA/differential_expression/composite_figs/Figure4.png&quot;, width = 6, height = 8, res = 300,units = &quot;in&quot;)
+draw(ht, merge_legend = TRUE, heatmap_legend_side = &quot;bottom&quot;, annotation_legend_side = &quot;bottom&quot;)
+dev.off()</code></pre>
+<pre><code>## quartz_off_screen 
+##                 2</code></pre>
+<pre class="r"><code>svg(&quot;../output_RNA/differential_expression/composite_figs/Figure4.svg&quot;, width = 6, height = 8)
 draw(ht, merge_legend = TRUE, heatmap_legend_side = &quot;bottom&quot;, annotation_legend_side = &quot;bottom&quot;)
 dev.off()</code></pre>
 <pre><code>## quartz_off_screen 

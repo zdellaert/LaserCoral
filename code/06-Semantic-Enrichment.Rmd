@@ -942,8 +942,7 @@ final_fig <-
 
 final_fig <- final_fig + plot_annotation(tag_levels = list(c("A: Oral Epidermis Tissue", "","B: Aboral Tissue", "","C: Oral Epidermis Tissue", "D: Aboral Tissue")))
 
-ggsave("../output_RNA/differential_expression/semantic-enrichment/All_sig_BP_terms_by_cluster_FULL.png", final_fig, width = 12, height = 16, dpi = 300)
-ggsave("../output_RNA/differential_expression/composite_figs/Figure3.png", final_fig, width = 12, height = 16, dpi = 300)
+ggsave("../output_RNA/differential_expression/composite_figs/Figure3.svg", final_fig, width = 12, height = 16)
 ```
 
 ### Plot
