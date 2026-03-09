@@ -22,6 +22,8 @@ library(ComplexHeatmap)
 library(RColorBrewer)
 library(circlize)
 library(svglite)
+library(cowplot)
+library(magick)
 ```
 
 ## Setup
@@ -52,11 +54,31 @@ meta$Tissue <- factor(meta$Tissue, levels = c("Aboral","OralEpi")) #we want Abor
 CDSearch <- read.delim("../references/Pocillopora_acuta_HIv2.genes.Conserved_Domain_Search_results.txt", quote = "") %>% dplyr::rename("query" = X.Query)
 EggNog <- read.delim("../references/Pocillopora_acuta_HIv2.genes.EggNog_results.txt") %>% dplyr::rename("query" = X.query)
 DESeq_SwissProt <- read.csv(file=paste0(outdir,"/DESeq_SwissProt_annotation_categorized.csv"))
+
+DE_05_marker_broc <- read.csv(file=paste0(outdir,"/DE_05_markergene_annotation.csv"))
+
 ```
 
-## Figure 1
+## Figure 2
 
 ### Panel B: PCA
+
+```{r}
+pcaData <- read.csv(paste0(outdir, "/pcaData_allgenes.csv"), row.names = 1)
+percentVar <- read.csv(paste0(outdir, "/pcaData_percentVar_allgenes.csv"))$percentVar
+percentVar <- round(100 * percentVar)
+
+PCA_small <- ggplot(pcaData, aes(PC1, PC2, color=Tissue)) +
+  geom_point(size=2) +
+  scale_color_manual(values = c("Aboral" = "mediumpurple1", "OralEpi" = "#FD8D3C"),
+                     labels = c("Aboral" = "Aboral", "OralEpi" = "Oral"))+
+  xlab(paste0("PC1: ",percentVar[1],"% variance")) +
+  ylab(paste0("PC2: ",percentVar[2],"% variance")) + 
+  coord_fixed() + theme_bw() + 
+  theme(legend.position = c(0.8,0.25))
+
+```
+
 
 ### Panel C
 
@@ -78,44 +100,15 @@ LFC_colors[is.na(LFC_colors)] <- 'grey'
   names(LFC_colors)[LFC_colors == '#AB82FF'] <- 'Up_Aboral_LFC_sig'
   names(LFC_colors)[LFC_colors == '#D4C0FF'] <- 'Up_Aboral'
   
-DESeq_SwissProt$short_name <- ifelse(nchar(DESeq_SwissProt$ProteinNames) > 25, 
-                            paste0(substr(DESeq_SwissProt$ProteinNames, 1, 22), "..."), 
-                            DESeq_SwissProt$ProteinNames)
- 
-plot <- EnhancedVolcano(DESeq_SwissProt, 
-    lab = ifelse(DESeq_SwissProt$padj < 0.05 & abs(DESeq_SwissProt$log2FoldChange) > 10, DESeq_SwissProt$short_name, ""),
-    xlim = c(min(DESeq_SwissProt[["log2FoldChange"]], na.rm = TRUE) - 5, max(DESeq_SwissProt[["log2FoldChange"]], na.rm = TRUE) + 5),
-  #ylim = c(0, max(-log10(toptable[[y]]), na.rm = TRUE) + 5),
-    labSize = 3,
-    axisLabSize = 8,
-    captionLabSize = 4,
-  shape=16,
-    x = "log2FoldChange", 
-    y = "padj",
-    pCutoff = 0.05,
-    colCustom = LFC_colors, colAlpha = .7,
-    title = NULL, subtitle = NULL, 
-    legendPosition = "bottom",
-    legendLabSize = 8,
-    pointSize = 1,
-    legendIconSize = 3,
-    drawConnectors = TRUE,
-    widthConnectors = 0.5,
-    directionConnectors = "x",
-    border = 'full',
-    max.overlaps = Inf,
-    maxoverlapsConnectors = 0,
-    arrowheads =FALSE,
-    min.segment.length = 0,
-    gridlines.major = FALSE,
-  gridlines.minor = FALSE
-) #+ coord_flip() + scale_x_reverse()
+DESeq_SwissProt$Volcano_Label <-paste0(replace_na(stringr::str_wrap(DESeq_SwissProt$Heatmap_Label, width = 20), "Unannotated"),"\nLFC = ",round(DESeq_SwissProt$log2FoldChange,1))
 
-plot
+top_DE_oral <- DESeq_SwissProt %>% filter(log2FoldChange > 1) %>% arrange(desc(log2FoldChange)) %>% head(5) %>% pull(query)
+top_DE_aboral <- DESeq_SwissProt %>% filter(log2FoldChange < -1) %>% arrange(log2FoldChange) %>% head(5)  %>% pull(query)
+label_top5 <- c(top_DE_oral,top_DE_aboral)
 
-plot <- EnhancedVolcano(DESeq_SwissProt, 
-    lab = ifelse(DESeq_SwissProt$padj < 0.05 & abs(DESeq_SwissProt$log2FoldChange) > 10, DESeq_SwissProt$short_name, ""),
-    xlim = c(min(DESeq_SwissProt[["log2FoldChange"]], na.rm = TRUE) - .5, max(DESeq_SwissProt[["log2FoldChange"]], na.rm = TRUE) + .5),
+volcano <- EnhancedVolcano(DESeq_SwissProt, 
+    lab = ifelse(DESeq_SwissProt$query %in% label_top5 , DESeq_SwissProt$Volcano_Label, ""),
+    xlim = c(min(DESeq_SwissProt[["log2FoldChange"]], na.rm = TRUE) - 1.5, max(DESeq_SwissProt[["log2FoldChange"]], na.rm = TRUE) + 1.5),
   ylim = c(0, max(-log10(DESeq_SwissProt[["padj"]]), na.rm = TRUE) + .5),
     labSize = 3,
     axisLabSize = 12,
@@ -125,50 +118,47 @@ plot <- EnhancedVolcano(DESeq_SwissProt,
   shape=16,
     pCutoff = 0.05,
     colCustom = LFC_colors, colAlpha = .7,
-    title = NULL, subtitle = NULL, 
-    legendPosition = "bottom",
+    title = NULL, subtitle = NULL, caption = NULL,
+    legendPosition = "none",
     legendLabSize = 8,
     pointSize = 1,
     legendIconSize = 3,
     drawConnectors = TRUE,
-    widthConnectors = 0.5,
-    directionConnectors = "x",
-    border = 'full',
+    lengthConnectors = unit(0.01, "npc"),
+    directionConnectors = "both",
+    border = 'partial',
     max.overlaps = Inf,
-    maxoverlapsConnectors = 0,
-    arrowheads =FALSE,
+    maxoverlapsConnectors = NULL,
+    arrowheads =TRUE,
     min.segment.length = 0,
     gridlines.major = FALSE,
   gridlines.minor = FALSE
 ) #+ coord_flip() + scale_x_reverse()
-
-plot
-
-#DESeq_SwissProt
+ volcano
+ 
 ```
 
 ### Patchwork
 
-```{r, eval=FALSE}
-library(patchwork)
+```{r}
+# Load images 
+img_1A_crop <- ggdraw() + draw_image("images/1A_crop.png") 
+img_1A_crop_cut <- ggdraw() + draw_image("images/1A_crop_cut.png")
+  
 
-layout <- "
-AABBCC
-DDDDDD
-"
+top_row <- (free(img_1A_crop) + free(img_1A_crop_cut) + PCA_small) +
+  plot_layout(widths = c(0.225, 0.225, 0.235)) 
+final_fig <- 
+  top_row / free(volcano) +
+  plot_annotation(tag_levels = list(c("A1", "A2","B","C"))) &
+  theme(plot.tag = element_text(size = 16, face = "bold"),
+        plot.margin = margin(0.5,0.5,0.5,0.5),
+        plot.tag.position  = c(.02, .9)) 
 
-final_fig <- pic_1 + pic_2 + PCA + plot +
-  plot_layout(design = layout) +
-  plot_annotation(tag_levels = "A") &
-  theme(plot.tag = element_text(size = 12, face = "bold"))
-
-# Save outputs
-ggsave("../output_RNA/differential_expression/composite_figs/Figure1.png",
-       final_fig, width = 6.9, height = 9, units = "in", dpi = 600, bg = "white")
-
-ggsave("../output_RNA/differential_expression/composite_figs/Figure1.pdf",
-       final_fig, width = 6.9, height = 9, units = "in", dpi = 600, 
-       device = cairo_pdf, bg = "white")
+svglite("../output_RNA/differential_expression/composite_figs/Figure2.svg",
+        width = 10, height = 7)
+print(final_fig)
+dev.off()
 ```
 
 ## Figure 4
@@ -311,3 +301,164 @@ dev.off()
 
 
 
+## Figure 5
+
+```{r}
+#get list of all differentially expressed marker genes
+markers <- DE_05_marker_broc %>% select(query, Standardized_Name_spA) %>% distinct()
+
+# get VST expression values
+vsd_mat <- vsd %>% 
+  tibble::rownames_to_column("gene")
+
+# make VST expression value df into long format, and add marker info, filter to only keep expressed marker genes
+
+mat_long <- vsd_mat %>%
+  pivot_longer(-gene, names_to = "Sample", values_to = "vst") %>%
+  left_join(meta %>% select(Sample, Tissue), by = "Sample") %>%
+  left_join(markers, by = c("gene" = "query")) %>%
+  filter(!is.na(Standardized_Name_spA))
+
+# gene mean by tissue
+gene_tissue <- mat_long %>%
+  group_by(Standardized_Name_spA, gene, Tissue) %>%
+  summarise(mean_vst = mean(vst, na.rm = TRUE), .groups = "drop")
+
+plot_df <- gene_tissue %>%
+  pivot_wider(names_from = Tissue, values_from = mean_vst, values_fill = 0)
+```
+
+
+```{r}
+tissue_cols <- setdiff(colnames(plot_df), c("Standardized_Name_spA", "gene"))
+
+# outer = OralEpi (t1), inner = Aboral (t2)
+t1 <- tissue_cols[tissue_cols=="OralEpi"]
+t2 <- tissue_cols[tissue_cols=="Aboral"]
+
+# Sort sectors by tissue dominance for better visual flow
+sector_totals <- plot_df %>%
+  group_by(Standardized_Name_spA) %>%
+  summarise(
+    n_t1 = sum(.data[[t1]] > .data[[t2]], na.rm = TRUE),
+    n_t2 = sum(.data[[t2]] > .data[[t1]], na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    dom_group = if_else(n_t1 > n_t2, "t1_dominant", "t2_dominant"),
+    sort_value = if_else(dom_group == "t1_dominant", -n_t1, n_t2)  # negative makes n_t1 descending
+  ) %>%
+  arrange(
+    factor(dom_group, levels = c("t1_dominant", "t2_dominant")),
+    sort_value
+  )
+
+plot_df <- plot_df %>%
+  mutate(Standardized_Name_spA = factor(Standardized_Name_spA, 
+                                       levels = sector_totals$Standardized_Name_spA))
+
+
+gene_counts <- table(plot_df$Standardized_Name_spA)
+xlims <- cbind(rep(0, length(gene_counts)), as.numeric(gene_counts))
+maxval <- max(c(plot_df[[t1]], plot_df[[t2]]), na.rm = TRUE)
+maxval <- signif(maxval,0)
+ylim <- c(0, maxval)
+
+png("../output_RNA/differential_expression/DE_05_brocmarker_circ_colored.png", width = 3000, height = 3000, res = 300)
+
+circos.clear()
+circos.par(start.degree = 90, gap.after = 5, cell.padding = c(0.01, 0, 0.01, 0))
+circos.initialize(factors = names(gene_counts), xlim = xlims)
+
+# Sector labels with improved styling
+circos.track(
+  ylim = c(0, 1), 
+  track.height = 0.08, 
+  bg.border = NA,
+  panel.fun = function(x, y) {
+    sector <- CELL_META$sector.index
+    # Calculate text size based on sector name length
+    text_cex <- min(0.7, 10/nchar(sector))
+    circos.text(CELL_META$xcenter, 0.5, sector,
+                facing = "bending.inside", 
+                cex = text_cex,
+                font = 2)  # Bold text
+  }
+)
+
+circos.trackPlotRegion(
+  ylim = c(-maxval, maxval),  # negative to positive
+  track.height = 0.5,
+  bg.border = "gray90",
+  panel.fun = function(x, y) {
+    
+    sector <- CELL_META$sector.index
+    
+    genes <- plot_df %>% filter(Standardized_Name_spA == sector) %>%
+                      mutate(
+              dom_group = if_else(.data[[t1]] > .data[[t2]], "t1_dominant", "t2_dominant")
+            ) %>%
+            arrange(
+              factor(dom_group, levels = c("t1_dominant", "t2_dominant")),
+              desc(if_else(dom_group == "t1_dominant", .data[[t1]], -.data[[t2]]))
+            )
+
+    # Add horizontal grid lines at standardized levels
+    grid_levels <- c(maxval * -0.25, maxval * -0.5, maxval * -0.75, maxval * 0.25, maxval * 0.5, maxval * 0.75)
+    for (level in grid_levels) {
+      circos.lines(c(0, CELL_META$xlim[2]), c(level, level),
+                   col = "gray90", lwd = 0.8)
+    }
+    
+    for (i in seq_len(nrow(genes))) {
+      t1_val <- genes[[t1]][i]
+      t2_val <- genes[[t2]][i]
+      
+      # Determine colors based on dominance
+      if (t1_val > t2_val) {
+        t1_col <- "#FD8D3C"  # Bright color for dominant
+        t2_col <- "#E6D3F7"  # Muted color for non-dominant
+      } else {
+        t1_col <- "#FED8A6"  # Muted color for non-dominant
+        t2_col <- "mediumpurple1"  # Bright color for dominant
+      }
+      
+      # Add border to emphasize dominant bar
+      t1_border <- "white" # ifelse(t1_val > t2_val, "black", "white")
+      t2_border <- "white" #ifelse(t2_val > t1_val, "black", "white")
+      
+      # Tissue 1 goes up (positive)
+      circos.rect(i-1, 0, i, t1_val, col = t1_col, border = t1_border, lwd = 0.5)
+      # Tissue 2 goes down (negative) 
+      circos.rect(i-1, 0, i, -t2_val, col = t2_col, border = t2_border, lwd = 0.5)
+    }
+    
+        # Add y-axis labels on first sector
+    if (CELL_META$sector.numeric.index == 1) {
+      circos.yaxis(side = "left", at = c(-maxval, -maxval/2, 0, maxval/2, maxval),
+                   labels = c(sprintf("%.0f", -maxval), sprintf("%.0f", -maxval/2),"0", sprintf("%.0f", maxval/2), sprintf("%.0f", maxval)),
+                   tick.length = 0.15, labels.cex = 0.8, lwd = 1)
+    }
+  }
+)
+
+# Enhanced legend with better positioning and styling
+par(xpd = TRUE)
+legend("topright", 
+       legend = paste(c("Outer:", "Inner:"), c(t1, t2)), 
+       fill = c("#FD8D3C", "mediumpurple1"),
+       border = "black",
+       bty = "o",  # Draw box around legend
+       cex = 1.0,
+       title = "Tissue Type",
+       title.cex = 1.1)
+
+# Add subtitle with sample info
+n_genes <- nrow(plot_df)
+n_sectors <- length(unique(plot_df$Standardized_Name_spA))
+mtext(sprintf("VST-normalized expression | %d genes across %d gene categories", 
+              n_genes, n_sectors),
+      side = 3, line = 0, cex = 0.9, col = "gray40")
+
+dev.off()
+```
