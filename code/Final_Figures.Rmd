@@ -320,12 +320,11 @@ mat_long <- vsd_mat %>%
   filter(!is.na(Standardized_Name_spA))
 
 # gene mean by tissue
-gene_tissue <- mat_long %>%
+plot_df <- mat_long %>%
   group_by(Standardized_Name_spA, gene, Tissue) %>%
-  summarise(mean_vst = mean(vst, na.rm = TRUE), .groups = "drop")
-
-plot_df <- gene_tissue %>%
-  pivot_wider(names_from = Tissue, values_from = mean_vst, values_fill = 0)
+  summarise(mean_vst = mean(vst, na.rm = TRUE), .groups = "drop") %>%
+  pivot_wider(names_from = Tissue, values_from = mean_vst, values_fill = 0) %>%
+  mutate(Standardized_Name_spA = str_to_title(str_replace_all(Standardized_Name_spA,"_","\n")))
 ```
 
 
@@ -362,12 +361,18 @@ gene_counts <- table(plot_df$Standardized_Name_spA)
 xlims <- cbind(rep(0, length(gene_counts)), as.numeric(gene_counts))
 maxval <- max(c(plot_df[[t1]], plot_df[[t2]]), na.rm = TRUE)
 maxval <- signif(maxval,0)
-ylim <- c(0, maxval)
+```
 
-png("../output_RNA/differential_expression/DE_05_brocmarker_circ_colored.png", width = 3000, height = 3000, res = 300)
+
+```{r}
+#png("../output_RNA/differential_expression/DE_05_brocmarker_circ_colored.png", width = 3000, height = 3000, res = 300)
+svglite("../output_RNA/differential_expression/composite_figs/Figure5.svg", width = 10, height = 10)
 
 circos.clear()
-circos.par(start.degree = 90, gap.after = 5, cell.padding = c(0.01, 0, 0.01, 0))
+circos.par(start.degree = 180,
+           gap.after = setNames(c(rep(3,length(gene_counts)-1),8), names(gene_counts)),
+           cell.padding = c(0.01, 0, 0.01, 0),
+           canvas.xlim = c(-1, 1.1))
 circos.initialize(factors = names(gene_counts), xlim = xlims)
 
 # Sector labels with improved styling
@@ -378,11 +383,11 @@ circos.track(
   panel.fun = function(x, y) {
     sector <- CELL_META$sector.index
     # Calculate text size based on sector name length
-    text_cex <- min(0.7, 10/nchar(sector))
-    circos.text(CELL_META$xcenter, 0.5, sector,
-                facing = "bending.inside", 
+    text_cex <- min(1.25, 30/nchar(sector))
+    circos.text(CELL_META$xcenter, 1.85, sector,
+                facing = "downward", 
                 cex = text_cex,
-                font = 2)  # Bold text
+                font = 2) 
   }
 )
 
@@ -423,20 +428,16 @@ circos.trackPlotRegion(
         t2_col <- "mediumpurple1"  # Bright color for dominant
       }
       
-      # Add border to emphasize dominant bar
-      t1_border <- "white" # ifelse(t1_val > t2_val, "black", "white")
-      t2_border <- "white" #ifelse(t2_val > t1_val, "black", "white")
-      
       # Tissue 1 goes up (positive)
-      circos.rect(i-1, 0, i, t1_val, col = t1_col, border = t1_border, lwd = 0.5)
+      circos.rect(i-1, 0, i, t1_val, col = t1_col, border = "white", lwd = 0.5)
       # Tissue 2 goes down (negative) 
-      circos.rect(i-1, 0, i, -t2_val, col = t2_col, border = t2_border, lwd = 0.5)
+      circos.rect(i-1, 0, i, -t2_val, col = t2_col, border = "white", lwd = 0.5)
     }
     
-        # Add y-axis labels on first sector
+        # Add y-axis labels on top-most sector
     if (CELL_META$sector.numeric.index == 1) {
       circos.yaxis(side = "left", at = c(-maxval, -maxval/2, 0, maxval/2, maxval),
-                   labels = c(sprintf("%.0f", -maxval), sprintf("%.0f", -maxval/2),"0", sprintf("%.0f", maxval/2), sprintf("%.0f", maxval)),
+                   labels = c(sprintf("%.0f", -maxval), sprintf("%.0f", -maxval/2),"0", sprintf("%.0f", maxval/2), sprintf("%.0f", maxval)),labels.niceFacing = FALSE,
                    tick.length = 0.15, labels.cex = 0.8, lwd = 1)
     }
   }
@@ -444,7 +445,7 @@ circos.trackPlotRegion(
 
 # Enhanced legend with better positioning and styling
 par(xpd = TRUE)
-legend("topright", 
+legend("center", 
        legend = paste(c("Outer:", "Inner:"), c(t1, t2)), 
        fill = c("#FD8D3C", "mediumpurple1"),
        border = "black",
@@ -452,13 +453,5 @@ legend("topright",
        cex = 1.0,
        title = "Tissue Type",
        title.cex = 1.1)
-
-# Add subtitle with sample info
-n_genes <- nrow(plot_df)
-n_sectors <- length(unique(plot_df$Standardized_Name_spA))
-mtext(sprintf("VST-normalized expression | %d genes across %d gene categories", 
-              n_genes, n_sectors),
-      side = 3, line = 0, cex = 0.9, col = "gray40")
-
 dev.off()
 ```
