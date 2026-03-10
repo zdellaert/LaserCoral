@@ -1,0 +1,11 @@
+﻿Fragment,Tissue Type,Number of Dissections,Total Tissue Area (µm²),Mean ± Standard Deviation per Dissection (µm²)
+A,OralEpi,6,"71,149",11858 ± 3652
+A,Aboral,9,"49,204",5467 ± 2628
+B,OralEpi,8,"94,925",11866 ± 3038
+B,Aboral,7,"52,018",7431 ± 4324
+C,OralEpi,8,"157,916",19740 ± 6536
+C,Aboral,6,"114,946",19158 ± 4189
+D,OralEpi,7,"101,268",14467 ± 3569
+D,Aboral,8,"54,282",6785 ± 1302
+E,OralEpi,10,"124,948",12495 ± 2895
+E,Aboral,11,"87,014",7910 ± 3326

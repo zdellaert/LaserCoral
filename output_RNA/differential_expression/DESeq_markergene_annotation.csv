@@ -1,4 +1,4 @@
-"","query","baseMean","log2FoldChange","lfcSE","pvalue","padj","List","Standardized_Name_spA"
+"","query","baseMean","log2FoldChange","lfcSE","pvalue","padj","Spis_CellType_Full","Spis_CellType"
 "1","Pocillopora_acuta_HIv2___RNAseq.g14330.t3",2168.32101516159,16.3859028551501,3.71164199181217,6.70801192648671e-19,1.6170780750784e-15,"epidermis_1","epidermis"
 "2","Pocillopora_acuta_HIv2___RNAseq.g14025.t1",2533.20105807112,16.5084028067417,3.78273122811433,1.17610368424726e-18,2.12639546111904e-15,"epidermis_2","epidermis"
 "3","Pocillopora_acuta_HIv2___RNAseq.g22853.t1",8612.30390232864,11.1479439185155,2.14634834160287,1.90546526898883e-15,6.72210967089134e-13,"digestive_filaments","digestive_filaments"
