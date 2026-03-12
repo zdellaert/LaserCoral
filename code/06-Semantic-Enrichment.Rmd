@@ -3,12 +3,7 @@ title: "Semantic Enrichment"
 author: "Zoe Dellaert"
 date: "2025-01-11"
 output:
-  github_document:
-    toc: true
-    toc_depth: 3
-    number_sections: true
-    html_preview: true
-always_allow_html: true
+ html_document: default
 ---
 
 ## Gene Ontology Analysis analysis of LCM RNA Data
