@@ -24,7 +24,7 @@ Data and methods for Chapter Three of my dissertation, Laser Capture Microdissec
 **Biomineralization-related genes ([Scucchia et al., 2021](https://doi.org/10.1111/gcb.15812); [Scucchia et al., 2021](https://doi.org/10.1098/rspb.2021.0328))**
 - [Excel file](https://github.com/zdellaert/LaserCoral/blob/main/references/Biomineralization_Toolkit_FScucchia/Biomineralization_Toolkit_FScucchia.xlsx)
 - [Fasta file](https://github.com/zdellaert/LaserCoral/blob/main/references/Biomineralization_Toolkit_FScucchia/Biomineralization_Toolkit_FScucchia.fasta)
-- [*P. acuta* orthologs](https://github.com/zdellaert/LaserCoral/blob/main/Biomineralization_Toolkit_FScucchia/Pacuta_Biomin_Spis_ortholog.csv)
+- [*P. acuta* orthologs](https://github.com/zdellaert/LaserCoral/blob/main/references/Biomineralization_Toolkit_FScucchia/Pacuta_Biomin_Spis_ortholog.csv)
 
 **Stylophora pistillata scRNA-seq Marker Genes ([Levy et al., 2021](10.1016/j.cell.2021.04.005))**
 - [Marker Gene File](https://github.com/zdellaert/LaserCoral/blob/main/references/marker_genes/Spis_mc_coral_markers_list_cell_type.tsv) downloaded from [here](https://github.com/sebepedroslab/Stylophora_single_cell_atlas/blob/master/clustering_coral/scdb/Spis_mc_coral_markers_list_cell_type.tsv)
