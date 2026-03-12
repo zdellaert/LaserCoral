@@ -1,38 +1,131 @@
----
-title: "Figures Plotted"
-author: "Zoe Dellaert"
-date: "2025-11-05"
-output:
-  github_document:
-    toc: true
-    toc_depth: 3
-    number_sections: true
-    html_preview: true
-always_allow_html: true
----
+Figures Plotted
+================
+Zoe Dellaert
+2025-11-05
+
+- [0.1 Setup](#01-setup)
+  - [0.1.1 Load in Data](#011-load-in-data)
+- [0.2 Figure 2](#02-figure-2)
+  - [0.2.1 Panel B: PCA](#021-panel-b-pca)
+  - [0.2.2 Panel C](#022-panel-c)
+  - [0.2.3 Patchwork](#023-patchwork)
+- [0.3 Figure 3](#03-figure-3)
+- [0.4 Figure 4](#04-figure-4)
+- [0.5 Figure 5](#05-figure-5)
+- [0.6 Supplementary Tables](#06-supplementary-tables)
 
 Work in progress to have one doc for centralized figure work
 
-
-```{r}
+``` r
 library(tidyverse)
+```
+
+    ## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+    ## ✔ dplyr     1.1.4     ✔ readr     2.1.5
+    ## ✔ forcats   1.0.1     ✔ stringr   1.6.0
+    ## ✔ ggplot2   4.0.0     ✔ tibble    3.3.0
+    ## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+    ## ✔ purrr     1.2.0     
+    ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ✖ dplyr::filter() masks stats::filter()
+    ## ✖ dplyr::lag()    masks stats::lag()
+    ## ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
+
+``` r
 library(purrr)
 library(ggplot2)
 library(patchwork)
 library(stringr)
 library(scales)
+```
+
+    ## 
+    ## Attaching package: 'scales'
+    ## 
+    ## The following object is masked from 'package:purrr':
+    ## 
+    ##     discard
+    ## 
+    ## The following object is masked from 'package:readr':
+    ## 
+    ##     col_factor
+
+``` r
 library(EnhancedVolcano)
+```
+
+    ## Loading required package: ggrepel
+
+``` r
 library(ComplexHeatmap)
+```
+
+    ## Loading required package: grid
+    ## ========================================
+    ## ComplexHeatmap version 2.26.0
+    ## Bioconductor page: http://bioconductor.org/packages/ComplexHeatmap/
+    ## Github page: https://github.com/jokergoo/ComplexHeatmap
+    ## Documentation: http://jokergoo.github.io/ComplexHeatmap-reference
+    ## 
+    ## If you use it in published research, please cite either one:
+    ## - Gu, Z. Complex Heatmap Visualization. iMeta 2022.
+    ## - Gu, Z. Complex heatmaps reveal patterns and correlations in multidimensional 
+    ##     genomic data. Bioinformatics 2016.
+    ## 
+    ## 
+    ## The new InteractiveComplexHeatmap package can directly export static 
+    ## complex heatmaps into an interactive Shiny app with zero effort. Have a try!
+    ## 
+    ## This message can be suppressed by:
+    ##   suppressPackageStartupMessages(library(ComplexHeatmap))
+    ## ========================================
+
+``` r
 library(RColorBrewer)
 library(circlize)
+```
+
+    ## ========================================
+    ## circlize version 0.4.16
+    ## CRAN page: https://cran.r-project.org/package=circlize
+    ## Github page: https://github.com/jokergoo/circlize
+    ## Documentation: https://jokergoo.github.io/circlize_book/book/
+    ## 
+    ## If you use it in published research, please cite:
+    ## Gu, Z. circlize implements and enhances circular visualization
+    ##   in R. Bioinformatics 2014.
+    ## 
+    ## This message can be suppressed by:
+    ##   suppressPackageStartupMessages(library(circlize))
+    ## ========================================
+
+``` r
 library(svglite)
 library(cowplot)
+```
+
+    ## 
+    ## Attaching package: 'cowplot'
+    ## 
+    ## The following object is masked from 'package:patchwork':
+    ## 
+    ##     align_plots
+    ## 
+    ## The following object is masked from 'package:lubridate':
+    ## 
+    ##     stamp
+
+``` r
 library(magick)
 ```
 
-## Setup
+    ## Linking to ImageMagick 6.9.13.29
+    ## Enabled features: cairo, fontconfig, freetype, heic, lcms, pango, raw, rsvg, webp
+    ## Disabled features: fftw, ghostscript, x11
 
-```{r}
+## 0.1 Setup
+
+``` r
 #set standard output directory for figures
 outdir <- "../output_RNA/differential_expression"
 
@@ -40,9 +133,9 @@ outdir <- "../output_RNA/differential_expression"
 ann_colors = list(Tissue = c(OralEpi = "#FD8D3C" ,Aboral = "mediumpurple1"))
 ```
 
-### Load in Data
+### 0.1.1 Load in Data
 
-```{r}
+``` r
 vsd <- read.csv(paste0(outdir,"/vsd_expression_matrix.csv"))
 vsd <- vsd %>% column_to_rownames(var = "X")
 
@@ -59,14 +152,13 @@ EggNog <- read.delim("../references/Pocillopora_acuta_HIv2.genes.EggNog_results.
 DESeq_SwissProt <- read.csv(file=paste0(outdir,"/DESeq_SwissProt_annotation_categorized.csv"))
 
 DE_05_marker_broc <- read.csv(file=paste0(outdir,"/DE_05_markergene_annotation.csv"))
-
 ```
 
-## Figure 2
+## 0.2 Figure 2
 
-### Panel B: PCA
+### 0.2.1 Panel B: PCA
 
-```{r}
+``` r
 pcaData <- read.csv(paste0(outdir, "/pcaData_allgenes.csv"), row.names = 1)
 percentVar <- read.csv(paste0(outdir, "/pcaData_percentVar_allgenes.csv"))$percentVar
 percentVar <- round(100 * percentVar)
@@ -79,17 +171,19 @@ PCA_small <- ggplot(pcaData, aes(PC1, PC2, color=Tissue)) +
   ylab(paste0("PC2: ",percentVar[2],"% variance")) + 
   coord_fixed() + theme_bw() + 
   theme(legend.position = c(0.8,0.25))
-
 ```
 
+### 0.2.2 Panel C
 
-### Panel C
-
-```{r}
+``` r
 ann_colors = list(Tissue = c(OralEpi = "#FD8D3C" ,Aboral = "mediumpurple1"))
 
 colorRampPalette(c("mediumpurple1", "white", "#FD8D3C"))(5)
+```
 
+    ## [1] "#AB82FF" "#D4C0FF" "#FFFFFF" "#FEC69D" "#FD8D3C"
+
+``` r
 LFC_colors <- ifelse(DESeq_SwissProt$padj < 0.05 & DESeq_SwissProt$log2FoldChange > 1, '#FD8D3C',
                   ifelse(DESeq_SwissProt$padj < 0.05 & DESeq_SwissProt$log2FoldChange > 0 , '#FEC69D',
                          ifelse(DESeq_SwissProt$padj < 0.05 & DESeq_SwissProt$log2FoldChange < -1, '#AB82FF',
@@ -138,13 +232,33 @@ volcano <- EnhancedVolcano(DESeq_SwissProt,
   gridlines.minor = FALSE,
   raster = TRUE
 ) #+ coord_flip() + scale_x_reverse()
- volcano
- 
 ```
 
-### Patchwork
+    ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+    ## ℹ Please use `linewidth` instead.
+    ## ℹ The deprecated feature was likely used in the EnhancedVolcano package.
+    ##   Please report the issue to the authors.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
 
-```{r}
+    ## Warning: The `size` argument of `element_rect()` is deprecated as of ggplot2 3.4.0.
+    ## ℹ Please use the `linewidth` argument instead.
+    ## ℹ The deprecated feature was likely used in the EnhancedVolcano package.
+    ##   Please report the issue to the authors.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+``` r
+ volcano
+```
+
+![](Final_Figures_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+
+### 0.2.3 Patchwork
+
+``` r
 # Load images 
 img_1A_crop <- ggdraw() + draw_image("images/1A_crop.png") 
 img_1A_crop_cut <- ggdraw() + draw_image("images/1A_crop_cut.png")
@@ -165,9 +279,12 @@ print(final_fig)
 dev.off()
 ```
 
-## Figure 3
+    ## quartz_off_screen 
+    ##                 2
 
-```{r, eval=FALSE}
+## 0.3 Figure 3
+
+``` r
 library(ggdendro)
 library(patchwork)
 dist_mat <- slot(Wang_clusters_wardD2_Oral, "clusters_dist")[["BMA"]]
@@ -231,7 +348,7 @@ final_oral_dend <- wrap_elements(
   dend_plot_oral + bar_plot_oral + plot_layout(widths = c(0.8, 3.5)) + theme(plot.margin = margin(0, 0, 0, 0)))
 ```
 
-```{r, eval=FALSE}
+``` r
 dist_mat <- slot(Wang_clusters_wardD2_Aboral, "clusters_dist")[["BMA"]]
 hc <- hclust(dist_mat, method = "ward.D2")
 dend <- as.dendrogram(hc)
@@ -294,7 +411,7 @@ final_aboral_dend <- wrap_elements(
   dend_plot_aboral + bar_plot_aboral + plot_layout(widths = c(0.8, 3.5)) + theme(plot.margin = margin(0, 0, 0, 0)))
 ```
 
-```{r, eval=FALSE}
+``` r
 top_Oral_per_Cluster <- clustered_Oral_DEGs_enrichedGO %>% group_by(GO.cluster) %>% arrange(Oral_elim.pvalue) %>% slice(1) %>% ungroup() %>% dplyr::select(GO.cluster,GO.ID,term) %>% rename("top_sig_GO" = `GO.ID`,"top_sig_term" = `term`)
 
 plotting_oral <- left_join(clustered_Oral_DEGs_enrichedGO,top_Oral_per_Cluster) %>%
@@ -326,7 +443,7 @@ combined_plotting <- rbind(plotting_oral %>%
                                         dplyr::select(-contains("Aboral")))
 ```
 
-```{r, eval=FALSE}
+``` r
 p_oral <-ggplot(plotting_oral, 
        aes(x = `Oral_elim.-log10_pvalue`, 
            y = reorder(GO.ID, `Oral_elim.-log10_pvalue`),
@@ -395,11 +512,15 @@ final_fig <- final_fig + plot_annotation(tag_levels = list(c("A: Oral Epidermis 
 ggsave("../output_RNA/differential_expression/composite_figs/Figure3.svg", final_fig, width = 12, height = 16)
 ```
 
-## Figure 4
+## 0.4 Figure 4
 
-```{r}
+``` r
 Biomin_all_expressed <- read.csv(paste0(outdir,"/DESeq_biomin_annotation.csv")) %>% left_join(DESeq_SwissProt %>% select(query,Heatmap_Label)) %>% select(-def_short)
+```
 
+    ## Joining with `by = join_by(query)`
+
+``` r
 write.csv(Biomin_all_expressed %>% select(-X) %>% select(Heatmap_Label,query,everything()), file=paste0(outdir,"/DESeq_biomin_annotation_heatmap_labels.csv"),row.names=FALSE)
 
 Biomin_DE <- Biomin_all_expressed %>% filter(abs(log2FoldChange) > 1 & padj < 0.05)
@@ -412,7 +533,11 @@ z_scores_df <- z_scores %>% as.data.frame() %>% rownames_to_column(var = "query"
 
 Biomin_DE_Zscore <- Biomin_DE %>% left_join(z_scores_df) %>%
   rename_at(vars(meta$Sample),~ meta$Sample_Desc)
+```
 
+    ## Joining with `by = join_by(query)`
+
+``` r
 write.csv(Biomin_DE_Zscore%>% select(-X) %>% select(Heatmap_Label,query,everything()), file=paste0(outdir,"/DE05_biomin_zscore.csv"),row.names = FALSE)
 
 # row annotations: Classification (type of biomin gene), category (genes i also called non-biomin), logfoldchange, padj
@@ -490,7 +615,7 @@ row_clusters <- cutree(row_hclust, k = 2)
 split_factor <- stringr::str_wrap(annotation_row$Classification, width = 18)
 ```
 
-```{r}
+``` r
 ht <- Heatmap(
   z_scores,
   name = "Expression\nZ-score",
@@ -534,11 +659,12 @@ draw(ht, merge_legend = TRUE, heatmap_legend_side = "bottom", annotation_legend_
 dev.off()
 ```
 
+    ## quartz_off_screen 
+    ##                 2
 
+## 0.5 Figure 5
 
-## Figure 5
-
-```{r}
+``` r
 #get list of all differentially expressed marker genes
 markers <- DE_05_marker_broc %>% select(query, Standardized_Name_spA) %>% distinct()
 
@@ -553,7 +679,15 @@ mat_long <- vsd_mat %>%
   left_join(meta %>% select(Sample, Tissue), by = "Sample") %>%
   left_join(markers, by = c("gene" = "query")) %>%
   filter(!is.na(Standardized_Name_spA))
+```
 
+    ## Warning in left_join(., markers, by = c(gene = "query")): Detected an unexpected many-to-many relationship between `x` and `y`.
+    ## ℹ Row 9601 of `x` matches multiple rows in `y`.
+    ## ℹ Row 43 of `y` matches multiple rows in `x`.
+    ## ℹ If a many-to-many relationship is expected, set `relationship =
+    ##   "many-to-many"` to silence this warning.
+
+``` r
 # gene mean by tissue
 plot_df <- mat_long %>%
   group_by(Standardized_Name_spA, gene, Tissue) %>%
@@ -562,8 +696,7 @@ plot_df <- mat_long %>%
   mutate(Standardized_Name_spA = str_to_title(str_replace_all(Standardized_Name_spA,"_","\n")))
 ```
 
-
-```{r}
+``` r
 tissue_cols <- setdiff(colnames(plot_df), c("Standardized_Name_spA", "gene"))
 
 # outer = OralEpi (t1), inner = Aboral (t2)
@@ -598,8 +731,7 @@ maxval <- max(c(plot_df[[t1]], plot_df[[t2]]), na.rm = TRUE)
 maxval <- signif(maxval,0)
 ```
 
-
-```{r}
+``` r
 #png("../output_RNA/differential_expression/DE_05_brocmarker_circ_colored.png", width = 3000, height = 3000, res = 300)
 svglite("../output_RNA/differential_expression/composite_figs/Figure5.svg", width = 10, height = 10)
 
@@ -625,7 +757,39 @@ circos.track(
                 font = 2) 
   }
 )
+```
 
+    ## Note: 1 point is out of plotting region in sector 'Neuron', track '1'.
+
+    ## Note: 1 point is out of plotting region in sector 'Epidermis', track
+    ## '1'.
+
+    ## Note: 1 point is out of plotting region in sector 'Gland', track '1'.
+
+    ## Note: 1 point is out of plotting region in sector 'Cnidocyte', track
+    ## '1'.
+
+    ## Note: 1 point is out of plotting region in sector 'Immune', track '1'.
+
+    ## Note: 1 point is out of plotting region in sector 'Germline', track
+    ## '1'.
+
+    ## Note: 1 point is out of plotting region in sector 'Unidentified', track
+    ## '1'.
+
+    ## Note: 1 point is out of plotting region in sector 'Gastrodermis
+    ## Symbiont Containing', track '1'.
+
+    ## Note: 1 point is out of plotting region in sector 'Digestive
+    ## Filaments', track '1'.
+
+    ## Note: 1 point is out of plotting region in sector 'Calicoblast', track
+    ## '1'.
+
+    ## Note: 1 point is out of plotting region in sector 'Gastrodermis', track
+    ## '1'.
+
+``` r
 circos.trackPlotRegion(
   ylim = c(-maxval, maxval),  # negative to positive
   track.height = 0.5,
@@ -691,21 +855,48 @@ legend("center",
 dev.off()
 ```
 
+    ## quartz_off_screen 
+    ##                 2
 
-## Supplementary Tables
+## 0.6 Supplementary Tables
 
-```{r}
+``` r
 library(openxlsx)
 
 wb <- createWorkbook()
 
 # Table S1
 table_s1 <- read_csv("../data_RNA/Table_S1_LCM_RNA_metadata_bydissection.csv")
+```
+
+    ## Rows: 10 Columns: 5
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: ","
+    ## chr (3): Fragment, Tissue Type, Mean ± Standard Deviation per Dissection (µm²)
+    ## dbl (1): Number of Dissections
+    ## num (1): Total Tissue Area (µm²)
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
 addWorksheet(wb, "Table S1")
 writeData(wb, "Table S1", table_s1)
 
 # Table S2
 table_s2 <- read_csv("../output_RNA/differential_expression/DESeq_results.csv") %>% rename("query"=1)
+```
+
+    ## New names:
+    ## Rows: 14464 Columns: 6
+    ## ── Column specification
+    ## ──────────────────────────────────────────────────────── Delimiter: "," chr
+    ## (1): ...1 dbl (5): baseMean, log2FoldChange, lfcSE, pvalue, padj
+    ## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ
+    ## Specify the column types or set `show_col_types = FALSE` to quiet this message.
+    ## • `` -> `...1`
+
+``` r
 addWorksheet(wb, "Table S2")
 writeData(wb, "Table S2", table_s2)
 
@@ -714,12 +905,34 @@ table_s3_aboral <- read_tsv("../output_RNA/differential_expression/semantic-enri
   rename_with(~gsub("^Aboral_", "", .)) %>%
   mutate(Tissue_Upregulation = "Aboral") %>%
   select(Tissue_Upregulation,everything())
+```
 
+    ## Rows: 123 Columns: 10
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: "\t"
+    ## chr (6): GO.ID, term, definition, Aboral_elim.genes_frequency, Aboral_elim.S...
+    ## dbl (4): GO.cluster, IC, Aboral_elim.pvalue, Aboral_elim.-log10_pvalue
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
 table_s3_oral <- read_tsv("../output_RNA/differential_expression/semantic-enrichment/DE_05_Oral_cluster_heatmap_Wang_wardD2.tsv") %>% 
   rename_with(~gsub("^Oral_", "", .)) %>%
   mutate(Tissue_Upregulation = "Oral") %>%
   select(Tissue_Upregulation,everything())
+```
 
+    ## Rows: 63 Columns: 10
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: "\t"
+    ## chr (6): GO.ID, term, definition, Oral_elim.genes_frequency, Oral_elim.Signi...
+    ## dbl (4): GO.cluster, IC, Oral_elim.pvalue, Oral_elim.-log10_pvalue
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
 table_s3 <- bind_rows(table_s3_aboral, table_s3_oral)
 addWorksheet(wb, "Table S3")
 writeData(wb, "Table S3", table_s3)
@@ -729,11 +942,34 @@ table_s4_aboral <- read_tsv("../output_RNA/differential_expression/semantic-enri
   rename_with(~gsub("^Aboral_", "", .)) %>%
   mutate(Tissue_Upregulation = "Aboral") %>%
   select(Tissue_Upregulation,everything())
+```
+
+    ## Rows: 27 Columns: 10
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: "\t"
+    ## chr (6): GO.ID, term, definition, Aboral_elim.genes_frequency, Aboral_elim.S...
+    ## dbl (4): GO.cluster, IC, Aboral_elim.pvalue, Aboral_elim.-log10_pvalue
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
 table_s4_oral <- read_tsv("../output_RNA/differential_expression/semantic-enrichment/MF_DE_05_Oral_cluster_heatmap_Wang_wardD2.tsv") %>% 
   rename_with(~gsub("^Oral_", "", .)) %>%
   mutate(Tissue_Upregulation = "Oral") %>%
   select(Tissue_Upregulation,everything())
+```
 
+    ## Rows: 28 Columns: 10
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: "\t"
+    ## chr (6): GO.ID, term, definition, Oral_elim.genes_frequency, Oral_elim.Signi...
+    ## dbl (4): GO.cluster, IC, Oral_elim.pvalue, Oral_elim.-log10_pvalue
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
 table_s4 <- bind_rows(table_s4_aboral, table_s4_oral)
 addWorksheet(wb, "Table S4")
 writeData(wb, "Table S4", table_s4)
@@ -743,29 +979,89 @@ table_s5_aboral <- read_tsv("../output_RNA/differential_expression/semantic-enri
   rename_with(~gsub("^Aboral_", "", .)) %>%
   mutate(Tissue_Upregulation = "Aboral") %>%
   select(Tissue_Upregulation,everything())
+```
+
+    ## Rows: 26 Columns: 10
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: "\t"
+    ## chr (6): GO.ID, term, definition, Aboral_elim.genes_frequency, Aboral_elim.S...
+    ## dbl (4): GO.cluster, IC, Aboral_elim.pvalue, Aboral_elim.-log10_pvalue
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
 table_s5_oral <- read_tsv("../output_RNA/differential_expression/semantic-enrichment/CC_DE_05_Oral_cluster_heatmap_Wang_wardD2.tsv") %>% 
   rename_with(~gsub("^Oral_", "", .)) %>%
   mutate(Tissue_Upregulation = "Oral") %>%
   select(Tissue_Upregulation,everything())
+```
+
+    ## Rows: 19 Columns: 10
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: "\t"
+    ## chr (6): GO.ID, term, definition, Oral_elim.genes_frequency, Oral_elim.Signi...
+    ## dbl (4): GO.cluster, IC, Oral_elim.pvalue, Oral_elim.-log10_pvalue
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
 table_s5 <- bind_rows(table_s5_aboral, table_s5_oral)
 addWorksheet(wb, "Table S5")
 writeData(wb, "Table S5", table_s5)
 
 ## Table S6
 table_s6 <- read_csv("../output_RNA/differential_expression/DESeq_biomin_annotation_heatmap_labels.csv")
+```
+
+    ## Rows: 182 Columns: 12
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: ","
+    ## chr (7): Heatmap_Label, query, List, definition, Classification, Reference, ...
+    ## dbl (5): baseMean, log2FoldChange, lfcSE, pvalue, padj
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
 addWorksheet(wb, "Table S6")
 writeData(wb, "Table S6", table_s6)
 
 ## Table S7
 table_s7 <- read_csv("../output_RNA/differential_expression/DE05_biomin_zscore.csv")
+```
+
+    ## Rows: 72 Columns: 22
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: ","
+    ## chr  (7): Heatmap_Label, query, List, definition, Classification, Reference,...
+    ## dbl (15): baseMean, log2FoldChange, lfcSE, pvalue, padj, C_OralEpi, C_Aboral...
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
 addWorksheet(wb, "Table S7")
 writeData(wb, "Table S7", table_s7)
 
 ## Table S8
 table_s8 <- read_csv("../output_RNA/differential_expression/DESeq_markergene_annotation.csv") %>% select(-1) 
+```
+
+    ## New names:
+    ## Rows: 238 Columns: 9
+    ## ── Column specification
+    ## ──────────────────────────────────────────────────────── Delimiter: "," chr
+    ## (3): query, Spis_CellType_Full, Spis_CellType dbl (6): ...1, baseMean,
+    ## log2FoldChange, lfcSE, pvalue, padj
+    ## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ
+    ## Specify the column types or set `show_col_types = FALSE` to quiet this message.
+    ## • `` -> `...1`
+
+``` r
 addWorksheet(wb, "Table S8")
 writeData(wb, "Table S8", table_s8)
 
 saveWorkbook(wb, "../Supplementary_Tables.xlsx", overwrite = TRUE)
 ```
-

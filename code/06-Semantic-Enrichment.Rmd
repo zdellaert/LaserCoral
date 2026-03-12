@@ -3,7 +3,6 @@ title: "Semantic Enrichment"
 author: "Zoe Dellaert"
 date: "2025-01-11"
 output:
-  html_document: default
   github_document:
     toc: true
     toc_depth: 3
