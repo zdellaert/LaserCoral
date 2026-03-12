@@ -38,8 +38,15 @@ references/motif_dbs/
 *sam
 *genozip*
 *ht2
+output_RNA/stringtie/LCM_*.gtf
+output_RNA/stringtie/*tab
+output_RNA/stringtie-GeneExt/*tab
+output_RNA/stringtie-GeneExt/LCM_*.gtf
+output_RNA/stringtie-GeneExt/merged
+output_RNA/stringtie-GeneExt/transcript_count_matrix.csv
 
 #temporary file directories
+tmp*/
 scripts/old/*
 scripts/*/old/*
 
@@ -56,4 +63,6 @@ references/HI_genome_annotations/references/swissprot/SwissProt-Annot-GO_2025120
 *bedGraph
 *bedgraph
 *bed
+*pickle
+output_RNA/splicing/Pocillopora_acuta_HIv2.gtf*
 random/
