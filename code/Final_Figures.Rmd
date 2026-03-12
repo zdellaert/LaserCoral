@@ -137,9 +137,7 @@ volcano <- EnhancedVolcano(DESeq_SwissProt,
     gridlines.major = FALSE,
   gridlines.minor = FALSE,
   raster = TRUE
-) #+ coord_flip() + scale_x_reverse()
- volcano
- 
+)
 ```
 
 ### Patchwork

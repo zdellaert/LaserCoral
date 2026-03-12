@@ -231,7 +231,7 @@ volcano <- EnhancedVolcano(DESeq_SwissProt,
     gridlines.major = FALSE,
   gridlines.minor = FALSE,
   raster = TRUE
-) #+ coord_flip() + scale_x_reverse()
+)
 ```
 
     ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
@@ -249,12 +249,6 @@ volcano <- EnhancedVolcano(DESeq_SwissProt,
     ## This warning is displayed once per session.
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
-
-``` r
- volcano
-```
-
-![](Final_Figures_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 ### 0.2.3 Patchwork
 
