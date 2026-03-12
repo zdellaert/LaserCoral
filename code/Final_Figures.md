@@ -21,11 +21,11 @@ library(tidyverse)
 ```
 
     ## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-    ## ✔ dplyr     1.1.4     ✔ readr     2.1.5
+    ## ✔ dplyr     1.2.0     ✔ readr     2.2.0
     ## ✔ forcats   1.0.1     ✔ stringr   1.6.0
-    ## ✔ ggplot2   4.0.0     ✔ tibble    3.3.0
-    ## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
-    ## ✔ purrr     1.2.0     
+    ## ✔ ggplot2   4.0.2     ✔ tibble    3.3.1
+    ## ✔ lubridate 1.9.5     ✔ tidyr     1.3.2
+    ## ✔ purrr     1.2.1     
     ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
     ## ✖ dplyr::filter() masks stats::filter()
     ## ✖ dplyr::lag()    masks stats::lag()
@@ -62,7 +62,7 @@ library(ComplexHeatmap)
 
     ## Loading required package: grid
     ## ========================================
-    ## ComplexHeatmap version 2.26.0
+    ## ComplexHeatmap version 2.26.1
     ## Bioconductor page: http://bioconductor.org/packages/ComplexHeatmap/
     ## Github page: https://github.com/jokergoo/ComplexHeatmap
     ## Documentation: http://jokergoo.github.io/ComplexHeatmap-reference
@@ -86,7 +86,7 @@ library(circlize)
 ```
 
     ## ========================================
-    ## circlize version 0.4.16
+    ## circlize version 0.4.17
     ## CRAN page: https://cran.r-project.org/package=circlize
     ## Github page: https://github.com/jokergoo/circlize
     ## Documentation: https://jokergoo.github.io/circlize_book/book/
@@ -238,7 +238,7 @@ volcano <- EnhancedVolcano(DESeq_SwissProt,
     ## ℹ Please use `linewidth` instead.
     ## ℹ The deprecated feature was likely used in the EnhancedVolcano package.
     ##   Please report the issue to the authors.
-    ## This warning is displayed once every 8 hours.
+    ## This warning is displayed once per session.
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
@@ -246,7 +246,7 @@ volcano <- EnhancedVolcano(DESeq_SwissProt,
     ## ℹ Please use the `linewidth` argument instead.
     ## ℹ The deprecated feature was likely used in the EnhancedVolcano package.
     ##   Please report the issue to the authors.
-    ## This warning is displayed once every 8 hours.
+    ## This warning is displayed once per session.
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
