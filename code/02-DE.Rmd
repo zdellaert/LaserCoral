@@ -439,6 +439,8 @@ print(up_OralEpi)
 
 ## Specific Genes of Interest
 
+Ortholog analysis of *S. pistillata* and *P. acuta* genes for scRNA marker genes and "biomineralization toolkit" is detailed in the file here: https://github.com/zdellaert/LaserCoral/blob/main/references/HI_genome_annotations/code/genome_annotation.md.
+
 ### Single cell marker genes (Levy et al 2021)
 ```{r}
 MarkerGenes_broc <- read.csv("../references/marker_genes/Pacuta_Spis_Markers_pairs.csv") %>% select(protein_id_spB,cluster,Standardized_Name_spA ) %>% dplyr::rename("query" = 1, "List" = 2)
