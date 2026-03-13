@@ -1,0 +1,3 @@
+#species_file	nb_phylo	nb_NO_phylo	nb_empty_ali_ali	nb_pbm_tree
+Spis_proteins.faa	19179	4615	0	0
+Pacu_proteins.faa	21894	8346	0	0

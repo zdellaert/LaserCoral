@@ -1,0 +1,81 @@
+
+            Broccoli v1.3
+
+
+ --- STEP 1: kmer clustering
+
+ # parameters
+ input dir     : ../../cnidarian_protein_fastas
+ kmer size     : 100
+ kmer nb aa    : 15
+
+ # check input files
+ 2 input files
+ 66609 sequences
+
+ # kmer clustering
+ 2 proteomes on 8 threads
+ -> 54090 proteins saved for the next step
+
+
+ --- STEP 2: phylomes
+
+ # parameters
+ e_value     : 0.001
+ nb_hits     : 6
+ gaps        : 0.7
+ phylogenies : neighbor joining
+ threads     : 8
+
+ # check input files
+ 2 input fasta files
+ 54090 sequences
+
+ # build phylomes ... be patient
+ done
+
+
+ --- STEP 3: network analysis
+
+ ## parameters
+ species overlap  : 0.5
+ min edge weight  : 0.1
+ min nb hits      : 2
+ chimeric edges   : 0.5
+ chimeric species : 3
+ threads          : 8
+
+ ## get ortho and para
+ extract ortho from similarity
+ extract ortho from trees
+ remove ortho found only once
+ extract para from trees
+
+ ## network analysis
+ build network:
+      _ 44202 nodes
+      _ 48261 edges
+ load similarity search outputs
+ compute lcc for each node
+ apply LPA and corrections:
+      _ 16875 connected components
+      _ 17554 communities
+      _ 0 chimeric proteins
+      _ 726 spurious hits removed
+
+
+ --- STEP 4: orthologous pairs
+
+ ## parameters
+ ratio ortho  : 0.5
+ not same sp  : False
+ threads      : 8
+
+ ## load data
+ load NO tree results
+ load tree results
+ load OGs
+
+ ## analyse 15727 orthologous groups 1 by 1
+ done
+

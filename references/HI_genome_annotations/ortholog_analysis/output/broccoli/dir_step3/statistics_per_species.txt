@@ -1,0 +1,3 @@
+#species	perc_prot_assigned nb_prot_assigned
+Spis_proteins.faa	107.7	25647
+Pacu_proteins.faa	70.6	21389

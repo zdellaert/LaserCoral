@@ -1,0 +1,3 @@
+#index	file_name	nb_initial	nb_final
+0	Spis_proteins.faa	32879	23805
+1	Pacu_proteins.faa	33730	30285

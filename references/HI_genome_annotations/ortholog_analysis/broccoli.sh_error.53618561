@@ -1,0 +1,6 @@
+Loading conda version miniforge3-24.7.1
+Loading uri version main
+NOTE: The modules under this branch will not run on the login node. Use
+--constraint=avx512 for sbatch or srun sessions. 
+Loading zlib-ng version 2.1.6
+Loading diamond version 2.1.7
