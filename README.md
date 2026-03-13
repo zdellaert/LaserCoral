@@ -31,7 +31,7 @@ Data and methods for Chapter Three of my dissertation, Laser Capture Microdissec
 - [*P. acuta* orthologs](https://github.com/zdellaert/LaserCoral/blob/main/references/marker_genes/Pacuta_Spis_Markers_pairs.csv)
 
 ***Pocillopora acuta* species identification:**
-- [FASTA and genious files of *Pocillopora* species tress](https://github.com/zdellaert/LaserCoral/tree/main/data_speciesID)
+- [FASTA and genious files of *Pocillopora* species trees](https://github.com/zdellaert/LaserCoral/tree/main/data_speciesID)
 
 **Reference Genome and annotations:**   
 - Version 2 from: http://cyanophora.rutgers.edu/Pocillopora_acuta/
