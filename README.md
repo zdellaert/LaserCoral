@@ -7,9 +7,9 @@ Data and methods for Chapter Three of my dissertation, Laser Capture Microdissec
 - [Metadata for all samples](https://github.com/zdellaert/LaserCoral/blob/main/LCM_RNA_metadata.csv)
 
 **RNA-seq Data QC and Processing**
+- [Raw data: Uploaded to SRA, BioProject PRJNA1209584](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA1209584)
 - [Bioinformatic pipeline](https://github.com/zdellaert/LaserCoral/blob/main/code/RNA-seq-bioinf.md)   
 - QC of [Raw](https://github.com/zdellaert/LaserCoral/tree/main/output_RNA/raw_qc) and [Trimmed](https://github.com/zdellaert/LaserCoral/tree/main/output_RNA/trimmed_oligo_qc) reads
-- [Raw data: Sequence upload to SRA, BioProject PRJNA1209584](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA1209584)
 - [Genome mapping rate per sample](https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/hisat2/mapped_reads_counts_Pacuta)
 - [Gene count matrix](https://github.com/zdellaert/LaserCoral/blob/main/output_RNA/stringtie-GeneExt/LCM_RNA_gene_count_matrix.csv)
 
@@ -37,4 +37,4 @@ Data and methods for Chapter Three of my dissertation, Laser Capture Microdissec
 - Version 2 from: http://cyanophora.rutgers.edu/Pocillopora_acuta/
 
 **NCBI Sequence uploads:**
-- Bioproject: PRJNA1209584  
+- Bioproject: [PRJNA1209584](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA1209584)
