@@ -163,6 +163,8 @@ Index primer full sequences from [oligo kit E7500S](https://www.neb.com/en-us/-/
 
 ## Trimming adapters and low-quality bases and short reads (< 20bp)
 
+**NOTE: I just found this trimming guide from NEB specifically for this kit: https://github.com/nebiolabs/nebnext-single-cell-rna-seq**
+
 I am going to use [cutadapt](https://cutadapt.readthedocs.io/en/stable/guide.html) for trimming and quality control
 
 Example code with comments:
