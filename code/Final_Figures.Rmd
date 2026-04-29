@@ -11,9 +11,6 @@ output:
 always_allow_html: true
 ---
 
-Work in progress to have one doc for centralized figure work
-
-
 ```{r}
 library(tidyverse)
 library(purrr)

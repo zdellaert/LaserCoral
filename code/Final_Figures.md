@@ -14,8 +14,6 @@ Zoe Dellaert
 - [0.5 Figure 5](#05-figure-5)
 - [0.6 Supplementary Tables](#06-supplementary-tables)
 
-Work in progress to have one doc for centralized figure work
-
 ``` r
 library(tidyverse)
 ```

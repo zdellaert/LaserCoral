@@ -77,7 +77,6 @@ rnapower(depth=55, effect= 2, n = 5, alpha= .05, power=c(.8, .9))
 rnapower(depth=290, effect= 2, n = 5, alpha= .05, power=c(.8, .9))
 ```
 
-
 After getting the data back, what is our CV?
 
 ```{r}
@@ -107,26 +106,14 @@ median(counts_aboral$cv, na.rm = T) #0.8838708
 # Average cv for both tissue types
 mean(c(0.7061599, 0.9370125)) # 0.8215862
 ```
-
 So, time to redo the power analysis and calculate power/effect size we can detect:
-
-Parameters: 
-- Depth = 5 (?)
-- n = 3 (control)
-- n2 = 10 (T1, T2, T3, T4 - not including outliers)
-- cv = 0.2569478
-- cv2 = 0.3105552
-- effect = 1.25, 1.5, 1.75, 2
-- alpha = 0.05
-- power = 0.8, 0.9
 
 ```{r}
 rnapower(depth=55, cv=0.8215862 , n = 5, alpha= .05, power=c(.8, .9))
 
 rnapower(depth=290, cv=0.8215862 , n = 5, alpha= .05, power=c(.8, .9))
 ```
-
-With a sequencing coverage of 55X, and a within-group cv of 0.9, and sample size of 5, we will be able to detect an effect size of 4.372025 at a power of 0.8.
+With a sequencing coverage of 55X, and a within-group cv of 0.8215862, and sample size of 5, we will be able to detect an effect size of 4.372025 at a power of 0.8.
 
 For a coverage of 290X, we will be able to detect an effect size of 4.303653.
 
@@ -134,7 +121,7 @@ What about calculating power?
 ```{r}
 rnapower(depth=55, cv=0.8215862 , n = 5, alpha= .05, effect=c(1.25, 1.5, 1.75, 2,5, 6))
 
-rnapower(depth=290, cv=0.9020732 , n = 5, alpha= .05, effect=c(1.25, 1.5, 1.75, 2,5, 6))
+rnapower(depth=290, cv=0.8215862 , n = 5, alpha= .05, effect=c(1.25, 1.5, 1.75, 2,5, 6))
 ```
 
 With both depths, at this cv and sample size, we can see we will be able to determine an effect size around 5-6 and greater for a power > 0.8
