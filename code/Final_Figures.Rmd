@@ -59,6 +59,8 @@ DE_05_marker_broc <- read.csv(file=paste0(outdir,"/DE_05_markergene_annotation.c
 
 ```
 
+
+
 ## Figure 2
 
 ### Panel B: PCA
@@ -762,5 +764,58 @@ addWorksheet(wb, "Table S8")
 writeData(wb, "Table S8", table_s8)
 
 saveWorkbook(wb, "../Supplementary_Tables.xlsx", overwrite = TRUE)
+```
+
+## Figure SX
+
+```{r}
+library(ggtree)
+tree <- read.tree("../references/NCBI_cnidaria_scRNA.phy")
+
+tree$tip.label <- str_remove_all(tree$tip.label, "'")
+
+ggtree(tree, branch.length = "none") + 
+  geom_tiplab() +
+  theme_tree2()
+```
+
+```{r}
+meta <- read.csv("../references/comparative_tree/comparative_tree.csv")
+
+p <- ggtree(tree, branch.length = "none", size = 0.6)
+p <- p %<+% meta +
+  geom_tippoint(aes(color = category, size = category)) +  
+  geom_tiplab(aes(fontface = ifelse(category == "Laser capture microdissection (This study)","bold.italic", "italic")),
+              offset = 0.3, size = 3.5) +
+  geom_tiplab(aes(label = citation), offset = 4, size = 3, 
+              linetype = "blank", fontface = "plain") +
+  geom_cladelab(node = MRCA(tree, "Pocillopora acuta", "Stylophora pistillata"),
+                label = "Pocilloporidae", offset = 7.5, barsize = 0.8, fontsize = 3) +
+  geom_cladelab(node = MRCA(tree, "Acropora muricata", "Montipora foliosa"),
+                label = "Acroporidae", offset = 7.5, barsize = 0.8, fontsize = 3) +
+  geom_cladelab(node = MRCA(tree, "Exaiptasia diaphana", "Nematostella vectensis"),
+                label = "Actiniaria", offset = 7.5, barsize = 0.8, fontsize = 3) +
+  geom_cladelab(node = MRCA(tree, "Clytia hemisphaerica", "Hydra vulgaris"),
+                label = "Hydrozoa", offset = 7.5, barsize = 0.8, fontsize = 3) +
+  geom_cladelab(node = MRCA(tree, "Pocillopora acuta", "Astroides calycularis"),
+                label = "Scleractinia", offset = 9, barsize = 0.8, fontsize = 3) +
+  scale_color_manual(values = c(
+    "Laser capture microdissection (This study)"   = "#D55E00",
+    "Preprinted scRNA-seq"           = "#E69F00",
+    "Published scRNA-seq"  = "#0072B2"
+  )) +
+  scale_size_manual(values = c(
+    "Laser capture microdissection (This study)"   = 4,
+    "Published scRNA-seq"           = 3,
+    "Preprinted scRNA-seq"  = 3
+  )) +
+  theme_tree2() +
+  theme(legend.position = "bottom",
+        legend.title = element_blank()) +
+  xlim(0, 17)   # extend x-axis to accommodate labels
+
+p
+
+ggsave("../references/comparative_tree/comparative_tree.svg", p, width = 10, height = 6)
 ```
 

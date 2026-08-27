@@ -1,0 +1,964 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="720.00pt"
+   height="432.00pt"
+   viewBox="0 0 720.00 432.00"
+   version="1.1"
+   id="svg478"
+   sodipodi:docname="comparative_tree.svg"
+   inkscape:version="1.2.2 (b0a84865, 2022-12-01)"
+   inkscape:export-filename="FigureSX.png"
+   inkscape:export-xdpi="300"
+   inkscape:export-ydpi="300"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs482" />
+  <sodipodi:namedview
+     id="namedview480"
+     pagecolor="#ffffff"
+     bordercolor="#999999"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="pt"
+     showgrid="false"
+     inkscape:zoom="0.83020663"
+     inkscape:cx="242.1084"
+     inkscape:cy="231.86999"
+     inkscape:window-width="1470"
+     inkscape:window-height="803"
+     inkscape:window-x="0"
+     inkscape:window-y="34"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="g434" />
+  <g
+     class="svglite"
+     id="g476">
+    <defs
+       id="defs184">
+      <style
+         type="text/css"
+         id="style182"><![CDATA[
+    .svglite line, .svglite polyline, .svglite polygon, .svglite path, .svglite rect, .svglite circle {
+      fill: none;
+      stroke: #000000;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-miterlimit: 10.00;
+    }
+    .svglite text {
+      white-space: pre;
+    }
+    .svglite g.glyphgroup path {
+      fill: inherit;
+      stroke: none;
+    }
+  ]]></style>
+    </defs>
+    <defs
+       id="defs191">
+      <clipPath
+         id="cpMC4wMHw3MjAuMDB8MC4wMHw0MzIuMDA=">
+        <rect
+           x="0.00"
+           y="0.00"
+           width="720.00"
+           height="432.00"
+           id="rect188" />
+      </clipPath>
+    </defs>
+    <defs
+       id="defs200">
+      <clipPath
+         id="cpNS40OHw3MTQuNTJ8NS40OHwzNzQuMjQ=">
+        <rect
+           x="5.48"
+           y="5.48"
+           width="709.04"
+           height="368.76"
+           id="rect197" />
+      </clipPath>
+    </defs>
+    <g
+       clip-path="url(#cpNS40OHw3MTQuNTJ8NS40OHwzNzQuMjQ=)"
+       id="g434">
+      <line
+         x1="37.71"
+         y1="361.38"
+         x2="227.29"
+         y2="361.38"
+         style="stroke-width: 1.28;"
+         id="line204" />
+      <line
+         x1="75.63"
+         y1="275.62"
+         x2="227.29"
+         y2="275.62"
+         style="stroke-width: 1.28;"
+         id="line206" />
+      <line
+         x1="113.54"
+         y1="211.30"
+         x2="227.29"
+         y2="211.30"
+         style="stroke-width: 1.28;"
+         id="line208" />
+      <line
+         x1="113.54"
+         y1="189.86"
+         x2="227.29"
+         y2="189.86"
+         style="stroke-width: 1.28;"
+         id="line210" />
+      <line
+         x1="113.54"
+         y1="168.42"
+         x2="227.29"
+         y2="168.42"
+         style="stroke-width: 1.28;"
+         id="line212" />
+      <line
+         x1="151.46"
+         y1="82.66"
+         x2="227.29"
+         y2="82.66"
+         style="stroke-width: 1.28;"
+         id="line214" />
+      <line
+         x1="189.38"
+         y1="61.22"
+         x2="227.29"
+         y2="61.22"
+         style="stroke-width: 1.28;"
+         id="line216" />
+      <line
+         x1="189.38"
+         y1="39.78"
+         x2="227.29"
+         y2="39.78"
+         style="stroke-width: 1.28;"
+         id="line218" />
+      <line
+         x1="189.38"
+         y1="18.34"
+         x2="227.29"
+         y2="18.34"
+         style="stroke-width: 1.28;"
+         id="line220" />
+      <line
+         x1="151.46"
+         y1="146.98"
+         x2="227.29"
+         y2="146.98"
+         style="stroke-width: 1.28;"
+         id="line222" />
+      <line
+         x1="189.38"
+         y1="125.54"
+         x2="227.29"
+         y2="125.54"
+         style="stroke-width: 1.28;"
+         id="line224" />
+      <line
+         x1="189.38"
+         y1="104.10"
+         x2="227.29"
+         y2="104.10"
+         style="stroke-width: 1.28;"
+         id="line226" />
+      <line
+         x1="189.38"
+         y1="254.18"
+         x2="227.29"
+         y2="254.18"
+         style="stroke-width: 1.28;"
+         id="line228" />
+      <line
+         x1="189.38"
+         y1="232.74"
+         x2="227.29"
+         y2="232.74"
+         style="stroke-width: 1.28;"
+         id="line230" />
+      <line
+         x1="151.46"
+         y1="339.94"
+         x2="227.29"
+         y2="339.94"
+         style="stroke-width: 1.28;"
+         id="line232" />
+      <line
+         x1="189.38"
+         y1="318.50"
+         x2="227.29"
+         y2="318.50"
+         style="stroke-width: 1.28;"
+         id="line234" />
+      <line
+         x1="189.38"
+         y1="297.06"
+         x2="227.29"
+         y2="297.06"
+         style="stroke-width: 1.28;"
+         id="line236" />
+      <line
+         x1="37.71"
+         y1="303.01"
+         x2="37.71"
+         y2="303.01"
+         style="stroke-width: 1.28;"
+         id="line238" />
+      <line
+         x1="37.71"
+         y1="223.81"
+         x2="75.63"
+         y2="223.81"
+         style="stroke-width: 1.28;"
+         id="line240" />
+      <line
+         x1="75.63"
+         y1="152.34"
+         x2="113.54"
+         y2="152.34"
+         style="stroke-width: 1.28;"
+         id="line242" />
+      <line
+         x1="113.54"
+         y1="61.22"
+         x2="151.46"
+         y2="61.22"
+         style="stroke-width: 1.28;"
+         id="line244" />
+      <line
+         x1="151.46"
+         y1="39.78"
+         x2="189.38"
+         y2="39.78"
+         style="stroke-width: 1.28;"
+         id="line246" />
+      <line
+         x1="113.54"
+         y1="130.90"
+         x2="151.46"
+         y2="130.90"
+         style="stroke-width: 1.28;"
+         id="line248" />
+      <line
+         x1="151.46"
+         y1="114.82"
+         x2="189.38"
+         y2="114.82"
+         style="stroke-width: 1.28;"
+         id="line250" />
+      <line
+         x1="75.63"
+         y1="243.46"
+         x2="189.38"
+         y2="243.46"
+         style="stroke-width: 1.28;"
+         id="line252" />
+      <line
+         x1="37.71"
+         y1="323.86"
+         x2="151.46"
+         y2="323.86"
+         style="stroke-width: 1.28;"
+         id="line254" />
+      <line
+         x1="151.46"
+         y1="307.78"
+         x2="189.38"
+         y2="307.78"
+         style="stroke-width: 1.28;"
+         id="line256" />
+      <line
+         x1="37.71"
+         y1="303.01"
+         x2="37.71"
+         y2="361.38"
+         style="stroke-width: 1.28;"
+         id="line258" />
+      <line
+         x1="75.63"
+         y1="223.81"
+         x2="75.63"
+         y2="275.62"
+         style="stroke-width: 1.28;"
+         id="line260" />
+      <line
+         x1="113.54"
+         y1="152.34"
+         x2="113.54"
+         y2="211.30"
+         style="stroke-width: 1.28;"
+         id="line262" />
+      <line
+         x1="113.54"
+         y1="152.34"
+         x2="113.54"
+         y2="189.86"
+         style="stroke-width: 1.28;"
+         id="line264" />
+      <line
+         x1="113.54"
+         y1="152.34"
+         x2="113.54"
+         y2="168.42"
+         style="stroke-width: 1.28;"
+         id="line266" />
+      <line
+         x1="151.46"
+         y1="61.22"
+         x2="151.46"
+         y2="82.66"
+         style="stroke-width: 1.28;"
+         id="line268" />
+      <line
+         x1="189.38"
+         y1="39.78"
+         x2="189.38"
+         y2="61.22"
+         style="stroke-width: 1.28;"
+         id="line270" />
+      <line
+         x1="189.38"
+         y1="39.78"
+         x2="189.38"
+         y2="39.78"
+         style="stroke-width: 1.28;"
+         id="line272" />
+      <line
+         x1="189.38"
+         y1="39.78"
+         x2="189.38"
+         y2="18.34"
+         style="stroke-width: 1.28;"
+         id="line274" />
+      <line
+         x1="151.46"
+         y1="130.90"
+         x2="151.46"
+         y2="146.98"
+         style="stroke-width: 1.28;"
+         id="line276" />
+      <line
+         x1="189.38"
+         y1="114.82"
+         x2="189.38"
+         y2="125.54"
+         style="stroke-width: 1.28;"
+         id="line278" />
+      <line
+         x1="189.38"
+         y1="114.82"
+         x2="189.38"
+         y2="104.10"
+         style="stroke-width: 1.28;"
+         id="line280" />
+      <line
+         x1="189.38"
+         y1="243.46"
+         x2="189.38"
+         y2="254.18"
+         style="stroke-width: 1.28;"
+         id="line282" />
+      <line
+         x1="189.38"
+         y1="243.46"
+         x2="189.38"
+         y2="232.74"
+         style="stroke-width: 1.28;"
+         id="line284" />
+      <line
+         x1="151.46"
+         y1="323.86"
+         x2="151.46"
+         y2="339.94"
+         style="stroke-width: 1.28;"
+         id="line286" />
+      <line
+         x1="189.38"
+         y1="307.78"
+         x2="189.38"
+         y2="318.50"
+         style="stroke-width: 1.28;"
+         id="line288" />
+      <line
+         x1="189.38"
+         y1="307.78"
+         x2="189.38"
+         y2="297.06"
+         style="stroke-width: 1.28;"
+         id="line290" />
+      <line
+         x1="37.71"
+         y1="303.01"
+         x2="37.71"
+         y2="303.01"
+         style="stroke-width: 1.28;"
+         id="line292" />
+      <line
+         x1="37.71"
+         y1="303.01"
+         x2="37.71"
+         y2="223.81"
+         style="stroke-width: 1.28;"
+         id="line294" />
+      <line
+         x1="75.63"
+         y1="223.81"
+         x2="75.63"
+         y2="152.34"
+         style="stroke-width: 1.28;"
+         id="line296" />
+      <line
+         x1="113.54"
+         y1="152.34"
+         x2="113.54"
+         y2="61.22"
+         style="stroke-width: 1.28;"
+         id="line298" />
+      <line
+         x1="151.46"
+         y1="61.22"
+         x2="151.46"
+         y2="39.78"
+         style="stroke-width: 1.28;"
+         id="line300" />
+      <line
+         x1="113.54"
+         y1="152.34"
+         x2="113.54"
+         y2="130.90"
+         style="stroke-width: 1.28;"
+         id="line302" />
+      <line
+         x1="151.46"
+         y1="130.90"
+         x2="151.46"
+         y2="114.82"
+         style="stroke-width: 1.28;"
+         id="line304" />
+      <line
+         x1="75.63"
+         y1="223.81"
+         x2="75.63"
+         y2="243.46"
+         style="stroke-width: 1.28;"
+         id="line306" />
+      <line
+         x1="37.71"
+         y1="303.01"
+         x2="37.71"
+         y2="323.86"
+         style="stroke-width: 1.28;"
+         id="line308" />
+      <line
+         x1="151.46"
+         y1="323.86"
+         x2="151.46"
+         y2="307.78"
+         style="stroke-width: 1.28;"
+         id="line310" />
+      <circle
+         cx="227.29"
+         cy="61.22"
+         r="4.62"
+         style="stroke-width: 0.71; stroke: #D55E00; fill: #D55E00;"
+         id="circle312" />
+      <circle
+         cx="227.29"
+         cy="168.42"
+         r="3.56"
+         style="stroke-width: 0.71; stroke: #E69F00; fill: #E69F00;"
+         id="circle314" />
+      <circle
+         cx="227.29"
+         cy="39.78"
+         r="3.56"
+         style="stroke-width: 0.71; stroke: #E69F00; fill: #E69F00;"
+         id="circle316" />
+      <circle
+         cx="227.29"
+         cy="125.54"
+         r="3.56"
+         style="stroke-width: 0.71; stroke: #E69F00; fill: #E69F00;"
+         id="circle318" />
+      <circle
+         cx="227.29"
+         cy="104.10"
+         r="3.56"
+         style="stroke-width: 0.71; stroke: #E69F00; fill: #E69F00;"
+         id="circle320" />
+      <circle
+         cx="227.29"
+         cy="361.38"
+         r="3.56"
+         style="stroke-width: 0.71; stroke: #0072B2; fill: #0072B2;"
+         id="circle322" />
+      <circle
+         cx="227.29"
+         cy="275.62"
+         r="3.56"
+         style="stroke-width: 0.71; stroke: #0072B2; fill: #0072B2;"
+         id="circle324" />
+      <circle
+         cx="227.29"
+         cy="211.30"
+         r="3.56"
+         style="stroke-width: 0.71; stroke: #0072B2; fill: #0072B2;"
+         id="circle326" />
+      <circle
+         cx="227.29"
+         cy="189.86"
+         r="3.56"
+         style="stroke-width: 0.71; stroke: #0072B2; fill: #0072B2;"
+         id="circle328" />
+      <circle
+         cx="227.29"
+         cy="82.66"
+         r="3.56"
+         style="stroke-width: 0.71; stroke: #0072B2; fill: #0072B2;"
+         id="circle330" />
+      <circle
+         cx="227.29"
+         cy="18.34"
+         r="3.56"
+         style="stroke-width: 0.71; stroke: #0072B2; fill: #0072B2;"
+         id="circle332" />
+      <circle
+         cx="227.29"
+         cy="146.98"
+         r="3.56"
+         style="stroke-width: 0.71; stroke: #0072B2; fill: #0072B2;"
+         id="circle334" />
+      <circle
+         cx="227.29"
+         cy="254.18"
+         r="3.56"
+         style="stroke-width: 0.71; stroke: #0072B2; fill: #0072B2;"
+         id="circle336" />
+      <circle
+         cx="227.29"
+         cy="232.74"
+         r="3.56"
+         style="stroke-width: 0.71; stroke: #0072B2; fill: #0072B2;"
+         id="circle338" />
+      <circle
+         cx="227.29"
+         cy="339.94"
+         r="3.56"
+         style="stroke-width: 0.71; stroke: #0072B2; fill: #0072B2;"
+         id="circle340" />
+      <circle
+         cx="227.29"
+         cy="318.50"
+         r="3.56"
+         style="stroke-width: 0.71; stroke: #0072B2; fill: #0072B2;"
+         id="circle342" />
+      <circle
+         cx="227.29"
+         cy="297.06"
+         r="3.56"
+         style="stroke-width: 0.71; stroke: #0072B2; fill: #0072B2;"
+         id="circle344" />
+      <text
+         x="239.61"
+         y="64.79"
+         style="font-size: 9.96px; font-weight: bold; font-style: italic; font-family: &quot;Arial&quot;;"
+         textLength="82.94px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text346">Pocillopora acuta</text>
+      <text
+         x="239.61"
+         y="364.94"
+         style="font-size: 9.96px; font-style: italic; font-family: &quot;Arial&quot;;"
+         textLength="71.92px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text348">Aurelia coerulea</text>
+      <text
+         x="239.61"
+         y="279.18"
+         style="font-size: 9.96px; font-style: italic; font-family: &quot;Arial&quot;;"
+         textLength="41.50px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text350">Xenia sp.</text>
+      <text
+         x="239.61"
+         y="214.86"
+         style="font-size: 9.96px; font-style: italic; font-family: &quot;Arial&quot;;"
+         textLength="90.77px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text352">Astroides calycularis</text>
+      <text
+         x="239.61"
+         y="193.42"
+         style="font-size: 9.96px; font-style: italic; font-family: &quot;Arial&quot;;"
+         textLength="85.20px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text354">Oculina patagonica</text>
+      <text
+         x="239.61"
+         y="171.98"
+         style="font-size: 9.96px; font-style: italic; font-family: &quot;Arial&quot;;"
+         textLength="82.44px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text356">Orbicella faveolata</text>
+      <text
+         x="239.61"
+         y="86.23"
+         style="font-size: 9.96px; font-style: italic; font-family: &quot;Arial&quot;;"
+         textLength="86.33px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text358">Stylophora pistillata</text>
+      <text
+         x="239.61"
+         y="43.35"
+         style="font-size: 9.96px; font-style: italic; font-family: &quot;Arial&quot;;"
+         textLength="95.72px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text360">Pocillopora verrucosa</text>
+      <text
+         x="239.61"
+         y="21.91"
+         style="font-size: 9.96px; font-style: italic; font-family: &quot;Arial&quot;;"
+         textLength="100.16px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text362">Pocillopora damicornis</text>
+      <text
+         x="239.61"
+         y="150.54"
+         style="font-size: 9.96px; font-style: italic; font-family: &quot;Arial&quot;;"
+         textLength="81.31px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text364">Acropora muricata</text>
+      <text
+         x="239.61"
+         y="129.11"
+         style="font-size: 9.96px; font-style: italic; font-family: &quot;Arial&quot;;"
+         textLength="75.80px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text366">Montipora foliosa</text>
+      <text
+         x="239.61"
+         y="107.67"
+         style="font-size: 9.96px; font-style: italic; font-family: &quot;Arial&quot;;"
+         textLength="95.16px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text368">Montipora capricornis</text>
+      <text
+         x="239.61"
+         y="257.74"
+         style="font-size: 9.96px; font-style: italic; font-family: &quot;Arial&quot;;"
+         textLength="89.64px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text370">Exaiptasia diaphana</text>
+      <text
+         x="239.61"
+         y="236.30"
+         style="font-size: 9.96px; font-style: italic; font-family: &quot;Arial&quot;;"
+         textLength="102.38px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text372">Nematostella vectensis</text>
+      <text
+         x="239.61"
+         y="343.50"
+         style="font-size: 9.96px; font-style: italic; font-family: &quot;Arial&quot;;"
+         textLength="92.41px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text374">Clytia hemisphaerica</text>
+      <text
+         x="239.61"
+         y="322.06"
+         style="font-size: 9.96px; font-style: italic; font-family: &quot;Arial&quot;;"
+         textLength="135.02px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text376">Hydractinia symbiolongicarpus</text>
+      <text
+         x="239.61"
+         y="300.62"
+         style="font-size: 9.96px; font-style: italic; font-family: &quot;Arial&quot;;"
+         textLength="63.62px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text378">Hydra vulgaris</text>
+      <text
+         x="379.91"
+         y="364.43"
+         style="font-size: 8.54px; font-family: &quot;Arial&quot;;"
+         textLength="48.91px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text380">Li et al. 2026</text>
+      <text
+         x="379.91"
+         y="278.68"
+         style="font-size: 8.54px; font-family: &quot;Arial&quot;;"
+         textLength="53.17px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text382">Hu et al. 2020</text>
+      <text
+         x="379.91"
+         y="214.36"
+         style="font-size: 8.54px; font-family: &quot;Arial&quot;;"
+         textLength="98.73px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text384">Ramon-Mateu et al. 2025 </text>
+      <text
+         x="379.91"
+         y="192.92"
+         style="font-size: 8.54px; font-family: &quot;Arial&quot;;"
+         textLength="107.58px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text386">Valadez-Ingersoll et al. 2025</text>
+      <text
+         x="379.91"
+         y="171.48"
+         style="font-size: 8.54px; font-family: &quot;Arial&quot;;"
+         textLength="118.19px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text388">Preprint: del Campo et al. 2024</text>
+      <text
+         x="379.91"
+         y="85.72"
+         style="font-size: 8.54px; font-family: &quot;Arial&quot;;"
+         textLength="60.30px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text390">Levy et al. 2021</text>
+      <text
+         x="379.91"
+         y="64.279999"
+         style="font-size:8.54px;font-family:Arial"
+         textLength="193.91"
+         lengthAdjust="spacingAndGlyphs"
+         id="text392"
+         transform="translate(0,-6)"><tspan
+           sodipodi:role="line"
+           id="tspan811"
+           x="379.91"
+           y="64.279999">LCM: This study; scRNA:</tspan><tspan
+           sodipodi:role="line"
+           id="tspan813"
+           x="379.91"
+           y="75.083961">Ramon-Mateu et al. 2025</tspan></text>
+      <text
+         x="379.91"
+         y="42.84"
+         style="font-size: 8.54px; font-family: &quot;Arial&quot;;"
+         textLength="87.81px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text394">Preprint: He et al. 2024</text>
+      <text
+         x="379.91"
+         y="21.40"
+         style="font-size: 8.54px; font-family: &quot;Arial&quot;;"
+         textLength="59.81px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text396">Diao et al. 2025</text>
+      <text
+         x="379.91"
+         y="150.04"
+         style="font-size: 8.54px; font-family: &quot;Arial&quot;;"
+         textLength="57.92px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text398">Han et al. 2025</text>
+      <text
+         x="379.91"
+         y="128.60"
+         style="font-size: 8.54px; font-family: &quot;Arial&quot;;"
+         textLength="87.81px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text400">Preprint: He et al. 2024</text>
+      <text
+         x="379.91"
+         y="107.16"
+         style="font-size: 8.54px; font-family: &quot;Arial&quot;;"
+         textLength="87.81px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text402">Preprint: He et al. 2024</text>
+      <text
+         x="379.91"
+         y="257.24"
+         style="font-size: 8.54px; font-family: &quot;Arial&quot;;"
+         textLength="55.06px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text404">Cui et al. 2023</text>
+      <text
+         x="379.91"
+         y="235.80"
+         style="font-size: 8.54px; font-family: &quot;Arial&quot;;"
+         textLength="108.23px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text406">Cole et al. 2024 (and others)</text>
+      <text
+         x="379.91"
+         y="342.99"
+         style="font-size: 8.54px; font-family: &quot;Arial&quot;;"
+         textLength="98.73px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text408">Ramon-Mateu et al. 2025 </text>
+      <text
+         x="379.91"
+         y="321.55"
+         style="font-size: 8.54px; font-family: &quot;Arial&quot;;"
+         textLength="105.36px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text410">Salamanca-Díaz et al. 2025</text>
+      <text
+         x="379.91"
+         y="300.11"
+         style="font-size: 8.54px; font-family: &quot;Arial&quot;;"
+         textLength="69.31px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text412">Siebert et al. 2019</text>
+      <text
+         x="517.35"
+         y="53.56"
+         style="font-size: 8.54px; font-family: &quot;Arial&quot;;"
+         textLength="53.61px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text414">Pocilloporidae</text>
+      <line
+         x1="515.46"
+         y1="82.66"
+         x2="515.46"
+         y2="18.34"
+         style="stroke-width: 1.71; stroke-linecap: butt;"
+         id="line416" />
+      <text
+         x="517.35"
+         y="128.60"
+         style="font-size: 8.54px; font-family: &quot;Arial&quot;;"
+         textLength="46.03px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text418">Acroporidae</text>
+      <line
+         x1="515.46"
+         y1="146.98"
+         x2="515.46"
+         y2="104.10"
+         style="stroke-width: 1.71; stroke-linecap: butt;"
+         id="line420" />
+      <text
+         x="517.35"
+         y="246.52"
+         style="font-size: 8.54px; font-family: &quot;Arial&quot;;"
+         textLength="35.09px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text422">Actiniaria</text>
+      <line
+         x1="515.46"
+         y1="254.18"
+         x2="515.46"
+         y2="232.74"
+         style="stroke-width: 1.71; stroke-linecap: butt;"
+         id="line424" />
+      <text
+         x="517.35"
+         y="321.55"
+         style="font-size: 8.54px; font-family: &quot;Arial&quot;;"
+         textLength="36.53px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text426">Hydrozoa</text>
+      <line
+         x1="515.46"
+         y1="339.94"
+         x2="515.46"
+         y2="297.06"
+         style="stroke-width: 1.71; stroke-linecap: butt;"
+         id="line428" />
+      <text
+         x="574.23"
+         y="117.88"
+         style="font-size: 8.54px; font-family: &quot;Arial&quot;;"
+         textLength="44.11px"
+         lengthAdjust="spacingAndGlyphs"
+         id="text430">Scleractinia</text>
+      <line
+         x1="572.33"
+         y1="211.30"
+         x2="572.33"
+         y2="18.34"
+         style="stroke-width: 1.71; stroke-linecap: butt;"
+         id="line432"
+         inkscape:export-filename="FigureSX.png"
+         inkscape:export-xdpi="300"
+         inkscape:export-ydpi="300" />
+    </g>
+    <g
+       clip-path="url(#cpMC4wMHw3MjAuMDB8MC4wMHw0MzIuMDA=)"
+       id="g474"
+       transform="translate(0,-25.5)">
+      <rect
+         x="145.75"
+         y="398.28"
+         width="428.51001"
+         height="28.24"
+         style="fill:#ffffff;stroke:none;stroke-width:1.07"
+         id="rect454" />
+      <rect
+         x="151.23"
+         y="403.76001"
+         width="17.280001"
+         height="17.280001"
+         style="fill:#ffffff;stroke:#ffffff;stroke-width:1.07"
+         id="rect456" />
+      <circle
+         cx="159.87"
+         cy="412.39999"
+         r="4.6199999"
+         style="fill:#d55e00;stroke:#d55e00;stroke-width:0.71"
+         id="circle458" />
+      <rect
+         x="344.67001"
+         y="403.76001"
+         width="17.280001"
+         height="17.280001"
+         style="fill:#ffffff;stroke:#ffffff;stroke-width:1.07"
+         id="rect460" />
+      <circle
+         cx="353.31"
+         cy="412.39999"
+         r="3.5599999"
+         style="fill:#e69f00;stroke:#e69f00;stroke-width:0.71"
+         id="circle462" />
+      <rect
+         x="460.42001"
+         y="403.76001"
+         width="17.280001"
+         height="17.280001"
+         style="fill:#ffffff;stroke:#ffffff;stroke-width:1.07"
+         id="rect464" />
+      <circle
+         cx="469.06"
+         cy="412.39999"
+         r="3.5599999"
+         style="fill:#0072b2;stroke:#0072b2;stroke-width:0.71"
+         id="circle466" />
+      <text
+         x="173.98"
+         y="415.54999"
+         style="font-size:8.8px;font-family:Arial"
+         textLength="165.2"
+         lengthAdjust="spacingAndGlyphs"
+         id="text468">Laser capture microdissection (This study)</text>
+      <text
+         x="367.42999"
+         y="415.54999"
+         style="font-size:8.8px;font-family:Arial"
+         textLength="87.519997"
+         lengthAdjust="spacingAndGlyphs"
+         id="text470">Preprinted scRNA-seq</text>
+      <text
+         x="483.17999"
+         y="415.54999"
+         style="font-size:8.8px;font-family:Arial"
+         textLength="85.589996"
+         lengthAdjust="spacingAndGlyphs"
+         id="text472">Published scRNA-seq</text>
+    </g>
+  </g>
+</svg>
