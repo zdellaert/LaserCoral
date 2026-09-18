@@ -11,7 +11,7 @@ output:
 always_allow_html: true
 ---
 
-```{r}
+```{r setup}
 library(tidyverse)
 library(purrr)
 library(ggplot2)
@@ -770,7 +770,7 @@ saveWorkbook(wb, "../Supplementary_Tables.xlsx", overwrite = TRUE)
 
 ```{r}
 library(ggtree)
-tree <- read.tree("../references/NCBI_cnidaria_scRNA.phy")
+tree <- read.tree("../references/comparative_tree/NCBI_cnidaria_scRNA.phy")
 
 tree$tip.label <- str_remove_all(tree$tip.label, "'")
 

@@ -5,7 +5,7 @@
    viewBox="0 0 720.00 432.00"
    version="1.1"
    id="svg478"
-   sodipodi:docname="comparative_tree.svg"
+   sodipodi:docname="FigureS1.svg"
    inkscape:version="1.2.2 (b0a84865, 2022-12-01)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -929,7 +929,10 @@
          y2="18.34"
          style="stroke-width:1.63161;stroke-linecap:butt"
          id="line432"
-         transform="matrix(1.0480434,0,0,1.0480434,-22.996702,-6.9873298)" />
+         transform="matrix(1.0480434,0,0,1.0480434,-22.996702,-6.9873298)"
+         inkscape:export-filename="FigureS1.png"
+         inkscape:export-xdpi="600"
+         inkscape:export-ydpi="600" />
     </g>
     <g
        clip-path="url(#cpMC4wMHw3MjAuMDB8MC4wMHw0MzIuMDA=)"
