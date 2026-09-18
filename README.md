@@ -1,5 +1,9 @@
 # LaserCoral
-Data and methods for Chapter Three of my dissertation, Laser Capture Microdissection RNAseq analysis
+Data and methods for Chapter Two of my dissertation, Laser Capture Microdissection RNAseq analysis. Now published at:
+
+Dellaert, Z. and Putnam, H. M. (2026). Spatially resolved gene expression analysis illuminates location-specific functions in the reef-building coral Pocillopora acuta. PLoS One 21, e0358454. https://dx.plos.org/10.1371/journal.pone.0358454
+
+[Figure2.tiff](https://github.com/user-attachments/files/32390063/Figure2.tiff)
 
 ## Repository organization
 
